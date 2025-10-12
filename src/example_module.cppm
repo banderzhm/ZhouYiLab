@@ -1,13 +1,11 @@
 // C++23 Module 接口文件示例
 // 文件扩展名: .cppm (跨平台) 或 .ixx (MSVC)
 
-module;
-
-// 全局模块片段 - 在这里包含传统头文件
-#include <string>
-#include <vector>
-
+// 使用 C++23 标准库模块
 export module ZhouYi.TianGan;
+
+// 导入标准库模块
+import std;
 
 // 导出的命名空间和类型
 export namespace ZhouYi {

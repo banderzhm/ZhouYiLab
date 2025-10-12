@@ -14,10 +14,11 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 
 ## 技术特性
 
-- **C++23 Modules**: 使用最新的 C++23 模块系统
-- **现代 CMake**: 基于 CMake 3.28+ 构建系统
+- **C++23 Modules**: 使用最新的 C++23 模块系统和 `import std;`
+- **现代 CMake**: 基于 CMake 3.30+ 构建系统，完整支持 C++ modules
 - **Git Submodules**: 使用子模块管理第三方依赖
 - **跨平台支持**: Windows、Linux、macOS
+- **标准库模块化**: 启用 `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` 支持
 
 ## 第三方库
 
@@ -28,11 +29,11 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 
 ## 构建要求
 
-- CMake 3.28 或更高版本
-- 支持 C++23 的编译器：
-  - GCC 14+
-  - Clang 17+
-  - MSVC 2022 17.5+
+- **CMake 3.30** 或更高版本（支持 `import std;`）
+- 支持 C++23 modules 和 `import std;` 的编译器：
+  - **GCC 14+** (完全支持)
+  - **Clang 18+** (完全支持)
+  - **MSVC 2022 17.10+** (实验性支持，需要最新版本)
 
 ## 快速开始
 
@@ -68,8 +69,18 @@ cmake --build build
 ### 3. 运行
 
 ```bash
+# 基本运行
 ./build/bin/ZhouYiLab
+
+# 运行完整的 C++23 modules 演示
+./build/bin/ZhouYiLab --demo
 ```
+
+程序将展示：
+- 使用 `import std;` 的现代 C++ 代码
+- 自定义模块（天干、地支、干支）
+- 六十甲子表
+- 纳音五行计算
 
 ## 项目结构
 

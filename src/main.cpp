@@ -1,11 +1,20 @@
-#include <iostream>
+// 使用 C++23 标准库模块
+import std;
+
+// 导入自定义模块
+import ZhouYi.GanZhi;
+
+// 使用传统头文件引入第三方库
 #include <fmt/core.h>
 #include <fmt/color.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
-int main() {
+// 声明模块演示函数
+int main_modules_demo();
+
+int main(int argc, char* argv[]) {
     // 使用 fmt 库进行彩色输出
     fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold,
                "===========================================\n");
@@ -66,8 +75,32 @@ int main() {
     fmt::print(fg(fmt::color::yellow), "公历 {} 年对应: {}{} 年\n", 
                year, tian_gan[gan_index], di_zhi[zhi_index]);
     
+    // 使用 C++23 modules 获取干支信息
+    fmt::print("\n");
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, 
+               "使用 C++23 Modules 计算:\n");
+    auto gan_zhi = ZhouYi::GanZhi::from_year(year);
+    fmt::print(fg(fmt::color::white), "{}\n", gan_zhi.get_info());
+    fmt::print(fg(fmt::color::yellow), "纳音五行: {}\n", gan_zhi.na_yin());
+    
+    // 菜单选项
+    fmt::print("\n");
+    fmt::print(fg(fmt::color::cyan), "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    fmt::print(fg(fmt::color::white), "运行 modules 完整演示？ (y/n): ");
+    
+    if (argc > 1 && std::string(argv[1]) == "--demo") {
+        fmt::print("y\n");
+        return main_modules_demo();
+    } else {
+        std::string input;
+        std::getline(std::cin, input);
+        if (input == "y" || input == "Y") {
+            return main_modules_demo();
+        }
+    }
+    
     fmt::print(fg(fmt::color::cyan) | fmt::emphasis::italic,
-               "\n感谢使用！更多功能敬请期待...\n");
+               "\n感谢使用！使用 '--demo' 参数运行完整演示。\n");
     
     return 0;
 }
