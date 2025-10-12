@@ -8,6 +8,7 @@ import nlohmann.json;
 // 导入自定义模块
 import ZhouYi.TianGan;
 import ZhouYi.DiZhi;
+import ZhouYi.GanZhi;
 import ZhouYi.LunarCalendar;
 
 // 导入标准库模块（最后）
@@ -100,19 +101,63 @@ int main() {
     
     fmt::print("\n");
     
-    // ==================== 六十甲子演示 ====================
+    // ==================== 完整干支系统演示 ====================
     fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, 
-               "【4】六十甲子表\n");
+               "【4】完整干支系统演示（ZhouYi.GanZhi）\n");
     fmt::print("----------------------------------------------\n");
     
-    auto sixty_cycles = ZhouYi::Lunar::GanZhi::get_sixty_cycles();
-    fmt::print(fg(fmt::color::yellow), "六十甲子:\n");
-    for (std::size_t i = 0; i < sixty_cycles.size(); ++i) {
-        fmt::print("{:2d}.{} ", i + 1, sixty_cycles[i]);
+    // 展示六十甲子表
+    auto jia_zi_list = ZhouYi::GanZhi::get_liu_shi_jia_zi();
+    fmt::print(fg(fmt::color::yellow), "六十甲子表:\n");
+    for (std::size_t i = 0; i < jia_zi_list.size(); ++i) {
+        const auto& jz = jia_zi_list[i];
+        fmt::print("{:2d}.{} ", i + 1, jz.to_string());
         if ((i + 1) % 10 == 0) {
             fmt::print("\n");
         }
     }
+    fmt::print("\n");
+    
+    // 演示干支关系
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, "干支关系演示:\n");
+    
+    // 地支六冲
+    auto zi = ZhouYi::GanZhi::DiZhi::Zi;
+    auto wu = ZhouYi::GanZhi::DiZhi::Wu;
+    fmt::print("子午相冲: {}\n", 
+               ZhouYi::GanZhi::is_chong(zi, wu) ? "是" : "否");
+    
+    // 地支六合
+    auto chou = ZhouYi::GanZhi::DiZhi::Chou;
+    fmt::print("子丑相合: {}\n", 
+               ZhouYi::GanZhi::is_he(zi, chou) ? "是" : "否");
+    
+    // 地支三合
+    auto shen = ZhouYi::GanZhi::DiZhi::Shen;
+    auto chen = ZhouYi::GanZhi::DiZhi::Chen;
+    auto [is_san_he, he_wx] = ZhouYi::GanZhi::is_san_he(shen, zi, chen);
+    if (is_san_he) {
+        fmt::print("申子辰三合: {} (合化为{})\n", "是", 
+                   ZhouYi::GanZhi::Mapper::to_zh(he_wx));
+    }
+    
+    // 五行生克
+    auto mu = ZhouYi::GanZhi::WuXing::Mu;
+    auto huo = ZhouYi::GanZhi::WuXing::Huo;
+    fmt::print("木生火: {}\n", 
+               ZhouYi::GanZhi::wu_xing_sheng(mu, huo) ? "是" : "否");
+    
+    fmt::print("\n");
+    
+    // 天干贵人
+    fmt::print(fg(fmt::color::magenta), "天干贵人:\n");
+    auto jia = ZhouYi::GanZhi::TianGan::Jia;
+    auto yang_gui = ZhouYi::GanZhi::get_gui_ren(jia, true);
+    auto yin_gui = ZhouYi::GanZhi::get_gui_ren(jia, false);
+    fmt::print("甲日阳贵: {}, 阴贵: {}\n",
+               ZhouYi::GanZhi::Mapper::to_zh(yang_gui),
+               ZhouYi::GanZhi::Mapper::to_zh(yin_gui));
+    
     fmt::print("\n");
     
     // ==================== 二十四节气演示 ====================
@@ -179,7 +224,8 @@ int main() {
     
     fmt::print("天干数量: {}\n", magic_enum::enum_count<ZhouYi::TianGan::Type>());
     fmt::print("地支数量: {}\n", magic_enum::enum_count<ZhouYi::DiZhi::Type>());
-    fmt::print("六十甲子: {} 个\n", sixty_cycles.size());
+    fmt::print("五行数量: {}\n", magic_enum::enum_count<ZhouYi::GanZhi::WuXing>());
+    fmt::print("六十甲子: {} 个\n", jia_zi_list.size());
     fmt::print("二十四节气: {} 个\n", terms_2025.size());
     
     fmt::print("\n");

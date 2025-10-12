@@ -121,6 +121,7 @@ ZhouYiLab/
 │   ├── main.cpp                # ⚠️ 唯一允许的 .cpp 文件
 │   ├── example_module.cppm     # 示例：天干模块（含反射）
 │   ├── dizhi_module.cppm       # 示例：地支模块（含反射）
+│   ├── ganzhi.cppm             # 完整干支系统模块（核心）
 │   ├── zh_mapper.cppm          # 中文映射辅助模块
 │   ├── lunar_calendar.cppm     # 农历日历模块（封装 tyme4cpp）
 │   └── *.cppm                  # 所有其他源文件必须是 .cppm
@@ -138,10 +139,23 @@ main.cpp
   ├─→ import fmt;                    (第三方库：格式化输出)
   ├─→ import magic_enum;             (第三方库：枚举反射)
   ├─→ import nlohmann.json;          (第三方库：JSON)
-  ├─→ import ZhouYi.TianGan;         (自定义模块：天干)
-  ├─→ import ZhouYi.DiZhi;           (自定义模块：地支)
+  ├─→ import ZhouYi.TianGan;         (自定义模块：天干示例)
+  ├─→ import ZhouYi.DiZhi;           (自定义模块：地支示例)
+  ├─→ import ZhouYi.GanZhi;          (自定义模块：完整干支系统 ⭐核心)
   ├─→ import ZhouYi.LunarCalendar;   (自定义模块：农历日历)
   └─→ import std;                    (标准库，最后导入！)
+
+ganzhi.cppm (GanZhi) ⭐核心干支模块
+  ├─→ import magic_enum;             (反射支持)
+  └─→ import std;                    (标准库，最后导入)
+  功能：
+    - 天干地支枚举定义
+    - 五行阴阳属性
+    - 生克制化关系
+    - 冲合刑害判断
+    - 六十甲子系统
+    - 纳音五行
+    - 贵人寄宫等
 
 example_module.cppm (TianGan)
   ├─→ import magic_enum;             (反射支持)
@@ -397,6 +411,61 @@ auto cycles = ZhouYi::Lunar::GanZhi::get_sixty_cycles();
 ```
 
 基于 [tyme4cpp](https://github.com/6tail/tyme4cpp) 库实现。
+
+**Q: 如何使用完整的干支系统？**
+
+A: 使用 `ZhouYi.GanZhi` 模块，这是从旧代码剥离整合的核心模块：
+
+```cpp
+import ZhouYi.GanZhi;
+using namespace ZhouYi::GanZhi;
+
+// 定义天干地支
+auto jia = TianGan::Jia;
+auto zi = DiZhi::Zi;
+
+// 获取中文名称
+auto name = Mapper::to_zh(jia);  // "甲"
+
+// 获取五行属性
+auto wu_xing = get_wu_xing(jia);  // WuXing::Mu (木)
+auto yin_yang = get_yin_yang(jia); // YinYang::Yang (阳)
+
+// 判断地支关系
+bool chong = is_chong(DiZhi::Zi, DiZhi::Wu);  // 子午相冲
+bool he = is_he(DiZhi::Zi, DiZhi::Chou);      // 子丑相合
+bool xing = is_xing(DiZhi::Zi, DiZhi::Mao);   // 子卯相刑
+
+// 地支三合
+auto [is_san_he, he_wx] = is_san_he(
+    DiZhi::Shen, DiZhi::Zi, DiZhi::Chen
+);  // 申子辰合水局
+
+// 五行生克
+bool sheng = wu_xing_sheng(WuXing::Mu, WuXing::Huo);  // 木生火
+bool ke = wu_xing_ke(WuXing::Mu, WuXing::Tu);          // 木克土
+
+// 六十甲子
+auto jz = LiuShiJiaZi::from_index(0);  // 甲子
+auto na_yin = jz.get_na_yin();          // 获取纳音五行
+
+// 天干贵人
+auto gui = get_gui_ren(TianGan::Jia, true);  // 甲日阳贵人
+
+// 天干寄宫
+auto gong = get_ji_gong(TianGan::Jia);  // 甲寄寅宫
+
+// 地支藏干
+auto cang = get_cang_gan(DiZhi::Yin);   // 寅藏甲丙戊
+```
+
+这个模块整合了旧代码中的所有天干地支核心功能，包括：
+- ✅ 完整的枚举定义和运算符重载
+- ✅ 五行阴阳属性查询
+- ✅ 生克制化关系判断
+- ✅ 冲合刑害完整判断
+- ✅ 六十甲子系统（含纳音）
+- ✅ 贵人寄宫藏干等高级功能
 
 ### 🤝 贡献指南
 
