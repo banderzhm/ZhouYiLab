@@ -14,11 +14,16 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 
 ## 技术特性
 
-- **C++23 Modules**: 使用最新的 C++23 模块系统和 `import std;`
-- **现代 CMake**: 基于 CMake 3.30+ 构建系统，完整支持 C++ modules
+- **完全模块化**: 零 `#include`，所有依赖使用 `import`
+  - ✅ `import std;` - C++23 标准库模块
+  - ✅ `import fmt;` - fmt 格式化库模块
+  - ✅ `import nlohmann.json;` - JSON 库模块
+  - ✅ 自定义模块（天干、地支、干支）
+- **现代 CMake**: 基于 CMake 4.1.2，完整支持 C++ modules
+  - `FILE_SET` 模块管理
+  - `CXX_MODULE_GENERATION_MODE` 优化编译
 - **Git Submodules**: 使用子模块管理第三方依赖
 - **跨平台支持**: Windows、Linux、macOS
-- **标准库模块化**: 启用 `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` 支持
 
 ## 第三方库
 

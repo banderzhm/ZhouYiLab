@@ -4,13 +4,13 @@ import std;
 // 导入自定义模块
 import ZhouYi.GanZhi;
 
-// 使用传统头文件引入第三方库
-#include <fmt/core.h>
-#include <fmt/color.h>
-#include <nlohmann/json.hpp>
+// 导入第三方库模块
+import fmt;            // ✅ fmt 模块
+import nlohmann.json;  // ✅ nlohmann_json 官方模块
 
+// 使用别名
 using json = nlohmann::json;
-
+using namespace fmt;
 // 声明模块演示函数
 int main_modules_demo();
 
@@ -104,4 +104,3 @@ int main(int argc, char* argv[]) {
     
     return 0;
 }
-

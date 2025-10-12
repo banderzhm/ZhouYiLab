@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 4.1.2)
 
 # 4.1.2 启用 C++23 import std 实验性功能
+#在https://github.com/Kitware/CMake/blob/v4.1.2/Help/dev/experimental.rst中可以查看
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
     "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 
@@ -25,18 +26,24 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 编译选项
 if(MSVC)
+    # MSVC UTF-8 支持和警告级别
     add_compile_options(/utf-8 /W4)
     # MSVC 对 C++23 modules 的支持
     add_compile_options(/experimental:module)
+    # 禁用 C5050 警告（模块环境不兼容警告）
+    # 这个警告是因为 MSVC 标准库模块编译时环境与用户代码不同
+    add_compile_options(/wd5050)
 else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
 # 配置第三方库的 C++ modules 支持
-# 启用 fmt 的 module 模式
+# 启用 fmt 的 module 模式（稳定支持）
 set(FMT_MODULE ON CACHE BOOL "Build fmt as a C++ module" FORCE)
 
 # 启用 nlohmann_json 的 module 支持
+# 注意：在 MSVC 上，nlohmann_json 模块可能存在兼容性问题
+# 如果遇到问题，请在代码中使用 #include <nlohmann/json.hpp> 代替 import nlohmann.json
 set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" FORCE)
 
 # 添加第三方库
@@ -72,11 +79,25 @@ if(MODULE_FILES)
 endif()
 
 # 链接第三方库
-target_link_libraries(${PROJECT_NAME} 
-    PRIVATE 
-        fmt::fmt 
-        nlohmann_json::nlohmann_json
-)
+# 注意：链接顺序很重要，模块库需要在基础库之前
+if(NLOHMANN_JSON_BUILD_MODULES AND TARGET nlohmann_json_modules)
+    # 如果有模块支持，优先链接模块库
+    target_link_libraries(${PROJECT_NAME} 
+        PRIVATE 
+            fmt::fmt 
+            nlohmann_json_modules
+            nlohmann_json::nlohmann_json
+    )
+    message(STATUS "Using nlohmann_json with module support")
+else()
+    # 否则使用传统方式
+    target_link_libraries(${PROJECT_NAME} 
+        PRIVATE 
+            fmt::fmt 
+            nlohmann_json::nlohmann_json
+    )
+    message(STATUS "Using nlohmann_json with traditional headers")
+endif()
 
 # 设置目标属性
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -115,6 +136,11 @@ message(STATUS "  - CXX_MODULE_STD: ON (import std 支持)")
 message(STATUS "  - CXX_MODULE_GENERATION_MODE: SEPARATE")
 message(STATUS "  - FMT_MODULE: ${FMT_MODULE}")
 message(STATUS "  - NLOHMANN_JSON_BUILD_MODULES: ${NLOHMANN_JSON_BUILD_MODULES}")
+if(TARGET nlohmann_json_modules)
+    message(STATUS "  - nlohmann_json_modules: ✓ Available")
+else()
+    message(STATUS "  - nlohmann_json_modules: ✗ Not available (use #include)")
+endif()
 list(LENGTH MODULE_FILES MODULE_COUNT)
 message(STATUS "  - 自定义模块文件数量: ${MODULE_COUNT}")
 message(STATUS "==========================================")

@@ -8,10 +8,10 @@ import ZhouYi.TianGan;
 import ZhouYi.DiZhi;
 import ZhouYi.GanZhi;
 
-// 使用传统头文件引入第三方库
-#include <fmt/core.h>
-#include <fmt/color.h>
+// 导入第三方库模块
+import fmt;  // ✅ 使用 fmt 模块
 
+using namespace fmt;
 using namespace ZhouYi;
 
 void demo_tian_gan() {
@@ -97,4 +97,3 @@ int main_modules_demo() {
     
     return 0;
 }
-
