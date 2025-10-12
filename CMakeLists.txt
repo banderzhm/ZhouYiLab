@@ -38,9 +38,6 @@ add_subdirectory(3rdparty/nlohmann_json)
 # 添加 tyme4cpp 农历库（仅添加 tyme 子目录，跳过 tests）
 add_subdirectory(3rdparty/tyme4cpp/tyme)
 
-# 添加 common/tyme 模块化版本
-add_subdirectory(common/tyme)
-
 # 包含头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json/include)
@@ -51,8 +48,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/tyme4cpp/tyme)
 # 分离普通 C++ 源文件和模块文件
 file(GLOB_RECURSE CPP_SOURCES "src/*.cpp")
 file(GLOB_RECURSE MODULE_FILES 
-    "src/*.cppm"  # C++23 module 接口文件
-    "src/*.ixx"   # MSVC module 接口文件
+    "src/*.cppm"           # C++23 module 接口文件
+    "src/*.ixx"            # MSVC module 接口文件
+    "common/tyme/*.cppm"   # common/tyme 模块文件
 )
 
 # 创建可执行文件
@@ -78,7 +76,6 @@ target_link_libraries(ZhouYiLab
         fmt::fmt 
         nlohmann_json_modules
         tyme
-        tyme_modules
 )
 
 # 解决 CLion 无法识别 import std
@@ -92,13 +89,6 @@ if (UNIX)
             BASE_DIRS ${LIBCXX_MODULE_DIRS}
             FILES ${LIBCXX_MODULE_DIRS}/std.cppm ${LIBCXX_MODULE_DIRS}/std.compat.cppm)
     message(STATUS "Added libc++ standard library modules from ${LIBCXX_MODULE_DIRS}")
-    
-    # 同时为 tyme_modules 添加标准库模块
-    target_sources(tyme_modules
-            PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${LIBCXX_MODULE_DIRS}
-            FILES ${LIBCXX_MODULE_DIRS}/std.cppm ${LIBCXX_MODULE_DIRS}/std.compat.cppm)
 
 elseif (WIN32)
     # Windows: 使用 MSVC 标准库模块
@@ -109,13 +99,6 @@ elseif (WIN32)
             BASE_DIRS ${LIBCXX_MODULE_DIRS}
             FILES ${LIBCXX_MODULE_DIRS}/std.ixx ${LIBCXX_MODULE_DIRS}/std.compat.ixx)
     message(STATUS "Added MSVC standard library modules from ${LIBCXX_MODULE_DIRS}")
-    
-    # 同时为 tyme_modules 添加标准库模块
-    target_sources(tyme_modules
-            PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${LIBCXX_MODULE_DIRS}
-            FILES ${LIBCXX_MODULE_DIRS}/std.ixx ${LIBCXX_MODULE_DIRS}/std.compat.ixx)
 endif ()
 
 
