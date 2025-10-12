@@ -38,6 +38,7 @@ add_subdirectory(3rdparty/nlohmann_json)
 # 包含头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include)
 
 # 收集源文件
 # 分离普通 C++ 源文件和模块文件
@@ -50,13 +51,18 @@ file(GLOB_RECURSE MODULE_FILES
 # 创建可执行文件
 add_executable(ZhouYiLab ${CPP_SOURCES} ${MODULE_FILES})
 
-
+# 添加自定义模块和第三方模块到 FILE_SET
 target_sources(ZhouYiLab
     PUBLIC
     FILE_SET cxx_modules TYPE CXX_MODULES FILES
     ${MODULE_FILES}
+    # 添加 magic_enum 模块
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/module/magic_enum.cppm
 )
 message(STATUS "已添加 ${CMAKE_CURRENT_LIST_LENGTH} 个 C++ 模块文件")
+
+# 定义 MAGIC_ENUM_USE_STD_MODULE 以使用 import std
+target_compile_definitions(ZhouYiLab PRIVATE MAGIC_ENUM_USE_STD_MODULE)
 
 
 # 链接第三方库

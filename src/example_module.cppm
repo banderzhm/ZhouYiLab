@@ -4,7 +4,10 @@
 // 使用 C++23 标准库模块
 export module ZhouYi.TianGan;
 
-// 导入标准库模块
+// 导入第三方库模块
+import magic_enum;
+
+// 导入标准库模块（最后）
 import std;
 
 // 导出的命名空间和类型
@@ -99,6 +102,45 @@ std::vector<TianGan> get_all_tian_gan() {
         result.push_back(TianGan::from_index(i));
     }
     return result;
+}
+
+/**
+ * @brief 天干枚举的中文映射辅助函数
+ */
+namespace TianGanMapper {
+    // 获取中文名称
+    constexpr auto to_zh(TianGan::Type type) -> std::string_view {
+        constexpr std::array<std::string_view, 10> names = {
+            "甲", "乙", "丙", "丁", "戊", 
+            "己", "庚", "辛", "壬", "癸"
+        };
+        return names[static_cast<int>(type)];
+    }
+    
+    // 从中文名称获取枚举
+    constexpr auto from_zh(std::string_view zh_name) -> std::optional<TianGan::Type> {
+        constexpr std::array<std::string_view, 10> names = {
+            "甲", "乙", "丙", "丁", "戊", 
+            "己", "庚", "辛", "壬", "癸"
+        };
+        
+        for (std::size_t i = 0; i < names.size(); ++i) {
+            if (names[i] == zh_name) {
+                return static_cast<TianGan::Type>(i);
+            }
+        }
+        return std::nullopt;
+    }
+    
+    // 使用 magic_enum 获取英文名称
+    constexpr auto to_en(TianGan::Type type) -> std::string_view {
+        return magic_enum::enum_name(type);
+    }
+    
+    // 从英文名称获取枚举
+    constexpr auto from_en(std::string_view en_name) -> std::optional<TianGan::Type> {
+        return magic_enum::enum_cast<TianGan::Type>(en_name);
+    }
 }
 
 } // namespace ZhouYi

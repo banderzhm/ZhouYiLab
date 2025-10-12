@@ -1,7 +1,10 @@
 // 地支模块 - 使用 C++23 modules
 export module ZhouYi.DiZhi;
 
-// 导入标准库模块
+// 导入第三方库模块
+import magic_enum;
+
+// 导入标准库模块（最后）
 import std;
 
 // 导出地支相关功能
@@ -132,6 +135,54 @@ std::vector<DiZhi> get_all_di_zhi() {
  */
 DiZhi year_to_di_zhi(int year) {
     return DiZhi::from_index((year - 4) % 12);
+}
+
+/**
+ * @brief 地支枚举的中文映射辅助函数
+ */
+namespace DiZhiMapper {
+    // 获取地支中文名称
+    constexpr auto to_zh(DiZhi::Type type) -> std::string_view {
+        constexpr std::array<std::string_view, 12> names = {
+            "子", "丑", "寅", "卯", "辰", "巳",
+            "午", "未", "申", "酉", "戌", "亥"
+        };
+        return names[static_cast<int>(type)];
+    }
+    
+    // 从中文名称获取地支枚举
+    constexpr auto from_zh(std::string_view zh_name) -> std::optional<DiZhi::Type> {
+        constexpr std::array<std::string_view, 12> names = {
+            "子", "丑", "寅", "卯", "辰", "巳",
+            "午", "未", "申", "酉", "戌", "亥"
+        };
+        
+        for (std::size_t i = 0; i < names.size(); ++i) {
+            if (names[i] == zh_name) {
+                return static_cast<DiZhi::Type>(i);
+            }
+        }
+        return std::nullopt;
+    }
+    
+    // 获取生肖中文名称
+    constexpr auto sheng_xiao_zh(DiZhi::Type type) -> std::string_view {
+        constexpr std::array<std::string_view, 12> animals = {
+            "鼠", "牛", "虎", "兔", "龙", "蛇",
+            "马", "羊", "猴", "鸡", "狗", "猪"
+        };
+        return animals[static_cast<int>(type)];
+    }
+    
+    // 使用 magic_enum 获取英文名称
+    constexpr auto to_en(DiZhi::Type type) -> std::string_view {
+        return magic_enum::enum_name(type);
+    }
+    
+    // 从英文名称获取枚举
+    constexpr auto from_en(std::string_view en_name) -> std::optional<DiZhi::Type> {
+        return magic_enum::enum_cast<DiZhi::Type>(en_name);
+    }
 }
 
 } // namespace ZhouYi

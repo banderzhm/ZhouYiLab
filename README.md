@@ -17,7 +17,10 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 ### 🚀 完全模块化设计
 - ✅ **零传统头文件**：所有依赖使用 `import` 语句
 - ✅ **C++23 标准库模块**：`import std;`
-- ✅ **第三方库模块化**：`import fmt;`、`import nlohmann.json;`
+- ✅ **第三方库模块化**：
+  - `import fmt;` - 现代格式化输出
+  - `import magic_enum;` - 编译期枚举反射
+  - `import nlohmann.json;` - JSON 序列化
 - ✅ **自定义模块系统**：所有业务代码使用 `.cppm` 模块接口文件
 
 ### 🏗️ 现代构建系统
@@ -38,8 +41,11 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 
 本项目使用以下第三方库（通过 Git 子模块管理）：
 
-- [fmt](https://github.com/fmtlib/fmt) - 现代化的格式化库
-- [nlohmann/json](https://github.com/nlohmann/json) - JSON 处理库
+- [fmt](https://github.com/fmtlib/fmt) - 现代化的格式化库，支持彩色输出
+- [magic_enum](https://github.com/Neargye/magic_enum) - 编译期枚举反射，零开销
+- [nlohmann/json](https://github.com/nlohmann/json) - JSON 序列化/反序列化库
+
+所有库均支持 C++23 Modules，可直接使用 `import` 导入。
 
 ## 构建要求
 
@@ -103,6 +109,7 @@ cmake --build build
 ZhouYiLab/
 ├── 3rdparty/                    # 第三方库（Git 子模块）
 │   ├── fmt/                    # 格式化库（支持 import fmt;）
+│   ├── magic_enum/             # 枚举反射库（支持 import magic_enum;）
 │   └── nlohmann_json/          # JSON 库（支持 import nlohmann.json;）
 ├── cmake/                       # CMake 工具链配置
 │   ├── clang.toolchain.cmake   # Clang 工具链
@@ -110,8 +117,9 @@ ZhouYiLab/
 │   └── vs.toolchain.cmake      # MSVC 工具链
 ├── src/                         # 源代码（纯模块化）
 │   ├── main.cpp                # ⚠️ 唯一允许的 .cpp 文件
-│   ├── example_module.cppm     # 示例：天干模块
-│   ├── dizhi_module.cppm       # 示例：地支模块
+│   ├── example_module.cppm     # 示例：天干模块（含反射）
+│   ├── dizhi_module.cppm       # 示例：地支模块（含反射）
+│   ├── zh_mapper.cppm          # 中文映射辅助模块
 │   └── *.cppm                  # 所有其他源文件必须是 .cppm
 ├── include/                     # 公共接口（可选，优先使用模块）
 ├── CMakeLists.txt              # CMake 主配置
@@ -124,19 +132,24 @@ ZhouYiLab/
 
 ```
 main.cpp
-  ├─→ import fmt;                    (第三方库)
-  ├─→ import nlohmann.json;          (第三方库)
-  ├─→ import ZhouYi.TianGan;         (自定义模块)
-  ├─→ import ZhouYi.DiZhi;           (自定义模块)
+  ├─→ import fmt;                    (第三方库：格式化输出)
+  ├─→ import magic_enum;             (第三方库：枚举反射)
+  ├─→ import nlohmann.json;          (第三方库：JSON)
+  ├─→ import ZhouYi.TianGan;         (自定义模块：天干)
+  ├─→ import ZhouYi.DiZhi;           (自定义模块：地支)
   └─→ import std;                    (标准库，最后导入！)
 
 example_module.cppm (TianGan)
-  ├─→ import fmt;
-  └─→ import std;
+  ├─→ import magic_enum;             (反射支持)
+  └─→ import std;                    (标准库，最后导入)
 
 dizhi_module.cppm (DiZhi)
-  ├─→ import fmt;
-  └─→ import std;
+  ├─→ import magic_enum;             (反射支持)
+  └─→ import std;                    (标准库，最后导入)
+
+zh_mapper.cppm (ZhMapper)
+  ├─→ import magic_enum;             (基于 magic_enum 实现)
+  └─→ import std;                    (标准库，最后导入)
 ```
 
 ## 📋 开发规范
@@ -151,6 +164,7 @@ dizhi_module.cppm (DiZhi)
 // ✅ 正确的导入顺序
 // 第一步：导入第三方库模块
 import fmt;
+import magic_enum;       // 枚举反射库
 import nlohmann.json;
 
 // 第二步：导入自定义业务模块
@@ -291,6 +305,57 @@ A: 不可以。本项目采用纯模块化设计，所有代码必须使用模�
 
 A: 这是 MSVC 的已知警告，已在 `CMakeLists.txt` 中使用 `/wd5050` 抑制，不影响编译。
 
+**Q: 如何使用 magic_enum 进行枚举反射？**
+
+A: magic_enum 提供编译期零开销的枚举反射功能：
+
+```cpp
+import magic_enum;
+import std;
+
+enum class Color { Red, Green, Blue };
+
+// 枚举 → 字符串
+auto name = magic_enum::enum_name(Color::Red);  // "Red"
+
+// 字符串 → 枚举
+auto color = magic_enum::enum_cast<Color>("Green");  // std::optional<Color>
+
+// 获取所有枚举值
+constexpr auto values = magic_enum::enum_values<Color>();
+
+// 获取枚举数量
+constexpr auto count = magic_enum::enum_count<Color>();  // 3
+
+// 枚举迭代
+for (auto value : magic_enum::enum_values<Color>()) {
+    fmt::print("{}\n", magic_enum::enum_name(value));
+}
+```
+
+**Q: 如何实现枚举到中文的映射？**
+
+A: 使用命名空间函数封装中文映射：
+
+```cpp
+// 在模块中定义
+export namespace MyEnumMapper {
+    constexpr auto to_zh(MyEnum value) -> std::string_view {
+        constexpr std::array<std::string_view, N> names = {"中文1", "中文2"};
+        return names[magic_enum::enum_integer(value)];
+    }
+    
+    constexpr auto from_zh(std::string_view zh_name) -> std::optional<MyEnum> {
+        // 遍历查找...
+    }
+}
+
+// 使用
+auto zh_name = MyEnumMapper::to_zh(value);
+```
+
+参考 `src/example_module.cppm` 和 `src/dizhi_module.cppm` 中的实现。
+
 ### 🤝 贡献指南
 
 欢迎贡献代码！请确保：
@@ -313,12 +378,20 @@ git push
 
 ## 🔗 相关资源
 
+### 📚 官方文档
 - [C++23 Modules 官方文档](https://en.cppreference.com/w/cpp/language/modules)
 - [CMake Modules 支持](https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html)
-- [fmt 库文档](https://fmt.dev/)
-- [nlohmann/json 文档](https://json.nlohmann.me/)
+
+### 🛠️ 第三方库
+- [fmt 库文档](https://fmt.dev/) - 现代格式化输出
+- [magic_enum 库文档](https://github.com/Neargye/magic_enum) - 编译期枚举反射
+- [nlohmann/json 文档](https://json.nlohmann.me/) - JSON 序列化
+
+### 📖 学习资源
+- [magic_enum 示例](https://github.com/Neargye/magic_enum/tree/master/example)
+- [C++23 特性概览](https://en.cppreference.com/w/cpp/23)
 
 ---
 
-**⚡ 技术栈**: C++23 | CMake 4.1.2 | Git Submodules | Pure Modules Design
+**⚡ 技术栈**: C++23 | CMake 4.1.2 | Git Submodules | Pure Modules Design | Compile-time Reflection
 
