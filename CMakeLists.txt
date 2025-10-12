@@ -5,12 +5,9 @@ project(ZhouYiLab
     DESCRIPTION "周易实验室 - 传统文化算法库"
     LANGUAGES CXX
 )
-set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "a9e1cf81-9932-4810-974b-6eccaf14e457")
-
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -69,6 +66,30 @@ target_link_libraries(ZhouYiLab
         nlohmann_json_modules
 )
 
+# 解决 CLion 无法识别 import std
+# 直接将标准库模块添加到主目标的 FILE_SET 中
+if (UNIX)
+    # Linux/Unix: 使用 libc++ 标准库模块
+    set(LIBCXX_MODULE_DIRS "/usr/lib/llvm-21/share/libc++/v1")
+    target_sources(${PROJECT_NAME}
+            PUBLIC
+            FILE_SET CXX_MODULES
+            BASE_DIRS ${LIBCXX_MODULE_DIRS}
+            FILES ${LIBCXX_MODULE_DIRS}/std.cppm ${LIBCXX_MODULE_DIRS}/std.compat.cppm)
+    message(STATUS "Added libc++ standard library modules from ${LIBCXX_MODULE_DIRS}")
+
+elseif (WIN32)
+    # Windows: 使用 MSVC 标准库模块
+    set(LIBCXX_MODULE_DIRS "F:/program/visul_studio/idea/VC/Tools/MSVC/14.44.35207/modules")
+    target_sources(${PROJECT_NAME}
+            PUBLIC
+            FILE_SET CXX_MODULES
+            BASE_DIRS ${LIBCXX_MODULE_DIRS}
+            FILES ${LIBCXX_MODULE_DIRS}/std.ixx ${LIBCXX_MODULE_DIRS}/std.compat.ixx)
+    message(STATUS "Added MSVC standard library modules from ${LIBCXX_MODULE_DIRS}")
+endif ()
+
+
 # 分离模块生成与编译（CMake 4.0+ 特性）
 # SEPARATE: 模块接口单元的编译与其他翻译单元分离
 # COMBINED: 模块接口单元与导入它们的翻译单元一起编译（默认）
@@ -99,37 +120,3 @@ endif()
 list(LENGTH MODULE_FILES MODULE_COUNT)
 message(STATUS "  - 自定义模块文件数量: ${MODULE_COUNT}")
 message(STATUS "==========================================")
-
-
-# 手动构建标准库模块目标
-# 这是为了支持 import std; 在不同平台上
-if (UNIX)
-    # Linux/Unix: 使用 libc++ 标准库模块
-    set(LIBCXX_MODULE_DIRS "/usr/lib/llvm-21/share/libc++/v1")
-    add_library(__CMAKE::CXX23 STATIC)
-    target_sources(__CMAKE::CXX23
-            PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${LIBCXX_MODULE_DIRS}
-            FILES ${LIBCXX_MODULE_DIRS}/std.cppm ${LIBCXX_MODULE_DIRS}/std.compat.cppm)
-    target_compile_features(__CMAKE::CXX23 PUBLIC cxx_std_23)
-    
-    # 链接到主目标
-    target_link_libraries(${PROJECT_NAME} PRIVATE __CMAKE::CXX23)
-    message(STATUS "Created __CMAKE::CXX23 target for libc++ modules")
-    
-elseif (WIN32)
-    # Windows: 使用 MSVC 标准库模块
-    set(LIBCXX_MODULE_DIRS "F:/program/visul_studio/idea/VC/Tools/MSVC/14.44.35207/modules")
-    add_library(__CMAKE::CXX23 STATIC)
-    target_sources(__CMAKE::CXX23
-            PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${LIBCXX_MODULE_DIRS}
-            FILES ${LIBCXX_MODULE_DIRS}/std.ixx ${LIBCXX_MODULE_DIRS}/std.compat.ixx)
-    target_compile_features(__CMAKE::CXX23 PUBLIC cxx_std_23)
-    
-    # 链接到主目标
-    target_link_libraries(${PROJECT_NAME} PRIVATE __CMAKE::CXX23)
-    message(STATUS "Created __CMAKE::CXX23 target for MSVC modules")
-endif ()
