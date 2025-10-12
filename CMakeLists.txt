@@ -1,41 +1,29 @@
-cmake_minimum_required(VERSION 4.1.2)
-
-# 4.1.2 启用 C++23 import std 实验性功能
-#在https://github.com/Kitware/CMake/blob/v4.1.2/Help/dev/experimental.rst中可以查看
-set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-    "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+cmake_minimum_required(VERSION 4.0.0)
 
 project(ZhouYiLab 
     VERSION 1.0.0
     DESCRIPTION "周易实验室 - 传统文化算法库"
     LANGUAGES CXX
 )
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "a9e1cf81-9932-4810-974b-6eccaf14e457")
 
-# 设置 C++ 标准为 C++23
+
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Currently CMake requires extensions enabled when using import std.
+# https://gitlab.kitware.com/cmake/cmake/-/issues/25916
+# https://gitlab.kitware.com/cmake/cmake/-/issues/25539
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 启用 C++23 modules 扫描
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-# 设置输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# 编译选项
-if(MSVC)
-    # MSVC UTF-8 支持和警告级别
-    add_compile_options(/utf-8 /W4)
-    # MSVC 对 C++23 modules 的支持
-    add_compile_options(/experimental:module)
-    # 禁用 C5050 警告（模块环境不兼容警告）
-    # 这个警告是因为 MSVC 标准库模块编译时环境与用户代码不同
-    add_compile_options(/wd5050)
-else()
-    add_compile_options(-Wall -Wextra -pedantic)
-endif()
+message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
+
 
 # 配置第三方库的 C++ modules 支持
 # 启用 fmt 的 module 模式（稳定支持）
@@ -63,64 +51,31 @@ file(GLOB_RECURSE MODULE_FILES
 )
 
 # 创建可执行文件
-add_executable(${PROJECT_NAME})
+add_executable(ZhouYiLab ${CPP_SOURCES} ${MODULE_FILES})
 
-# 添加普通源文件
-target_sources(${PROJECT_NAME} PRIVATE ${CPP_SOURCES})
 
-# 使用 FILE_SET 添加模块文件（CMake 3.28+ 特性）
-if(MODULE_FILES)
-    target_sources(${PROJECT_NAME}
-        PUBLIC
-        FILE_SET cxx_modules TYPE CXX_MODULES FILES
-        ${MODULE_FILES}
-    )
-    message(STATUS "已添加 ${CMAKE_CURRENT_LIST_LENGTH} 个 C++ 模块文件")
-endif()
+target_sources(ZhouYiLab
+    PUBLIC
+    FILE_SET cxx_modules TYPE CXX_MODULES FILES
+    ${MODULE_FILES}
+)
+message(STATUS "已添加 ${CMAKE_CURRENT_LIST_LENGTH} 个 C++ 模块文件")
+
 
 # 链接第三方库
-# 注意：链接顺序很重要，模块库需要在基础库之前
-if(NLOHMANN_JSON_BUILD_MODULES AND TARGET nlohmann_json_modules)
-    # 如果有模块支持，优先链接模块库
-    target_link_libraries(${PROJECT_NAME} 
-        PRIVATE 
-            fmt::fmt 
-            nlohmann_json_modules
-            nlohmann_json::nlohmann_json
-    )
-    message(STATUS "Using nlohmann_json with module support")
-else()
-    # 否则使用传统方式
-    target_link_libraries(${PROJECT_NAME} 
-        PRIVATE 
-            fmt::fmt 
-            nlohmann_json::nlohmann_json
-    )
-    message(STATUS "Using nlohmann_json with traditional headers")
-endif()
-
-# 设置目标属性
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 23
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS OFF
-    CXX_SCAN_FOR_MODULES ON
-    CXX_MODULE_STD ON  # 启用 import std 支持
+target_link_libraries(ZhouYiLab
+    PRIVATE 
+        fmt::fmt 
+        nlohmann_json_modules
 )
 
 # 分离模块生成与编译（CMake 4.0+ 特性）
 # SEPARATE: 模块接口单元的编译与其他翻译单元分离
 # COMBINED: 模块接口单元与导入它们的翻译单元一起编译（默认）
-set_property(TARGET ${PROJECT_NAME} PROPERTY
+set_property(TARGET ZhouYiLab PROPERTY
     CXX_MODULE_GENERATION_MODE "SEPARATE"
 )
 
-# 安装规则
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
 
 # 打印配置信息
 message(STATUS "==========================================")
@@ -145,3 +100,36 @@ list(LENGTH MODULE_FILES MODULE_COUNT)
 message(STATUS "  - 自定义模块文件数量: ${MODULE_COUNT}")
 message(STATUS "==========================================")
 
+
+# 手动构建标准库模块目标
+# 这是为了支持 import std; 在不同平台上
+if (UNIX)
+    # Linux/Unix: 使用 libc++ 标准库模块
+    set(LIBCXX_MODULE_DIRS "/usr/lib/llvm-21/share/libc++/v1")
+    add_library(__CMAKE::CXX23 STATIC)
+    target_sources(__CMAKE::CXX23
+            PUBLIC
+            FILE_SET CXX_MODULES
+            BASE_DIRS ${LIBCXX_MODULE_DIRS}
+            FILES ${LIBCXX_MODULE_DIRS}/std.cppm ${LIBCXX_MODULE_DIRS}/std.compat.cppm)
+    target_compile_features(__CMAKE::CXX23 PUBLIC cxx_std_23)
+    
+    # 链接到主目标
+    target_link_libraries(${PROJECT_NAME} PRIVATE __CMAKE::CXX23)
+    message(STATUS "Created __CMAKE::CXX23 target for libc++ modules")
+    
+elseif (WIN32)
+    # Windows: 使用 MSVC 标准库模块
+    set(LIBCXX_MODULE_DIRS "F:/program/visul_studio/idea/VC/Tools/MSVC/14.44.35207/modules")
+    add_library(__CMAKE::CXX23 STATIC)
+    target_sources(__CMAKE::CXX23
+            PUBLIC
+            FILE_SET CXX_MODULES
+            BASE_DIRS ${LIBCXX_MODULE_DIRS}
+            FILES ${LIBCXX_MODULE_DIRS}/std.ixx ${LIBCXX_MODULE_DIRS}/std.compat.ixx)
+    target_compile_features(__CMAKE::CXX23 PUBLIC cxx_std_23)
+    
+    # 链接到主目标
+    target_link_libraries(${PROJECT_NAME} PRIVATE __CMAKE::CXX23)
+    message(STATUS "Created __CMAKE::CXX23 target for MSVC modules")
+endif ()
