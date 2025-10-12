@@ -44,8 +44,9 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 - [fmt](https://github.com/fmtlib/fmt) - 现代化的格式化库，支持彩色输出
 - [magic_enum](https://github.com/Neargye/magic_enum) - 编译期枚举反射，零开销
 - [nlohmann/json](https://github.com/nlohmann/json) - JSON 序列化/反序列化库
+- [tyme4cpp](https://github.com/6tail/tyme4cpp) - 强大的日历工具库，支持农历、干支、节气等
 
-所有库均支持 C++23 Modules，可直接使用 `import` 导入。
+fmt、magic_enum、nlohmann_json 支持 C++23 Modules，可直接使用 `import` 导入。tyme4cpp 通过自定义模块 `ZhouYi.LunarCalendar` 封装。
 
 ## 构建要求
 
@@ -110,7 +111,8 @@ ZhouYiLab/
 ├── 3rdparty/                    # 第三方库（Git 子模块）
 │   ├── fmt/                    # 格式化库（支持 import fmt;）
 │   ├── magic_enum/             # 枚举反射库（支持 import magic_enum;）
-│   └── nlohmann_json/          # JSON 库（支持 import nlohmann.json;）
+│   ├── nlohmann_json/          # JSON 库（支持 import nlohmann.json;）
+│   └── tyme4cpp/               # 农历日历库（通过模块包装）
 ├── cmake/                       # CMake 工具链配置
 │   ├── clang.toolchain.cmake   # Clang 工具链
 │   ├── gcc.toolchain.cmake     # GCC 工具链
@@ -120,6 +122,7 @@ ZhouYiLab/
 │   ├── example_module.cppm     # 示例：天干模块（含反射）
 │   ├── dizhi_module.cppm       # 示例：地支模块（含反射）
 │   ├── zh_mapper.cppm          # 中文映射辅助模块
+│   ├── lunar_calendar.cppm     # 农历日历模块（封装 tyme4cpp）
 │   └── *.cppm                  # 所有其他源文件必须是 .cppm
 ├── include/                     # 公共接口（可选，优先使用模块）
 ├── CMakeLists.txt              # CMake 主配置
@@ -137,6 +140,7 @@ main.cpp
   ├─→ import nlohmann.json;          (第三方库：JSON)
   ├─→ import ZhouYi.TianGan;         (自定义模块：天干)
   ├─→ import ZhouYi.DiZhi;           (自定义模块：地支)
+  ├─→ import ZhouYi.LunarCalendar;   (自定义模块：农历日历)
   └─→ import std;                    (标准库，最后导入！)
 
 example_module.cppm (TianGan)
@@ -149,6 +153,11 @@ dizhi_module.cppm (DiZhi)
 
 zh_mapper.cppm (ZhMapper)
   ├─→ import magic_enum;             (基于 magic_enum 实现)
+  └─→ import std;                    (标准库，最后导入)
+
+lunar_calendar.cppm (LunarCalendar)
+  ├─→ #include <tyme.h>              (封装 tyme4cpp 库)
+  ├─→ import magic_enum;             (反射支持)
   └─→ import std;                    (标准库，最后导入)
 ```
 
@@ -356,6 +365,39 @@ auto zh_name = MyEnumMapper::to_zh(value);
 
 参考 `src/example_module.cppm` 和 `src/dizhi_module.cppm` 中的实现。
 
+**Q: 如何使用农历日历功能？**
+
+A: 使用 `ZhouYi.LunarCalendar` 模块进行公历与农历互转：
+
+```cpp
+import ZhouYi.LunarCalendar;
+import std;
+
+// 从公历创建
+auto solar = ZhouYi::Lunar::SolarDate::from_ymd(1986, 5, 29);
+auto lunar = solar.to_lunar();
+
+// 获取农历信息
+fmt::print("农历: {}\n", lunar.to_string());        // 农历甲寅年四月廿一
+fmt::print("年干支: {}\n", lunar.get_year_gan_zhi()); // 丙寅
+fmt::print("生肖: {}\n", lunar.get_zodiac());        // 虎
+
+// 从农历创建
+auto lunar2 = ZhouYi::Lunar::LunarDate::from_lunar(2025, 1, 1);
+auto [y, m, d] = lunar2.to_solar();  // 转换为公历
+
+// 二十四节气
+auto terms = ZhouYi::Lunar::SolarTerm::get_terms_of_year(2025);
+for (const auto& [name, date] : terms) {
+    // 处理每个节气...
+}
+
+// 六十甲子
+auto cycles = ZhouYi::Lunar::GanZhi::get_sixty_cycles();
+```
+
+基于 [tyme4cpp](https://github.com/6tail/tyme4cpp) 库实现。
+
 ### 🤝 贡献指南
 
 欢迎贡献代码！请确保：
@@ -386,6 +428,7 @@ git push
 - [fmt 库文档](https://fmt.dev/) - 现代格式化输出
 - [magic_enum 库文档](https://github.com/Neargye/magic_enum) - 编译期枚举反射
 - [nlohmann/json 文档](https://json.nlohmann.me/) - JSON 序列化
+- [tyme4cpp 库文档](https://6tail.cn/tyme.html) - 强大的日历工具库
 
 ### 📖 学习资源
 - [magic_enum 示例](https://github.com/Neargye/magic_enum/tree/master/example)
