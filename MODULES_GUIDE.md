@@ -93,11 +93,11 @@ auto gan_zhi = GanZhi::from_year(2025);
 ### 主 CMakeLists.txt 配置
 
 ```cmake
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 4.1.2)
 
-# 启用 C++23 import std 实验性功能
+# 启用 C++23 import std 实验性功能（CMake 4.1.2 UUID）
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-    "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+    "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 
 project(ZhouYiLab LANGUAGES CXX)
 
@@ -117,9 +117,24 @@ set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" F
 add_subdirectory(3rdparty/fmt)
 add_subdirectory(3rdparty/nlohmann_json)
 
+# 收集源文件 - 分离普通源文件和模块文件
+file(GLOB_RECURSE CPP_SOURCES "src/*.cpp")
+file(GLOB_RECURSE MODULE_FILES "src/*.cppm" "src/*.ixx")
+
 # 创建可执行文件
-file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.cppm" "src/*.ixx")
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME})
+
+# 添加普通源文件
+target_sources(${PROJECT_NAME} PRIVATE ${CPP_SOURCES})
+
+# 使用 FILE_SET 添加模块文件（推荐方式）
+if(MODULE_FILES)
+    target_sources(${PROJECT_NAME}
+        PUBLIC
+        FILE_SET cxx_modules TYPE CXX_MODULES FILES
+        ${MODULE_FILES}
+    )
+endif()
 
 # 设置目标属性
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -128,6 +143,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS OFF
     CXX_SCAN_FOR_MODULES ON
     CXX_MODULE_STD ON  # 启用 import std 支持
+)
+
+# 分离模块生成与编译（提高并行编译效率）
+set_property(TARGET ${PROJECT_NAME} PROPERTY
+    CXX_MODULE_GENERATION_MODE "SEPARATE"
 )
 
 # 链接第三方库
@@ -142,11 +162,23 @@ target_link_libraries(${PROJECT_NAME}
 
 | 配置项 | 说明 | 参考文档 |
 |-------|------|---------|
-| `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` | 启用 `import std;` 支持 | [CXX_MODULE_STD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_MODULE_STD.html) |
+| `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` | 启用 `import std;` 支持（UUID 根据 CMake 版本不同） | [CXX_MODULE_STD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_MODULE_STD.html) |
 | `CMAKE_CXX_SCAN_FOR_MODULES` | 全局启用模块扫描 | [CXX_SCAN_FOR_MODULES](https://cmake.org/cmake/help/latest/prop_tgt/CXX_SCAN_FOR_MODULES.html) |
 | `CXX_MODULE_STD` | 目标级别的 `import std` 支持 | 同上 |
+| `CXX_MODULE_GENERATION_MODE` | 模块生成模式：`SEPARATE` 或 `COMBINED` | CMake 4.0+ |
+| `FILE_SET ... TYPE CXX_MODULES` | 使用 FILE_SET 明确指定模块文件 | [target_sources](https://cmake.org/cmake/help/latest/command/target_sources.html) |
 | `FMT_MODULE` | 构建 fmt 为模块 | fmt 库选项 |
 | `NLOHMANN_JSON_BUILD_MODULES` | 构建 nlohmann_json 模块 | nlohmann_json 库选项 |
+
+#### CXX_MODULE_GENERATION_MODE 详解
+
+- **`SEPARATE`** (推荐): 模块接口单元独立编译，与使用它们的翻译单元分离
+  - ✅ 优点：提高并行编译效率，模块变化时只重新编译必要的文件
+  - ⚠️ 缺点：可能增加总体编译时间（首次编译）
+  
+- **`COMBINED`** (默认): 模块接口单元与导入它们的翻译单元一起编译
+  - ✅ 优点：首次编译可能更快
+  - ⚠️ 缺点：模块变化时需要重新编译所有依赖文件
 
 ## 使用示例
 
@@ -237,8 +269,11 @@ main.cpp
 
 ### CMake 版本
 
-- **最低版本**: 3.30
+- **最低版本**: 4.1.2（完整支持 `CXX_MODULE_GENERATION_MODE`）
+- **兼容版本**: 3.30+（部分特性支持）
 - **推荐版本**: 最新稳定版
+
+> **注意**: `CXX_MODULE_GENERATION_MODE` 是 CMake 4.0+ 的新特性。如果使用 CMake 3.30，请移除该配置项，其他功能仍可正常工作。
 
 ### 编译器要求
 

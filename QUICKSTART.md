@@ -34,12 +34,12 @@ cmake --build build -j$(nproc)
 
 ## 📋 最低要求
 
-| 组件 | 版本 |
-|------|------|
-| CMake | 3.30+ |
-| GCC | 14.0+ |
-| Clang | 18.0+ |
-| MSVC | 19.40+ (VS 2022 17.10+) |
+| 组件 | 版本 | 备注 |
+|------|------|------|
+| CMake | 4.1.2+ | 完整特性支持（3.30+ 部分兼容） |
+| GCC | 14.0+ | 完全支持 C++23 modules |
+| Clang | 18.0+ | 完全支持 C++23 modules |
+| MSVC | 19.40+ (VS 2022 17.10+) | 实验性支持 |
 
 ## ✨ C++23 特性
 
@@ -110,11 +110,12 @@ ZhouYiLab/
 项目的 `CMakeLists.txt` 关键配置：
 
 ```cmake
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 4.1.2)
 
 # 启用 import std 支持（基于 CMake 官方文档）
+# UUID 对应 CMake 4.1.2 版本
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
-    "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+    "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 
 # C++23 标准
 set(CMAKE_CXX_STANDARD 23)
@@ -124,10 +125,22 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 set(FMT_MODULE ON CACHE BOOL "Build fmt as a C++ module" FORCE)
 set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "" FORCE)
 
+# 使用 FILE_SET 添加模块文件
+target_sources(${PROJECT_NAME}
+    PUBLIC
+    FILE_SET cxx_modules TYPE CXX_MODULES FILES
+    ${MODULE_FILES}
+)
+
 # 目标属性
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_MODULE_STD ON  # 启用 import std
     CXX_SCAN_FOR_MODULES ON
+)
+
+# 分离模块生成与编译（提高并行编译效率）
+set_property(TARGET ${PROJECT_NAME} PROPERTY
+    CXX_MODULE_GENERATION_MODE "SEPARATE"
 )
 ```
 

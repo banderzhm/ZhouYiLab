@@ -29,7 +29,8 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 
 ## 构建要求
 
-- **CMake 3.30** 或更高版本（支持 `import std;`）
+- **CMake 4.1.2** 或更高版本（完整支持 C++ modules 和 `import std;`）
+  - 最低兼容版本：CMake 3.30（部分特性）
 - 支持 C++23 modules 和 `import std;` 的编译器：
   - **GCC 14+** (完全支持)
   - **Clang 18+** (完全支持)
