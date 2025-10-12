@@ -1,5 +1,5 @@
 // Tyme 主模块实现
-module tyme;
+module ZhouYi.tyme;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
