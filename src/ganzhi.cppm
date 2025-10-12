@@ -386,42 +386,28 @@ constexpr DiZhi get_ji_gong(TianGan gan) {
 /**
  * @brief 获取地支中寄居的天干
  */
-constexpr auto get_ji_gan(DiZhi zhi) -> std::vector<TianGan> {
-    std::vector<TianGan> result;
-    
+inline auto get_ji_gan(DiZhi zhi) -> std::vector<TianGan> {
     switch (zhi) {
     case DiZhi::Yin:
-        result.push_back(TianGan::Jia);
-        break;
+        return {TianGan::Jia};
     case DiZhi::Chen:
-        result.push_back(TianGan::Yi);
-        break;
+        return {TianGan::Yi};
     case DiZhi::Si:
-        result.push_back(TianGan::Bing);
-        result.push_back(TianGan::Wu);
-        break;
+        return {TianGan::Bing, TianGan::Wu};
     case DiZhi::Wei:
-        result.push_back(TianGan::Ding);
-        result.push_back(TianGan::Ji);
-        break;
+        return {TianGan::Ding, TianGan::Ji};
     case DiZhi::Shen:
-        result.push_back(TianGan::Geng);
-        break;
+        return {TianGan::Geng};
     case DiZhi::Xu:
-        result.push_back(TianGan::Xin);
-        break;
+        return {TianGan::Xin};
     case DiZhi::Hai:
-        result.push_back(TianGan::Ren);
-        break;
+        return {TianGan::Ren};
     case DiZhi::Chou:
-        result.push_back(TianGan::Gui);
-        break;
+        return {TianGan::Gui};
     default:
         // 子、卯、午、酉无天干寄宫
-        break;
+        return {};
     }
-    
-    return result;
 }
 
 // ==================== 贵人表 ====================
@@ -460,25 +446,53 @@ constexpr bool is_daytime(DiZhi hour) {
 // ==================== 地支藏干 ====================
 
 /**
- * @brief 获取地支藏干（主气、中气、余气）
+ * @brief 藏干数据结构（最多3个天干）
  */
-constexpr auto get_cang_gan(DiZhi zhi) -> std::vector<TianGan> {
-    constexpr std::array<std::vector<TianGan>, 12> cang_gan_table = {{
-        {TianGan::Gui},                            // 子：癸
-        {TianGan::Ji, TianGan::Gui, TianGan::Xin}, // 丑：己癸辛
-        {TianGan::Jia, TianGan::Bing, TianGan::Wu}, // 寅：甲丙戊
-        {TianGan::Yi},                             // 卯：乙
-        {TianGan::Wu, TianGan::Yi, TianGan::Gui},  // 辰：戊乙癸
-        {TianGan::Bing, TianGan::Wu, TianGan::Geng}, // 巳：丙戊庚
-        {TianGan::Ding, TianGan::Ji},              // 午：丁己
-        {TianGan::Ji, TianGan::Ding, TianGan::Yi}, // 未：己丁乙
-        {TianGan::Geng, TianGan::Ren, TianGan::Wu}, // 申：庚壬戊
-        {TianGan::Xin},                            // 酉：辛
-        {TianGan::Wu, TianGan::Xin, TianGan::Ding}, // 戌：戊辛丁
-        {TianGan::Ren, TianGan::Jia}               // 亥：壬甲
-    }};
+struct CangGanData {
+    std::array<TianGan, 3> gans;
+    std::size_t count;
     
-    return cang_gan_table[static_cast<int>(zhi)];
+    constexpr CangGanData(TianGan g1) 
+        : gans{g1, TianGan::Jia, TianGan::Jia}, count(1) {}
+    
+    constexpr CangGanData(TianGan g1, TianGan g2) 
+        : gans{g1, g2, TianGan::Jia}, count(2) {}
+    
+    constexpr CangGanData(TianGan g1, TianGan g2, TianGan g3) 
+        : gans{g1, g2, g3}, count(3) {}
+    
+    constexpr auto get_span() const -> std::span<const TianGan> {
+        return std::span<const TianGan>(gans.data(), count);
+    }
+    
+    constexpr auto operator[](std::size_t idx) const -> TianGan {
+        return gans[idx];
+    }
+};
+
+// 藏干数据表（编译时常量）
+inline constexpr std::array<CangGanData, 12> cang_gan_table = {{
+    CangGanData{TianGan::Gui},                            // 子：癸
+    CangGanData{TianGan::Ji, TianGan::Gui, TianGan::Xin}, // 丑：己癸辛
+    CangGanData{TianGan::Jia, TianGan::Bing, TianGan::Wu}, // 寅：甲丙戊
+    CangGanData{TianGan::Yi},                             // 卯：乙
+    CangGanData{TianGan::Wu, TianGan::Yi, TianGan::Gui},  // 辰：戊乙癸
+    CangGanData{TianGan::Bing, TianGan::Wu, TianGan::Geng}, // 巳：丙戊庚
+    CangGanData{TianGan::Ding, TianGan::Ji},              // 午：丁己
+    CangGanData{TianGan::Ji, TianGan::Ding, TianGan::Yi}, // 未：己丁乙
+    CangGanData{TianGan::Geng, TianGan::Ren, TianGan::Wu}, // 申：庚壬戊
+    CangGanData{TianGan::Xin},                            // 酉：辛
+    CangGanData{TianGan::Wu, TianGan::Xin, TianGan::Ding}, // 戌：戊辛丁
+    CangGanData{TianGan::Ren, TianGan::Jia}               // 亥：壬甲
+}};
+
+/**
+ * @brief 获取地支藏干（主气、中气、余气）
+ * @return std::vector 包含藏干的向量
+ */
+inline auto get_cang_gan(DiZhi zhi) -> std::vector<TianGan> {
+    const auto& data = cang_gan_table[static_cast<int>(zhi)];
+    return std::vector<TianGan>(data.gans.begin(), data.gans.begin() + data.count);
 }
 
 // ==================== 六十甲子 ====================
