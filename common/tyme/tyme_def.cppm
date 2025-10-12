@@ -1,5 +1,5 @@
 // Tyme 主模块定义
-export module tyme;
+export module  ZhouYi.tyme;
 
 // 取消可能存在的IN和OUT宏定义
 #ifdef IN

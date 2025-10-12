@@ -1,7 +1,7 @@
 // 测试 tyme 模块
 
 // 导入 tyme 模块
-import tyme;
+import ZhouYi.tyme;
 import tyme.util;
 
 // 导入 fmt
@@ -27,4 +27,3 @@ int main() {
     
     return 0;
 }
-

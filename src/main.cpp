@@ -9,14 +9,15 @@ import nlohmann.json;
 import ZhouYi.TianGan;
 import ZhouYi.DiZhi;
 import ZhouYi.GanZhi;
-import ZhouYi.LunarCalendar;
+import ZhouYi.tyme;
 
 // 导入标准库模块（最后）
 import std;
 
+using namespace fmt;
 int main() {
     // 使用 fmt 模块进行彩色输出
-    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, 
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold,
                "=== ZhouYiLab C++23 Modules Demo ===\n\n");
     
     // ==================== 反射功能演示 ====================
@@ -68,36 +69,20 @@ int main() {
     fmt::print("----------------------------------------------\n");
     
     // 示例日期：1986年5月29日
-    auto solar = ZhouYi::Lunar::SolarDate::from_ymd(1986, 5, 29);
-    auto lunar = solar.to_lunar();
+    auto solar = tyme::SolarDay::from_ymd(1986, 5, 29);
+    auto lunar = solar.get_lunar_day();
     
     fmt::print(fg(fmt::color::green), "公历日期: {}\n", solar.to_string());
     fmt::print(fg(fmt::color::green), "农历日期: {}\n", lunar.to_string());
-    fmt::print(fg(fmt::color::yellow), "年份干支: {}\n", lunar.get_year_gan_zhi());
-    fmt::print(fg(fmt::color::yellow), "月份干支: {}\n", lunar.get_month_gan_zhi());
-    fmt::print(fg(fmt::color::yellow), "日期干支: {}\n", lunar.get_day_gan_zhi());
-    fmt::print(fg(fmt::color::magenta), "生　　肖: {}\n", lunar.get_zodiac());
-    fmt::print(fg(fmt::color::magenta), "星　　座: {}\n", solar.get_constellation());
-    fmt::print(fg(fmt::color::magenta), "星　　期: {}\n", solar.get_week_name());
     
-    // 节气信息
-    auto term = solar.get_solar_term();
-    if (term.has_value()) {
-        fmt::print(fg(fmt::color::cyan), "节　　气: {}\n", term.value());
-    }
+    // 获取年月日的干支信息
+    auto lunar_month = lunar.get_lunar_month();
+    auto lunar_year = lunar_month.get_lunar_year();
     
-    fmt::print("\n");
-    
-    // 今天的日期
-    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, "今日日期信息:\n");
-    auto today = ZhouYi::Lunar::SolarDate::today();
-    auto today_lunar = today.to_lunar();
-    fmt::print("公历: {}\n", today.to_string());
-    fmt::print("农历: {}\n", today_lunar.to_string());
-    fmt::print("干支: {} {} {}\n", 
-               today_lunar.get_year_gan_zhi(),
-               today_lunar.get_month_gan_zhi(),
-               today_lunar.get_day_gan_zhi());
+    fmt::print(fg(fmt::color::yellow), "年份干支: {}\n", lunar_year.get_sixty_cycle().get_name());
+    fmt::print(fg(fmt::color::yellow), "月份干支: {}\n", lunar_month.get_sixty_cycle().get_name());
+    fmt::print(fg(fmt::color::yellow), "日期干支: {}\n", lunar.get_sixty_cycle().get_name());
+    fmt::print(fg(fmt::color::magenta), "生　　肖: {}\n", lunar_year.get_zodiac().get_name());
     
     fmt::print("\n");
     
@@ -162,15 +147,14 @@ int main() {
     
     // ==================== 二十四节气演示 ====================
     fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, 
-               "【5】2025年二十四节气表\n");
+               "【5】农历信息演示\n");
     fmt::print("----------------------------------------------\n");
     
-    auto terms_2025 = ZhouYi::Lunar::SolarTerm::get_terms_of_year(2025);
-    for (const auto& [term_name, date] : terms_2025) {
-        auto [y, m, d] = date;
-        fmt::print(fg(fmt::color::green), "{:6s} → {}年{:2d}月{:2d}日\n", 
-                   term_name, y, m, d);
-    }
+    // 展示一些农历信息
+    fmt::print(fg(fmt::color::green), "农历年: {}年\n", lunar_year.get_year());
+    fmt::print(fg(fmt::color::green), "农历月数: {} 个月\n", lunar_year.get_month_count());
+    fmt::print(fg(fmt::color::green), "农历天数: {} 天\n", lunar_year.get_day_count());
+    fmt::print(fg(fmt::color::yellow), "本月天数: {} 天\n", lunar_month.get_day_count());
     
     fmt::print("\n");
     

@@ -59,15 +59,15 @@ export namespace tyme::util {
         static double qi_accurate2(double jd);
 
     private:
-        static string decode(const string &s);
+        static std::string decode(const std::string &s);
 
         static const double NUT_B[];
         static const double DT_AT[];
         static const double XL0[];
-        static const vector<vector<double>> XL1;
+        static const std::vector<std::vector<double>> XL1;
         static const double QI_KB[];
         static const double SHUO_KB[];
-        static const string QB;
-        static const string SB;
+        static const std::string QB;
+        static const std::string SB;
     };
 }
