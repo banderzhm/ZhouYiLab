@@ -35,14 +35,10 @@ set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" F
 add_subdirectory(3rdparty/fmt)
 add_subdirectory(3rdparty/nlohmann_json)
 
-# 添加 tyme4cpp 农历库（仅添加 tyme 子目录，跳过 tests）
-add_subdirectory(3rdparty/tyme4cpp/tyme)
-
 # 包含头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/tyme4cpp/tyme)
 
 # 收集源文件
 # 分离普通 C++ 源文件和模块文件
@@ -75,7 +71,6 @@ target_link_libraries(ZhouYiLab
     PRIVATE 
         fmt::fmt 
         nlohmann_json_modules
-        tyme
 )
 
 # 解决 CLion 无法识别 import std
