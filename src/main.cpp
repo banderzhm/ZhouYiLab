@@ -10,6 +10,8 @@ import ZhouYi.GanZhi;          // 包含 TianGan 和 DiZhi
 import ZhouYi.BaZiBase;        // 八字基础结构
 import ZhouYi.tyme;            // 农历时间库
 import ZhouYi.LiuYaoController;// 六爻排盘控制器
+import ZhouYi.DaLiuRen;        // 大六壬核心模块
+import ZhouYi.DaLiuRen.Controller; // 大六壬控制器
 
 // 导入标准库模块（最后）
 import std;
@@ -326,11 +328,47 @@ int main() {
         fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
     }
     
+    // ==================== 大六壬排盘演示 ====================
+    fmt::print("\n");
+    fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, 
+               "【10】大六壬排盘演示\n");
+    fmt::print("----------------------------------------------\n");
+    
+    try {
+        // 测试1: 基本排盘
+        fmt::print(fg(fmt::color::yellow), "\n测试1: 公历日期大六壬排盘\n");
+        fmt::print("公历: 2025年10月10日 14时\n");
+        
+        auto dlr_result = ZhouYi::DaLiuRen::DaLiuRenEngine::pai_pan(2025, 10, 10, 14);
+        
+        // 使用控制器显示详细结果
+        ZhouYi::DaLiuRen::Controller::DaLiuRenController::display_result_detailed(dlr_result);
+        
+        // 测试2: 访问详细信息
+        fmt::print(fg(fmt::color::yellow), "\n测试2: 访问排盘详细信息\n");
+        fmt::print("初传: {}\n", 
+                   ZhouYi::GanZhi::Mapper::to_zh(dlr_result.san_chuan.get_chu_chuan()));
+        fmt::print("中传: {}\n", 
+                   ZhouYi::GanZhi::Mapper::to_zh(dlr_result.san_chuan.get_zhong_chuan()));
+        fmt::print("末传: {}\n", 
+                   ZhouYi::GanZhi::Mapper::to_zh(dlr_result.san_chuan.get_mo_chuan()));
+        
+        const auto& ke_shi = dlr_result.san_chuan.get_ke_shi();
+        if (!ke_shi.empty()) {
+            fmt::print("课式: {}\n", fmt::join(ke_shi, ", "));
+        }
+        
+        fmt::print(fg(fmt::color::green), "\n✅ 大六壬排盘功能正常！\n");
+        
+    } catch (const std::exception& e) {
+        fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
+    }
+    
     fmt::print("\n");
     fmt::print(fg(fmt::color::magenta) | fmt::emphasis::italic, 
                "✨ 所有功能演示完成！\n");
     fmt::print(fg(fmt::color::green), 
-               "🎉 C++23 Modules + 反射 + 中文映射 + 农历日历 + 八字计算 + 十二长生完美运行！\n");
+               "🎉 C++23 Modules + 反射 + 中文映射 + 农历日历 + 八字计算 + 十二长生 + 大六壬完美运行！\n");
     
     return 0;
 }

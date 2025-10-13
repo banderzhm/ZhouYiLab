@@ -194,6 +194,10 @@ if(TEST_SOURCES)
         ${MODULE_INTERFACE_FILES}  # 包含所有模块接口
         ${TYME_IMPL_FILES}          # 包含 tyme 实现
         src/liu_yao/liu_yao_controller.cpp  # 包含 controller 实现
+        src/da_liu_ren/da_liu_ren.cpp       # 包含大六壬核心实现
+        src/da_liu_ren/da_liu_ren_controller.cpp  # 包含大六壬控制器实现
+        src/da_liu_ren/da_liu_ren_shen_sha.cpp   # 包含大六壬神煞实现
+        src/da_liu_ren/da_liu_ren_guati.cpp      # 包含大六壬卦体判定实现
     )
     
     # 添加模块到测试目标

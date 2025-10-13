@@ -16,6 +16,7 @@ _deps/
 *.ninja
 *.ninja_deps
 *.ninja_log
+cmake-build-*
 
 # Build artifacts
 *.exe

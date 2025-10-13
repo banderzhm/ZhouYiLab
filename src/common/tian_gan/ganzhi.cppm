@@ -1010,5 +1010,180 @@ inline auto get_mu_ku_zhi(TianGan gan) -> DiZhi {
     return static_cast<DiZhi>(mu_ku_idx);
 }
 
+// ==================== 六亲系统 ====================
+
+/**
+ * @brief 六亲枚举
+ * 
+ * 用于描述五行之间的六亲关系
+ */
+enum class LiuQin {
+    FuMu,      // 父母（生我者）
+    XiongDi,   // 兄弟（比和者）
+    ZiSun,     // 子孙（我生者）
+    QiCai,     // 妻财（我克者）
+    GuanGui    // 官鬼（克我者）
+};
+
+/**
+ * @brief 获取六亲关系
+ * 
+ * @param self_gan 日干（我）
+ * @param other_zhi 他支
+ * @return 六亲关系
+ */
+constexpr LiuQin get_liu_qin(TianGan self_gan, DiZhi other_zhi) {
+    WuXing self_wx = get_wu_xing(self_gan);
+    WuXing other_wx = get_wu_xing(other_zhi);
+    
+    if (wu_xing_sheng(other_wx, self_wx)) {
+        return LiuQin::FuMu;  // 生我者为父母
+    } else if (wu_xing_sheng(self_wx, other_wx)) {
+        return LiuQin::ZiSun;  // 我生者为子孙
+    } else if (wu_xing_ke(self_wx, other_wx)) {
+        return LiuQin::QiCai;  // 我克者为妻财
+    } else if (wu_xing_ke(other_wx, self_wx)) {
+        return LiuQin::GuanGui;  // 克我者为官鬼
+    } else {
+        return LiuQin::XiongDi;  // 比和为兄弟
+    }
+}
+
+/**
+ * @brief 获取六亲中文名称
+ */
+constexpr std::string_view liu_qin_to_zh(LiuQin lq) {
+    constexpr std::array<std::string_view, 5> names = {
+        "父母", "兄弟", "子孙", "妻财", "官鬼"
+    };
+    return names[static_cast<int>(lq)];
+}
+
+// ==================== 十神系统 ====================
+
+/**
+ * @brief 十神枚举
+ */
+enum class ShiShen {
+    BiJian,     // 比肩
+    JieCai,     // 劫财
+    ShiShen,    // 食神
+    ShangGuan,  // 伤官
+    PianCai,    // 偏财
+    ZhengCai,   // 正财
+    QiSha,      // 七杀
+    ZhengGuan,  // 正官
+    PianYin,    // 偏印
+    ZhengYin    // 正印
+};
+
+/**
+ * @brief 获取十神关系
+ * 
+ * @param self_gan 日干（我）
+ * @param other_gan 他干
+ * @return 十神关系
+ */
+constexpr ShiShen get_shi_shen(TianGan self_gan, TianGan other_gan) {
+    WuXing self_wx = get_wu_xing(self_gan);
+    WuXing other_wx = get_wu_xing(other_gan);
+    YinYang self_yy = get_yin_yang(self_gan);
+    YinYang other_yy = get_yin_yang(other_gan);
+    bool same_yy = (self_yy == other_yy);
+    
+    if (self_wx == other_wx) {
+        // 比和
+        return same_yy ? ShiShen::BiJian : ShiShen::JieCai;
+    } else if (wu_xing_sheng(self_wx, other_wx)) {
+        // 我生者
+        return same_yy ? ShiShen::ShiShen : ShiShen::ShangGuan;
+    } else if (wu_xing_ke(self_wx, other_wx)) {
+        // 我克者
+        return same_yy ? ShiShen::PianCai : ShiShen::ZhengCai;
+    } else if (wu_xing_ke(other_wx, self_wx)) {
+        // 克我者
+        return same_yy ? ShiShen::QiSha : ShiShen::ZhengGuan;
+    } else {
+        // 生我者
+        return same_yy ? ShiShen::PianYin : ShiShen::ZhengYin;
+    }
+}
+
+/**
+ * @brief 获取十神中文名称
+ */
+constexpr std::string_view shi_shen_to_zh(ShiShen ss) {
+    constexpr std::array<std::string_view, 10> names = {
+        "比肩", "劫财", "食神", "伤官", "偏财",
+        "正财", "七杀", "正官", "偏印", "正印"
+    };
+    return names[static_cast<int>(ss)];
+}
+
+// ==================== 地支遁干系统 ====================
+
+/**
+ * @brief 计算旬首地支
+ * 
+ * @param day_gan 日干
+ * @param day_zhi 日支
+ * @return 旬首地支
+ */
+constexpr DiZhi get_xun_shou(TianGan day_gan, DiZhi day_zhi) {
+    int gan_idx = static_cast<int>(day_gan);
+    int zhi_idx = static_cast<int>(day_zhi);
+    int xun_shou_idx = (zhi_idx - gan_idx + 12) % 12;
+    return static_cast<DiZhi>(xun_shou_idx);
+}
+
+/**
+ * @brief 计算地支遁干
+ * 
+ * @param zhi 地支
+ * @param day_gan 日干
+ * @param day_zhi 日支
+ * @return 遁干，如果空亡则返回 std::nullopt
+ */
+constexpr std::optional<TianGan> get_dun_gan(DiZhi zhi, TianGan day_gan, DiZhi day_zhi) {
+    DiZhi xun_shou = get_xun_shou(day_gan, day_zhi);
+    int zhi_delta = (static_cast<int>(zhi) - static_cast<int>(xun_shou) + 12) % 12;
+    
+    // 如果是10或11（戌或亥位置），则为空亡
+    if (zhi_delta == 10 || zhi_delta == 11) {
+        return std::nullopt;
+    }
+    
+    // 从甲开始加偏移量
+    return static_cast<TianGan>((static_cast<int>(TianGan::Jia) + zhi_delta) % 10);
+}
+
+/**
+ * @brief 判断地支是否空亡
+ * 
+ * @param zhi 地支
+ * @param day_gan 日干
+ * @param day_zhi 日支
+ * @return 是否空亡
+ */
+constexpr bool is_kong_wang(DiZhi zhi, TianGan day_gan, DiZhi day_zhi) {
+    return !get_dun_gan(zhi, day_gan, day_zhi).has_value();
+}
+
+/**
+ * @brief 获取旬空（空亡）的两个地支
+ * 
+ * @param day_gan 日干
+ * @param day_zhi 日支
+ * @return 旬空的两个地支
+ */
+constexpr std::array<DiZhi, 2> get_kong_wang(TianGan day_gan, DiZhi day_zhi) {
+    DiZhi xun_shou = get_xun_shou(day_gan, day_zhi);
+    int xs_idx = static_cast<int>(xun_shou);
+    return {
+        static_cast<DiZhi>((xs_idx - 2 + 12) % 12),
+        static_cast<DiZhi>((xs_idx - 1 + 12) % 12)
+    };
+}
+
 } // namespace ZhouYi::GanZhi
 
