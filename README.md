@@ -32,10 +32,48 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 - **跨平台构建**：统一的构建体验（Windows、Linux、macOS）
 
 ### 🎯 严格的代码规范
+
+#### 核心规范
 - **强制 C++23**：所有代码必须符合 C++23 标准
 - **模块优先**：除 `main.cpp` 外，所有源文件必须使用 `.cppm` 扩展名
-- **fmt 专用输出**：禁止使用 `std::cout`/`std::print`，统一使用 `fmt::print`
 - **导入顺序规范**：第三方库模块 → 自定义模块 → `import std;`（最后）
+
+#### 算法规范 ⭐
+- **优先使用 Ranges**：所有容器操作优先使用 `std::ranges` 算法
+  - ✅ `std::ranges::transform`, `std::ranges::filter`, `std::ranges::for_each`
+  - ✅ `std::ranges::find_if`, `std::ranges::count_if`, `std::ranges::any_of`
+  - ❌ 避免传统的 `std::transform`, `std::find` 等算法
+  - ❌ 减少手写 `for` 循环（除非必要）
+
+#### 输出规范 ⭐
+- **统一使用 std::println**：禁止使用其他输出方式
+  - ✅ `std::println("{}", value);`
+  - ✅ `std::print("{}", value);` (不换行时使用)
+  - ❌ `std::cout`, `printf`, `fmt::print` 等均禁止
+
+#### 错误处理规范 ⭐
+- **优先使用 std::expected**：可恢复的错误使用 `std::expected<T, E>`
+  - ✅ 函数返回值可能失败时使用 `std::expected`
+  - ✅ 可选值使用 `std::optional<T>`
+  - ❌ 避免使用异常（除非必要）
+  - ❌ 避免返回错误码或 `nullptr`
+
+```cpp
+// ✅ 正确：使用 std::expected
+auto parse_number(std::string_view str) -> std::expected<int, std::string> {
+    // ... 解析逻辑
+    if (failed) {
+        return std::unexpected("Parse error");
+    }
+    return result;
+}
+
+// ✅ 正确：使用 std::optional
+auto find_user(int id) -> std::optional<User> {
+    // ... 查找逻辑
+    return user; // 或 std::nullopt
+}
+```
 
 ## 第三方库
 
@@ -185,25 +223,25 @@ lunar_calendar.cppm (LunarCalendar)
 
 ```cpp
 // ✅ 正确的导入顺序
-// 第一步：导入第三方库模块
-import fmt;
+// 第一步：导入第三方库模块（如果需要）
 import magic_enum;       // 枚举反射库
-import nlohmann.json;
+import nlohmann.json;    // JSON 库
 
 // 第二步：导入自定义业务模块
 import ZhouYi.TianGan;
 import ZhouYi.DiZhi;
 
-// 第三步：最后导入标准库模块（避免冲突）
+// 第三步：最后导入标准库模块（必须最后）
 import std;
 
 int main() {
-    // ⚠️ 只能使用 fmt 进行输出
-    fmt::print("Hello, ZhouYiLab!\n");
+    // ✅ 使用 std::println 进行输出
+    std::println("Hello, ZhouYiLab!");
     
-    // ❌ 禁止使用标准库输出
-    // std::cout << "No!" << std::endl;  // 编译错误
-    // std::print("No!\n");              // 编译错误
+    // ✅ 使用 ranges 算法
+    auto numbers = std::vector{1, 2, 3, 4, 5};
+    auto sum = std::ranges::fold_left(numbers, 0, std::plus{});
+    std::println("Sum: {}", sum);
     
     return 0;
 }
@@ -213,7 +251,7 @@ int main() {
 ```cpp
 // ❌ 错误：std 在前会导致符号冲突
 import std;
-import fmt;  // 可能导致编译错误
+import nlohmann.json;  // 可能导致编译错误
 ```
 
 #### 2️⃣ 文件扩展名规范
@@ -228,22 +266,48 @@ import fmt;  // 可能导致编译错误
 #### 3️⃣ 输出规范
 
 ```cpp
-// ✅ 正确：使用 fmt::print
-fmt::print("Hello, {}!\n", name);
-fmt::print(fg(fmt::color::green), "Success!\n");
+// ✅ 正确：使用 std::println
+std::println("Hello, {}!", name);
+std::print("Processing... ");  // 不换行
+std::println("Done!");
 
-// ❌ 错误：禁止使用标准库输出
+// ❌ 错误：禁止使用其他输出方式
 std::cout << "Hello" << std::endl;    // 不允许
-std::print("Hello\n");                 // 不允许
+fmt::print("Hello\n");                 // 不允许  
 printf("Hello\n");                     // 不允许
 ```
 
-#### 4️⃣ C++23 标准强制
+#### 4️⃣ Ranges 算法优先
+
+```cpp
+// ✅ 正确：使用 ranges 算法
+auto numbers = std::vector{1, 2, 3, 4, 5};
+
+// 过滤偶数
+auto evens = numbers 
+    | std::views::filter([](int n) { return n % 2 == 0; })
+    | std::ranges::to<std::vector>();
+
+// 转换并累加
+auto sum = std::ranges::fold_left(
+    numbers | std::views::transform([](int n) { return n * 2; }),
+    0, std::plus{}
+);
+
+// 查找元素
+auto it = std::ranges::find_if(numbers, [](int n) { return n > 3; });
+
+// ❌ 避免：传统循环和算法
+for (auto& n : numbers) { /* ... */ }  // 尽量避免
+std::find(numbers.begin(), numbers.end(), 3);  // 不推荐
+```
+
+#### 5️⃣ C++23 标准强制
 
 所有代码必须使用 C++23 特性：
-- ✅ `std::print_format`、`std::expected`、`std::mdspan`
-- ✅ Ranges 和 Views（`std::ranges`）
-- ✅ 协程（`co_await`、`co_yield`）
+- ✅ `std::expected`、`std::optional`、`std::mdspan`
+- ✅ Ranges 和 Views（`std::ranges`、`std::views`）
+- ✅ `std::print` / `std::println`
 - ✅ 概念和约束（`concept`、`requires`）
 
 ### 📝 创建新模块示例
@@ -251,9 +315,6 @@ printf("Hello\n");                     // 不允许
 **1. 创建模块文件**：`src/example.cppm`
 
 ```cpp
-// 导入依赖（第三方库）
-import fmt;
-
 // 导入标准库（最后）
 import std;
 
@@ -263,11 +324,27 @@ export module ZhouYi.Example;
 // 导出的函数
 export namespace ZhouYi {
     void hello() {
-        fmt::print(fg(fmt::color::cyan), "Hello from Example module!\n");
+        std::println("Hello from Example module!");
     }
     
     auto get_data() -> std::vector<int> {
         return {1, 2, 3, 4, 5};
+    }
+    
+    // 使用 std::expected 处理错误
+    auto parse_int(std::string_view str) -> std::expected<int, std::string> {
+        try {
+            return std::stoi(std::string(str));
+        } catch (...) {
+            return std::unexpected(std::format("Failed to parse: {}", str));
+        }
+    }
+    
+    // 使用 ranges 算法
+    auto filter_evens(const std::vector<int>& nums) -> std::vector<int> {
+        return nums 
+            | std::views::filter([](int n) { return n % 2 == 0; })
+            | std::ranges::to<std::vector>();
     }
 }
 ```
@@ -275,14 +352,27 @@ export namespace ZhouYi {
 **2. 在 `main.cpp` 中使用**：
 
 ```cpp
-import fmt;
 import ZhouYi.Example;  // 导入自定义模块
 import std;
 
 int main() {
     ZhouYi::hello();
+    
     auto data = ZhouYi::get_data();
-    fmt::print("Data size: {}\n", data.size());
+    std::println("Data size: {}", data.size());
+    
+    // 使用 std::expected
+    auto result = ZhouYi::parse_int("123");
+    if (result) {
+        std::println("Parsed: {}", *result);
+    } else {
+        std::println("Error: {}", result.error());
+    }
+    
+    // 使用 ranges
+    auto evens = ZhouYi::filter_evens(data);
+    std::println("Evens: {}", evens);
+    
     return 0;
 }
 ```
@@ -350,10 +440,13 @@ constexpr auto values = magic_enum::enum_values<Color>();
 // 获取枚举数量
 constexpr auto count = magic_enum::enum_count<Color>();  // 3
 
-// 枚举迭代
-for (auto value : magic_enum::enum_values<Color>()) {
-    fmt::print("{}\n", magic_enum::enum_name(value));
-}
+// 枚举迭代（使用 ranges）
+std::ranges::for_each(
+    magic_enum::enum_values<Color>(),
+    [](auto value) {
+        std::println("{}", magic_enum::enum_name(value));
+    }
+);
 ```
 
 **Q: 如何实现枚举到中文的映射？**
@@ -392,9 +485,9 @@ auto solar = ZhouYi::Lunar::SolarDate::from_ymd(1986, 5, 29);
 auto lunar = solar.to_lunar();
 
 // 获取农历信息
-fmt::print("农历: {}\n", lunar.to_string());        // 农历甲寅年四月廿一
-fmt::print("年干支: {}\n", lunar.get_year_gan_zhi()); // 丙寅
-fmt::print("生肖: {}\n", lunar.get_zodiac());        // 虎
+std::println("农历: {}", lunar.to_string());        // 农历甲寅年四月廿一
+std::println("年干支: {}", lunar.get_year_gan_zhi()); // 丙寅
+std::println("生肖: {}", lunar.get_zodiac());        // 虎
 
 // 从农历创建
 auto lunar2 = ZhouYi::Lunar::LunarDate::from_lunar(2025, 1, 1);

@@ -10,3 +10,6 @@
 [submodule "3rdparty/tyme4cpp"]
 	path = 3rdparty/tyme4cpp
 	url = https://github.com/6tail/tyme4cpp.git
+[submodule "3rdparty/doctest"]
+	path = 3rdparty/doctest
+	url = https://github.com/doctest/doctest.git

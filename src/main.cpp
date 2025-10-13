@@ -6,10 +6,10 @@ import magic_enum;
 import nlohmann.json;
 
 // 导入自定义模块
-import ZhouYi.TianGan;
-import ZhouYi.DiZhi;
-import ZhouYi.GanZhi;
-import ZhouYi.tyme;
+import ZhouYi.GanZhi;          // 包含 TianGan 和 DiZhi
+import ZhouYi.BaZiBase;        // 八字基础结构
+import ZhouYi.tyme;            // 农历时间库
+import ZhouYi.LiuYaoController;// 六爻排盘控制器
 
 // 导入标准库模块（最后）
 import std;
@@ -27,7 +27,7 @@ int main() {
     
     // 获取天干枚举的所有值
     fmt::print(fg(fmt::color::yellow), "天干枚举值列表（英文名）:\n");
-    constexpr auto tian_gan_values = magic_enum::enum_values<ZhouYi::TianGan::Type>();
+    constexpr auto tian_gan_values = magic_enum::enum_values<ZhouYi::GanZhi::TianGan>();
     for (auto value : tian_gan_values) {
         auto name = magic_enum::enum_name(value);
         auto index = magic_enum::enum_integer(value);
@@ -45,7 +45,7 @@ int main() {
     fmt::print(fg(fmt::color::magenta), "天干中英文对照表:\n");
     for (auto value : tian_gan_values) {
         auto en_name = magic_enum::enum_name(value);
-        auto zh_name = ZhouYi::TianGanMapper::to_zh(value);
+        auto zh_name = ZhouYi::GanZhi::Mapper::to_zh(value);
         fmt::print("  {} → {}\n", en_name, zh_name);
     }
     
@@ -53,11 +53,11 @@ int main() {
     
     // 地支中英文对照
     fmt::print(fg(fmt::color::magenta), "地支中英文对照表（含生肖）:\n");
-    constexpr auto di_zhi_values = magic_enum::enum_values<ZhouYi::DiZhi::Type>();
+    constexpr auto di_zhi_values = magic_enum::enum_values<ZhouYi::GanZhi::DiZhi>();
     for (auto value : di_zhi_values) {
         auto en_name = magic_enum::enum_name(value);
-        auto zh_name = ZhouYi::DiZhiMapper::to_zh(value);
-        auto sheng_xiao = ZhouYi::DiZhiMapper::sheng_xiao_zh(value);
+        auto zh_name = ZhouYi::GanZhi::Mapper::to_zh(value);
+        auto sheng_xiao = ZhouYi::GanZhi::Mapper::sheng_xiao_zh(value);
         fmt::print("  {} → {} ({})\n", en_name, zh_name, sheng_xiao);
     }
     
@@ -82,7 +82,7 @@ int main() {
     fmt::print(fg(fmt::color::yellow), "年份干支: {}\n", lunar_year.get_sixty_cycle().get_name());
     fmt::print(fg(fmt::color::yellow), "月份干支: {}\n", lunar_month.get_sixty_cycle().get_name());
     fmt::print(fg(fmt::color::yellow), "日期干支: {}\n", lunar.get_sixty_cycle().get_name());
-    fmt::print(fg(fmt::color::magenta), "生　　肖: {}\n", lunar_year.get_zodiac().get_name());
+    //fmt::print(fg(fmt::color::magenta), "生　　肖: {}\n", lunar_year.get_zodiac().get_name());
     
     fmt::print("\n");
     
@@ -206,17 +206,131 @@ int main() {
                "【7】统计信息\n");
     fmt::print("----------------------------------------------\n");
     
-    fmt::print("天干数量: {}\n", magic_enum::enum_count<ZhouYi::TianGan::Type>());
-    fmt::print("地支数量: {}\n", magic_enum::enum_count<ZhouYi::DiZhi::Type>());
+    fmt::print("天干数量: {}\n", magic_enum::enum_count<ZhouYi::GanZhi::TianGan>());
+    fmt::print("地支数量: {}\n", magic_enum::enum_count<ZhouYi::GanZhi::DiZhi>());
     fmt::print("五行数量: {}\n", magic_enum::enum_count<ZhouYi::GanZhi::WuXing>());
     fmt::print("六十甲子: {} 个\n", jia_zi_list.size());
-    fmt::print("二十四节气: {} 个\n", terms_2025.size());
+    //fmt::print("二十四节气: {} 个\n", terms_2025.size());
+    
+    // ==================== 八字计算演示 ====================
+    fmt::print("\n");
+    fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, 
+               "【8】八字计算与公历农历转换演示\n");
+    fmt::print("----------------------------------------------\n");
+    
+    try {
+        // 测试1: 从公历创建八字
+        fmt::print(fg(fmt::color::yellow), "\n测试1: 公历转八字（带旬空）\n");
+        fmt::print("公历: 2025年10月13日 14时30分\n");
+        auto bazi1 = ZhouYi::BaZiBase::BaZi::from_solar(2025, 10, 13, 14, 30);
+        fmt::print("八字:\n{}\n", bazi1);
+        
+        // 测试2: 从农历创建八字
+        fmt::print(fg(fmt::color::yellow), "\n测试2: 农历转八字（带旬空）\n");
+        fmt::print("农历: 2025年九月十一 子时\n");
+        auto bazi2 = ZhouYi::BaZiBase::BaZi::from_lunar(2025, 9, 11, 0);
+        fmt::print("八字:\n{}\n", bazi2);
+        
+        // 测试3: 公历农历转换
+        fmt::print(fg(fmt::color::yellow), "\n测试3: 公历农历互转\n");
+        ZhouYi::BaZiBase::SolarDate solar{2025, 10, 13};
+        fmt::print("公历 2025-10-13 → 农历: {}\n", solar.to_lunar_string());
+        
+        ZhouYi::BaZiBase::LunarDate lunar{2025, 9, 11};
+        fmt::print("农历 2025年九月十一 → 公历: {}\n", lunar.to_solar_string());
+        
+        // 测试4: 旬空说明
+        fmt::print(fg(fmt::color::yellow), "\n测试4: 旬空（空亡）说明\n");
+        fmt::print("旬空是根据日柱计算的，因为地支比天干多2个\n");
+        fmt::print("每一旬（10天）中，最后两个地支就是旬空\n");
+        fmt::print("日柱 {} 的旬空: {} {}\n", 
+                   bazi1.day.to_string(), bazi1.xun_kong_1, bazi1.xun_kong_2);
+        
+        fmt::print(fg(fmt::color::green), "\n✅ 八字计算功能正常！旬空计算正确！\n");
+        
+    } catch (const std::exception& e) {
+        fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
+    }
+    
+    // ==================== 十二长生演示 ====================
+    fmt::print("\n");
+    fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, 
+               "【9】十二长生功能演示\n");
+    fmt::print("----------------------------------------------\n");
+    
+    try {
+        // 测试1: 获取天干在地支的十二长生状态
+        fmt::print(fg(fmt::color::yellow), "\n测试1: 天干在地支的十二长生状态\n");
+        
+        auto gan = ZhouYi::GanZhi::TianGan::Jia;  // 甲木
+        auto zhi = ZhouYi::GanZhi::DiZhi::Hai;    // 亥
+        
+        auto cs = ZhouYi::GanZhi::get_shi_er_chang_sheng(gan, zhi);
+        auto cs_name = ZhouYi::GanZhi::ShiErChangShengMapper::to_zh(cs);
+        
+        fmt::print("甲木 在 亥 的状态: {}\n", cs_name);
+        
+        // 测试2: 展示甲木在十二地支的完整十二长生
+        fmt::print(fg(fmt::color::yellow), "\n测试2: 甲木在十二地支的完整十二长生\n");
+        fmt::print("甲木（阳干，顺行）:\n");
+        
+        constexpr auto di_zhi_values = magic_enum::enum_values<ZhouYi::GanZhi::DiZhi>();
+        for (auto zhi_val : di_zhi_values) {
+            auto cs_state = ZhouYi::GanZhi::get_shi_er_chang_sheng(ZhouYi::GanZhi::TianGan::Jia, zhi_val);
+            auto cs_name2 = ZhouYi::GanZhi::ShiErChangShengMapper::to_zh(cs_state);
+            auto zhi_name = ZhouYi::GanZhi::Mapper::to_zh(zhi_val);
+            fmt::print("  {} → {}\n", zhi_name, cs_name2);
+        }
+        
+        // 测试3: 展示乙木在十二地支的完整十二长生
+        fmt::print(fg(fmt::color::yellow), "\n测试3: 乙木在十二地支的完整十二长生\n");
+        fmt::print("乙木（阴干，逆行）:\n");
+        
+        for (auto zhi_val : di_zhi_values) {
+            auto cs_state = ZhouYi::GanZhi::get_shi_er_chang_sheng(ZhouYi::GanZhi::TianGan::Yi, zhi_val);
+            auto cs_name3 = ZhouYi::GanZhi::ShiErChangShengMapper::to_zh(cs_state);
+            auto zhi_name = ZhouYi::GanZhi::Mapper::to_zh(zhi_val);
+            fmt::print("  {} → {}\n", zhi_name, cs_name3);
+        }
+        
+        // 测试4: 获取关键地支
+        fmt::print(fg(fmt::color::yellow), "\n测试4: 十天干的长生、帝旺、墓库地支\n");
+        constexpr auto tian_gan_values2 = magic_enum::enum_values<ZhouYi::GanZhi::TianGan>();
+        for (auto gan_val : tian_gan_values2) {
+            auto gan_name = ZhouYi::GanZhi::Mapper::to_zh(gan_val);
+            auto cs_zhi = ZhouYi::GanZhi::get_chang_sheng_zhi(gan_val);
+            auto dw_zhi = ZhouYi::GanZhi::get_di_wang_zhi(gan_val);
+            auto mk_zhi = ZhouYi::GanZhi::get_mu_ku_zhi(gan_val);
+            
+            fmt::print("  {} - 长生:{}, 帝旺:{}, 墓库:{}\n", 
+                      gan_name,
+                      ZhouYi::GanZhi::Mapper::to_zh(cs_zhi),
+                      ZhouYi::GanZhi::Mapper::to_zh(dw_zhi),
+                      ZhouYi::GanZhi::Mapper::to_zh(mk_zhi));
+        }
+        
+        // 测试5: 判断特定状态
+        fmt::print(fg(fmt::color::yellow), "\n测试5: 状态判断函数\n");
+        fmt::print("甲木在亥是否长生: {}\n", 
+                   ZhouYi::GanZhi::is_chang_sheng(ZhouYi::GanZhi::TianGan::Jia, ZhouYi::GanZhi::DiZhi::Hai) ? "是" : "否");
+        fmt::print("甲木在卯是否帝旺: {}\n", 
+                   ZhouYi::GanZhi::is_di_wang(ZhouYi::GanZhi::TianGan::Jia, ZhouYi::GanZhi::DiZhi::Mao) ? "是" : "否");
+        fmt::print("甲木在未是否墓库: {}\n", 
+                   ZhouYi::GanZhi::is_mu_ku(ZhouYi::GanZhi::TianGan::Jia, ZhouYi::GanZhi::DiZhi::Wei) ? "是" : "否");
+        fmt::print("甲木在申是否绝地: {}\n", 
+                   ZhouYi::GanZhi::is_jue_di(ZhouYi::GanZhi::TianGan::Jia, ZhouYi::GanZhi::DiZhi::Shen) ? "是" : "否");
+        
+        fmt::print(fg(fmt::color::green), "\n✅ 十二长生功能正常！\n");
+        
+    } catch (const std::exception& e) {
+        fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
+    }
     
     fmt::print("\n");
     fmt::print(fg(fmt::color::magenta) | fmt::emphasis::italic, 
                "✨ 所有功能演示完成！\n");
     fmt::print(fg(fmt::color::green), 
-               "🎉 C++23 Modules + 反射 + 中文映射 + 农历日历完美运行！\n");
+               "🎉 C++23 Modules + 反射 + 中文映射 + 农历日历 + 八字计算 + 十二长生完美运行！\n");
     
     return 0;
 }

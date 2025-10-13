@@ -1,5 +1,5 @@
 // Tyme Util 模块定义
-export module tyme.util;
+export module ZhouYi.tyme.util;
 
 // 导入标准库（最后）
 import std;

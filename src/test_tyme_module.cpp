@@ -2,7 +2,7 @@
 
 // 导入 tyme 模块
 import ZhouYi.tyme;
-import tyme.util;
+import ZhouYi.tyme.util;
 
 // 导入 fmt
 import fmt;

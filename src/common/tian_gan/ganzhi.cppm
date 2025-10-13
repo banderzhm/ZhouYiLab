@@ -242,54 +242,135 @@ constexpr YinYang get_yin_yang(DiZhi zhi) {
 
 /**
  * @brief 判断五行相生（x生y）
+ * 
+ * 五行相生规律：
+ * - 木生火：木材燃烧生火，火赖木生
+ * - 火生土：火焚木成灰土，土赖火生
+ * - 土生金：土中蕴藏金矿，金赖土生
+ * - 金生水：金属融化成水，水赖金生（又说金寒生水）
+ * - 水生木：水滋润树木生长，木赖水生
+ * 
+ * 生我者为母，我生者为子，故称"母子相生"
+ * 
+ * @param x 生者（母）
+ * @param y 被生者（子）
+ * @return true 如果 x 生 y
  */
 constexpr bool wu_xing_sheng(WuXing x, WuXing y) {
-    // 木生火、火生土、土生金、金生水、水生木
     int ix = static_cast<int>(x);
     int iy = static_cast<int>(y);
-    return (ix == 1 && iy == 2) || (ix == 2 && iy == 3) || 
-           (ix == 3 && iy == 4) || (ix == 4 && iy == 5) || (ix == 5 && iy == 1);
+    return (ix == 1 && iy == 2) ||  // 木(1)生火(2)
+           (ix == 2 && iy == 3) ||  // 火(2)生土(3)
+           (ix == 3 && iy == 4) ||  // 土(3)生金(4)
+           (ix == 4 && iy == 5) ||  // 金(4)生水(5)
+           (ix == 5 && iy == 1);    // 水(5)生木(1)
 }
 
 /**
  * @brief 判断五行相克（x克y）
+ * 
+ * 五行相克规律：
+ * - 木克土：树木扎根于土，木能疏土（木胜土）
+ * - 土克水：土能防水、吸水，水来土掩（土胜水）
+ * - 水克火：水能灭火，水火不容（水胜火）
+ * - 火克金：火能熔金，烈火炼真金（火胜金）
+ * - 金克木：金属可以砍伐树木，金刚克木（金胜木）
+ * 
+ * 克我者为所不胜，我克者为所胜，故称"克制相胜"
+ * 
+ * @param x 克者（所胜）
+ * @param y 被克者（所不胜）
+ * @return true 如果 x 克 y
  */
 constexpr bool wu_xing_ke(WuXing x, WuXing y) {
-    // 木克土、土克水、水克火、火克金、金克木
     int ix = static_cast<int>(x);
     int iy = static_cast<int>(y);
-    return (ix == 1 && iy == 3) || (ix == 3 && iy == 5) || 
-           (ix == 5 && iy == 2) || (ix == 2 && iy == 4) || (ix == 4 && iy == 1);
+    return (ix == 1 && iy == 3) ||  // 木(1)克土(3)
+           (ix == 3 && iy == 5) ||  // 土(3)克水(5)
+           (ix == 5 && iy == 2) ||  // 水(5)克火(2)
+           (ix == 2 && iy == 4) ||  // 火(2)克金(4)
+           (ix == 4 && iy == 1);    // 金(4)克木(1)
 }
 
 // ==================== 地支关系 ====================
 
 /**
  * @brief 判断地支相冲（六冲）
+ * 
+ * 地支六冲，又称"六位相冲"，是地支相距六位的对冲关系。
+ * 相冲代表对立、冲突、动荡、变化，主破坏之力。
+ * 
+ * 六冲对照：
+ * - 子午冲：水火相冲（子水 vs 午火），北方与南方相冲
+ * - 丑未冲：土土相冲（丑土 vs 未土），东北与西南相冲  
+ * - 寅申冲：木金相冲（寅木 vs 申金），东北与西南相冲
+ * - 卯酉冲：木金相冲（卯木 vs 酉金），东方与西方相冲，日出与日落
+ * - 辰戌冲：土土相冲（辰土 vs 戌土），东南与西北相冲
+ * - 巳亥冲：火水相冲（巳火 vs 亥水），东南与西北相冲
+ * 
+ * 规律：地支相距六位即相冲（180度对冲）
+ * 影响：主变动、搬迁、离散、破坏、疾病等
+ * 
+ * @param zhi1 第一个地支
+ * @param zhi2 第二个地支
+ * @return true 如果两地支相冲
  */
 constexpr bool is_chong(DiZhi zhi1, DiZhi zhi2) {
-    // 子午冲、丑未冲、寅申冲、卯酉冲、辰戌冲、巳亥冲
     return (static_cast<int>(zhi1) + 6) % 12 == static_cast<int>(zhi2);
 }
 
 /**
  * @brief 判断地支相刑
+ * 
+ * 地支相刑是地支之间的刑罚关系，代表刑伤、灾祸、官非、病痛。
+ * 刑分为四种类型：
+ * 
+ * 1. 无礼之刑（子卯刑）：
+ *    - 子刑卯、卯刑子
+ *    - 子为水，卯为木，水生木，本为相生，但因过度则为刑
+ *    - 主无礼、淫乱、犯上、礼教败坏
+ *    - 子卯为桃花，相刑主感情纠葛、桃色事件
+ * 
+ * 2. 无恩之刑（寅巳申三刑）：
+ *    - 寅刑巳、巳刑申、申刑寅（循环相刑）
+ *    - 寅木、巳火、申金，三者既相生又相克，恩中藏害
+ *    - 主忘恩负义、恩将仇报、背信弃义
+ *    - 又称"持势之刑"，刑罚最重
+ * 
+ * 3. 恃势之刑（丑戌未三刑）：
+ *    - 丑刑戌、戌刑未、未刑丑（循环相刑）
+ *    - 三者皆为土，土旺则相刑，主霸道、恃强凌弱
+ *    - 主自以为是、仗势欺人、专横跋扈
+ *    - 又称"倚势之刑"、"土刑"
+ * 
+ * 4. 自刑（辰辰、午午、酉酉、亥亥）：
+ *    - 自己刑自己，即同一地支相见则刑
+ *    - 辰辰自刑：辰为天罡，水土相战
+ *    - 午午自刑：午为阳火，火过旺则自焚
+ *    - 酉酉自刑：酉为金，金刚过盛则自损
+ *    - 亥亥自刑：亥为水，水漫过头则自困
+ *    - 主自我矛盾、内耗、自残、自寻烦恼
+ * 
+ * 影响：主刑伤、官非、牢狱、疾病、灾祸、是非
+ * 
+ * @param zhi1 第一个地支
+ * @param zhi2 第二个地支
+ * @return true 如果两地支相刑
  */
 constexpr bool is_xing(DiZhi zhi1, DiZhi zhi2) {
-    // 子卯刑、寅巳申三刑、丑戌未三刑、辰午酉亥自刑
     int i1 = static_cast<int>(zhi1);
     int i2 = static_cast<int>(zhi2);
     
-    // 子卯相刑
+    // 无礼之刑：子卯相刑
     if ((i1 == 0 && i2 == 3) || (i1 == 3 && i2 == 0)) return true;
     
-    // 寅巳申三刑
+    // 无恩之刑：寅巳申三刑（循环相刑）
     if ((i1 == 2 && i2 == 5) || (i1 == 5 && i2 == 9) || (i1 == 9 && i2 == 2)) return true;
     
-    // 丑戌未三刑
+    // 恃势之刑：丑戌未三刑（循环相刑）
     if ((i1 == 1 && i2 == 10) || (i1 == 10 && i2 == 7) || (i1 == 7 && i2 == 1)) return true;
     
-    // 自刑：辰辰、午午、酉酉、亥亥
+    // 自刑：辰辰、午午、酉酉、亥亥（同一地支相见）
     if (i1 == i2 && (i1 == 4 || i1 == 6 || i1 == 9 || i1 == 11)) return true;
     
     return false;
@@ -297,11 +378,42 @@ constexpr bool is_xing(DiZhi zhi1, DiZhi zhi2) {
 
 /**
  * @brief 判断地支相合（六合）
+ * 
+ * 地支六合是地支之间的合化关系，代表和谐、亲密、合作、喜庆。
+ * 相合主吉祥、团结、婚姻、缘分，力量较三合为弱。
+ * 
+ * 六合对照及合化五行：
+ * - 子丑合化土：子水配丑土，阴阳相合，水土相济，北方合（鼠牛合）
+ * - 寅亥合化木：寅木配亥水，木得水生，木旺相生，东北合（虎猪合）
+ * - 卯戌合化火：卯木配戌土，木火通明，文明之合，东西合（兔狗合）
+ * - 辰酉合化金：辰土配酉金，土生金旺，金玉良缘，东南西合（龙鸡合）
+ * - 巳申合化水：巳火配申金，火金相融，水火既济，南西合（蛇猴合）
+ * - 午未合化土：午火配未土，火土相生，中正之合，南方合（马羊合）
+ * 
+ * 合化条件（一般需要）：
+ * 1. 有化神当令（月令临合化之五行）
+ * 2. 有化神透干（天干透出合化五行）  
+ * 3. 无强烈冲刑破害
+ * 
+ * 规律特点：
+ * - 阴阳相配：阳支合阴支（子阳丑阴、寅阳亥阴等）
+ * - 方位对应：多为东西、南北或对角方位相合
+ * - 五行和谐：合化后五行多与双方有生助关系
+ * 
+ * 影响：主婚姻美满、合作愉快、贵人相助、喜庆吉利
+ * 
+ * @param zhi1 第一个地支
+ * @param zhi2 第二个地支
+ * @return true 如果两地支相合
  */
 constexpr bool is_he(DiZhi zhi1, DiZhi zhi2) {
-    // 子丑合、寅亥合、卯戌合、辰酉合、巳申合、午未合
     constexpr std::array<std::pair<int, int>, 6> he_pairs = {{
-        {0, 1}, {2, 11}, {3, 10}, {4, 9}, {5, 8}, {6, 7}
+        {0, 1},   // 子(0)丑(1)合化土
+        {2, 11},  // 寅(2)亥(11)合化木
+        {3, 10},  // 卯(3)戌(10)合化火
+        {4, 9},   // 辰(4)酉(9)合化金
+        {5, 8},   // 巳(5)申(8)合化水
+        {6, 7}    // 午(6)未(7)合化土
     }};
     
     int i1 = static_cast<int>(zhi1);
@@ -317,11 +429,50 @@ constexpr bool is_he(DiZhi zhi1, DiZhi zhi2) {
 
 /**
  * @brief 判断地支相害（六害）
+ * 
+ * 地支六害，又称"六穿"、"相穿"，是地支之间的破坏关系。
+ * 相害是因为破坏了相合关系而产生的，代表暗中伤害、小人陷害。
+ * 害比冲、刑的力量弱，但其作用隐蔽，不易察觉，更加阴险。
+ * 
+ * 六害对照及成因：
+ * - 子未害：子丑合，未冲丑，故子未相害（穿六合）
+ *   子水克未土，未为木库，水土交战，主被人拖累
+ * 
+ * - 丑午害：丑子合，午未合，午冲子，故丑午相害
+ *   丑土晦午火，午火伤丑金，主损耗、消磨
+ * 
+ * - 寅巳害：寅亥合，巳申合，寅巳刑，故寅巳相害（无恩之害）
+ *   寅木生巳火，巳火反制寅木，主恩中带害、养虎为患
+ * 
+ * - 卯辰害：卯戌合，辰酉合，卯辰相邻，故卯辰相害
+ *   卯木克辰土，辰为湿土，主阴湿、暗昧、抑郁
+ * 
+ * - 申亥害：申巳合，亥寅合，申亥相穿，故申亥相害
+ *   申金克亥中甲木，亥水生申金中气，主互相伤害
+ * 
+ * - 酉戌害：酉辰合，戌卯合，酉戌相邻，故酉戌相害
+ *   酉金克戌中丁火，戌土生酉金，主暗害、背叛
+ * 
+ * 规律特点：
+ * - 相害是因破坏六合而成，合中带害
+ * - 相害之地支往往与第三方有刑冲合的关系
+ * - 六害主小人、暗害、牵连、拖累
+ * 
+ * 影响：主小人陷害、暗箭伤人、拖累牵连、明合暗斗、
+ *       感情不和、疾病缠身、小灾小难
+ * 
+ * @param zhi1 第一个地支
+ * @param zhi2 第二个地支
+ * @return true 如果两地支相害
  */
 constexpr bool is_hai(DiZhi zhi1, DiZhi zhi2) {
-    // 子未害、丑午害、寅巳害、卯辰害、申亥害、酉戌害
     constexpr std::array<std::pair<int, int>, 6> hai_pairs = {{
-        {0, 7}, {1, 6}, {2, 5}, {3, 4}, {8, 11}, {9, 10}
+        {0, 7},   // 子(0)未(7)害
+        {1, 6},   // 丑(1)午(6)害
+        {2, 5},   // 寅(2)巳(5)害
+        {3, 4},   // 卯(3)辰(4)害
+        {8, 11},  // 申(8)亥(11)害
+        {9, 10}   // 酉(9)戌(10)害
     }};
     
     int i1 = static_cast<int>(zhi1);
@@ -337,6 +488,58 @@ constexpr bool is_hai(DiZhi zhi1, DiZhi zhi2) {
 
 /**
  * @brief 判断地支三合
+ * 
+ * 地支三合局是三个地支合化成一个五行的组合，力量最强。
+ * 三合局按照五行的"生、旺、墓"三个阶段组成，代表从生到旺到归藏的完整循环。
+ * 
+ * 四组三合局及其组成（生旺墓）：
+ * 
+ * 1. 申子辰合水局：
+ *    - 申（长生）：水长生于申，申为水的起源
+ *    - 子（帝旺）：子为水之本位，水最旺盛
+ *    - 辰（墓库）：辰为水库，水归藏之地
+ *    - 方位：西 → 北 → 东，跨越三方
+ *    - 季节：秋末 → 冬 → 春初，水气旺盛之时
+ * 
+ * 2. 亥卯未合木局：
+ *    - 亥（长生）：木长生于亥，水生木之始
+ *    - 卯（帝旺）：卯为木之本位，木最旺盛
+ *    - 未（墓库）：未为木库，木归藏之地
+ *    - 方位：北 → 东 → 南，顺时针三合
+ *    - 季节：冬末 → 春 → 夏初，木气生发之时
+ * 
+ * 3. 寅午戌合火局：
+ *    - 寅（长生）：火长生于寅，木生火之始
+ *    - 午（帝旺）：午为火之本位，火最旺盛
+ *    - 戌（墓库）：戌为火库，火归藏之地
+ *    - 方位：东 → 南 → 西，三合成局
+ *    - 季节：春末 → 夏 → 秋初，火气炎盛之时
+ * 
+ * 4. 巳酉丑合金局：
+ *    - 巳（长生）：金长生于巳，火炼金成
+ *    - 酉（帝旺）：酉为金之本位，金最旺盛
+ *    - 丑（墓库）：丑为金库，金归藏之地
+ *    - 方位：南 → 西 → 北，逆时针三合
+ *    - 季节：夏末 → 秋 → 冬初，金气肃杀之时
+ * 
+ * 规律特点：
+ * - 三合局相距四位（120度），形成等边三角形
+ * - 生旺墓三者齐全，力量最强，可改变原有五行属性
+ * - 即使缺一，只要有两个也有一定的合力
+ * - 三合局以"旺"为主导，有旺支则合局有力
+ * 
+ * 合化条件：
+ * 1. 三支齐全（完美三合）
+ * 2. 月令当旺（月令临合化之五行）
+ * 3. 无强烈冲破（冲克旺支或生支）
+ * 4. 有化神透干（天干透出合化五行更佳）
+ * 
+ * 影响：主力量强大、成就事业、团结合作、势力庞大、
+ *       聚财聚势、贵人相助、婚姻美满（比六合更稳固）
+ * 
+ * @param zhi1 第一个地支
+ * @param zhi2 第二个地支  
+ * @param zhi3 第三个地支
  * @return pair<bool, WuXing> - 是否三合，合化的五行
  */
 constexpr auto is_san_he(DiZhi zhi1, DiZhi zhi2, DiZhi zhi3) -> std::pair<bool, WuXing> {
@@ -345,21 +548,21 @@ constexpr auto is_san_he(DiZhi zhi1, DiZhi zhi2, DiZhi zhi3) -> std::pair<bool, 
         static_cast<int>(zhi2),
         static_cast<int>(zhi3)
     };
-    std::sort(arr.begin(), arr.end());
+    std::ranges::sort(arr);
     
-    // 申子辰合水局
+    // 申子辰合水局：申(8长生) + 子(0帝旺) + 辰(4墓库)
     if (arr[0] == 0 && arr[1] == 4 && arr[2] == 8) return {true, WuXing::Shui};
     
-    // 亥卯未合木局
+    // 亥卯未合木局：亥(11长生) + 卯(3帝旺) + 未(7墓库)
     if (arr[0] == 3 && arr[1] == 7 && arr[2] == 11) return {true, WuXing::Mu};
     
-    // 寅午戌合火局
+    // 寅午戌合火局：寅(2长生) + 午(6帝旺) + 戌(10墓库)
     if (arr[0] == 2 && arr[1] == 6 && arr[2] == 10) return {true, WuXing::Huo};
     
-    // 巳酉丑合金局
+    // 巳酉丑合金局：巳(5长生) + 酉(9帝旺) + 丑(1墓库)
     if (arr[0] == 1 && arr[1] == 5 && arr[2] == 9) return {true, WuXing::Jin};
     
-    return {false, WuXing::Mu};
+    return {false, WuXing::Mu};  // 未合局
 }
 
 // ==================== 天干寄宫 ====================
@@ -596,6 +799,215 @@ inline auto get_liu_shi_jia_zi() -> std::vector<LiuShiJiaZi> {
     }
     
     return result;
+}
+
+// ==================== 十二长生 ====================
+
+/**
+ * @brief 十二长生枚举
+ * 
+ * 表示天干在十二地支中的生命状态
+ * 用于判断五行的旺衰
+ */
+enum class ShiErChangSheng {
+    ChangSheng = 0,  // 长生 - 如婴儿出生，开始生长
+    MuYu = 1,        // 沐浴 - 如婴儿沐浴，易受侵害
+    GuanDai = 2,     // 冠带 - 如成人加冠，渐趋成熟
+    LinGuan = 3,     // 临官 - 如人临官得位，兴旺发达
+    DiWang = 4,      // 帝旺 - 如人壮盛，达到顶峰
+    Shuai = 5,       // 衰 - 如人衰老，开始衰退
+    Bing = 6,        // 病 - 如人患病，气力衰弱
+    Si = 7,          // 死 - 如人死亡，生机断绝
+    Mu = 8,          // 墓 - 如人入墓，归于寂静（又称"库"）
+    Jue = 9,         // 绝 - 如形体灭绝，无气之地
+    Tai = 10,        // 胎 - 如受胎孕育，开始孕育
+    Yang = 11        // 养 - 如婴儿养育，生命延续
+};
+
+/**
+ * @brief 十二长生中文映射命名空间
+ */
+namespace ShiErChangShengMapper {
+    /**
+     * @brief 转换为中文名称
+     */
+    constexpr auto to_zh(ShiErChangSheng cs) -> std::string_view {
+        constexpr std::array<std::string_view, 12> names = {
+            "长生", "沐浴", "冠带", "临官", "帝旺", "衰",
+            "病", "死", "墓", "绝", "胎", "养"
+        };
+        return names[static_cast<int>(cs)];
+    }
+
+    /**
+     * @brief 从中文名称查找
+     */
+    constexpr auto from_zh(std::string_view name) -> std::optional<ShiErChangSheng> {
+        constexpr std::array<std::string_view, 12> names = {
+            "长生", "沐浴", "冠带", "临官", "帝旺", "衰",
+            "病", "死", "墓", "绝", "胎", "养"
+        };
+        
+        for (std::size_t i = 0; i < names.size(); ++i) {
+            if (names[i] == name) {
+                return static_cast<ShiErChangSheng>(i);
+            }
+        }
+        return std::nullopt;
+    }
+}
+
+/**
+ * @brief 获取天干在指定地支的十二长生状态
+ * 
+ * @param gan 天干
+ * @param zhi 地支
+ * @return 十二长生状态
+ * 
+ * 规则说明：
+ * - 阳干（甲丙戊庚壬）顺行十二长生
+ * - 阴干（乙丁己辛癸）逆行十二长生
+ * 
+ * 长生起点：
+ * - 甲木长生在亥，乙木长生在午
+ * - 丙火长生在寅，丁火长生在酉
+ * - 戊土长生在寅，己土长生在酉（土同火）
+ * - 庚金长生在巳，辛金长生在子
+ * - 壬水长生在申，癸水长生在卯
+ * 
+ * @example
+ * auto cs = get_shi_er_chang_sheng(TianGan::Jia, DiZhi::Hai); // 返回 ShiErChangSheng::ChangSheng
+ */
+inline auto get_shi_er_chang_sheng(TianGan gan, DiZhi zhi) -> ShiErChangSheng {
+    // 长生地支索引（从子=0开始）
+    static constexpr std::array<int, 10> chang_sheng_start = {
+        11,  // 甲 - 亥 (11)
+        6,   // 乙 - 午 (6)
+        2,   // 丙 - 寅 (2)
+        9,   // 丁 - 酉 (9)
+        2,   // 戊 - 寅 (2)（土同火）
+        9,   // 己 - 酉 (9)（土同火）
+        5,   // 庚 - 巳 (5)
+        0,   // 辛 - 子 (0)
+        8,   // 壬 - 申 (8)
+        3    // 癸 - 卯 (3)
+    };
+    
+    int gan_idx = static_cast<int>(gan);
+    int zhi_idx = static_cast<int>(zhi);
+    int start = chang_sheng_start[gan_idx];
+    
+    int offset;
+    
+    // 阳干顺行，阴干逆行
+    if (gan_idx % 2 == 0) {
+        // 阳干：甲丙戊庚壬（索引为偶数）
+        offset = (zhi_idx - start + 12) % 12;
+    } else {
+        // 阴干：乙丁己辛癸（索引为奇数）
+        offset = (start - zhi_idx + 12) % 12;
+    }
+    
+    return static_cast<ShiErChangSheng>(offset);
+}
+
+/**
+ * @brief 判断天干在指定地支是否为长生状态
+ */
+inline bool is_chang_sheng(TianGan gan, DiZhi zhi) {
+    return get_shi_er_chang_sheng(gan, zhi) == ShiErChangSheng::ChangSheng;
+}
+
+/**
+ * @brief 判断天干在指定地支是否为帝旺状态
+ */
+inline bool is_di_wang(TianGan gan, DiZhi zhi) {
+    return get_shi_er_chang_sheng(gan, zhi) == ShiErChangSheng::DiWang;
+}
+
+/**
+ * @brief 判断天干在指定地支是否为墓库状态
+ */
+inline bool is_mu_ku(TianGan gan, DiZhi zhi) {
+    return get_shi_er_chang_sheng(gan, zhi) == ShiErChangSheng::Mu;
+}
+
+/**
+ * @brief 判断天干在指定地支是否为绝地状态
+ */
+inline bool is_jue_di(TianGan gan, DiZhi zhi) {
+    return get_shi_er_chang_sheng(gan, zhi) == ShiErChangSheng::Jue;
+}
+
+/**
+ * @brief 获取天干的长生地支
+ * 
+ * @param gan 天干
+ * @return 长生地支
+ */
+inline auto get_chang_sheng_zhi(TianGan gan) -> DiZhi {
+    static constexpr std::array<DiZhi, 10> chang_sheng_map = {
+        DiZhi::Hai,   // 甲木长生在亥
+        DiZhi::Wu,    // 乙木长生在午
+        DiZhi::Yin,   // 丙火长生在寅
+        DiZhi::You,   // 丁火长生在酉
+        DiZhi::Yin,   // 戊土长生在寅
+        DiZhi::You,   // 己土长生在酉
+        DiZhi::Si,    // 庚金长生在巳
+        DiZhi::Zi,    // 辛金长生在子
+        DiZhi::Shen,  // 壬水长生在申
+        DiZhi::Mao    // 癸水长生在卯
+    };
+    
+    return chang_sheng_map[static_cast<int>(gan)];
+}
+
+/**
+ * @brief 获取天干的帝旺地支
+ * 
+ * @param gan 天干
+ * @return 帝旺地支
+ */
+inline auto get_di_wang_zhi(TianGan gan) -> DiZhi {
+    // 帝旺 = 长生 + 4（阳干顺行）或 长生 - 4（阴干逆行）
+    auto chang_sheng = get_chang_sheng_zhi(gan);
+    int cs_idx = static_cast<int>(chang_sheng);
+    int gan_idx = static_cast<int>(gan);
+    
+    int di_wang_idx;
+    if (gan_idx % 2 == 0) {
+        // 阳干顺行
+        di_wang_idx = (cs_idx + 4) % 12;
+    } else {
+        // 阴干逆行
+        di_wang_idx = (cs_idx - 4 + 12) % 12;
+    }
+    
+    return static_cast<DiZhi>(di_wang_idx);
+}
+
+/**
+ * @brief 获取天干的墓库地支
+ * 
+ * @param gan 天干
+ * @return 墓库地支
+ */
+inline auto get_mu_ku_zhi(TianGan gan) -> DiZhi {
+    // 墓库 = 长生 + 8（阳干顺行）或 长生 - 8（阴干逆行）
+    auto chang_sheng = get_chang_sheng_zhi(gan);
+    int cs_idx = static_cast<int>(chang_sheng);
+    int gan_idx = static_cast<int>(gan);
+    
+    int mu_ku_idx;
+    if (gan_idx % 2 == 0) {
+        // 阳干顺行
+        mu_ku_idx = (cs_idx + 8) % 12;
+    } else {
+        // 阴干逆行
+        mu_ku_idx = (cs_idx - 8 + 12) % 12;
+    }
+    
+    return static_cast<DiZhi>(mu_ku_idx);
 }
 
 } // namespace ZhouYi::GanZhi
