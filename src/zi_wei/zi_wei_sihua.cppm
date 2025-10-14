@@ -8,6 +8,7 @@ import ZhouYi.ZhMapper;
 
 export namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
 
     /**
      * @brief 四化信息结构
