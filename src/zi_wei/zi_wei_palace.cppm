@@ -8,6 +8,7 @@ import ZhouYi.tyme;
 
 export namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
 
     /**
      * @brief 定五行局法（以命宫天干地支而定）

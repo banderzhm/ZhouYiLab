@@ -446,7 +446,8 @@ namespace ZhouYi::ZiWei {
             auto j = json::parse(XING_YAO_JSON_DATABASE);
             
             // 遍历所有分类（主星、辅星、煞星、杂耀）
-            for (auto& [category, stars] : j.items()) {
+            for (auto it = j.begin(); it != j.end(); ++it) {
+                const auto& stars = it.value();
                 for (auto& star_json : stars) {
                     XingYaoInfo info;
                     info.name = star_json["name"].get<string>();
@@ -469,7 +470,7 @@ namespace ZhouYi::ZiWei {
             }
         } catch (const json::exception& e) {
             // JSON解析错误，返回空数据库
-            fmt::print(stderr, "JSON解析错误: {}\n", e.what());
+            fmt::print(std::cerr, "JSON解析错误: {}\n", e.what());
         }
         
         return database;

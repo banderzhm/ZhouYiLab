@@ -9,6 +9,7 @@ import ZhouYi.tyme;
 
 export namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
 
     /**
      * @brief 星耀数据结构
