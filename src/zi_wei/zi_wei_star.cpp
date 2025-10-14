@@ -1,23 +1,23 @@
 // 紫微斗数星耀定位模块（实现）
-module;
-#include <fmt/core.h>
-
 module ZhouYi.ZiWei.Star;
 
-import std;
 import ZhouYi.GanZhi;
 import ZhouYi.ZiWei.Constants;
 import ZhouYi.ZhMapper;
+import fmt;
+import std;
 
 namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
+    using namespace ZhouYi::Mapper;
 
     // ============= StarData 实现 =============
 
     string StarData::to_string() const {
-        string result = fmt::format("{} [{}]", name, string(Mapper::to_zh(liang_du)));
+        string result = fmt::format("{} [{}]", name, string(to_zh(liang_du)));
         if (si_hua.has_value()) {
-            result += fmt::format(" {}", string(Mapper::to_zh(*si_hua)));
+            result += fmt::format(" {}", string(to_zh(*si_hua)));
         }
         return result;
     }
@@ -114,7 +114,7 @@ namespace ZhouYi::ZiWei {
         return positions;
     }
 
-    constexpr array<LiangDu, 12> get_zhu_xing_liang_du_table(ZhuXing star) {
+    array<LiangDu, 12> get_zhu_xing_liang_du_table(ZhuXing star) {
         using LD = LiangDu;
         
         switch (star) {
@@ -213,7 +213,7 @@ namespace ZhouYi::ZiWei {
      * 
      * 说明：天魁天钺按年干起，前者为魁后者为钺
      */
-    constexpr pair<int, int> get_kui_yue_index(TianGan year_gan) {
+    pair<int, int> get_kui_yue_index(TianGan year_gan) {
         // 地支索引映射（以寅宫为0）：
         // 寅0 卯1 辰2 巳3 午4 未5 申6 酉7 戌8 亥9 子10 丑11
         
@@ -271,7 +271,7 @@ namespace ZhouYi::ZiWei {
      * 
      * 解释：擎羊在禄存前一位，陀罗在禄存后一位
      */
-    constexpr pair<int, int> get_yang_tuo_index(int lu_cun_index) {
+    pair<int, int> get_yang_tuo_index(int lu_cun_index) {
         return {
             fix_index(lu_cun_index + 1),  // 擎羊在禄存前一位
             fix_index(lu_cun_index - 1)   // 陀罗在禄存后一位
@@ -287,7 +287,7 @@ namespace ZhouYi::ZiWei {
      * 
      * 解释：前者为火星起始位，后者为铃星起始位，再从时辰顺数
      */
-    constexpr pair<int, int> get_huo_ling_index(DiZhi year_zhi, DiZhi hour_zhi) {
+    pair<int, int> get_huo_ling_index(DiZhi year_zhi, DiZhi hour_zhi) {
         int hour_offset = static_cast<int>(hour_zhi);
         int huo_start, ling_start;
         
@@ -320,7 +320,7 @@ namespace ZhouYi::ZiWei {
      * 
      * 解释：从亥宫起子时，顺数为地劫，逆数为地空
      */
-    constexpr pair<int, int> get_kong_jie_index(DiZhi hour_zhi) {
+    pair<int, int> get_kong_jie_index(DiZhi hour_zhi) {
         int hour_index = static_cast<int>(hour_zhi);
         int hai_index = 9; // 亥宫索引
         

@@ -48,7 +48,7 @@ export namespace ZhouYi::ZiWei {
     /**
      * @brief 获取主星亮度表（按宫位地支排序，从寅开始）
      */
-    constexpr array<LiangDu, 12> get_zhu_xing_liang_du_table(ZhuXing star);
+    array<LiangDu, 12> get_zhu_xing_liang_du_table(ZhuXing star);
 
     /**
      * @brief 安左辅右弼（按农历月份）
@@ -63,7 +63,7 @@ export namespace ZhouYi::ZiWei {
     /**
      * @brief 安天魁天钺（按年干）
      */
-    constexpr pair<int, int> get_kui_yue_index(TianGan year_gan);
+    pair<int, int> get_kui_yue_index(TianGan year_gan);
 
     /**
      * @brief 安禄存（按年干）
@@ -73,17 +73,17 @@ export namespace ZhouYi::ZiWei {
     /**
      * @brief 安擎羊陀罗（禄前擎羊，禄后陀罗）
      */
-    constexpr pair<int, int> get_yang_tuo_index(int lu_cun_index);
+    pair<int, int> get_yang_tuo_index(int lu_cun_index);
 
     /**
      * @brief 安火星铃星（按年支和时辰）
      */
-    constexpr pair<int, int> get_huo_ling_index(DiZhi year_zhi, DiZhi hour_zhi);
+    pair<int, int> get_huo_ling_index(DiZhi year_zhi, DiZhi hour_zhi);
 
     /**
      * @brief 安地空地劫（按时辰）
      */
-    constexpr pair<int, int> get_kong_jie_index(DiZhi hour_zhi);
+    pair<int, int> get_kong_jie_index(DiZhi hour_zhi);
 
     /**
      * @brief 四化表（年干四化）

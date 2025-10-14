@@ -3,14 +3,20 @@ export module ZhouYi.ZiWei;
 
 import std;
 import ZhouYi.GanZhi;
+import ZhouYi.BaZiBase;
 import ZhouYi.ZiWei.Constants;
 import ZhouYi.ZiWei.Palace;
 import ZhouYi.ZiWei.Star;
 import ZhouYi.ZiWei.Horoscope;
+import ZhouYi.ZhMapper;
 import ZhouYi.tyme;
+import fmt;
 
 export namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
+    using namespace ZhouYi::BaZiBase;
+    using namespace ZhouYi::Mapper;
 
     /**
      * @brief 宫位完整数据（包含星耀）
@@ -65,10 +71,10 @@ export namespace ZhouYi::ZiWei {
         bool is_male;                    // 性别
         
         // 四柱
-        GanZhi year_pillar;              // 年柱
-        GanZhi month_pillar;             // 月柱
-        GanZhi day_pillar;               // 日柱
-        GanZhi hour_pillar;              // 时柱
+        Pillar year_pillar;              // 年柱
+        Pillar month_pillar;             // 月柱
+        Pillar day_pillar;               // 日柱
+        Pillar hour_pillar;              // 时柱
         
         // 命盘核心数据
         int ming_gong_index;             // 命宫索引（以寅宫为0）
@@ -136,13 +142,13 @@ export namespace ZhouYi::ZiWei {
                                 day_pillar.to_string(),
                                 hour_pillar.to_string());
             result += fmt::format("五行局：{}\n", 
-                                string(Mapper::to_zh(wu_xing_ju)));
+                                string(to_zh(wu_xing_ju)));
             result += fmt::format("命宫：{}{}\n",
-                                string(tian_gan_to_zh(palaces[ming_gong_index].gong_data.tian_gan)),
-                                string(di_zhi_to_zh(palaces[ming_gong_index].gong_data.di_zhi)));
+                                string(to_zh(palaces[ming_gong_index].gong_data.tian_gan)),
+                                string(to_zh(palaces[ming_gong_index].gong_data.di_zhi)));
             result += fmt::format("身宫：{}{}\n\n",
-                                string(tian_gan_to_zh(palaces[shen_gong_index].gong_data.tian_gan)),
-                                string(di_zhi_to_zh(palaces[shen_gong_index].gong_data.di_zhi)));
+                                string(to_zh(palaces[shen_gong_index].gong_data.tian_gan)),
+                                string(to_zh(palaces[shen_gong_index].gong_data.di_zhi)));
             
             result += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
             result += "           十二宫详情\n";
@@ -172,19 +178,27 @@ export namespace ZhouYi::ZiWei {
         // 创建阳历日期
         tyme::SolarDay solar_day = tyme::SolarDay::from_ymd(year, month, day);
         
-        // 转换为农历
+        // 转换为农历并获取四柱
+        auto solar_time = tyme::SolarTime::from_ymd_hms(year, month, day, hour, 0, 0);
         tyme::LunarDay lunar_day = solar_day.get_lunar_day();
-        tyme::LunarHour lunar_hour = lunar_day.get_lunar_hour(hour, 0);
+        tyme::LunarHour lunar_hour = solar_time.get_lunar_hour();
+        tyme::EightChar bazi = lunar_hour.get_eight_char();
+         
+        // 转换为我们的 Pillar 类型
+        auto convert_cycle = [](const tyme::SixtyCycle& cycle) -> Pillar {
+            return Pillar(
+                cycle.get_heaven_stem().get_name(),
+                cycle.get_earth_branch().get_name()
+            );
+        };
         
-        // 获取四柱
-        tyme::EightChar bazi = solar_day.get_eight_char(hour, 0);
-        GanZhi year_pillar{bazi.get_year().get_heaven_stem(), bazi.get_year().get_earth_branch()};
-        GanZhi month_pillar{bazi.get_month().get_heaven_stem(), bazi.get_month().get_earth_branch()};
-        GanZhi day_pillar{bazi.get_day().get_heaven_stem(), bazi.get_day().get_earth_branch()};
-        GanZhi hour_pillar{bazi.get_hour().get_heaven_stem(), bazi.get_hour().get_earth_branch()};
+        Pillar year_pillar = convert_cycle(bazi.get_year());
+        Pillar month_pillar = convert_cycle(bazi.get_month());
+        Pillar day_pillar = convert_cycle(bazi.get_day());
+        Pillar hour_pillar = convert_cycle(bazi.get_hour());
         
         // 获取农历月份和日期
-        int lunar_month = lunar_day.get_month().get_month();
+        int lunar_month = lunar_day.get_month();
         int lunar_day_num = lunar_day.get_day();
         
         // 获取时辰地支
@@ -232,21 +246,24 @@ export namespace ZhouYi::ZiWei {
         auto [huo_idx, ling_idx] = get_huo_ling_index(year_pillar.zhi, hour_zhi);
         auto [kong_idx, jie_idx] = get_kong_jie_index(hour_zhi);
         
-        // 创建结果对象
-        ZiWeiResult result;
-        result.solar_day = solar_day;
-        result.lunar_day = lunar_day;
-        result.lunar_hour = lunar_hour;
-        result.is_male = is_male;
-        result.year_pillar = year_pillar;
-        result.month_pillar = month_pillar;
-        result.day_pillar = day_pillar;
-        result.hour_pillar = hour_pillar;
-        result.ming_gong_index = ming_index;
-        result.shen_gong_index = shen_index;
-        result.wu_xing_ju = wu_xing_ju;
-        result.zi_wei_index = zi_wei_idx;
-        result.tian_fu_index = tian_fu_idx;
+        // 创建结果对象（使用聚合初始化）
+        ZiWeiResult result{
+            .solar_day = solar_day,
+            .lunar_day = lunar_day,
+            .lunar_hour = lunar_hour,
+            .is_male = is_male,
+            .year_pillar = year_pillar,
+            .month_pillar = month_pillar,
+            .day_pillar = day_pillar,
+            .hour_pillar = hour_pillar,
+            .ming_gong_index = ming_index,
+            .shen_gong_index = shen_index,
+            .wu_xing_ju = wu_xing_ju,
+            .zi_wei_index = zi_wei_idx,
+            .tian_fu_index = tian_fu_idx,
+            .palaces = {},
+            .da_xian_data = {}
+        };
         
         // 填充每个宫位的星耀
         for (int i = 0; i < 12; ++i) {
@@ -258,7 +275,7 @@ export namespace ZhouYi::ZiWei {
                 if (idx == i) {
                     auto liang_du_table = get_zhu_xing_liang_du_table(star);
                     StarData star_data;
-                    star_data.name = string(Mapper::to_zh(star));
+                    star_data.name = string(to_zh(star));
                     star_data.liang_du = liang_du_table[i];
                     star_data.gong_index = i; 
                     
@@ -276,7 +293,7 @@ export namespace ZhouYi::ZiWei {
                 if (idx == i) {
                     auto liang_du_table = get_zhu_xing_liang_du_table(star);
                     StarData star_data;
-                    star_data.name = string(Mapper::to_zh(star));
+                    star_data.name = string(to_zh(star));
                     star_data.liang_du = liang_du_table[i];
                     star_data.gong_index = i;
                     
@@ -292,42 +309,42 @@ export namespace ZhouYi::ZiWei {
             // 添加辅星
             if (i == zuo_idx) {
                 palace_info.fu_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(FuXing::ZuoFu)),
+                    .name = string(to_zh(FuXing::ZuoFu)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == you_idx) {
                 palace_info.fu_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(FuXing::YouBi)),
+                    .name = string(to_zh(FuXing::YouBi)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == chang_idx) {
                 palace_info.fu_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(FuXing::WenChang)),
+                    .name = string(to_zh(FuXing::WenChang)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == qu_idx) {
                 palace_info.fu_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(FuXing::WenQu)),
+                    .name = string(to_zh(FuXing::WenQu)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == kui_idx) {
                 palace_info.fu_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(FuXing::TianKui)),
+                    .name = string(to_zh(FuXing::TianKui)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == yue_idx) {
                 palace_info.fu_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(FuXing::TianYue)),
+                    .name = string(to_zh(FuXing::TianYue)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
@@ -336,42 +353,42 @@ export namespace ZhouYi::ZiWei {
             // 添加煞星
             if (i == yang_idx) {
                 palace_info.sha_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(ShaXing::QingYang)),
+                    .name = string(to_zh(ShaXing::QingYang)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == tuo_idx) {
                 palace_info.sha_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(ShaXing::TuoLuo)),
+                    .name = string(to_zh(ShaXing::TuoLuo)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == huo_idx) {
                 palace_info.sha_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(ShaXing::HuoXing)),
+                    .name = string(to_zh(ShaXing::HuoXing)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == ling_idx) {
                 palace_info.sha_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(ShaXing::LingXing)),
+                    .name = string(to_zh(ShaXing::LingXing)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == kong_idx) {
                 palace_info.sha_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(ShaXing::DiKong)),
+                    .name = string(to_zh(ShaXing::DiKong)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });
             }
             if (i == jie_idx) {
                 palace_info.sha_xing.push_back(StarData{
-                    .name = string(Mapper::to_zh(ShaXing::DiJie)),
+                    .name = string(to_zh(ShaXing::DiJie)),
                     .liang_du = LiangDu::Ping,
                     .gong_index = i
                 });

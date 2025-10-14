@@ -8,6 +8,7 @@ import ZhouYi.ZiWei.SanFang;
 import ZhouYi.ZiWei.GeJu;
 import ZhouYi.ZiWei.StarDescription;
 import ZhouYi.ZiWei.Horoscope;
+import ZhouYi.ZhMapper;
 import ZhouYi.tyme;
 import fmt;
 import nlohmann.json;
@@ -18,13 +19,14 @@ using json = nlohmann::json;
 namespace ZhouYi::ZiWei {
     using namespace std;
     using namespace ZhouYi::GanZhi;
+    using namespace ZhouYi::Mapper;
 
     void pai_pan_and_print_solar(int year, int month, int day, int hour, bool is_male) {
         try {
             auto result = pai_pan_solar(year, month, day, hour, is_male);
             fmt::print("{}\n", result.to_string());
         } catch (const exception& e) {
-            fmt::print(stderr, "排盘错误: {}\n", e.what());
+            fmt::print(std::cerr, "排盘错误: {}\n", e.what());
         }
     }
 
@@ -34,7 +36,7 @@ namespace ZhouYi::ZiWei {
             auto result = pai_pan_lunar(year, month, day, hour, is_male, is_leap_month);
             fmt::print("{}\n", result.to_string());
         } catch (const exception& e) {
-            fmt::print(stderr, "排盘错误: {}\n", e.what());
+            fmt::print(std::cerr, "排盘错误: {}\n", e.what());
         }
     }
 
@@ -43,7 +45,7 @@ namespace ZhouYi::ZiWei {
             const auto& palace = result.get_palace(gong_wei);
             fmt::print("\n{}\n", palace.to_string());
         } catch (const exception& e) {
-            fmt::print(stderr, "获取宫位错误: {}\n", e.what());
+            fmt::print(std::cerr, "获取宫位错误: {}\n", e.what());
         }
     }
 
@@ -85,7 +87,7 @@ namespace ZhouYi::ZiWei {
         j["si_zhu"]["hour"] = result.hour_pillar.to_string();
         
         // 命盘核心数据
-        j["wu_xing_ju"] = string(wu_xing_ju_to_zh(result.wu_xing_ju));
+        j["wu_xing_ju"] = string(to_zh(result.wu_xing_ju));
         j["ming_gong_index"] = result.ming_gong_index;
         j["shen_gong_index"] = result.shen_gong_index;
         
@@ -93,10 +95,10 @@ namespace ZhouYi::ZiWei {
         j["palaces"] = json::array();
         for (const auto& palace : result.palaces) {
             json p;
-            p["name"] = string(Mapper::to_zh(palace.gong_data.gong_wei));
+            p["name"] = string(to_zh(palace.gong_data.gong_wei));
             p["gan_zhi"] = fmt::format("{}{}",
-                string(tian_gan_to_zh(palace.gong_data.tian_gan)),
-                string(di_zhi_to_zh(palace.gong_data.di_zhi)));
+                string(to_zh(palace.gong_data.tian_gan)),
+                string(to_zh(palace.gong_data.di_zhi)));
             p["is_ming_palace"] = palace.gong_data.is_ming_palace;
             p["is_body_palace"] = palace.gong_data.is_body_palace;
             
@@ -105,9 +107,9 @@ namespace ZhouYi::ZiWei {
             for (const auto& star : palace.zhu_xing) {
                 json s;
                 s["name"] = star.name;
-                s["liang_du"] = string(Mapper::to_zh(star.liang_du));
+                s["liang_du"] = string(to_zh(star.liang_du));
                 if (star.si_hua.has_value()) {
-                    s["si_hua"] = string(Mapper::to_zh(*star.si_hua));
+                    s["si_hua"] = string(to_zh(*star.si_hua));
                 }
                 p["zhu_xing"].push_back(s);
             }
@@ -211,7 +213,7 @@ namespace ZhouYi::ZiWei {
     
     void display_fei_hua_analysis(const ZiWeiResult& result, int from_gong, SiHua si_hua_type) {
         fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-        fmt::print("       第{}宫 {} 飞化链分析\n", from_gong, string(Mapper::to_zh(si_hua_type)));
+        fmt::print("       第{}宫 {} 飞化链分析\n", from_gong, string(to_zh(si_hua_type)));
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
         
         auto gong_gan_zhi = prepare_gong_gan_zhi(result);
@@ -309,7 +311,7 @@ namespace ZhouYi::ZiWei {
         auto san_fang = get_san_fang_si_zheng(gong_index);
         
         fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-        fmt::print("       {} 三方四正\n", string(Mapper::to_zh(gong_wei)));
+        fmt::print("       {} 三方四正\n", string(to_zh(gong_wei)));
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
         
         fmt::print("{}\n\n", san_fang.to_string());
@@ -362,13 +364,12 @@ namespace ZhouYi::ZiWei {
         
         for (int i = 0; i < 12; ++i) {
             const auto& da_xian = result.da_xian_data[i];
-            fmt::print("第{}限：{}岁-{}岁 ({}) - 大限宫位：第{}宫 {}\n",
+            fmt::print("第{}限：{}岁-{}岁 - 大限宫位：第{}宫 {}\n",
                 i + 1,
                 da_xian.start_age,
                 da_xian.end_age,
-                da_xian.is_forward ? "顺行" : "逆行",
                 da_xian.gong_index,
-                string(Mapper::to_zh(result.palaces[da_xian.gong_index].gong_data.gong_wei)));
+                string(to_zh(result.palaces[da_xian.gong_index].gong_data.gong_wei)));
         }
     }
     
@@ -377,11 +378,11 @@ namespace ZhouYi::ZiWei {
         fmt::print("       小限分析（{}岁）\n", current_age);
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
         
-        auto xiao_xian_data = get_xiao_xian(current_age, result.is_male, result.year_pillar.di_zhi);
+        auto xiao_xian_data = get_xiao_xian(current_age, result.is_male, result.year_pillar.zhi);
         
         fmt::print("小限宫位：第{}宫 {}\n",
             xiao_xian_data.gong_index,
-            string(Mapper::to_zh(result.palaces[xiao_xian_data.gong_index].gong_data.gong_wei)));
+            string(to_zh(result.palaces[xiao_xian_data.gong_index].gong_data.gong_wei)));
         
         fmt::print("\n{}\n", result.palaces[xiao_xian_data.gong_index].to_string());
     }
@@ -407,19 +408,19 @@ namespace ZhouYi::ZiWei {
         auto liu_nian_data = get_liu_nian(target_year, tian_gan, di_zhi, result.ming_gong_index);
         
         fmt::print("流年干支：{}{} ({}年)\n", 
-            string(Mapper::to_zh(liu_nian_data.tian_gan)),
-            string(Mapper::to_zh(liu_nian_data.di_zhi)),
+            string(to_zh(liu_nian_data.tian_gan)),
+            string(to_zh(liu_nian_data.di_zhi)),
             target_year);
         fmt::print("流年宫位：第{}宫 {}\n",
             liu_nian_data.gong_index,
-            string(Mapper::to_zh(result.palaces[liu_nian_data.gong_index].gong_data.gong_wei)));
+            string(to_zh(result.palaces[liu_nian_data.gong_index].gong_data.gong_wei)));
         
         // 显示流年四化
         fmt::print("\n流年四化：\n");
         for (int i = 0; i < 4; ++i) {
             if (!liu_nian_data.si_hua[i].empty()) {
                 fmt::print("  {} - {}\n", 
-                    string(Mapper::to_zh(static_cast<SiHua>(i))),
+                    string(to_zh(static_cast<SiHua>(i))),
                     liu_nian_data.si_hua[i]);
             }
         }
@@ -437,7 +438,7 @@ namespace ZhouYi::ZiWei {
         auto solar_day = tyme::SolarDay::from_ymd(target_year, target_month, 15); // 使用月中作为参考日
         auto lunar_day = solar_day.get_lunar_day();
         int lunar_month = lunar_day.get_lunar_month().get_month();
-        int birth_month = result.month_pillar.di_zhi == DiZhi::Zi ? 11 : static_cast<int>(result.month_pillar.di_zhi) - 1;
+        int birth_month = result.month_pillar.zhi == DiZhi::Zi ? 11 : static_cast<int>(result.month_pillar.zhi) - 1;
         
         auto sixty_cycle_day = solar_day.get_sixty_cycle_day();
         auto month_cycle = sixty_cycle_day.get_month();
@@ -451,19 +452,19 @@ namespace ZhouYi::ZiWei {
         auto liu_yue_data = get_liu_yue(lunar_month, birth_month, month_gan, month_zhi, year_zhi, result.ming_gong_index);
         
         fmt::print("流月干支：{}{} (农历{}月)\n", 
-            string(Mapper::to_zh(liu_yue_data.tian_gan)),
-            string(Mapper::to_zh(liu_yue_data.di_zhi)),
+            string(to_zh(liu_yue_data.tian_gan)),
+            string(to_zh(liu_yue_data.di_zhi)),
             liu_yue_data.month);
         fmt::print("流月宫位：第{}宫 {}\n",
             liu_yue_data.gong_index,
-            string(Mapper::to_zh(result.palaces[liu_yue_data.gong_index].gong_data.gong_wei)));
+            string(to_zh(result.palaces[liu_yue_data.gong_index].gong_data.gong_wei)));
         
         // 显示流月四化
         fmt::print("\n流月四化：\n");
         for (int i = 0; i < 4; ++i) {
             if (!liu_yue_data.si_hua[i].empty()) {
                 fmt::print("  {} - {}\n", 
-                    string(Mapper::to_zh(static_cast<SiHua>(i))),
+                    string(to_zh(static_cast<SiHua>(i))),
                     liu_yue_data.si_hua[i]);
             }
         }
@@ -492,7 +493,7 @@ namespace ZhouYi::ZiWei {
         auto solar_day_month = tyme::SolarDay::from_ymd(target_year, target_month, 15);
         auto lunar_day_month = solar_day_month.get_lunar_day();
         int lunar_month = lunar_day_month.get_lunar_month().get_month();
-        int birth_month = result.month_pillar.di_zhi == DiZhi::Zi ? 11 : static_cast<int>(result.month_pillar.di_zhi) - 1;
+        int birth_month = result.month_pillar.zhi == DiZhi::Zi ? 11 : static_cast<int>(result.month_pillar.zhi) - 1;
         
         auto sixty_cycle_day_month = solar_day_month.get_sixty_cycle_day();
         auto month_cycle = sixty_cycle_day_month.get_month();
@@ -508,19 +509,19 @@ namespace ZhouYi::ZiWei {
         auto liu_ri_data = get_liu_ri(lunar_day_num, day_gan, day_zhi, liu_yue_data.gong_index);
         
         fmt::print("流日干支：{}{} (农历{}日)\n", 
-            string(Mapper::to_zh(liu_ri_data.tian_gan)),
-            string(Mapper::to_zh(liu_ri_data.di_zhi)),
+            string(to_zh(liu_ri_data.tian_gan)),
+            string(to_zh(liu_ri_data.di_zhi)),
             liu_ri_data.day);
         fmt::print("流日宫位：第{}宫 {}\n",
             liu_ri_data.gong_index,
-            string(Mapper::to_zh(result.palaces[liu_ri_data.gong_index].gong_data.gong_wei)));
+            string(to_zh(result.palaces[liu_ri_data.gong_index].gong_data.gong_wei)));
         
         // 显示流日四化
         fmt::print("\n流日四化：\n");
         for (int i = 0; i < 4; ++i) {
             if (!liu_ri_data.si_hua[i].empty()) {
                 fmt::print("  {} - {}\n", 
-                    string(Mapper::to_zh(static_cast<SiHua>(i))),
+                    string(to_zh(static_cast<SiHua>(i))),
                     liu_ri_data.si_hua[i]);
             }
         }
@@ -533,7 +534,7 @@ namespace ZhouYi::ZiWei {
         fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         fmt::print("       {}年{}月{}日 {} 流时分析（{}岁）\n", 
             target_year, target_month, target_day, 
-            string(Mapper::to_zh(target_hour)), 
+            string(to_zh(target_hour)), 
             current_age);
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
         
@@ -559,7 +560,7 @@ namespace ZhouYi::ZiWei {
         auto solar_day_month = tyme::SolarDay::from_ymd(target_year, target_month, 15);
         auto lunar_day_month = solar_day_month.get_lunar_day();
         int lunar_month = lunar_day_month.get_lunar_month().get_month();
-        int birth_month = result.month_pillar.di_zhi == DiZhi::Zi ? 11 : static_cast<int>(result.month_pillar.di_zhi) - 1;
+        int birth_month = result.month_pillar.zhi == DiZhi::Zi ? 11 : static_cast<int>(result.month_pillar.zhi) - 1;
         
         auto sixty_cycle_day_month = solar_day_month.get_sixty_cycle_day();
         auto month_cycle = sixty_cycle_day_month.get_month();
@@ -576,18 +577,18 @@ namespace ZhouYi::ZiWei {
         auto liu_shi_data = get_liu_shi(target_hour, hour_gan, liu_ri_data.gong_index);
         
         fmt::print("流时干支：{}{}\n", 
-            string(Mapper::to_zh(liu_shi_data.tian_gan)),
-            string(Mapper::to_zh(liu_shi_data.di_zhi)));
+            string(to_zh(liu_shi_data.tian_gan)),
+            string(to_zh(liu_shi_data.di_zhi)));
         fmt::print("流时宫位：第{}宫 {}\n",
             liu_shi_data.gong_index,
-            string(Mapper::to_zh(result.palaces[liu_shi_data.gong_index].gong_data.gong_wei)));
+            string(to_zh(result.palaces[liu_shi_data.gong_index].gong_data.gong_wei)));
         
         // 显示流时四化
         fmt::print("\n流时四化：\n");
         for (int i = 0; i < 4; ++i) {
             if (!liu_shi_data.si_hua[i].empty()) {
                 fmt::print("  {} - {}\n", 
-                    string(Mapper::to_zh(static_cast<SiHua>(i))),
+                    string(to_zh(static_cast<SiHua>(i))),
                     liu_shi_data.si_hua[i]);
             }
         }
@@ -602,7 +603,7 @@ namespace ZhouYi::ZiWei {
         fmt::print("║              完整运限分析报告                              ║\n");
         fmt::print("║       {}年{}月{}日 {} （{}岁）            ║\n",
             target_year, target_month, target_day,
-            string(Mapper::to_zh(target_hour)),
+            string(to_zh(target_hour)),
             current_age);
         fmt::print("╚════════════════════════════════════════════════════════════╝\n");
         
@@ -696,13 +697,13 @@ namespace ZhouYi::ZiWei {
         for (const auto& gong_si_hua : si_hua_system.get_all_gong_gan_si_hua()) {
             json sh;
             sh["gong_index"] = gong_si_hua.gong_index;
-            sh["gong_gan"] = string(Mapper::to_zh(gong_si_hua.gong_gan));
+            sh["gong_gan"] = string(to_zh(gong_si_hua.gong_gan));
             sh["si_hua_list"] = json::array();
             for (const auto& si_hua_info : gong_si_hua.si_hua_list) {
                 if (!si_hua_info.star_name.empty()) {
                     json info;
                     info["star"] = si_hua_info.star_name;
-                    info["type"] = string(Mapper::to_zh(si_hua_info.type));
+                    info["type"] = string(to_zh(si_hua_info.type));
                     info["to_gong"] = si_hua_info.gong_index;
                     sh["si_hua_list"].push_back(info);
                 }
@@ -717,7 +718,7 @@ namespace ZhouYi::ZiWei {
             zh["gong_index"] = zi_hua.gong_index;
             zh["types"] = json::array();
             for (const auto& type : zi_hua.zi_hua_types) {
-                zh["types"].push_back(string(Mapper::to_zh(type)));
+                zh["types"].push_back(string(to_zh(type)));
             }
             j["si_hua"]["zi_hua"].push_back(zh);
         }
@@ -729,7 +730,6 @@ namespace ZhouYi::ZiWei {
             dxj["start_age"] = dx.start_age;
             dxj["end_age"] = dx.end_age;
             dxj["gong_index"] = dx.gong_index;
-            dxj["is_forward"] = dx.is_forward;
             j["da_xian"].push_back(dxj);
         }
         

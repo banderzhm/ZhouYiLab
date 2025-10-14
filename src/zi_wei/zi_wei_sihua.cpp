@@ -10,18 +10,20 @@ import ZhouYi.ZhMapper;
 
 namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
+    using namespace ZhouYi::Mapper;
 
     // ============= 辅助函数 =============
 
     string SiHuaInfo::to_string() const {
         return fmt::format("{}{} -> 第{}宫",
             star_name,
-            string(Mapper::to_zh(type)),
+            string(to_zh(type)),
             gong_index);
     }
 
     string GongGanSiHua::to_string() const {
-        string result = fmt::format("第{}宫 [{}干] 四化：\n", gong_index, string(Mapper::to_zh(gong_gan)));
+        string result = fmt::format("第{}宫 [{}干] 四化：\n", gong_index, string(to_zh(gong_gan)));
         for (const auto& si_hua : si_hua_list) {
             if (!si_hua.star_name.empty()) {
                 result += "  " + si_hua.to_string() + "\n";
@@ -33,7 +35,7 @@ namespace ZhouYi::ZiWei {
     string ZiHuaInfo::to_string() const {
         string result = fmt::format("第{}宫自化：", gong_index);
         for (const auto& type : zi_hua_types) {
-            result += string(Mapper::to_zh(type)) + " ";
+            result += string(to_zh(type)) + " ";
         }
         return result;
     }
@@ -41,8 +43,8 @@ namespace ZhouYi::ZiWei {
     string FeiHuaRelation::to_string() const {
         return fmt::format("第{}宫[{}干] {} 飞化 -> 第{}宫",
             from_gong,
-            string(Mapper::to_zh(from_gan)),
-            star_name + string(Mapper::to_zh(si_hua_type)),
+            string(to_zh(from_gan)),
+            star_name + string(to_zh(si_hua_type)),
             to_gong);
     }
 
@@ -170,7 +172,7 @@ namespace ZhouYi::ZiWei {
                 }
                 
                 auto star = si_hua_stars[si_hua_idx].value();
-                string star_name = string(Mapper::to_zh(star));
+                string star_name = string(to_zh(star));
                 
                 // 在12个宫位中查找该星
                 int star_gong = -1;

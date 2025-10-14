@@ -10,14 +10,16 @@ import ZhouYi.ZhMapper;
 
 namespace ZhouYi::ZiWei {
     using namespace std;
+    using namespace ZhouYi::GanZhi;
+    using namespace ZhouYi::Mapper;
 
     // ============= 数据结构 to_string 实现 =============
 
     string DaXianData::to_string() const {
         return fmt::format("大限 {}~{} 岁 [{}-{}宫] 四化: {}",
             start_age, end_age,
-            string(Mapper::to_zh(tian_gan)),
-            string(Mapper::to_zh(di_zhi)),
+            string(to_zh(tian_gan)),
+            string(to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
@@ -28,32 +30,32 @@ namespace ZhouYi::ZiWei {
     string LiuNianData::to_string() const {
         return fmt::format("流年 {} 年 [{}-{}宫] 四化: {}",
             year,
-            string(Mapper::to_zh(tian_gan)),
-            string(Mapper::to_zh(di_zhi)),
+            string(to_zh(tian_gan)),
+            string(to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
     string LiuYueData::to_string() const {
         return fmt::format("流月 {} 月 [{}-{}宫] 四化: {}",
             month,
-            string(Mapper::to_zh(tian_gan)),
-            string(Mapper::to_zh(di_zhi)),
+            string(to_zh(tian_gan)),
+            string(to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
     string LiuRiData::to_string() const {
         return fmt::format("流日 {} 日 [{}-{}宫] 四化: {}",
             day,
-            string(Mapper::to_zh(tian_gan)),
-            string(Mapper::to_zh(di_zhi)),
+            string(to_zh(tian_gan)),
+            string(to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
     string LiuShiData::to_string() const {
         return fmt::format("流时 {}时 [{}-{}宫] 四化: {}",
-            string(Mapper::to_zh(shi_chen)),
-            string(Mapper::to_zh(tian_gan)),
-            string(Mapper::to_zh(di_zhi)),
+            string(to_zh(shi_chen)),
+            string(to_zh(tian_gan)),
+            string(to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
@@ -97,11 +99,10 @@ namespace ZhouYi::ZiWei {
             int start_age = qi_yun_age + 10 * i;
             int end_age = start_age + 9;
             
-            // 计算大限天干地支（使用五虎遁）
-            TianGan start_gan = get_tian_gan_from_year_and_month(
-                TianGan::Jia,  // 这里需要传入实际年干
-                static_cast<DiZhi>(idx)
-            );
+            // 计算大限天干（从甲开始，根据流转方向递增或递减）
+            int gan_offset = shun_xing ? i : -i;
+            int gan_idx = (gan_offset + 10) % 10;
+            TianGan start_gan = static_cast<TianGan>(gan_idx);
             
             result[idx] = DaXianData{
                 .start_age = start_age,
@@ -117,7 +118,7 @@ namespace ZhouYi::ZiWei {
             int si_hua_idx = 0;
             for (const auto& [star, si_hua_type] : si_hua_map) {
                 if (si_hua_idx < 4) {
-                    result[idx].si_hua[si_hua_idx++] = string(Mapper::to_zh(star));
+                    result[idx].si_hua[si_hua_idx++] = string(to_zh(star));
                 }
             }
         }
@@ -189,7 +190,7 @@ namespace ZhouYi::ZiWei {
         int si_hua_idx = 0;
         for (const auto& [star, si_hua_type] : si_hua_map) {
             if (si_hua_idx < 4) {
-                si_hua[si_hua_idx++] = string(Mapper::to_zh(star));
+                si_hua[si_hua_idx++] = string(to_zh(star));
             }
         }
         
@@ -234,7 +235,7 @@ namespace ZhouYi::ZiWei {
         int si_hua_idx = 0;
         for (const auto& [star, si_hua_type] : si_hua_map) {
             if (si_hua_idx < 4) {
-                si_hua[si_hua_idx++] = string(Mapper::to_zh(star));
+                si_hua[si_hua_idx++] = string(to_zh(star));
             }
         }
         
@@ -269,7 +270,7 @@ namespace ZhouYi::ZiWei {
         int si_hua_idx = 0;
         for (const auto& [star, si_hua_type] : si_hua_map) {
             if (si_hua_idx < 4) {
-                si_hua[si_hua_idx++] = string(Mapper::to_zh(star));
+                si_hua[si_hua_idx++] = string(to_zh(star));
             }
         }
         
@@ -304,7 +305,7 @@ namespace ZhouYi::ZiWei {
         int si_hua_idx = 0;
         for (const auto& [star, si_hua_type] : si_hua_map) {
             if (si_hua_idx < 4) {
-                si_hua[si_hua_idx++] = string(Mapper::to_zh(star));
+                si_hua[si_hua_idx++] = string(to_zh(star));
             }
         }
         
@@ -394,15 +395,6 @@ namespace ZhouYi::ZiWei {
         result[tian_xi_idx].stars.push_back(prefix + "喜");
         
         return result;
-    }
-
-    /**
-     * @brief 获取年解星索引
-     */
-    int get_nian_jie_index(DiZhi year_zhi) {
-        // 从戌起子，逆数至流年太岁
-        constexpr array<int, 12> mapping = {8, 7, 6, 5, 4, 3, 2, 1, 0, 11, 10, 9};
-        return mapping[static_cast<int>(year_zhi)];
     }
 
 } // namespace ZhouYi::ZiWei

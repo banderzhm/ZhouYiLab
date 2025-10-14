@@ -4,6 +4,7 @@ export module ZhouYi.ZiWei.Controller;
 import std;
 import ZhouYi.GanZhi;
 import ZhouYi.ZiWei;
+import ZhouYi.ZiWei.Constants;
 import ZhouYi.ZiWei.SiHua;
 import ZhouYi.ZiWei.SanFang;
 import ZhouYi.ZiWei.GeJu;

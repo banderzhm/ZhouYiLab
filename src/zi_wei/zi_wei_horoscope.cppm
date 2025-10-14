@@ -229,13 +229,6 @@ export namespace ZhouYi::ZiWei {
     );
 
     /**
-     * @brief 获取年解星
-     * 
-     * 口诀：解神从戌上起子，逆数至流年太岁
-     */
-    int get_nian_jie_index(DiZhi year_zhi);
-
-    /**
      * @brief 综合运限结果
      */
     struct HoroscopeResult {

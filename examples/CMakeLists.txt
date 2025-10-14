@@ -38,11 +38,10 @@ foreach(EXAMPLE ${EXAMPLES})
     # 设置模块依赖
     target_compile_features(${EXAMPLE} PRIVATE cxx_std_23)
     
-    # 链接必要的库
+    # 链接核心库（包含所有模块）
     target_link_libraries(${EXAMPLE}
         PRIVATE
-        fmt::fmt
-        nlohmann_json_modules
+        ZhouYiLabCore
     )
     
     # 设置输出目录
@@ -50,44 +49,10 @@ foreach(EXAMPLE ${EXAMPLES})
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples
     )
     
-    # 平台特定的标准库模块配置（使用主 CMakeLists.txt 中定义的变量）
-    if(UNIX)
-        # Linux/Unix: 使用 libc++ 标准库模块
-        # 注意：LIBCXX_MODULE_DIRS 和 LIBCXX_INCLUDE_DIRS 已在主 CMakeLists.txt 中定义
-        
-        # 添加 libc++ 头文件路径（系统级，不会覆盖其他路径）
-        target_include_directories(${EXAMPLE} SYSTEM
-            PRIVATE
-            ${LIBCXX_INCLUDE_DIRS}
-        )
-        
-        # 添加标准库模块
-        target_sources(${EXAMPLE}
-            PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${LIBCXX_MODULE_DIRS}
-            FILES ${LIBCXX_MODULE_DIRS}/std.cppm ${LIBCXX_MODULE_DIRS}/std.compat.cppm
-        )
-        
-        # 注意：编译和链接选项已在全局设置中配置（add_compile_options/add_link_options）
-        # 这样确保第三方库（如 nlohmann_json）也使用 libc++
-        
-    elseif(WIN32)
-        # Windows: 使用 MSVC 标准库模块
-        # 注意：LIBCXX_MODULE_DIRS 已在主 CMakeLists.txt 中定义
-        
-        target_sources(${EXAMPLE}
-            PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${LIBCXX_MODULE_DIRS}
-            FILES ${LIBCXX_MODULE_DIRS}/std.ixx ${LIBCXX_MODULE_DIRS}/std.compat.ixx
-        )
-        
-        # 如果使用MSVC，设置UTF-8编码
-        if(MSVC)
-            target_compile_options(${EXAMPLE} PRIVATE /utf-8)
-        endif()
-    endif()
+    # 设置模块生成模式
+    set_property(TARGET ${EXAMPLE} PROPERTY
+        CXX_MODULE_GENERATION_MODE "SEPARATE"
+    )
     
 endforeach()
 
