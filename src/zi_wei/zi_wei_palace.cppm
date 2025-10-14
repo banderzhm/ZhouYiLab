@@ -4,11 +4,14 @@ export module ZhouYi.ZiWei.Palace;
 import std;
 import ZhouYi.GanZhi;
 import ZhouYi.ZiWei.Constants;
+import ZhouYi.ZhMapper;
 import ZhouYi.tyme;
+import fmt;
 
 export namespace ZhouYi::ZiWei {
     using namespace std;
     using namespace ZhouYi::GanZhi;
+    using namespace ZhouYi::Mapper;
 
     /**
      * @brief 定五行局法（以命宫天干地支而定）
@@ -151,9 +154,9 @@ export namespace ZhouYi::ZiWei {
         
         string to_string() const {
             return fmt::format("{} ({}{})", 
-                string(Mapper::to_zh(gong_wei)),
-                string(tian_gan_to_zh(tian_gan)),
-                string(di_zhi_to_zh(di_zhi))
+                string(to_zh(gong_wei)),
+                string(to_zh(tian_gan)),
+                string(to_zh(di_zhi))
             );
         }
     };

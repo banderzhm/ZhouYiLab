@@ -106,7 +106,7 @@ public:
      * @param birth_minute 出生分钟（默认0）
      * @param birth_second 出生秒（默认0）
      */
-    DaYunSystem(const BaZi& bazi, bool is_male, 
+    DaYunSystem(const BaZiBase::BaZi& bazi, bool is_male, 
                 int birth_year, int birth_month, int birth_day, int birth_hour = 12,
                 int birth_minute = 0, int birth_second = 0) 
         : child_limit_(create_child_limit(birth_year, birth_month, birth_day, 
@@ -181,16 +181,15 @@ public:
     };
     
     ChildLimitDetail get_child_limit_detail() const {
-        auto info = child_limit_.get_info();
         return ChildLimitDetail{
             child_limit_.get_start_age(),
-            info.get_year_count(),
-            info.get_month_count(),
-            info.get_day_count(),
-            info.get_hour_count(),
-            info.get_minute_count(),
-            info.get_start_time(),
-            info.get_end_time()
+            child_limit_.get_year_count(),
+            child_limit_.get_month_count(),
+            child_limit_.get_day_count(),
+            child_limit_.get_hour_count(),
+            child_limit_.get_minute_count(),
+            child_limit_.get_start_time(),
+            child_limit_.get_end_time()
         };
     }
     
@@ -232,7 +231,7 @@ private:
         auto solar_time = tyme::SolarTime::from_ymd_hms(year, month, day, hour, minute, second);
         
         // 创建性别对象
-        tyme::Gender gender = is_male ? tyme::Gender::from_code(1) : tyme::Gender::from_code(0);
+        tyme::Gender gender = is_male ? tyme::Gender::MAN : tyme::Gender::WOMAN;
         
         // 使用 tyme 库计算童限（包含起运年龄）
         return tyme::ChildLimit::from_solar_time(solar_time, gender);
@@ -241,7 +240,7 @@ private:
     /**
      * @brief 生成大运列表
      */
-    void generate_da_yun_list(const BaZi& bazi, int count) {
+    void generate_da_yun_list(const BaZiBase::BaZi& bazi, int count) {
         da_yun_list_.clear();
         
         // 从月柱开始推算
@@ -386,8 +385,8 @@ struct LiuYue {
  */
 inline LiuYue create_liu_yue(int year, int month, TianGan day_gan) {
     // 从年月获取干支（取月中某日）
-    auto solar_day = tyme::SolarDay::from_ymd(year, month, 15);
-    auto lunar_hour = solar_day.get_solar_time(12, 0, 0).get_lunar_hour();
+    auto solar_time = tyme::SolarTime::from_ymd_hms(year, month, 15, 12, 0, 0);
+    auto lunar_hour = solar_time.get_lunar_hour();
     auto eight_char = lunar_hour.get_eight_char();
     auto month_cycle = eight_char.get_month();
     
@@ -452,7 +451,7 @@ struct LiuRi {
  */
 inline LiuRi create_liu_ri(int year, int month, int day, TianGan day_gan) {
     // 从年月日获取干支
-    auto bazi = BaZi::from_solar(year, month, day, 12);
+    auto bazi = BaZiBase::BaZi::from_solar(year, month, day, 12);
     
     return LiuRi(year, month, day, bazi.day, day_gan);
 }
@@ -507,7 +506,7 @@ struct LiuShi {
  */
 inline LiuShi create_liu_shi(int year, int month, int day, int hour, TianGan day_gan) {
     // 从年月日时获取干支
-    auto bazi = BaZi::from_solar(year, month, day, hour);
+    auto bazi = BaZiBase::BaZi::from_solar(year, month, day, hour);
     
     return LiuShi(hour, bazi.hour, day_gan);
 }
@@ -520,7 +519,7 @@ inline LiuShi create_liu_shi(int year, int month, int day, int hour, TianGan day
  * 包含八字、大运、流年等所有信息
  */
 struct BaZiResult {
-    BaZi ba_zi;                     // 四柱八字
+    BaZiBase::BaZi ba_zi;           // 四柱八字
     bool is_male;                   // 性别
     int birth_year;                 // 出生年份
     int birth_month;                // 出生月份
@@ -530,7 +529,7 @@ struct BaZiResult {
     int birth_second;               // 出生秒
     DaYunSystem da_yun_system;      // 大运系统
     
-    BaZiResult(const BaZi& bz, bool male, int by, int bm, int bd, int bh, 
+    BaZiResult(const BaZiBase::BaZi& bz, bool male, int by, int bm, int bd, int bh, 
                int bmin = 0, int bsec = 0)
         : ba_zi(bz), is_male(male), birth_year(by), birth_month(bm), 
           birth_day(bd), birth_hour(bh), birth_minute(bmin), birth_second(bsec),
