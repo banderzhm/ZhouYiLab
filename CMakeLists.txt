@@ -16,6 +16,22 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # https://gitlab.kitware.com/cmake/cmake/-/issues/25539
 set(CMAKE_CXX_EXTENSIONS ON)
 
+# ============= 平台特定的标准库模块路径配置 =============
+if (UNIX)
+    # Linux/Unix: libc++ 标准库模块路径
+    set(LIBCXX_MODULE_DIRS "/usr/lib/llvm-21/share/libc++/v1" CACHE PATH "Path to libc++ modules")
+    set(LIBCXX_INCLUDE_DIRS "/usr/lib/llvm-21/include/c++/v1" CACHE PATH "Path to libc++ headers")
+    message(STATUS "Platform: Linux/Unix")
+    message(STATUS "  - libc++ module directory: ${LIBCXX_MODULE_DIRS}")
+    message(STATUS "  - libc++ include directory: ${LIBCXX_INCLUDE_DIRS}")
+elseif (WIN32)
+    # Windows: MSVC 标准库模块路径
+    set(LIBCXX_MODULE_DIRS "F:/program/visul_studio/idea/VC/Tools/MSVC/14.44.35207/modules" CACHE PATH "Path to MSVC modules")
+    message(STATUS "Platform: Windows")
+    message(STATUS "  - MSVC module directory: ${LIBCXX_MODULE_DIRS}")
+endif()
+# =======================================================
+
 # 在 Linux/Unix 上强制使用 libc++（必须在添加第三方库之前设置）
 if (UNIX)
     # 设置全局编译选项，确保所有目标（包括第三方库）都使用 libc++
@@ -103,8 +119,7 @@ target_compile_definitions(ZhouYiLab PRIVATE MAGIC_ENUM_USE_STD_MODULE)
 # 直接将标准库模块添加到主目标的 FILE_SET 中
 if (UNIX)
     # Linux/Unix: 使用 libc++ 标准库模块
-    set(LIBCXX_MODULE_DIRS "/usr/lib/llvm-21/share/libc++/v1")
-    set(LIBCXX_INCLUDE_DIRS "/usr/lib/llvm-21/include/c++/v1")
+    # 注意：LIBCXX_MODULE_DIRS 和 LIBCXX_INCLUDE_DIRS 已在头部定义
     
     # 添加 libc++ 头文件路径（系统级，不会覆盖其他路径）
     target_include_directories(${PROJECT_NAME} SYSTEM
@@ -127,7 +142,8 @@ if (UNIX)
 
 elseif (WIN32)
     # Windows: 使用 MSVC 标准库模块
-    set(LIBCXX_MODULE_DIRS "F:/program/visul_studio/idea/VC/Tools/MSVC/14.44.35207/modules")
+    # 注意：LIBCXX_MODULE_DIRS 已在头部定义
+    
     target_sources(${PROJECT_NAME}
             PUBLIC
             FILE_SET CXX_MODULES
