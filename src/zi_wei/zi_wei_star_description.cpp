@@ -470,7 +470,7 @@ namespace ZhouYi::ZiWei {
             }
         } catch (const json::exception& e) {
             // JSON解析错误，返回空数据库
-            fmt::print(std::cerr, "JSON解析错误: {}\n", e.what());
+            fmt::print("[错误] JSON解析错误: {}\n", e.what());
         }
         
         return database;

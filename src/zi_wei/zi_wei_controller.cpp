@@ -26,7 +26,7 @@ namespace ZhouYi::ZiWei {
             auto result = pai_pan_solar(year, month, day, hour, is_male);
             fmt::print("{}\n", result.to_string());
         } catch (const exception& e) {
-            fmt::print(std::cerr, "排盘错误: {}\n", e.what());
+            fmt::print("[错误] 排盘错误: {}\n", e.what());
         }
     }
 
@@ -36,7 +36,7 @@ namespace ZhouYi::ZiWei {
             auto result = pai_pan_lunar(year, month, day, hour, is_male, is_leap_month);
             fmt::print("{}\n", result.to_string());
         } catch (const exception& e) {
-            fmt::print(std::cerr, "排盘错误: {}\n", e.what());
+            fmt::print("[错误] 排盘错误: {}\n", e.what());
         }
     }
 
@@ -45,7 +45,7 @@ namespace ZhouYi::ZiWei {
             const auto& palace = result.get_palace(gong_wei);
             fmt::print("\n{}\n", palace.to_string());
         } catch (const exception& e) {
-            fmt::print(std::cerr, "获取宫位错误: {}\n", e.what());
+            fmt::print("[错误] 获取宫位错误: {}\n", e.what());
         }
     }
 

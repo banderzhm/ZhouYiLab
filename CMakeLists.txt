@@ -54,7 +54,6 @@ message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
 # 配置第三方库的 C++ modules 支持
 # 启用 fmt 的 module 模式（稳定支持）
 set(FMT_MODULE ON CACHE BOOL "Build fmt as a C++ module" FORCE)
-
 # 启用 nlohmann_json 的 module 支持
 # 注意：在 MSVC 上，nlohmann_json 模块可能存在兼容性问题
 # 如果遇到问题，请在代码中使用 #include <nlohmann/json.hpp> 代替 import nlohmann.json
@@ -103,7 +102,9 @@ list(REMOVE_ITEM CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 add_library(ZhouYiLabCore STATIC ${CPP_SOURCES} ${MODULE_INTERFACE_FILES} ${TYME_IMPL_FILES})
 
 # 定义 MAGIC_ENUM_USE_STD_MODULE 以使用 import std
-target_compile_definitions(ZhouYiLabCore PUBLIC MAGIC_ENUM_USE_STD_MODULE)
+target_compile_definitions(ZhouYiLabCore PUBLIC
+    MAGIC_ENUM_USE_STD_MODULE
+)
 
 # 添加自定义模块、第三方模块和标准库模块到 FILE_SET（必须在同一个 target_sources 调用中）
 if (UNIX)
