@@ -25,6 +25,7 @@ endif()
 
 # 示例程序列表
 set(EXAMPLES
+    example_asio
     example_ba_zi
     example_da_liu_ren
     example_liu_yao

@@ -62,6 +62,7 @@ set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" F
 # 添加第三方库
 add_subdirectory(3rdparty/fmt)
 add_subdirectory(3rdparty/nlohmann_json)
+add_subdirectory(3rdparty/asio)
 
 # 包含头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -165,7 +166,13 @@ target_link_libraries(ZhouYiLabCore
         PUBLIC
         fmt::fmt
         nlohmann_json_modules
+        asio::asio
 )
+
+# Windows 平台需要链接网络库
+if(WIN32)
+    target_link_libraries(ZhouYiLabCore PUBLIC ws2_32 mswsock)
+endif()
 
 # 分离模块生成与编译（CMake 4.0+ 特性）
 # SEPARATE: 模块接口单元的编译与其他翻译单元分离
@@ -196,6 +203,11 @@ if(TARGET nlohmann_json_modules)
     message(STATUS "  - nlohmann_json_modules: ✓ Available")
 else()
     message(STATUS "  - nlohmann_json_modules: ✗ Not available (use #include)")
+endif()
+if(TARGET asio::asio)
+    message(STATUS "  - asio (C++20 module): ✓ Available")
+else()
+    message(STATUS "  - asio: ✗ Not available")
 endif()
 list(LENGTH MODULE_FILES MODULE_COUNT)
 message(STATUS "  - 自定义模块文件数量: ${MODULE_COUNT}")
