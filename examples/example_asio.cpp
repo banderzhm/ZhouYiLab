@@ -257,10 +257,12 @@ void multiple_clients_example() {
                     asio::io_context io;
                     EchoClient client(io, "127.0.0.1", "8890");
                     
-                    for (int j = 1; j <= 2; ++j) {
-                        client.send(std::format("客户端 {} 的消息 {}", i, j));
-                        std::this_thread::sleep_for(50ms);
-                    }
+                for (int j = 1; j <= 2; ++j) {
+                    // 使用字符串拼接避免 MSVC 格式字符串常量表达式问题
+                    std::string msg = "客户端 " + std::to_string(i) + " 的消息 " + std::to_string(j);
+                    client.send(msg);
+                    std::this_thread::sleep_for(50ms);
+                }
                 } catch (const std::exception& e) {
                     std::println("  客户端 {} 错误: {}", i, e.what());
                 }
@@ -392,9 +394,9 @@ int main() {
         
         udp_echo_example();
         
-        std::println("\n" + std::string(50, '='));
+        std::println("\n==================================================");
         std::println("✅ 所有 Echo 测试完成！");
-        std::println(std::string(50, '=') + "\n");
+        std::println("==================================================\n");
         
     } catch (const std::exception& e) {
         std::println("\n❌ 程序错误: {}", e.what());
