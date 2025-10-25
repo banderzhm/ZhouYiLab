@@ -15,3 +15,7 @@
 [submodule "3rdparty/doctest"]
 	path = 3rdparty/doctest
 	url = https://github.com/doctest/doctest.git
+[submodule "3rdparty/asio"]
+	path = 3rdparty/asio
+	url = https://github.com/DanielaE/asio.git
+	branch = module
