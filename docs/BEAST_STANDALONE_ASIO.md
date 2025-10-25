@@ -517,3 +517,4 @@ static_assert(BOOST_BEAST_VERSION >= 300, "需要 Beast 3.0.0+");
 
 **结论**：强制 Beast 使用独立 Asio **完全可行**，而且是**推荐的做法**！这样可以充分利用 C++20 模块的优势，同时保持与 Beast 的完美兼容。
 
+
