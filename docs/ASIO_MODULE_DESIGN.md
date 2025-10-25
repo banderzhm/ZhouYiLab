@@ -370,8 +370,11 @@ import asio;           // 快速加载预编译模块
 - [Boost.Beast 文档](https://www.boost.org/doc/libs/release/libs/beast/)
 - [C++20 Modules 规范](https://en.cppreference.com/w/cpp/language/modules)
 - [MySQL Connector/C++](https://dev.mysql.com/doc/connector-cpp/8.0/en/)
+- [强制 Beast 使用独立 Asio 指南](BEAST_STANDALONE_ASIO.md) ⭐ **推荐阅读**
 
 ---
 
 **结论**：引入 Beast 和 MySQL **不会**对现有的 Asio 模块产生负面影响，它们可以完美共存！
+
+💡 **进阶方案**：如果你想让 Beast 也使用你的 Asio 模块实现（而不是 Boost.Asio），请参考 [BEAST_STANDALONE_ASIO.md](BEAST_STANDALONE_ASIO.md)。
 
