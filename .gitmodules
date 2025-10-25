@@ -3,7 +3,7 @@
 	url = https://github.com/fmtlib/fmt.git
 [submodule "3rdparty/nlohmann_json"]
 	path = 3rdparty/nlohmann_json
-	url = https://github.com/banderzhm/json.git
+	url = https://github.com/nlohmann/json.git
 	branch = develop
 [submodule "3rdparty/magic_enum"]
 	path = 3rdparty/magic_enum
