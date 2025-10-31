@@ -379,9 +379,12 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
         {"亥", "丑"}, {"卯", "丑"}, {"未", "丑"}   // 木局 → 丑
     };
 
-    // 日德 (日干查 - 仅阳干)
+    // 日德 (日干查 - 所有天干)
+    // 甲寅、乙卯、丙巳、丁午、戊巳、己午、庚申、辛酉、壬亥、癸子
     static const std::unordered_map<std::string, std::string> riDeMap = {
-        {"甲", "寅"}, {"丙", "巳"}, {"戊", "巳"}, {"庚", "申"}, {"壬", "亥"}};
+        {"甲", "寅"}, {"乙", "卯"}, {"丙", "巳"}, {"丁", "午"}, {"戊", "巳"},
+        {"己", "午"}, {"庚", "申"}, {"辛", "酉"}, {"壬", "亥"}, {"癸", "子"}
+    };
 
     std::map<std::string, std::vector<std::string>> shenShaDefinitionMap;
 
@@ -434,10 +437,8 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
             }
         }
     }
-    // 日德（仅阳干有日德：甲寅、丙巳、戊巳、庚申、壬亥）
-    if (riDeMap.contains(dayStem)) {
-        shenShaDefinitionMap["日德"].push_back(riDeMap.at(dayStem));
-    }
+    // 日德（所有天干都有日德：甲寅、乙卯、丙巳、丁午、戊巳、己午、庚申、辛酉、壬亥、癸子）
+    shenShaDefinitionMap["日德"].push_back(riDeMap.at(dayStem));
 
     // 3. 基于干支关系的神煞 (假设 key 存在)
     shenShaDefinitionMap["日禄"].push_back(luShenMap.at(dayStem));
