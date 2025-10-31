@@ -492,7 +492,7 @@ inline std::vector<YaoDetails> initializeYaoDetailsVector(const HexagramInfo &ma
         {
             if (idx == i + 1)
             {
-                yaoDetailsList[i + 1].isChanging = true;
+                yaoDetailsList[i].isChanging = true;  // 修复：应该是 [i] 而不是 [i+1]
                 break;
             }
         }
