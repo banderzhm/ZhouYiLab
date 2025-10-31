@@ -1,5 +1,8 @@
 // example_stacktrace.cpp - std::stacktrace 功能测试示例
 // 展示 C++23 std::stacktrace 的各种用法
+// 注意：std::stacktrace 目前主要在 MSVC (Windows) 上完整支持
+
+#ifdef _WIN32
 
 import std;
 
@@ -39,6 +42,56 @@ auto recursive_function(int depth) -> void {
     }
     
     recursive_function(depth - 1);
+}
+
+// 打印详细的 stacktrace 信息（包括源文件、函数名、行号）
+auto print_detailed_stacktrace(std::stacktrace const& trace, std::string_view title = "详细调用栈") -> void {
+    std::println("\n📋 {}:", title);
+    std::println("{'=':#>60}", "");
+    
+    if (trace.empty()) {
+        std::println("  (调用栈为空)");
+        return;
+    }
+    
+    for (std::size_t i = 0z; i < trace.size(); ++i) {
+        auto const& entry = trace[i];
+        
+        std::println("\n  帧 #{}", i);
+        std::println("  {'─':#>58}", "");
+        
+        // 获取源文件路径
+        auto const source_file = entry.source_file();
+        if (not source_file.empty()) {
+            std::println("  📄 源文件: {}", source_file);
+            
+            // 获取行号
+            auto const line_num = entry.source_line();
+            if (line_num != 0) {
+                std::println("  📍 行号: {}", line_num);
+            }
+        }
+        
+        // 获取函数描述（包含函数名、符号等）
+        auto const description = entry.description();
+        if (not description.empty()) {
+            std::println("  🔧 函数: {}", description);
+        }
+        
+        // 完整的 stacktrace_entry 信息
+        std::println("  📊 完整信息: {}", entry);
+        
+        // 如果只显示前几帧
+        if (i >= 9) {
+            std::size_t remaining = trace.size() - i - 1;
+            if (remaining > 0) {
+                std::println("\n  ... 还有 {} 帧未显示", remaining);
+            }
+            break;
+        }
+    }
+    
+    std::println("\n{'=':#>60}", "");
 }
 
 // 抛出异常的函数
@@ -179,11 +232,15 @@ auto main() -> int {
             std::println("  ✓ 捕获到异常: {}", e.what());
             std::println("  ✓ 异常抛出时的调用栈深度: {}", e.trace().size());
             
-            // 打印异常调用栈的前 5 帧
+            // 打印异常调用栈的前 5 帧（简单格式）
+            std::println("\n  简单格式输出（前5帧）:");
             auto const max_frames = std::min(std::size_t{5}, e.trace().size());
             for (std::size_t i = 0z; i < max_frames; ++i) {
                 std::println("    [{}] {}", i, e.trace()[i]);
             }
+            
+            // 打印详细的异常块代码信息
+            print_detailed_stacktrace(e.trace(), "异常抛出位置的详细调用栈");
         }
         std::println();
         
@@ -229,24 +286,53 @@ auto main() -> int {
         
         // 捕获当前位置的 stacktrace
         auto crash_trace = std::stacktrace::current();
-        std::println("❌ 崩溃时的调用栈:");
+        std::println("❌ 崩溃时的调用栈（简单格式）:");
         auto const max_frames = std::min(std::size_t{10}, crash_trace.size());
         for (std::size_t i = 0z; i < max_frames; ++i) {
             std::println("  [{}] {}", i, crash_trace[i]);
         }
+        
+        // 打印详细的崩溃信息
+        print_detailed_stacktrace(crash_trace, "崩溃位置的详细调用栈");
         
         return 1;
     } catch (...) {
         std::println("\n❌ 发生未知异常!");
         
         auto crash_trace = std::stacktrace::current();
-        std::println("❌ 崩溃时的调用栈 (前10帧):");
+        std::println("❌ 崩溃时的调用栈（简单格式，前10帧）:");
         auto const max_frames = std::min(std::size_t{10}, crash_trace.size());
         for (std::size_t i = 0z; i < max_frames; ++i) {
             std::println("  [{}] {}", i, crash_trace[i]);
         }
         
+        // 打印详细的崩溃信息
+        print_detailed_stacktrace(crash_trace, "未知异常的详细调用栈");
+        
         return 1;
     }
 }
+
+#else  // !_WIN32
+
+import std;
+
+auto main() -> int {
+    std::println("════════════════════════════════════════");
+    std::println("   ⚠️  std::stacktrace 测试跳过");
+    std::println("════════════════════════════════════════\n");
+    
+    std::println("std::stacktrace 目前主要在 Windows (MSVC) 上完整支持。");
+    std::println("Linux/Unix 平台的支持仍在发展中。");
+    std::println("\n如需在 Linux 上测试 stacktrace，请使用：");
+    std::println("  - libbacktrace");
+    std::println("  - boost::stacktrace");
+    std::println("  - 或等待 libc++/libstdc++ 的完整实现");
+    
+    std::println("\n════════════════════════════════════════");
+    
+    return 0;
+}
+
+#endif  // _WIN32
 
