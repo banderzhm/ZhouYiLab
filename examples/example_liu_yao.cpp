@@ -77,20 +77,75 @@ int main() {
         }
         fmt::print("\n{:─<60}\n\n", "");
         
-        // 输出完整的 JSON 数据（英文 key）
-        fmt::print("📋 完整 JSON 数据（英文 key）：\n");
-        fmt::print("{:─<60}\n", "");
-        auto json_str2 = result2.json_data.dump(2);
-        fmt::print("{}\n", json_str2);
-        fmt::print("{:─<60}\n\n", "");
-        
         // 输出 AI 可读的 JSON 数据（中文 key）
         fmt::print("🤖 AI 可读 JSON 数据（中文 key）：\n");
+        fmt::print("{:=<60}\n", "");
+        
+        // 1. 八字信息
+        if (result2.ai_read_json_data.contains("八字")) {
+            fmt::print("\n📅 八字信息：\n");
+            fmt::print("{}\n", result2.ai_read_json_data["八字"].dump(2));
+        }
+        
+        // 2. 本卦/变卦名称
+        if (result2.ai_read_json_data.contains("本卦名称")) {
+            fmt::print("\n🔮 本卦名称：{}\n", 
+                      result2.ai_read_json_data["本卦名称"].get<std::string>());
+        }
+        if (result2.ai_read_json_data.contains("变卦名称")) {
+            fmt::print("🔄 变卦名称：{}\n", 
+                      result2.ai_read_json_data["变卦名称"].get<std::string>());
+        }
+        
+        // 3. 神煞信息
+        if (result2.ai_read_json_data.contains("神煞")) {
+            fmt::print("\n✨ 神煞信息：\n");
+            fmt::print("{}\n", result2.ai_read_json_data["神煞"].dump(2));
+        }
+        
+        // 4. 六爻信息（简要展示）
+        if (result2.ai_read_json_data.contains("六爻")) {
+            fmt::print("\n🎲 六爻信息（AI 格式）：\n");
+            auto const& liu_yao = result2.ai_read_json_data["六爻"];
+            for (int i = 1; i <= 6; ++i) {
+                auto yao_key = fmt::format("{}爻", i);
+                if (liu_yao.contains(yao_key)) {
+                    auto const& yao = liu_yao[yao_key];
+                    fmt::print("\n  【{}】{}\n", yao_key, 
+                              yao["世应标记"].get<std::string>());
+                    fmt::print("    本卦：{} {} ({}) - {}\n",
+                              yao["本卦"]["干支"].get<std::string>(),
+                              yao["本卦"]["六亲"].get<std::string>(),
+                              yao["本卦"]["五行"].get<std::string>(),
+                              yao["旺衰"].get<std::string>());
+                    fmt::print("    六神：{}\n", yao["六神"].get<std::string>());
+                    
+                    if (yao["是否动爻"].get<bool>()) {
+                        fmt::print("    ⚡ 动爻 {} -> 变卦：{} {} ({})\n",
+                                  yao["动爻标记"].get<std::string>(),
+                                  yao["变卦"]["干支"].get<std::string>(),
+                                  yao["变卦"]["六亲"].get<std::string>(),
+                                  yao["变卦"]["五行"].get<std::string>());
+                    }
+                    
+                    if (yao.contains("伏神")) {
+                        fmt::print("    🔹 伏神：{} {} ({})\n",
+                                  yao["伏神"]["干支"].get<std::string>(),
+                                  yao["伏神"]["六亲"].get<std::string>(),
+                                  yao["伏神"]["五行"].get<std::string>());
+                    }
+                }
+            }
+        }
+        
+        fmt::print("\n{:=<60}\n", "");
+        
+        // 输出完整 AI JSON（供参考）
+        fmt::print("\n📋 完整 AI JSON（供 AI 阅读）：\n");
         fmt::print("{:─<60}\n", "");
         auto ai_json_str = result2.ai_read_json_data.dump(2);
         fmt::print("{}\n", ai_json_str);
-        fmt::print("{:─<60}\n", "");
-        fmt::print("\n");
+        fmt::print("{:─<60}\n\n", "");
 
         // 示例3：从爻辞生成卦象
         fmt::print("【示例3】从爻辞生成卦象\n");
