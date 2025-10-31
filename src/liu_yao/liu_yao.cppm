@@ -370,10 +370,14 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
         {"寅", "午"}, {"申", "午"}, {"卯", "申"}, {"酉", "申"}, {"辰", "戌"}, {"戌", "戌"},
         {"巳", "子"}, {"亥", "子"}, {"午", "寅"}, {"子", "寅"}, {"未", "辰"}, {"丑", "辰"}};
 
-    // 谋星 (日干查)
+    // 谋星 (日支查 - 按三合局)
+    // 寅午戌(火局)→辰, 申子辰(水局)→酉, 巳酉丑(金局)→未, 亥卯未(木局)→丑
     static const std::unordered_map<std::string, std::string> mouXingMap = {
-        {"甲", "亥"}, {"乙", "亥"}, {"丙", "寅"}, {"丁", "卯"}, {"戊", "寅"},
-        {"己", "卯"}, {"庚", "巳"}, {"辛", "巳"}, {"壬", "申"}, {"癸", "申"}};
+        {"寅", "辰"}, {"午", "辰"}, {"戌", "辰"},  // 火局 → 辰
+        {"申", "酉"}, {"子", "酉"}, {"辰", "酉"},  // 水局 → 酉
+        {"巳", "未"}, {"酉", "未"}, {"丑", "未"},  // 金局 → 未
+        {"亥", "丑"}, {"卯", "丑"}, {"未", "丑"}   // 木局 → 丑
+    };
 
     // 日德 (日干查 - 仅阳干)
     static const std::unordered_map<std::string, std::string> riDeMap = {
@@ -439,7 +443,7 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
     shenShaDefinitionMap["驿马"].push_back(yiMaMap.at(dayBranch)); // 沿用日支优先
     shenShaDefinitionMap["天马"].push_back(tianMaMap.at(monthBranch)); // 天马 (基于月支)
 
-    shenShaDefinitionMap["谋星"].push_back(mouXingMap.at(dayStem));
+    shenShaDefinitionMap["谋星"].push_back(mouXingMap.at(dayBranch));  // 按日支查（三合局）
     shenShaDefinitionMap["文昌"].push_back(wenChangMap.at(dayStem));
     shenShaDefinitionMap["华盖"].push_back(huaGaiMap.at(dayBranch)); // 沿用日支优先
     shenShaDefinitionMap["将星"].push_back(jiangXingMap.at(dayBranch)); // 沿用日支优先
@@ -905,7 +909,7 @@ inline nlohmann::json aiSetSixYaoDivination(
         
         // 动爻信息（完整翻译）
         yao_cn["是否动爻"] = yao.isChanging;
-        yao_cn["动爻标记"] = yao.changeMark;
+        //yao_cn["动爻标记"] = yao.changeMark;
         
         // 变卦信息（完整翻译，始终包含）
         nlohmann::json bian_gua_cn;
