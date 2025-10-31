@@ -47,7 +47,7 @@ auto recursive_function(int depth) -> void {
 // 打印详细的 stacktrace 信息（包括源文件、函数名、行号）
 auto print_detailed_stacktrace(std::stacktrace const& trace, std::string_view title = "详细调用栈") -> void {
     std::println("\n📋 {}:", title);
-    std::println("{'=':#>60}", "");
+    std::println("{:=<60}", "");
     
     if (trace.empty()) {
         std::println("  (调用栈为空)");
@@ -58,7 +58,7 @@ auto print_detailed_stacktrace(std::stacktrace const& trace, std::string_view ti
         auto const& entry = trace[i];
         
         std::println("\n  帧 #{}", i);
-        std::println("  {'─':#>58}", "");
+        std::println("  {:─<58}", "");
         
         // 获取源文件路径
         auto const source_file = entry.source_file();
@@ -91,7 +91,7 @@ auto print_detailed_stacktrace(std::stacktrace const& trace, std::string_view ti
         }
     }
     
-    std::println("\n{'=':#>60}", "");
+    std::println("\n{:=<60}", "");
 }
 
 // 抛出异常的函数
