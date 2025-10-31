@@ -434,7 +434,10 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
             }
         }
     }
-    // shenShaDefinitionMap["日德"].push_back(riDeMap.at(dayStem));
+    // 日德（仅阳干有日德：甲寅、丙巳、戊巳、庚申、壬亥）
+    if (riDeMap.contains(dayStem)) {
+        shenShaDefinitionMap["日德"].push_back(riDeMap.at(dayStem));
+    }
 
     // 3. 基于干支关系的神煞 (假设 key 存在)
     shenShaDefinitionMap["日禄"].push_back(luShenMap.at(dayStem));
