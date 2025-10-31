@@ -827,7 +827,7 @@ inline std::pair<std::vector<YaoDetails>, nlohmann::json> sixYaoDivination(const
  * 
  * @param yao_list 六爻详细信息列表
  * @param original_json 原始 JSON 数据（英文 key）
- * @return nlohmann::json AI 可读的 JSON（中文 key，爻编号格式为 "1爻"、"2爻" 等）
+ * @return nlohmann::json AI 可读的 JSON（中文 key，爻编号格式为 "1爻"、"2爻" 等，确保所有字段都翻译）
  */
 inline nlohmann::json aiSetSixYaoDivination(
     const std::vector<YaoDetails>& yao_list,
@@ -835,7 +835,7 @@ inline nlohmann::json aiSetSixYaoDivination(
 ) {
     nlohmann::json ai_json;
     
-    // 转换八字信息
+    // 转换八字信息（完整翻译所有字段）
     if (original_json.contains("ba_zi")) {
         nlohmann::json ba_zi_cn;
         auto const& ba_zi = original_json["ba_zi"];
@@ -843,6 +843,15 @@ inline nlohmann::json aiSetSixYaoDivination(
         ba_zi_cn["月柱"] = ba_zi["month"];
         ba_zi_cn["日柱"] = ba_zi["day"];
         ba_zi_cn["时柱"] = ba_zi["hour"];
+        
+        // 添加空亡信息
+        if (ba_zi.contains("xun_kong_1")) {
+            ba_zi_cn["旬空1"] = ba_zi["xun_kong_1"];
+        }
+        if (ba_zi.contains("xun_kong_2")) {
+            ba_zi_cn["旬空2"] = ba_zi["xun_kong_2"];
+        }
+        
         ai_json["八字"] = ba_zi_cn;
     }
     
@@ -856,7 +865,12 @@ inline nlohmann::json aiSetSixYaoDivination(
         ai_json["变卦名称"] = original_json["bian_gua_name"];
     }
     
-    // 转换六爻信息（使用中文 key，爻编号格式为 "1爻"、"2爻" 等）
+    // 转换神煞信息（神煞名称已经是中文，直接保留）
+    if (original_json.contains("shen_sa")) {
+        ai_json["神煞"] = original_json["shen_sa"];
+    }
+    
+    // 转换六爻信息（完整翻译所有字段，使用 "1爻"、"2爻" 等格式）
     nlohmann::json liu_yao_cn;
     for (std::size_t i = 0z; i < yao_list.size(); ++i) {
         auto const& yao = yao_list[i];
@@ -865,22 +879,20 @@ inline nlohmann::json aiSetSixYaoDivination(
         // 基本信息
         yao_cn["爻位"] = yao.position;
         yao_cn["世应标记"] = yao.shiYingMark;
+        yao_cn["六神"] = yao.spirit;
+        yao_cn["旺衰"] = yao.wangShuai;
         
-        // 本卦信息
+        // 本卦信息（完整翻译）
         nlohmann::json ben_gua_cn;
         ben_gua_cn["干支"] = yao.mainPillar.to_string();
         ben_gua_cn["天干"] = std::string{yao.mainPillar.stem()};
         ben_gua_cn["地支"] = std::string{yao.mainPillar.branch()};
         ben_gua_cn["五行"] = yao.mainElement;
         ben_gua_cn["六亲"] = yao.mainRelative;
-        ben_gua_cn["爻性"] = (yao.mainYaoType == '1' ? "阳爻" : "阴爻");
+        ben_gua_cn["爻性"] = (yao.mainYaoType == '1' || yao.mainYaoType == 49 ? "阳爻" : "阴爻");
         yao_cn["本卦"] = ben_gua_cn;
         
-        // 六神和旺衰
-        yao_cn["六神"] = yao.spirit;
-        yao_cn["旺衰"] = yao.wangShuai;
-        
-        // 伏神信息
+        // 伏神信息（完整翻译，如果存在）
         if (not yao.hiddenPillar.to_string().empty()) {
             nlohmann::json fu_shen_cn;
             fu_shen_cn["干支"] = yao.hiddenPillar.to_string();
@@ -891,20 +903,19 @@ inline nlohmann::json aiSetSixYaoDivination(
             yao_cn["伏神"] = fu_shen_cn;
         }
         
-        // 动爻和变卦信息
+        // 动爻信息（完整翻译）
         yao_cn["是否动爻"] = yao.isChanging;
-        if (yao.isChanging) {
-            yao_cn["动爻标记"] = yao.changeMark;
-            
-            nlohmann::json bian_gua_cn;
-            bian_gua_cn["干支"] = yao.changedPillar.to_string();
-            bian_gua_cn["天干"] = std::string{yao.changedPillar.stem()};
-            bian_gua_cn["地支"] = std::string{yao.changedPillar.branch()};
-            bian_gua_cn["五行"] = yao.changedElement;
-            bian_gua_cn["六亲"] = yao.changedRelative;
-            bian_gua_cn["爻性"] = (yao.mainYaoType == '0' ? "阳爻" : "阴爻");  // 变卦爻性相反
-            yao_cn["变卦"] = bian_gua_cn;
-        }
+        yao_cn["动爻标记"] = yao.changeMark;
+        
+        // 变卦信息（完整翻译，始终包含）
+        nlohmann::json bian_gua_cn;
+        bian_gua_cn["干支"] = yao.changedPillar.to_string();
+        bian_gua_cn["天干"] = std::string{yao.changedPillar.stem()};
+        bian_gua_cn["地支"] = std::string{yao.changedPillar.branch()};
+        bian_gua_cn["五行"] = yao.changedElement;
+        bian_gua_cn["六亲"] = yao.changedRelative;
+        bian_gua_cn["爻性"] = (yao.mainYaoType == '0' || yao.mainYaoType == 48 ? "阳爻" : "阴爻");  // 变卦爻性相反
+        yao_cn["变卦"] = bian_gua_cn;
         
         // 使用 "1爻"、"2爻" 等格式作为 key
         auto yao_key = fmt::format("{}爻", yao.position);

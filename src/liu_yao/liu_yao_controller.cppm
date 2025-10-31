@@ -132,10 +132,12 @@ HexagramInfo get_hexagram_info(const std::string& hexagram_code);
  * @brief 批量排盘（用于批量处理）
  * 
  * @param requests 批量请求列表，每个请求包含 {卦象代码, 八字, 动爻列表}
+ * @param generate_ai_json 是否生成 AI 可读的 JSON 数据（中文 key，默认 false）
  * @return 批量结果列表
  */
 std::vector<LiuYaoPaiPanResult> batch_calculate_liu_yao(
-    const std::vector<std::tuple<std::string, BaZi, std::vector<int>>>& requests
+    const std::vector<std::tuple<std::string, BaZi, std::vector<int>>>& requests,
+    bool generate_ai_json = false
 );
 
 } // namespace ZhouYi::LiuYaoController

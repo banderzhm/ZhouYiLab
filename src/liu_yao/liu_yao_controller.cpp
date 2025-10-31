@@ -154,14 +154,15 @@ HexagramInfo get_hexagram_info(const std::string& hexagram_code) {
  * @brief 批量排盘实现
  */
 std::vector<LiuYaoPaiPanResult> batch_calculate_liu_yao(
-    const std::vector<std::tuple<std::string, BaZi, std::vector<int>>>& requests
+    const std::vector<std::tuple<std::string, BaZi, std::vector<int>>>& requests,
+    bool generate_ai_json
 ) {
     std::vector<LiuYaoPaiPanResult> results;
     results.reserve(requests.size());
     
     for (const auto& [code, bazi, changing_lines] : requests) {
         try {
-            results.push_back(calculate_liu_yao(code, bazi, changing_lines));
+            results.push_back(calculate_liu_yao(code, bazi, changing_lines, generate_ai_json));
         } catch (const std::exception& e) {
             // 失败时添加空结果，并在 JSON 中记录错误
             LiuYaoPaiPanResult error_result;
