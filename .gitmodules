@@ -17,5 +17,5 @@
 	url = https://github.com/doctest/doctest.git
 [submodule "3rdparty/asio"]
 	path = 3rdparty/asio
-	url = https://github.com/DanielaE/asio.git
+	url = https://github.com/banderzhm/asio.git
 	branch = module
