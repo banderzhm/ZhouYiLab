@@ -19,7 +19,7 @@ int main() {
 
     try {
         // 创建八字（用于六爻排盘）
-        auto bazi = BaZi::from_solar(2025, 6, 15, 14, 0);
+        auto bazi = BaZi::from_solar(2025, 4, 7, 17, 3);
         
         // 示例1：基本六爻排盘（无动爻）
         fmt::print("【示例1】基本六爻排盘（乾卦，无动爻）\n");
@@ -35,16 +35,46 @@ int main() {
         fmt::print("\n");
 
         // 示例2：带动爻的六爻排盘
-        fmt::print("【示例2】带动爻的六爻排盘（第3爻和第5爻动）\n");
+        fmt::print("【示例2】带动爻的六爻排盘（第5爻动）\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-        fmt::print("主卦代码：010101\n\n");
+        fmt::print("主卦代码：011101\n");
+        fmt::print("动爻位置：第5爻\n\n");
         
-        auto result2 = calculate_liu_yao("010101", bazi, {3, 5});
+        auto result2 = calculate_liu_yao("011101", bazi, {5});
         
-        fmt::print("六爻信息（从下到上）：\n");
-        for (const auto& yao : result2.yao_list) {
-            fmt::print("  第{}爻: {}\n", yao.position, yao.mainPillar.to_string());
+        // 完整输出六爻信息
+        fmt::print("📊 六爻详细信息（从下到上）：\n");
+        fmt::print("{:─<60}\n", "");
+        for (std::size_t i = 0z; i < result2.yao_list.size(); ++i) {
+            auto const& yao = result2.yao_list[i];
+            fmt::print("\n第{}爻：\n", yao.position);
+            fmt::print("  • 主卦干支：{}\n", yao.mainPillar.to_string());
+            
+            // 如果有变卦信息
+            if (not yao.changePillar.to_string().empty()) {
+                fmt::print("  • 变卦干支：{}\n", yao.changePillar.to_string());
+                fmt::print("  • 是否动爻：是 ⚡\n");
+            } else {
+                fmt::print("  • 是否动爻：否\n");
+            }
+            
+            // 输出六亲、六神等信息
+            fmt::print("  • 六亲：{}\n", yao.liuQin);
+            fmt::print("  • 六神：{}\n", yao.liuShen);
+            fmt::print("  • 地支藏干：{}\n", fmt::join(yao.cangGan, "、"));
+            
+            if (i < result2.yao_list.size() - 1) {
+                fmt::print("  {:-<56}\n", "");
+            }
         }
+        fmt::print("\n{:─<60}\n\n", "");
+        
+        // 输出完整的 JSON 数据
+        fmt::print("📋 完整 JSON 数据：\n");
+        fmt::print("{:─<60}\n", "");
+        auto json_str2 = result2.json_data.dump(2);
+        fmt::print("{}\n", json_str2);
+        fmt::print("{:─<60}\n", "");
         fmt::print("\n");
 
         // 示例3：从爻辞生成卦象
