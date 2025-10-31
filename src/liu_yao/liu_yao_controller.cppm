@@ -97,6 +97,9 @@ LiuYaoPaiPanResult calculate_liu_yao(
  * std::vector<int> changing_lines;
  * auto code = yao_ci_to_hexagram_code(yao_ci, changing_lines);
  * // code = "101010", changing_lines = {3, 4}
+ * 
+ * // 然后使用生成的代码进行排盘，可启用 AI JSON
+ * auto result = calculate_liu_yao(code, bazi, changing_lines, true);
  */
 std::string yao_ci_to_hexagram_code(
     const std::vector<int>& yao_ci,
@@ -114,6 +117,9 @@ std::string yao_ci_to_hexagram_code(
  * // 金钱卦：3个正面=阳爻(1)，3个反面=阴爻(0)
  * std::vector<int> numbers = {3, 2, 3, 1, 2, 3};  // 从下到上
  * auto code = numbers_to_hexagram_code(numbers, true);
+ * 
+ * // 然后使用生成的代码进行排盘，可启用 AI JSON
+ * auto result = calculate_liu_yao(code, bazi, {}, true);
  */
 std::string numbers_to_hexagram_code(
     const std::vector<int>& numbers,

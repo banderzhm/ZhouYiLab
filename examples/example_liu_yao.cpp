@@ -80,7 +80,7 @@ int main() {
         // 输出 AI 可读的 JSON 数据（中文 key）
         fmt::print("🤖 AI 可读 JSON 数据（中文 key）：\n");
         fmt::print("{:─<60}\n", "");
-        fmt::print("{}\n", result2.ai_read_json_data.dump(2));
+        fmt::print("{}\n", result2.ai_read_json_data.dump(4));
         fmt::print("{:─<60}\n\n", "");
 
         // 示例3：从爻辞生成卦象
@@ -95,10 +95,20 @@ int main() {
         fmt::print("主卦代码：{}\n", code);
         fmt::print("动爻位置：{}\n\n", fmt::join(changing_lines, ", "));
         
-        auto result3 = calculate_liu_yao(code, bazi, changing_lines);
+        // 也启用 AI JSON 生成
+        auto result3 = calculate_liu_yao(code, bazi, changing_lines, true);
+        
         fmt::print("六爻信息（从下到上）：\n");
         for (const auto& yao : result3.yao_list) {
             fmt::print("  第{}爻: {}\n", yao.position, yao.mainPillar.to_string());
+        }
+        
+        // 输出 AI JSON
+        if (not result3.ai_read_json_data.empty()) {
+            fmt::print("\n🤖 AI 可读 JSON：\n");
+            fmt::print("{:─<60}\n", "");
+            fmt::print("{}\n", result3.ai_read_json_data.dump(4));
+            fmt::print("{:─<60}\n", "");
         }
         fmt::print("\n");
 
