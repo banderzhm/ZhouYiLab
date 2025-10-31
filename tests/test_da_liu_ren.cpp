@@ -1,15 +1,13 @@
 // 大六壬系统测试
 
-// Use global module fragment to isolate doctest from C++23 modules
-module;
-#include <doctest/doctest.h>
-
 import ZhouYi.DaLiuRen;
 import ZhouYi.DaLiuRen.Controller;
 import ZhouYi.GanZhi;
 import ZhouYi.BaZiBase;
 import fmt;
 import std;
+
+#include <doctest/doctest.h>
 
 using namespace ZhouYi::DaLiuRen;
 using namespace ZhouYi::DaLiuRen::Controller;

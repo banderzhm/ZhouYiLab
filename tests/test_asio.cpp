@@ -1,11 +1,9 @@
 // Asio 异步 I/O 库测试
 
-// Use global module fragment to isolate doctest from C++23 modules
-module;
-#include <doctest/doctest.h>
-
 import asio;
 import std;
+
+#include <doctest/doctest.h>
 
 using asio::ip::tcp;
 using asio::ip::udp;

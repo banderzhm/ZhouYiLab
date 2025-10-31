@@ -1,12 +1,10 @@
 // 干支系统测试
 
-// Use global module fragment to isolate doctest from C++23 modules
-module;
-#include <doctest/doctest.h>
-
 import ZhouYi.GanZhi;
 import magic_enum;
 import std;
+
+#include <doctest/doctest.h>
 
 using namespace ZhouYi::GanZhi;
 

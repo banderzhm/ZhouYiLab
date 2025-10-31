@@ -1,13 +1,11 @@
 // 八字系统测试
 
-// Use global module fragment to isolate doctest from C++23 modules
-module;
-#include <doctest/doctest.h>
-
 import ZhouYi.BaZiBase;
 import ZhouYi.GanZhi;
 import nlohmann.json;  // 添加 JSON 支持
 import std;
+
+#include <doctest/doctest.h>
 
 using namespace ZhouYi::BaZiBase;
 using namespace ZhouYi::GanZhi;
