@@ -1,5 +1,8 @@
 // 六爻排盘实例演示
 // 展示六爻排盘的实际应用和输出效果
+
+// Use global module fragment to isolate doctest from C++23 modules
+module;
 #include <doctest/doctest.h>
 
 import ZhouYi.LiuYaoController;
