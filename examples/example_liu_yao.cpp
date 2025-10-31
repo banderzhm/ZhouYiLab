@@ -47,21 +47,29 @@ int main() {
         fmt::print("{:─<60}\n", "");
         for (std::size_t i = 0z; i < result2.yao_list.size(); ++i) {
             auto const& yao = result2.yao_list[i];
-            fmt::print("\n第{}爻：\n", yao.position);
-            fmt::print("  • 主卦干支：{}\n", yao.mainPillar.to_string());
+            fmt::print("\n第{}爻 {}：\n", yao.position, yao.shiYingMark);
+            fmt::print("  • 本卦干支：{}\n", yao.mainPillar.to_string());
+            fmt::print("  • 本卦五行：{}\n", yao.mainElement);
+            fmt::print("  • 六亲：{}\n", yao.mainRelative);
+            fmt::print("  • 六神：{}\n", yao.spirit);
+            fmt::print("  • 旺衰：{}\n", yao.wangShuai);
             
-            // 如果有变卦信息
-            if (not yao.changePillar.to_string().empty()) {
-                fmt::print("  • 变卦干支：{}\n", yao.changePillar.to_string());
-                fmt::print("  • 是否动爻：是 ⚡\n");
+            // 如果是动爻
+            if (yao.isChanging) {
+                fmt::print("  • 是否动爻：是 ⚡ {}\n", yao.changeMark);
+                fmt::print("  • 变卦干支：{}\n", yao.changedPillar.to_string());
+                fmt::print("  • 变卦五行：{}\n", yao.changedElement);
+                fmt::print("  • 变卦六亲：{}\n", yao.changedRelative);
             } else {
                 fmt::print("  • 是否动爻：否\n");
             }
             
-            // 输出六亲、六神等信息
-            fmt::print("  • 六亲：{}\n", yao.liuQin);
-            fmt::print("  • 六神：{}\n", yao.liuShen);
-            fmt::print("  • 地支藏干：{}\n", fmt::join(yao.cangGan, "、"));
+            // 如果有伏神
+            if (not yao.hiddenPillar.to_string().empty()) {
+                fmt::print("  • 伏神干支：{}\n", yao.hiddenPillar.to_string());
+                fmt::print("  • 伏神五行：{}\n", yao.hiddenElement);
+                fmt::print("  • 伏神六亲：{}\n", yao.hiddenRelative);
+            }
             
             if (i < result2.yao_list.size() - 1) {
                 fmt::print("  {:-<56}\n", "");
