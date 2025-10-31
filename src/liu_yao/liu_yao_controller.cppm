@@ -32,8 +32,9 @@ using ZhouYi::LiuYao::HexagramInfo;
  * 封装排盘的所有结果信息
  */
 struct LiuYaoPaiPanResult {
-    std::vector<YaoDetails> yao_list;  // 六爻详细信息列表（从下到上，1-6爻）
-    nlohmann::json json_data;           // 完整的 JSON 数据
+    std::vector<YaoDetails> yao_list;      // 六爻详细信息列表（从下到上，1-6爻）
+    nlohmann::json json_data;               // 完整的 JSON 数据（英文 key）
+    nlohmann::json ai_read_json_data;      // AI 可读的 JSON 数据（中文 key）
     
     // JSON 序列化支持
     friend void to_json(nlohmann::json& j, const LiuYaoPaiPanResult& r) {
@@ -50,6 +51,7 @@ struct LiuYaoPaiPanResult {
  *                           - 从下到上排列（第1位是初爻，第6位是上爻）
  * @param bazi 八字信息（用于计算旺衰、神煞等）
  * @param changing_line_indices 动爻位置列表（1-6，空列表表示无动爻）
+ * @param generate_ai_json 是否生成 AI 可读的 JSON 数据（中文 key，默认 false）
  * 
  * @return LiuYaoPaiPanResult 排盘结果
  * 
@@ -58,7 +60,7 @@ struct LiuYaoPaiPanResult {
  * auto bazi = ZhouYi::BaZiBase::BaZi::from_solar(2024, 10, 13, 14, 30);
  * 
  * // 排盘：主卦为 010101（从下到上），第3爻和第5爻动
- * auto result = calculate_liu_yao("010101", bazi, {3, 5});
+ * auto result = calculate_liu_yao("010101", bazi, {3, 5}, true);
  * 
  * // 获取结果
  * for (const auto& yao : result.yao_list) {
@@ -66,13 +68,17 @@ struct LiuYaoPaiPanResult {
  *               << yao.mainPillar.to_string() << std::endl;
  * }
  * 
- * // 导出 JSON
+ * // 导出 JSON（英文 key）
  * std::cout << result.json_data.dump(2) << std::endl;
+ * 
+ * // 导出 AI 可读 JSON（中文 key）
+ * std::cout << result.ai_read_json_data.dump(2) << std::endl;
  */
 LiuYaoPaiPanResult calculate_liu_yao(
     const std::string& main_hexagram_code,
     const BaZi& bazi,
-    const std::vector<int>& changing_line_indices = {}
+    const std::vector<int>& changing_line_indices = {},
+    bool generate_ai_json = false
 );
 
 /**

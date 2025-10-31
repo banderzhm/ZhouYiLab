@@ -21,7 +21,8 @@ using namespace ZhouYi::LiuYao;
 LiuYaoPaiPanResult calculate_liu_yao(
     const std::string& main_hexagram_code,
     const BaZi& bazi,
-    const std::vector<int>& changing_line_indices
+    const std::vector<int>& changing_line_indices,
+    bool generate_ai_json
 ) {
     // 验证卦象代码
     if (main_hexagram_code.length() != 6) {
@@ -44,10 +45,17 @@ LiuYaoPaiPanResult calculate_liu_yao(
     // 调用内部排盘函数
     auto [yao_list, json_data] = sixYaoDivination(main_hexagram_code, bazi, changing_line_indices);
     
+    // 生成 AI 可读的 JSON（如果需要）
+    nlohmann::json ai_read_json_data;
+    if (generate_ai_json) {
+        ai_read_json_data = aiSetSixYaoDivination(yao_list, json_data);
+    }
+    
     // 返回结果
     return LiuYaoPaiPanResult{
         .yao_list = std::move(yao_list),
-        .json_data = std::move(json_data)
+        .json_data = std::move(json_data),
+        .ai_read_json_data = std::move(ai_read_json_data)
     };
 }
 

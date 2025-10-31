@@ -40,7 +40,7 @@ int main() {
         fmt::print("主卦代码：011101\n");
         fmt::print("动爻位置：第5爻\n\n");
         
-        auto result2 = calculate_liu_yao("011101", bazi, {5});
+        auto result2 = calculate_liu_yao("011101", bazi, {5}, true);  // 启用 AI 可读 JSON
         
         // 完整输出六爻信息
         fmt::print("📊 六爻详细信息（从下到上）：\n");
@@ -77,11 +77,18 @@ int main() {
         }
         fmt::print("\n{:─<60}\n\n", "");
         
-        // 输出完整的 JSON 数据
-        fmt::print("📋 完整 JSON 数据：\n");
+        // 输出完整的 JSON 数据（英文 key）
+        fmt::print("📋 完整 JSON 数据（英文 key）：\n");
         fmt::print("{:─<60}\n", "");
         auto json_str2 = result2.json_data.dump(2);
         fmt::print("{}\n", json_str2);
+        fmt::print("{:─<60}\n\n", "");
+        
+        // 输出 AI 可读的 JSON 数据（中文 key）
+        fmt::print("🤖 AI 可读 JSON 数据（中文 key）：\n");
+        fmt::print("{:─<60}\n", "");
+        auto ai_json_str = result2.ai_read_json_data.dump(2);
+        fmt::print("{}\n", ai_json_str);
         fmt::print("{:─<60}\n", "");
         fmt::print("\n");
 
