@@ -498,7 +498,7 @@ std::array<DiZhi, 3> SanChuan::fu_yin() {
         }
     }
     
-    // 5. 检查三传格式，如果三传全部相同（111格式），需要特殊处理
+    // 5. 检查三传格式，如果三传全部相同，需要特殊处理
     if (chu_chuan_ == zhong_chuan_ && zhong_chuan_ == mo_chuan_) {
         // 特别处理：乙木日，第一课酉/乙，第三课辰/辰
         if (si_ke_.first.gan == TianGan::Yi && 
