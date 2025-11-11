@@ -39,6 +39,7 @@ cmake-build-*
 *.swo
 *~
 .DS_Store
+.claude
 
 # Visual Studio
 .vs/
@@ -73,3 +74,5 @@ vcpkg_installed/
 # History
 .history/
 
+front/
+.cursor/
