@@ -52,29 +52,214 @@ enum class YueJiang {
 };
 
 /**
- * @brief 根据农历月份获取月将对应的地支
- * 
- * @param lunar_month 农历月份（1-12）
- * @return DiZhi 月将对应的地支
+ * @brief 根据太阳黄经（气中换将）确定月将
+ *
+ * 算法说明：
+ * 本函数严格按照传统历法歌诀实现月将的精确计算。
+ * 月将的切换不是简单的按月份，而是根据太阳在黄道上的实际位置，
+ * 在特定节气的特定时刻进行切换。
+ *
+ * 历法歌诀（写于此处，便于校对公式）：
+ * 雨水前日卯初刻，太阳入卫用登明；(亥)  - 雨水前1日，卯时初刻（5:00）-> 登明(亥)
+ * 春分后二巳一刻，入鲁河魁作将明；(戌)  - 春分后2日，巳时一刻（9:15）-> 河魁(戌)
+ * 谷雨后四亥初刻，入赵从魁用可称；(酉)  - 谷雨后4日，亥时初刻（21:00）-> 从魁(酉)
+ * 小满后五酉三刻，入晋还须传送兵；(申)  - 小满后5日，酉时三刻（17:45）-> 传送(申)
+ * 夏至后四未一刻，入秦小吉用其名；(未)  - 夏至后4日，未时一刻（13:15）-> 小吉(未)
+ * 大暑后三巳一刻，入周先用胜光灵；(午)  - 大暑后3日，巳时一刻（9:15）-> 胜光(午)
+ * 处暑后三巳二刻，入楚还当太乙迎；(巳)  - 处暑后3日，巳时二刻（9:30）-> 太乙(巳)
+ * 秋分后七寅三刻，入郑天罡用去亨；(辰)  - 秋分后7日，寅时三刻（3:45）-> 天罡(辰)
+ * 霜降后九丑三刻，太冲运动宋州城；(卯)  - 霜降后9日，丑时三刻（1:45）-> 太冲(卯)
+ * 小雪后七戌一刻，功曹将领入燕京；(寅)  - 小雪后7日，戌时一刻（19:15）-> 功曹(寅)
+ * 冬至后四亥一刻，入吴大吉便休停；(丑)  - 冬至后4日，亥时一刻（21:15）-> 大吉(丑)
+ * 大寒当日酉三刻，入齐神后岁功成。(子)  - 大寒当日，酉时三刻（17:45）-> 神后(子)
+ *
+ * 算法流程：
+ * 1. 定义12个月将切换规则（对应12个节气切换点）
+ * 2. 计算前后三年的所有切换时刻（确保覆盖当前时间）
+ * 3. 按时间排序所有切换点
+ * 4. 去重（避免重复的切换点）
+ * 5. 找到最后一个不超过当前时间的切换点，其对应的月将即为当前月将
+ *
+ * @param solar_time 公历时刻
+ * @return DiZhi 月将地支
  */
-inline DiZhi get_yue_jiang(int lunar_month) {
-    constexpr std::array<DiZhi, 12> yue_jiang_map = {
-        DiZhi::Hai,   // 正月 - 登明（亥）
-        DiZhi::Xu,    // 二月 - 河魁（戌）
-        DiZhi::You,   // 三月 - 传送（酉）
-        DiZhi::Shen,  // 四月 - 小吉（申）
-        DiZhi::Wei,   // 五月 - 胜光（未）
-        DiZhi::Si,    // 六月 - 太乙（午）- 注意：此处为巳，与原代码保持一致
-        DiZhi::Wu,    // 七月 - 天罡（巳）- 注意：此处为午，与原代码保持一致
-        DiZhi::Chen,  // 八月 - 太冲（辰）
-        DiZhi::Mao,   // 九月 - 功曹（卯）
-        DiZhi::Yin,   // 十月 - 大吉（寅）
-        DiZhi::Chou,  // 十一月 - 神后（丑）
-        DiZhi::Zi     // 十二月 - 阴阳（子）
+inline DiZhi get_yue_jiang(const tyme::SolarTime& solar_time) {
+    /**
+     * @brief 月将切换规则结构体
+     * 
+     * 每个规则定义一个月将的切换时刻：
+     * - term_name: 基准节气名称
+     * - day_offset: 相对于节气的日期偏移（负数表示前，正数表示后，0表示当日）
+     * - trigger_branch: 触发时辰的地支（如"卯初刻"中的"卯"）
+     * - trigger_minutes: 触发时刻的分钟数（如"一刻"=15分钟，"三刻"=45分钟）
+     * - result: 切换后的月将地支
+     */
+    struct YueJiangRule {
+        const char* term_name;      // 基准节气名称
+        int day_offset;              // 日期偏移（相对于节气日）
+        DiZhi trigger_branch;        // 触发时辰的地支
+        int trigger_minutes;         // 触发时刻的分钟数（0/15/30/45）
+        DiZhi result;                // 切换后的月将地支
     };
-    
-    int index = (lunar_month - 1 + 12) % 12;
-    return yue_jiang_map[index];
+
+    /**
+     * 12个月将切换规则表
+     */
+    constexpr std::array<YueJiangRule, 12> rules = {{
+        {"雨水", -1, DiZhi::Mao, 0, DiZhi::Hai},      // 雨水前1日，卯初刻（5:00）-> 登明(亥)
+        {"春分", 2, DiZhi::Si, 15, DiZhi::Xu},        // 春分后2日，巳一刻（9:15）-> 河魁(戌)
+        {"谷雨", 4, DiZhi::Hai, 0, DiZhi::You},       // 谷雨后4日，亥初刻（21:00）-> 从魁(酉)
+        {"小满", 5, DiZhi::You, 45, DiZhi::Shen},     // 小满后5日，酉三刻（17:45）-> 传送(申)
+        {"夏至", 4, DiZhi::Wei, 15, DiZhi::Wei},      // 夏至后4日，未一刻（13:15）-> 小吉(未)
+        {"大暑", 3, DiZhi::Si, 15, DiZhi::Wu},        // 大暑后3日，巳一刻（9:15）-> 胜光(午)
+        {"处暑", 3, DiZhi::Si, 30, DiZhi::Si},        // 处暑后3日，巳二刻（9:30）-> 太乙(巳)
+        {"秋分", 7, DiZhi::Yin, 45, DiZhi::Chen},     // 秋分后7日，寅三刻（3:45）-> 天罡(辰)
+        {"霜降", 9, DiZhi::Chou, 45, DiZhi::Mao},     // 霜降后9日，丑三刻（1:45）-> 太冲(卯)
+        {"小雪", 7, DiZhi::Xu, 15, DiZhi::Yin},       // 小雪后7日，戌一刻（19:15）-> 功曹(寅)
+        {"冬至", 4, DiZhi::Hai, 15, DiZhi::Chou},     // 冬至后4日，亥一刻（21:15）-> 大吉(丑)
+        {"大寒", 0, DiZhi::You, 45, DiZhi::Zi}        // 大寒当日，酉三刻（17:45）-> 神后(子)
+    }};
+
+    /**
+     * @brief 地支转时辰（24小时制）
+     * 
+     */
+    const auto to_branch_hour = [](DiZhi branch) -> int {
+        switch (branch) {
+            case DiZhi::Zi: return 23;    // 子时起始：23:00
+            case DiZhi::Chou: return 1;   // 丑时起始：01:00
+            case DiZhi::Yin: return 3;    // 寅时起始：03:00
+            case DiZhi::Mao: return 5;    // 卯时起始：05:00
+            case DiZhi::Chen: return 7;   // 辰时起始：07:00
+            case DiZhi::Si: return 9;     // 巳时起始：09:00
+            case DiZhi::Wu: return 11;    // 午时起始：11:00
+            case DiZhi::Wei: return 13;   // 未时起始：13:00
+            case DiZhi::Shen: return 15;  // 申时起始：15:00
+            case DiZhi::You: return 17;   // 酉时起始：17:00
+            case DiZhi::Xu: return 19;    // 戌时起始：19:00
+            case DiZhi::Hai: return 21;   // 亥时起始：21:00
+        }
+        return 23;  // 默认返回子时
+    };
+
+    // 存储所有月将切换时刻和对应的月将
+    std::vector<std::pair<tyme::SolarTime, DiZhi>> transitions;
+    transitions.reserve(rules.size() * 3);  // 预留空间：12个规则 × 3年
+
+    /**
+     * 步骤1：计算前后三年的所有月将切换时刻
+     * 
+     * 为什么要计算三年？
+     * - 当前时间可能在年初或年末，需要确保覆盖到所有可能的切换点
+     * - 例如：如果当前是1月，需要包含上一年的"大寒"切换点
+     * - 如果当前是12月，需要包含下一年的"雨水"切换点
+     */
+    const int base_year = solar_time.get_year();
+    for (int year_offset : {-1, 0, 1}) {  // 遍历前一年、当前年、后一年
+        const int term_year = base_year + year_offset;
+        
+        // 遍历所有12个月将切换规则
+        for (const auto& rule : rules) {
+            // 获取基准节气（使用tyme库精确计算节气时刻）
+            const auto term = tyme::SolarTerm::from_name(term_year, std::string(rule.term_name));
+            
+            // 获取节气所在日期
+            const auto term_day = term.get_julian_day().get_solar_time().get_solar_day();
+            
+            // 计算切换日期：节气日 + 日期偏移
+            // 例如："雨水前1日" = 雨水日 + (-1) = 雨水前1日
+            const auto trigger_day = term_day.next(rule.day_offset);
+            
+            // 将地支转换为24小时制的小时数
+            // 例如："卯初刻"中的"卯" -> 5点
+            const int trigger_hour = to_branch_hour(rule.trigger_branch);
+            
+            // 构造精确的切换时刻
+            // 例如："卯初刻" = 5点0分，"巳一刻" = 9点15分
+            auto trigger_time = tyme::SolarTime::from_ymd_hms(
+                trigger_day.get_year(),
+                trigger_day.get_month(),
+                trigger_day.get_day(),
+                trigger_hour,
+                rule.trigger_minutes,  // 分钟数：0（初刻）、15（一刻）、30（二刻）、45（三刻）
+                0                      // 秒数固定为0
+            );
+            
+            // 记录切换时刻和对应的月将
+            transitions.emplace_back(trigger_time, rule.result);
+        }
+    }
+
+    /**
+     * 步骤2：按时间排序所有切换点
+     * 
+     * 排序规则：
+     * 1. 首先按时间先后排序
+     * 2. 如果时间相同，按月将地支的枚举值排序（确保结果稳定）
+     */
+    std::sort(
+        transitions.begin(),
+        transitions.end(),
+        [](const auto& lhs, const auto& rhs) {
+            // 优先按时间排序
+            if (lhs.first.is_before(rhs.first)) {
+                return true;
+            }
+            if (lhs.first.is_after(rhs.first)) {
+                return false;
+            }
+            // 时间相同时，按月将地支枚举值排序
+            return static_cast<int>(lhs.second) < static_cast<int>(rhs.second);
+        }
+    );
+
+    /**
+     * 步骤3：去除重复的切换点
+     * 
+     * 可能产生重复的原因：
+     * - 不同年份的同一规则可能计算出相同的时刻（理论上不应该，但为保险起见）
+     * - 确保每个切换时刻只保留一个记录
+     */
+    transitions.erase(
+        std::unique(
+            transitions.begin(),
+            transitions.end(),
+            [](const auto& lhs, const auto& rhs) {
+                // 如果时间和月将都相同，则认为是重复的
+                return lhs.first.equals(rhs.first) && lhs.second == rhs.second;
+            }
+        ),
+        transitions.end()
+    );
+
+    /**
+     * 步骤4：查找当前时间对应的月将
+     * 
+     * 算法：找到最后一个不超过当前时间的切换点
+     * - 遍历所有已排序的切换点
+     * - 如果切换点时间 <= 当前时间，更新当前月将
+     * - 如果切换点时间 > 当前时间，停止遍历（因为已排序，后续都更大）
+     */
+    std::optional<DiZhi> current;
+    for (const auto& [trigger_time, yue_jiang] : transitions) {
+        if (!trigger_time.is_after(solar_time)) {
+            // 切换点时间 <= 当前时间，更新月将
+            current = yue_jiang;
+        } else {
+            // 切换点时间 > 当前时间，停止遍历
+            break;
+        }
+    }
+
+    // 如果找到了有效的月将，返回它
+    if (current.has_value()) {
+        return *current;
+    }
+
+    // 如果没有找到（理论上不应该发生），返回默认值
+    // 如果切换点列表为空，返回子（神后）
+    // 否则返回最后一个切换点的月将（作为兜底）
+    return transitions.empty() ? DiZhi::Zi : transitions.back().second;
 }
 
 // ==================== 干支课类 ====================
@@ -490,9 +675,9 @@ public:
     static DaLiuRenResult pai_pan_lunar(int year, int month, int day, int hour);
     
     /**
-     * @brief 从八字排盘
+     * @brief 从八字与公历时刻排盘
      */
-    static DaLiuRenResult pai_pan_from_bazi(const BaZi& ba_zi, int lunar_month, int hour);
+    static DaLiuRenResult pai_pan_from_bazi(const BaZi& ba_zi, const tyme::SolarTime& solar_time);
 };
 
 } // namespace ZhouYi::DaLiuRen

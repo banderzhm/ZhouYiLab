@@ -747,100 +747,35 @@ std::string DaLiuRenResult::to_string() const {
 // ==================== DaLiuRenEngine 实现 ====================
 
 DaLiuRenResult DaLiuRenEngine::pai_pan(int year, int month, int day, int hour) {
-    // 获取八字
-    BaZi ba_zi = BaZi::from_solar(year, month, day, hour);
-    
-    // 获取农历月份
     auto solar_time = tyme::SolarTime::from_ymd_hms(year, month, day, hour, 0, 0);
-    auto lunar_hour = solar_time.get_lunar_hour();
-    auto lunar_month = lunar_hour.get_lunar_day().get_lunar_month();
-    int lunar_month_num = lunar_month.get_month();
-    
-    // 计算月将
-    DiZhi yue_jiang = get_yue_jiang(lunar_month_num);
-    
-    // 计算时辰地支
-    DiZhi hour_zhi = static_cast<DiZhi>((hour + 1) / 2 % 12);
-    
-    // 判断昼夜
-    bool is_day = is_daytime(hour_zhi);
-    
-    // 获取贵人
-    DiZhi gui_ren = get_gui_ren(ba_zi.day.gan, is_day);
-    
-    // 判断神将顺布还是逆布
-    bool is_clockwise = (gui_ren == DiZhi::Hai) || 
-                       (static_cast<int>(gui_ren) >= static_cast<int>(DiZhi::Zi) && 
-                        static_cast<int>(gui_ren) <= static_cast<int>(DiZhi::Chen));
-    
-    // 创建天地盘
-    TianDiPan tian_di_pan(yue_jiang, hour_zhi, gui_ren, is_clockwise);
-    
-    // 计算四课
-    // 第一课：干上神
-    DiZhi gan_gong = get_ji_gong(ba_zi.day.gan);
-    DiZhi first_upper = tian_di_pan[gan_gong];
-    GanZhiKe first_ke(ba_zi.day.gan, first_upper);
-    
-    // 第二课：第一课上神在天盘对应位置
-    DiZhi second_upper = tian_di_pan[first_upper];
-    GanZhiKe second_ke(first_upper, second_upper);
-    
-    // 第三课：支上神
-    DiZhi third_upper = tian_di_pan[ba_zi.day.zhi];
-    GanZhiKe third_ke(ba_zi.day.zhi, third_upper);
-    
-    // 第四课：第三课上神在天盘对应位置
-    DiZhi fourth_upper = tian_di_pan[third_upper];
-    GanZhiKe fourth_ke(third_upper, fourth_upper);
-    
-    // 创建四课对象
-    SiKe si_ke(first_ke, second_ke, third_ke, fourth_ke, first_upper, third_upper);
-    
-    // 计算三传
-    SanChuan san_chuan(tian_di_pan, si_ke);
-    
-    // 计算神煞
-    ShenSha::ShenShaEngine shen_sha_engine(ba_zi, ba_zi.day.zhi);
-    auto shen_sha_result = shen_sha_engine.calculate();
-    
-    // 判定卦体
-    auto gua_ti = GuaTi::GuaTiEngine::judge_all(
-        ba_zi, yue_jiang, tian_di_pan, si_ke, san_chuan
-    );
-    
-    return DaLiuRenResult(ba_zi, yue_jiang, gui_ren, is_day, 
-                          tian_di_pan, si_ke, san_chuan, shen_sha_result, gua_ti);
+    BaZi ba_zi = BaZi::from_solar(year, month, day, hour);
+    return pai_pan_from_bazi(ba_zi, solar_time);
 }
 
 DaLiuRenResult DaLiuRenEngine::pai_pan_lunar(int year, int month, int day, int hour) {
-    // 获取八字
+    auto lunar_hour = tyme::LunarHour::from_ymd_hms(year, month, day, hour, 0, 0);
+    auto solar_time = lunar_hour.get_solar_time();
     BaZi ba_zi = BaZi::from_lunar(year, month, day, hour);
-    
-    return pai_pan_from_bazi(ba_zi, month, hour);
+    return pai_pan_from_bazi(ba_zi, solar_time);
 }
 
-DaLiuRenResult DaLiuRenEngine::pai_pan_from_bazi(const BaZi& ba_zi, int lunar_month, int hour) {
-    // 计算月将
-    DiZhi yue_jiang = get_yue_jiang(lunar_month);
-    
-    // 计算时辰地支
-    DiZhi hour_zhi = static_cast<DiZhi>((hour + 1) / 2 % 12);
-    
-    // 判断昼夜
+DaLiuRenResult DaLiuRenEngine::pai_pan_from_bazi(const BaZi& ba_zi, const tyme::SolarTime& solar_time) {
+    // 获取月将
+    DiZhi yue_jiang = get_yue_jiang(solar_time);
+
+    // 直接从八字获取时辰地支（更准确）
+    DiZhi hour_zhi = ba_zi.hour.zhi;
     bool is_day = is_daytime(hour_zhi);
     
     // 获取贵人
     DiZhi gui_ren = get_gui_ren(ba_zi.day.gan, is_day);
-    
     // 判断神将顺布还是逆布
-    bool is_clockwise = (gui_ren == DiZhi::Hai) || 
-                       (static_cast<int>(gui_ren) >= static_cast<int>(DiZhi::Zi) && 
-                        static_cast<int>(gui_ren) <= static_cast<int>(DiZhi::Chen));
-    
-    // 创建天地盘
+    bool is_clockwise = (gui_ren == DiZhi::Hai) ||
+                        (static_cast<int>(gui_ren) >= static_cast<int>(DiZhi::Zi) &&
+                         static_cast<int>(gui_ren) <= static_cast<int>(DiZhi::Chen));
+
     TianDiPan tian_di_pan(yue_jiang, hour_zhi, gui_ren, is_clockwise);
-    
+
     // 计算四课
     DiZhi gan_gong = get_ji_gong(ba_zi.day.gan);
     DiZhi first_upper = tian_di_pan[gan_gong];
