@@ -1,5 +1,0 @@
-export type ItemType = {
-    value: number;
-    name: string;
-};
-//# sourceMappingURL=enum-data-types.uts.map

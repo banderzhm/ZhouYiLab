@@ -1,1 +1,0 @@
-export default "/static/test-video/fast-backward.png"

@@ -1,1 +1,0 @@
-export default "/assets/logo.abb6eead.png"
