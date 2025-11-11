@@ -127,10 +127,10 @@ void display_da_yun(const BaZiResult& result, int max_count) {
     
     for (int i = 0; i < count; ++i) {
         const auto& dy = da_yun_list[i];
-        fmt::println("{:<12} {}-{:>2}岁      {}-{}年 {:<8} {:<8}",
+        fmt::println("{:<12} {:<14} {:<14} {:<8} {:<8}",
                      dy.pillar.to_string(),
-                     dy.start_age, dy.end_age,
-                     dy.start_year, dy.end_year,
+                     fmt::format("{}-{:>2}岁", dy.start_age, dy.end_age),
+                     fmt::format("{}-{}年", dy.start_year, dy.end_year),
                      shi_shen_to_zh(dy.gan_shi_shen),
                      shi_shen_to_zh(dy.zhi_shi_shen));
     }
@@ -157,7 +157,7 @@ void display_liu_nian(const BaZiResult& result, int start_year, int count) {
         fmt::println("{:<8} {:<8} {:<6} {:<8} {:<8}",
                      year,
                      liu_nian.pillar.to_string(),
-                     std::format("{}岁", liu_nian.age),
+                     fmt::format("{}岁", liu_nian.age),
                      shi_shen_to_zh(liu_nian.gan_shi_shen),
                      shi_shen_to_zh(liu_nian.zhi_shi_shen));
     }
@@ -174,14 +174,14 @@ void display_liu_yue(const BaZiResult& result, int year) {
     fmt::println("");
     
     fmt::println("{:<8} {:<8} {:<14} {:<8} {:<8}", 
-                 "月份", "干支", "起始日期", "天干十神", "地支十神");
+                 "农历月份", "干支", "公历起始日期", "天干十神", "地支十神");
     fmt::println("{:-<56}", "");
     
     auto liu_yue_list = result.get_liu_yue_list(year);
     
     for (const auto& liu_yue : liu_yue_list) {
         fmt::println("{:<8} {:<8} {:<14} {:<8} {:<8}",
-                     std::format("{}月", liu_yue.lunar_month_index),
+                     fmt::format("{}月", liu_yue.lunar_month_index),
                      liu_yue.pillar.to_string(),
                      liu_yue.start_date,
                      shi_shen_to_zh(liu_yue.gan_shi_shen),
@@ -272,4 +272,3 @@ std::vector<BaZiResult> batch_pai_pan(
 }
 
 } // namespace ZhouYi::BaZiController
-

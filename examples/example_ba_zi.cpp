@@ -19,14 +19,14 @@ int main() {
 
     try {
         // 示例1：排盘并显示完整八字信息
-        fmt::print("【示例1】农历排盘：2000年6月15日16时（男）\n");
+        fmt::print("【1】农历排盘：2000年6月15日16时（男）\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         auto result = pai_pan_lunar(2000 , 6, 15, 16, 30, true);
         display_result(result);
         fmt::print("\n");
 
         // 示例2：查看详细信息
-        fmt::print("【示例2】查看八字详细信息\n");
+        fmt::print("【2】查看八字详细信息\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         const auto& ba_zi = result.ba_zi;
         
@@ -38,7 +38,7 @@ int main() {
         fmt::print("\n");
 
         // 示例3：查看十神关系
-        fmt::print("【示例3】十神关系分析\n");
+        fmt::print("【3】十神关系分析\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         fmt::print("年干对日干：{}\n", 
             string(to_zh(get_shi_shen(ba_zi.day.gan, ba_zi.year.gan))));
@@ -49,7 +49,7 @@ int main() {
         fmt::print("\n");
 
         // 示例4：查看童限和大运信息
-        fmt::print("【示例4】童限和大运信息\n");
+        fmt::print("【4】童限和大运信息\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         display_child_limit_detail(result);
         fmt::print("\n");
@@ -57,13 +57,13 @@ int main() {
         fmt::print("\n");
 
         // 示例5：查看流年信息
-        fmt::print("【示例5】流年信息（2020-2025）\n");
+        fmt::print("【5】流年信息（2020-2025）\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         display_liu_nian(result, 2020, 6);
         fmt::print("\n");
 
         // 示例6：查看流月信息
-        fmt::print("【示例6】2024年流月信息\n");
+        fmt::print("【6】2025年流月信息\n");
         fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         display_liu_yue(result, 2025);
         fmt::print("\n");

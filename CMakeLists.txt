@@ -152,6 +152,22 @@ set(FMT_MODULE ON CACHE BOOL "Build fmt as a C++ module" FORCE)
 # 如果遇到问题，请在代码中使用 #include <nlohmann/json.hpp> 代替 import nlohmann.json
 set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" FORCE)
 
+# 在 CMakeLists.txt 中
+if(MSVC)
+    # 启用异常处理机制
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # 禁用保留模块标识符警告（libc++ 标准库需要）fix warning: 'std' is a reserved name for a module [-Wreserved-module-identifier]
+    add_compile_options(-Wno-reserved-module-identifier)
+
+    # 禁用模块包含警告（第三方库 ASIO 引起）
+    # fix warning: '#include <***>' attaches the declarations to the named module 'asio', which is not usually intended;
+    # consider moving that directive before the module declaration [-Winclude-angled-in-module-purview]
+    add_compile_options(-Wno-include-angled-in-module-purview)
+endif()
+
 # 添加第三方库
 add_subdirectory(3rdparty/fmt)
 add_subdirectory(3rdparty/nlohmann_json)
@@ -164,6 +180,7 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ${CMAKE_CXX_SCAN_FOR_MODULES_BACKUP})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include)
+
 
 # ==============================================================================
 # 源文件收集

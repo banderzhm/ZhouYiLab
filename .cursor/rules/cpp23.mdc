@@ -156,5 +156,3 @@ alwaysApply: true
   * 【避免】 `std::map` / `std::set`: (优先考虑 `std::flat_map` / `std::flat_set` 的性能)。
 
 -----
-
-git提交代码使用英文注释

@@ -142,64 +142,69 @@ inline DiZhi get_yue_jiang(const tyme::SolarTime& solar_time) {
         return 23;  // 默认返回子时
     };
 
-    // 存储所有月将切换时刻和对应的月将
-    std::vector<std::pair<tyme::SolarTime, DiZhi>> transitions;
-    transitions.reserve(rules.size() * 3);  // 预留空间：12个规则 × 3年
-
     /**
-     * 步骤1：计算前后三年的所有月将切换时刻
+     * 步骤1：使用 Ranges 计算前后三年的所有月将切换时刻
      * 
      * 为什么要计算三年？
      * - 当前时间可能在年初或年末，需要确保覆盖到所有可能的切换点
      * - 例如：如果当前是1月，需要包含上一年的"大寒"切换点
      * - 如果当前是12月，需要包含下一年的"雨水"切换点
+     * 
+     * 使用 Ranges 管道：
+     * 1. 生成年份偏移范围 [-1, 0, 1]
+     * 2. 与规则表进行笛卡尔积（cartesian product）
+     * 3. 使用 transform 将每个组合转换为切换时刻
+     * 4. 收集到 vector 中
      */
     const int base_year = solar_time.get_year();
-    for (int year_offset : {-1, 0, 1}) {  // 遍历前一年、当前年、后一年
-        const int term_year = base_year + year_offset;
-        
-        // 遍历所有12个月将切换规则
-        for (const auto& rule : rules) {
-            // 获取基准节气（使用tyme库精确计算节气时刻）
-            const auto term = tyme::SolarTerm::from_name(term_year, std::string(rule.term_name));
-            
-            // 获取节气所在日期
-            const auto term_day = term.get_julian_day().get_solar_time().get_solar_day();
-            
-            // 计算切换日期：节气日 + 日期偏移
-            // 例如："雨水前1日" = 雨水日 + (-1) = 雨水前1日
-            const auto trigger_day = term_day.next(rule.day_offset);
-            
-            // 将地支转换为24小时制的小时数
-            // 例如："卯初刻"中的"卯" -> 5点
-            const int trigger_hour = to_branch_hour(rule.trigger_branch);
-            
-            // 构造精确的切换时刻
-            // 例如："卯初刻" = 5点0分，"巳一刻" = 9点15分
-            auto trigger_time = tyme::SolarTime::from_ymd_hms(
-                trigger_day.get_year(),
-                trigger_day.get_month(),
-                trigger_day.get_day(),
-                trigger_hour,
-                rule.trigger_minutes,  // 分钟数：0（初刻）、15（一刻）、30（二刻）、45（三刻）
-                0                      // 秒数固定为0
-            );
-            
-            // 记录切换时刻和对应的月将
-            transitions.emplace_back(trigger_time, rule.result);
-        }
-    }
+    constexpr std::array<int, 3> year_offsets = {-1, 0, 1};
+    
+    auto transitions = year_offsets
+        | std::views::transform([&](int year_offset) {
+            return std::views::all(rules) 
+                | std::views::transform([&, year_offset](const YueJiangRule& rule) {
+                    // 获取基准节气（使用tyme库精确计算节气时刻）
+                    const int term_year = base_year + year_offset;
+                    const auto term = tyme::SolarTerm::from_name(term_year, std::string(rule.term_name));
+                    
+                    // 获取节气所在日期
+                    const auto term_day = term.get_julian_day().get_solar_time().get_solar_day();
+                    
+                    // 计算切换日期：节气日 + 日期偏移
+                    // 例如："雨水前1日" = 雨水日 + (-1) = 雨水前1日
+                    const auto trigger_day = term_day.next(rule.day_offset);
+                    
+                    // 将地支转换为24小时制的小时数
+                    // 例如："卯初刻"中的"卯" -> 5点
+                    const int trigger_hour = to_branch_hour(rule.trigger_branch);
+                    
+                    // 构造精确的切换时刻
+                    // 例如："卯初刻" = 5点0分，"巳一刻" = 9点15分
+                    auto trigger_time = tyme::SolarTime::from_ymd_hms(
+                        trigger_day.get_year(),
+                        trigger_day.get_month(),
+                        trigger_day.get_day(),
+                        trigger_hour,
+                        rule.trigger_minutes,  // 分钟数：0（初刻）、15（一刻）、30（二刻）、45（三刻）
+                        0                      // 秒数固定为0
+                    );
+                    
+                    // 返回切换时刻和对应的月将
+                    return std::make_pair(trigger_time, rule.result);
+                });
+        })
+        | std::views::join  // 展平嵌套的视图
+        | std::ranges::to<std::vector>();  // 收集到 vector
 
     /**
-     * 步骤2：按时间排序所有切换点
+     * 步骤2：使用 Ranges 按时间排序所有切换点
      * 
      * 排序规则：
      * 1. 首先按时间先后排序
      * 2. 如果时间相同，按月将地支的枚举值排序（确保结果稳定）
      */
-    std::sort(
-        transitions.begin(),
-        transitions.end(),
+    std::ranges::sort(
+        transitions,
         [](const auto& lhs, const auto& rhs) {
             // 优先按时间排序
             if (lhs.first.is_before(rhs.first)) {
@@ -214,46 +219,40 @@ inline DiZhi get_yue_jiang(const tyme::SolarTime& solar_time) {
     );
 
     /**
-     * 步骤3：去除重复的切换点
+     * 步骤3：使用 Ranges 去除重复的切换点
      * 
      * 可能产生重复的原因：
      * - 不同年份的同一规则可能计算出相同的时刻（理论上不应该，但为保险起见）
      * - 确保每个切换时刻只保留一个记录
      */
-    transitions.erase(
-        std::unique(
-            transitions.begin(),
-            transitions.end(),
-            [](const auto& lhs, const auto& rhs) {
-                // 如果时间和月将都相同，则认为是重复的
-                return lhs.first.equals(rhs.first) && lhs.second == rhs.second;
-            }
-        ),
-        transitions.end()
+    auto unique_end = std::ranges::unique(
+        transitions,
+        [](const auto& lhs, const auto& rhs) {
+            // 如果时间和月将都相同，则认为是重复的
+            return lhs.first.equals(rhs.first) && lhs.second == rhs.second;
+        }
     );
+    transitions.erase(unique_end.begin(), unique_end.end());
 
     /**
-     * 步骤4：查找当前时间对应的月将
+     * 步骤4：使用 Ranges 查找当前时间对应的月将
      * 
      * 算法：找到最后一个不超过当前时间的切换点
-     * - 遍历所有已排序的切换点
-     * - 如果切换点时间 <= 当前时间，更新当前月将
-     * - 如果切换点时间 > 当前时间，停止遍历（因为已排序，后续都更大）
+     * - 使用 ranges::find_if 配合反向视图（因为已排序，从后往前找）
+     * - 或者使用 ranges::partition_point 进行二分查找（O(log n) 复杂度）
      */
-    std::optional<DiZhi> current;
-    for (const auto& [trigger_time, yue_jiang] : transitions) {
-        if (!trigger_time.is_after(solar_time)) {
-            // 切换点时间 <= 当前时间，更新月将
-            current = yue_jiang;
-        } else {
-            // 切换点时间 > 当前时间，停止遍历
-            break;
+    // 使用反向视图查找最后一个 <= 当前时间的切换点
+    auto reversed_transitions = transitions | std::views::reverse;
+    auto it = std::ranges::find_if(
+        reversed_transitions,
+        [&](const auto& transition) {
+            return !transition.first.is_after(solar_time);
         }
-    }
-
-    // 如果找到了有效的月将，返回它
-    if (current.has_value()) {
-        return *current;
+    );
+    
+    // 如果找到了，返回对应的月将
+    if (it != reversed_transitions.end()) {
+        return it->second;
     }
 
     // 如果没有找到（理论上不应该发生），返回默认值
