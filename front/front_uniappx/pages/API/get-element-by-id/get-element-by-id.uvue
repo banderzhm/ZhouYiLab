@@ -1,0 +1,60 @@
+<template>
+  <page-head id="page-head" title="getElementById"></page-head>
+  <view style="margin: 0 15px;">
+    <text id="text">this is text</text>
+    <view id="view" class="uni-common-mt" style="border: 1px solid red">this is view</view>
+    <button class="uni-btn" @click="changePageHeadBackgroundColor">
+      修改 page-head 背景色
+    </button>
+    <button class="uni-btn" @click="changeTextColor">
+      修改 text 字体颜色
+    </button>
+    <button class="uni-btn" @click="changeViewStyle">
+      修改 view 宽高及背景色
+    </button>
+    <button class="uni-btn" @click="goMultipleRootNode">
+      跳转多根节点示例
+    </button>
+  </view>
+</template>
+
+<script lang="uts">
+  export default {
+    data() {
+      return {
+        checked: false,
+        homePagePath: '/pages/tabBar/component',
+        launchOptionsPath: '',
+      }
+    },
+    methods: {
+      getElementByNotExistId() : Element | null {
+        return uni.getElementById('not-exist-id')
+      },
+      changePageHeadBackgroundColor() {
+        const pageHead = uni.getElementById('page-head')!
+        pageHead.style.setProperty('background-color', 'red')
+      },
+      changeTextColor() {
+        const text = uni.getElementById('text')!
+        text.style.setProperty('color', 'red')
+      },
+      changeViewStyle() {
+        const view = uni.getElementById<UniViewElement>('view')
+        if (view !== null) {
+          view.style.setProperty('width', '90%')
+          view.style.setProperty('height', '50px')
+          view.style.setProperty('background-color', '#007AFF')
+        }
+      },
+      goMultipleRootNode() {
+        uni.navigateTo({ url: '/pages/API/get-element-by-id/get-element-by-id-multiple-root-node' })
+      },
+      //自动化测试获取text元素的offsetLeft属性值
+      getTextOffsetLeft() : number {
+        const text = uni.getElementById('text')!
+        return text.offsetLeft
+      }
+    }
+  }
+</script>

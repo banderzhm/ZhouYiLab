@@ -1,0 +1,27 @@
+const __sfc__ = defineComponent({})
+export default __sfc__
+function GenPagesCSSBorderComplexBorderComplexBorderRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode("view", utsMapOf({
+    style: normalizeStyle(utsMapOf({"flex-grow":"1"}))
+  }), [
+    createElementVNode("view", null, [
+      createElementVNode("text", null, "圆角 : 各边之间 不同width && 不同颜色 && 不同圆角"),
+      createElementVNode("view", utsMapOf({
+        style: normalizeStyle(utsMapOf({"width":"250px","height":"250px","background-color":"gray","justify-content":"center","align-items":"center"}))
+      }), [
+        createElementVNode("view", utsMapOf({ class: "border-circle" }))
+      ], 4 /* STYLE */)
+    ]),
+    createElementVNode("view", null, [
+      createElementVNode("text", null, "直角 : 各边之间 不同width && 不同颜色 "),
+      createElementVNode("view", utsMapOf({
+        style: normalizeStyle(utsMapOf({"width":"250px","height":"250px","background-color":"gray","justify-content":"center","align-items":"center"}))
+      }), [
+        createElementVNode("view", utsMapOf({ class: "border-rect" }))
+      ], 4 /* STYLE */)
+    ])
+  ], 4 /* STYLE */)
+}
+const GenPagesCSSBorderComplexBorderComplexBorderStyles = [utsMapOf([["common", padStyleMapOf(utsMapOf([["width", 250], ["height", 250], ["backgroundColor", "#808080"]]))], ["border-circle", padStyleMapOf(utsMapOf([["width", 125], ["height", 125], ["backgroundColor", "#00dd00"], ["borderTopWidth", 10], ["borderRightWidth", 10], ["borderBottomWidth", 20], ["borderLeftWidth", 10], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#000000"], ["borderRightColor", "#FFDC02"], ["borderBottomColor", "#ff0000"], ["borderLeftColor", "#000000"], ["borderBottomRightRadius", 5], ["borderBottomLeftRadius", 5], ["borderTopLeftRadius", 5], ["borderTopRightRadius", 5]]))], ["border-rect", padStyleMapOf(utsMapOf([["width", 125], ["height", 125], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["backgroundColor", "#00dd00"], ["borderTopWidth", 10], ["borderRightWidth", 10], ["borderBottomWidth", 20], ["borderLeftWidth", 10], ["borderTopColor", "#000000"], ["borderRightColor", "#FFDC02"], ["borderBottomColor", "#ff0000"], ["borderLeftColor", "#000000"]]))]])]

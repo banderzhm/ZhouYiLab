@@ -1,0 +1,1 @@
+export default "/assets/uniicons.ab33ac77.ttf"

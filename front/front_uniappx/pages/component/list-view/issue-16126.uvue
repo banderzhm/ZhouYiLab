@@ -1,0 +1,93 @@
+<template>
+	<view style="flex: 1;">
+		<list-view ref="listview" :style="listViewStyle"  @scrolltolower="loadMore" :scroll-into-view="intoview" :scroll-top="scrolltop">
+			<list-item class="listItem" v-for="index in dataList" :key="index" :id="'item' + index" @click="changeSize" type=1>
+				<text>{{ index }}</text>
+			</list-item>
+			<list-item class="listItem">
+				<text>加载更多中...</text>
+			</list-item>
+		</list-view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				listViewStyle: "flex:1; width: 100%; heigth: 100%",
+				dataList : 10,
+        intoview: "",
+        scrolltop: 0,
+        listViewElement: null as UniElement | null
+			}
+		},
+    onReady() {
+      // 组件ready时，获取组件实例
+      this.listViewElement = this.$refs["listview"] as UniElement
+    },
+		methods: {
+			changeSize() {
+				if (this.listViewStyle == "flex:1; width: 100%; heigth: 100%") {
+					this.listViewStyle = "flex:1; width: 50%; heigth: 100%;"
+				} else {
+					this.listViewStyle = "flex:1; width: 100%; heigth: 100%"
+				}
+			},
+			loadMore() {
+				setTimeout(() => {
+					this.dataList += 10
+				}, 1000)
+			},
+      setScrollTop(value: number) {
+        this.scrolltop = value
+      },
+      getScrollTop() : number {
+        var ret = this.listViewElement?.scrollTop ?? -1
+        console.log(ret)
+        return ret
+      },
+		}
+	}
+</script>
+
+<style>
+	.listView {
+		flex: 1;
+	}
+
+	.listItem {
+		width: 100%;
+		height: 100px;
+		border-style: solid;
+		border-width: 1px;
+		border-color: red;
+		border-bottom-width: 0;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.banner {
+	  height: 180px;
+	  overflow: hidden;
+	  position: relative;
+	  background-color: #ccc;
+	}
+
+	.banner-img {
+	  width: 100%;
+	}
+
+	.banner-title {
+	  max-height: 42px;
+	  overflow: hidden;
+	  position: absolute;
+	  left: 15px;
+	  bottom: 15px;
+	  width: 90%;
+	  font-size: 16px;
+	  font-weight: 400;
+	  line-height: 21px;
+	  color: white;
+	}
+</style>

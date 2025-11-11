@@ -1,0 +1,22 @@
+<template>
+  <view>
+    <uts-button>uts button</uts-button>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+
+      }
+    },
+    methods: {
+
+    }
+  }
+</script>
+
+<style>
+
+</style>

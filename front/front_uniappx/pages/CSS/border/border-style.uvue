@@ -1,0 +1,76 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view style="flex-grow: 1">
+      <view>
+        <text>border-style: dashed</text>
+        <view class="common" style="border-width: 5px; border-style: dashed"></view>
+      </view>
+
+      <view>
+        <text>border-left-style: dashed</text>
+        <view class="common" style="border-left-width: 5px; border-left-style: dashed"></view>
+      </view>
+
+      <view>
+        <text>border-top-style: dashed</text>
+        <view class="common" style="border-top-width: 5px; border-top-style: dashed"></view>
+      </view>
+
+      <view>
+        <text>border-right-style: dotted</text>
+        <view class="common" style="border-right-width: 5px; border-right-style: dotted"></view>
+      </view>
+
+      <view>
+        <text>border-bottom-style: dotted</text>
+        <view class="common" style="border-bottom-width: 5px; border-bottom-style: dotted"></view>
+      </view>
+
+      <view>
+        <text>border-style: solid (缺省 border-width)</text>
+        <view class="common" style="border-style: solid;"></view>
+      </view>
+
+      <view>
+        <text>border-style: none</text>
+        <view class="common" style="border-style: none; border-width: 5px;"></view>
+      </view>
+
+      <view @click="changeBorderStyle">
+        <text>border-style: 点击切换</text>
+        <view class="common" :style="borderStyle"></view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        isSolid: false,
+        borderStyle: "border-style: none; border-width: 5px;",
+      }
+    },
+    methods: {
+      changeBorderStyle() {
+        this.isSolid = !this.isSolid;
+        const solid = "border-style: solid; border-width: 5px;";
+        const none = "";
+        this.borderStyle = this.isSolid ? solid : none;
+      }
+    }
+  }
+</script>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+    background-color: gray;
+  }
+</style>

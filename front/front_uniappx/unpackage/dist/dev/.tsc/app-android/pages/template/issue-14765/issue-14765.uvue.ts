@@ -1,0 +1,53 @@
+
+  import Comp1 from './Comp1.uvue'
+  import Comp2 from './Comp2.uvue'
+  const __sfc__ = defineComponent({
+    components: {
+      Comp1,
+      Comp2
+    },
+    data() {
+      return {
+        id1: 'page-id-1',
+        id2: 'page-id-2',
+        testNode1: false,
+        testNode2: false
+      }
+    },
+    onReady() {
+      uni.createSelectorQuery().in(this).select('#page-id-2').boundingClientRect().exec((ret) => {
+        console.log(ret, " at pages/template/issue-14765/issue-14765.uvue:26")
+        this.testNode2 = ret.length > 0
+
+
+
+        if(this.testNode2) {
+          console.log('Comp2测试符合预期', " at pages/template/issue-14765/issue-14765.uvue:32")
+        } else {
+          console.error('Comp2测试不符合预期', " at pages/template/issue-14765/issue-14765.uvue:34")
+        }
+      })
+    },
+    methods: {
+      onComp1Ready(testNode1: boolean) {
+        this.testNode1 = testNode1
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesTemplateIssue14765Issue14765Render(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_Comp1 = resolveComponent("Comp1")
+const _component_Comp2 = resolveComponent("Comp2")
+
+  return createElementVNode("view", null, [
+    createVNode(_component_Comp1, utsMapOf({
+      id: _ctx.id1,
+      onReady: _ctx.onComp1Ready
+    }), null, 8 /* PROPS */, ["id", "onReady"]),
+    createVNode(_component_Comp2, utsMapOf({ id: _ctx.id2 }), null, 8 /* PROPS */, ["id"])
+  ])
+}
+const GenPagesTemplateIssue14765Issue14765Styles = []

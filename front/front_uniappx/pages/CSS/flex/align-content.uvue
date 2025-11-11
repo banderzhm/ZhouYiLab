@@ -1,0 +1,90 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view style="flex-grow: 1">
+      <view>
+        <text>align-content: center</text>
+        <view class="common" style="align-content: center">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>align-content: flex-start</text>
+        <view class="common" style="align-content: flex-start">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>align-content: flex-end</text>
+        <view class="common" style="align-content: flex-end">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>align-content: space-between</text>
+        <view class="common" style="align-content: space-between">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>align-content: space-around</text>
+        <view class="common" style="align-content: space-around">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>align-content: stretch</text>
+        <view class="common" style="align-content: stretch">
+          <view style="width: 50px; background-color: red"></view>
+          <view style="width: 50px; background-color: green"></view>
+          <view style="width: 50px; background-color: blue"></view>
+          <view style="width: 50px; background-color: red"></view>
+          <view style="width: 50px; background-color: green"></view>
+          <view style="width: 50px; background-color: blue"></view>
+        </view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+    background-color: gray;
+    flex-flow: row wrap;
+  }
+</style>

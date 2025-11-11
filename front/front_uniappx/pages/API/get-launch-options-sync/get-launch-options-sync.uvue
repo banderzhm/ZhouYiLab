@@ -1,0 +1,53 @@
+<template>
+  <page-head title="getLaunchOptionsSync"></page-head>
+  <view class="uni-padding-wrap">
+    <button @click="getLaunchOptionsSync">getLaunchOptionsSync</button>
+    <view class="uni-common-mt">
+      <text>应用本次启动路径：</text>
+      <text style="margin-top: 5px">{{ launchOptionsPath }}</text>
+    </view>
+    <view class="uni-common-mt">
+      <text>应用本次启动：</text>
+      <text style="margin-top: 5px">{{ launchOptionsString }}</text>
+    </view>
+  </view>
+</template>
+
+<script lang="uts">
+  export default {
+    data() {
+      return {
+        checked: false,
+        homePagePath: 'pages/tabBar/component',
+        launchOptionsPath: '',
+        launchOptionsString: '',
+        testResult: false
+      }
+    },
+    onReady() {
+      this.compareOnLaunchRes()
+    },
+    methods: {
+      compareOnLaunchRes() {
+        const launchOptions = uni.getLaunchOptionsSync();
+        this.launchOptionsString = JSON.stringify(launchOptions, null, 2)
+
+        const app = getApp()
+        const appOnLaunch = app.globalData.launchOptions
+
+        const isPathSame = launchOptions.path == appOnLaunch.path
+        const isAppSchemeSame = launchOptions.appScheme == appOnLaunch.appScheme
+        const isAppLinkSame = launchOptions.appLink == appOnLaunch.appLink
+        this.testResult = isPathSame && isAppSchemeSame && isAppLinkSame
+      },
+
+      getLaunchOptionsSync() {
+        const launchOptions = uni.getLaunchOptionsSync()
+        this.launchOptionsPath = launchOptions.path
+        if (launchOptions.path == this.homePagePath) {
+          this.checked = true
+        }
+      }
+    },
+  }
+</script>

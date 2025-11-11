@@ -1,0 +1,35 @@
+{
+  "version": "1",
+  "env": {
+    "compilerVersion": "4.66"
+  },
+  "files": {
+    "utssdk/app-android/TransparentActivity.uts": {
+      "md5": "d41530560fe13e9934cc3b1fb73c9890"
+    },
+    "utssdk/app-android/callbacks.uts": {
+      "md5": "348b1166fafde03d77d31c708ffeca5f"
+    },
+    "utssdk/app-android/constant.uts": {
+      "md5": "9e03e42b19d59d8ed16f3df814dbba74"
+    },
+    "utssdk/app-android/index.uts": {
+      "md5": "65946d1380ca24539aa97a8fe43fe62c"
+    },
+    "utssdk/interface.uts": {
+      "md5": "ff87bca6142d3990b5057f452ea3f2b4"
+    },
+    "package.json": {
+      "md5": "63edf084a51a7169f4749684f70ce398"
+    },
+    "utssdk/app-android/AndroidManifest.xml": {
+      "md5": "80263498d2ad55cb954e347c7c933e65"
+    },
+    "utssdk/app-android/config.json": {
+      "md5": "d903d6c89479ad424282bba97dff94ef"
+    },
+    "utssdk/app-android/res/values/notification_progress_styles.xml": {
+      "md5": "6fa2d7ac4d16a31ee5251cfb34bacd41"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+<template>
+  <scroll-view ref="listView" class="list" :bounces="false" :scroll-with-animation="true" :scroll-y="true" :scroll-top="newScrollTop" @scrolltolower="loadData()"
+    @scroll="onScroll">
+    <view class="list-item" v-for="(item, index) in dataList" :key="index">
+      <!-- <text class="title">{{item.title}}</text> -->
+      <view class="cell-item">
+        <text class="title">内容：{{item.title}}</text>
+        <input class="title" style="margin-top: 8px;" placeholder="备注:"/>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script>
+  type ListItem = {
+    title : string
+  }
+
+  export default {
+    data() {
+      return {
+        dataList: [] as ListItem[],
+        oldScrollTop: 0,
+        newScrollTop: 0
+      }
+    },
+    created() {
+      this.loadData()
+      // console.log("tab1 created");
+    },
+    methods: {
+      loadData() {
+        let index = this.dataList.length
+        for (let i = 0; i < 20; i++) {
+          this.dataList.push({
+            title: index.toString(),
+          } as ListItem)
+          index++
+        }
+      },
+      onScroll(e : ScrollEvent) {
+        uni.$emit('tabchange', e.detail.scrollTop)
+        this.oldScrollTop = e.detail.scrollTop
+      },
+      scrollTop(top : number) {
+        // (this.$refs["listView"] as UniElement).scrollTop = top
+        // console.log("tab1 to top");
+        this.newScrollTop = this.oldScrollTop
+        this.$nextTick(() => {
+          this.newScrollTop = top
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+  .list {
+    flex: 1;
+    background-color: #ffffff;
+  }
+
+  .list-item {
+    flex-direction: row;
+    padding: 30px;
+    border-bottom: 1px solid #dbdbdb;
+  }
+
+  .title {
+    font-size: 16px;
+    text-align: left;
+  }
+
+  .cell-item {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

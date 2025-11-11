@@ -1,0 +1,56 @@
+<template>
+<!-- #ifdef WEB -->
+  <view>
+  <!-- #endif -->
+    <list-view id="listview" style="flex: 1;" show-scrollbar=false @scrolltolower="onScrollTolower">
+      <list-item v-for="index in item_count" class="item" @click="itemClick(index)">
+        <text>item-------<text>{{index}}</text></text>
+        <input style="border-width: 1px; border-style: solid;" :placeholder="index + ''"
+          :value="index ==1 ? `第一个` :index " />
+      </list-item>
+    </list-view>
+  <!-- #ifdef WEB -->
+  </view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        item_count: 20,
+        listViewElement: null as UniListViewElement | null,
+        isTesting: false
+      }
+    },
+    onReady() {
+      this.listViewElement = uni.getElementById<UniListViewElement>('listview')
+    },
+    methods: {
+      onScrollTolower(_ : ScrollToLowerEvent) {
+        setTimeout(() => {
+          if (this.isTesting && this.item_count > 20) {
+            return
+          }
+          this.item_count += 20
+        }, 300)
+      },
+      itemClick(index : number) {
+        console.log("itemTextClick---" + index)
+      }
+    }
+  }
+</script>
+
+<style>
+  .item {
+    padding: 15px;
+    margin: 0 0 5px 0;
+    background-color: #fff;
+    border-radius: 5px;
+  }
+
+  .button_item {
+    width: 200px;
+  }
+</style>

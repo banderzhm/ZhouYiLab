@@ -1,0 +1,73 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view style="flex-grow: 1">
+      <view>
+        <text>flex: 0</text>
+        <view style="
+            width: 250px;
+            height: 150px;
+            background-color: gray;
+            flex-direction: row;
+          ">
+          <view class="common" style="min-width: 25px; flex: 0"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>flex: 1</text>
+        <view style="
+            width: 250px;
+            height: 150px;
+            background-color: gray;
+            flex-direction: row;
+          ">
+          <view class="common" style="flex: 1"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>flex: auto</text>
+        <view style="
+            width: 250px;
+            height: 150px;
+            background-color: gray;
+            flex-direction: row;
+          ">
+          <view class="common" style="flex: auto"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>flex: none</text>
+        <view style="
+            width: 250px;
+            height: 150px;
+            background-color: gray;
+            flex-direction: row;
+          ">
+          <view class="common" style="flex: none"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<style>
+  .common {
+    width: 50px;
+    height: 50px;
+    background-color: red;
+  }
+</style>

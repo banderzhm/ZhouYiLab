@@ -1,0 +1,53 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view style="flex-grow: 1">
+      <view>
+        <text>flex-direction: row</text>
+        <view class="common" style="flex-direction: row">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>flex-direction: row-reverse</text>
+        <view class="common" style="flex-direction: row-reverse">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>flex-direction: column</text>
+        <view class="common" style="flex-direction: column">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+
+      <view>
+        <text>flex-direction: column-reverse</text>
+        <view class="common" style="flex-direction: column-reverse">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+    background-color: gray;
+  }
+</style>

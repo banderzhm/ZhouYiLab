@@ -1,0 +1,70 @@
+<template>
+  <view class="page">
+    <page-head :title="title"></page-head>
+    <button @click="startRequestAnimationFrame">requestAnimationFrame</button>
+    <button @click="stopRequestAnimationFrame">cancelAnimationFrame</button>
+    <text class="frame-count">FPS: {{FPSString}}</text>
+    <text class="frame-count">FrameCount: {{testFrameCount}}</text>
+    <text class="tips">提示: 在当前测试例子中，每增加一次调用 requestAnimationFrame 帧率翻倍，cancelAnimationFrame 后恢复</text>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        title: 'AnimationFrame',
+        taskId: 0,
+        FPSString: '- / -ms',
+        lastTime: 0,
+        frameCount: 0,
+        testFrameCount: 0
+      }
+    },
+    onUnload() {
+      if (this.taskId > 0) {
+        this.stopRequestAnimationFrame()
+      }
+    },
+    methods: {
+      startRequestAnimationFrame() {
+        this.taskId = requestAnimationFrame((timestamp : number) => {
+          this.updateFPS(timestamp)
+          this.testFrameCount++
+          this.startRequestAnimationFrame()
+        })
+      },
+      stopRequestAnimationFrame() {
+        cancelAnimationFrame(this.taskId)
+        this.lastTime = 0
+        this.frameCount = 0
+        this.FPSString = '- / -ms'
+      },
+      updateFPS(timestamp : number) {
+        this.frameCount++
+        if (timestamp - this.lastTime >= 1000) {
+          const timeOfFrame = (1000 / this.frameCount)
+          this.FPSString = `${this.frameCount} / ${timeOfFrame.toFixed(3)}ms`
+          this.frameCount = 0
+          this.lastTime = timestamp
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  .page {
+    padding: 15px;
+  }
+
+  .frame-count {
+    margin-top: 15px;
+  }
+
+  .tips {
+    font-size: 12px;
+    margin-top: 30px;
+    opacity: 0.7;
+  }
+</style>

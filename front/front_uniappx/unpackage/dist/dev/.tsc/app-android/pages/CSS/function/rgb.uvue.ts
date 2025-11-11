@@ -1,0 +1,67 @@
+const __sfc__ = defineComponent({})
+export default __sfc__
+function GenPagesCSSFunctionRgbRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode("view", utsMapOf({ class: "container" }), [
+    createElementVNode("text", utsMapOf({ class: "intro-text" }), "RGB 是一种颜色表示方法，通过调整红(Red)、绿(Green)、蓝(Blue)三个通道的值（0-255）来产生不同的颜色。"),
+    createElementVNode("view", utsMapOf({ class: "section" }), [
+      createElementVNode("text", utsMapOf({ class: "section-title" }), "数值表示 (0-255)"),
+      createElementVNode("view", utsMapOf({ class: "color-grid" }), [
+        createElementVNode("view", utsMapOf({ class: "color-item" }), [
+          createElementVNode("view", utsMapOf({
+            class: "color-box",
+            style: normalizeStyle(utsMapOf({"background-color":"rgb(255, 0, 0)"}))
+          }), null, 4 /* STYLE */),
+          createElementVNode("text", utsMapOf({ class: "color-name" }), "红色"),
+          createElementVNode("text", utsMapOf({ class: "color-value" }), "rgb(255, 0, 0)")
+        ]),
+        createElementVNode("view", utsMapOf({ class: "color-item" }), [
+          createElementVNode("view", utsMapOf({
+            class: "color-box",
+            style: normalizeStyle(utsMapOf({"background-color":"rgb(0, 255, 0)"}))
+          }), null, 4 /* STYLE */),
+          createElementVNode("text", utsMapOf({ class: "color-name" }), "绿色"),
+          createElementVNode("text", utsMapOf({ class: "color-value" }), "rgb(0, 255, 0)")
+        ]),
+        createElementVNode("view", utsMapOf({ class: "color-item" }), [
+          createElementVNode("view", utsMapOf({
+            class: "color-box",
+            style: normalizeStyle(utsMapOf({"background-color":"rgb(0, 0, 255)"}))
+          }), null, 4 /* STYLE */),
+          createElementVNode("text", utsMapOf({ class: "color-name" }), "蓝色"),
+          createElementVNode("text", utsMapOf({ class: "color-value" }), "rgb(0, 0, 255)")
+        ])
+      ])
+    ]),
+    createElementVNode("view", utsMapOf({ class: "section" }), [
+      createElementVNode("view", utsMapOf({ class: "color-grid" }), [
+        createElementVNode("view", utsMapOf({ class: "color-item" }), [
+          createElementVNode("view", utsMapOf({
+            class: "color-box",
+            style: normalizeStyle(utsMapOf({"background-color":"rgb(255, 255, 0)"}))
+          }), null, 4 /* STYLE */),
+          createElementVNode("text", utsMapOf({ class: "color-name" }), "黄色"),
+          createElementVNode("text", utsMapOf({ class: "color-value" }), "rgb(255, 255, 0)")
+        ]),
+        createElementVNode("view", utsMapOf({ class: "color-item" }), [
+          createElementVNode("view", utsMapOf({
+            class: "color-box",
+            style: normalizeStyle(utsMapOf({"background-color":"rgb(255, 0, 255)"}))
+          }), null, 4 /* STYLE */),
+          createElementVNode("text", utsMapOf({ class: "color-name" }), "品红"),
+          createElementVNode("text", utsMapOf({ class: "color-value" }), "rgb(255, 0, 255)")
+        ]),
+        createElementVNode("view", utsMapOf({ class: "color-item" }), [
+          createElementVNode("view", utsMapOf({
+            class: "color-box",
+            style: normalizeStyle(utsMapOf({"background-color":"rgb(0, 255, 255)"}))
+          }), null, 4 /* STYLE */),
+          createElementVNode("text", utsMapOf({ class: "color-name" }), "青色"),
+          createElementVNode("text", utsMapOf({ class: "color-value" }), "rgb(0, 255, 255)")
+        ])
+      ])
+    ])
+  ])
+}
+const GenPagesCSSFunctionRgbStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["paddingTop", 20], ["paddingRight", 20], ["paddingBottom", 20], ["paddingLeft", 20]]))], ["intro-text", padStyleMapOf(utsMapOf([["fontSize", 14], ["color", "#333333"], ["marginBottom", 30], ["lineHeight", 1.4]]))], ["section", padStyleMapOf(utsMapOf([["marginBottom", 30]]))], ["section-title", padStyleMapOf(utsMapOf([["fontSize", 18], ["fontWeight", "bold"], ["marginBottom", 15]]))], ["color-grid", padStyleMapOf(utsMapOf([["flexDirection", "row"], ["flexWrap", "wrap"], ["justifyContent", "space-between"]]))], ["color-item", padStyleMapOf(utsMapOf([["width", "30%"], ["marginBottom", 20]]))], ["color-box", padStyleMapOf(utsMapOf([["width", "100%"], ["height", 100], ["borderTopLeftRadius", 8], ["borderTopRightRadius", 8], ["borderBottomRightRadius", 8], ["borderBottomLeftRadius", 8], ["marginBottom", 8]]))], ["color-name", padStyleMapOf(utsMapOf([["fontSize", 16], ["fontWeight", "bold"], ["marginBottom", 4]]))], ["color-value", padStyleMapOf(utsMapOf([["fontSize", 12], ["color", "#666666"]]))]])]

@@ -1,0 +1,76 @@
+<template>
+  <page-head :title="title"></page-head>
+  <view class="uni-padding-wrap uni-common-mt">
+    <view class="uni-container">
+      <view class="uni-center">网络状态</view>
+      <view v-if="hasNetworkType == false">
+        <view class="uni-center uni-common-mt">未获取</view>
+        <view class="uni-center uni-common-mt">请点击下面按钮获取网络状态</view>
+      </view>
+      <view v-if="hasNetworkType == true">
+        <view class="uni-center uni-common-mt">{{networkType}}</view>
+      </view>
+    </view>
+    <view class="uni-btn-v uni-common-mt">
+      <button type="primary" @tap="getNetworkType">获取设备网络状态</button>
+      <button class="uni-common-mt" @tap="clear">清空</button>
+    </view>
+  </view>
+</template>
+<script>
+  export default {
+    data() {
+      return {
+        title: 'getNetworkType',
+        hasNetworkType: false,
+        networkType: '',
+        connectedWifi: '',
+        //自动化测试例专用
+        jest_result: false,
+      }
+    },
+    onLoad() {
+    },
+    onUnload: function () {
+      this.networkType = '';
+      this.hasNetworkType = false;
+    },
+    methods: {
+      getNetworkType: function () {
+        uni.getNetworkType({
+          success: (res) => {
+            console.log(res)
+            this.hasNetworkType = true;
+            this.networkType = res.networkType
+          },
+          fail: () => {
+            uni.showModal({
+              content: '获取失败！',
+              showCancel: false
+            })
+          }
+        })
+      },
+      clear: function () {
+        this.hasNetworkType = false;
+        this.networkType = '';
+        this.connectedWifi = '';
+      },
+      //自动化测试例专用
+      jest_getNetworkType() {
+        uni.getNetworkType({
+          success: () => {
+            this.jest_result = true;
+          },
+          fail: () => {
+            this.jest_result = false;
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>

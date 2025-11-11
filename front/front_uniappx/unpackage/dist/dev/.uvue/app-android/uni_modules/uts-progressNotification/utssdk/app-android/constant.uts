@@ -1,0 +1,3 @@
+export const ACTION_DOWNLOAD_FINISH = "ACTION_DOWNLOAD_FINISH";
+export const ACTION_DOWNLOAD_PROGRESS = "ACTION_DOWNLOAD_PROGRESS";
+//# sourceMappingURL=constant.uts.map

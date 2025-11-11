@@ -1,0 +1,1 @@
+{"version":3,"file":"types.uts","sourceRoot":"","sources":["uni_modules/uni-recycle-view/common/types.uts"],"names":[],"mappings":"AAAA,MAAM,MAAM,UAAU,GAAG;IACvB,EAAE,EAAG,MAAM,CAAC;IACZ,MAAM,EAAG,MAAM,CAAC;IAChB,IAAI,EAAE,GAAG,CAAA;CACV,CAAA","sourcesContent":["export type LayoutItem = {\r\n  id : number,\r\n  offset : number,\n  item: any\r\n}"]}

@@ -1,0 +1,185 @@
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        title: '请求云函数',
+        callFunctionResult: {},
+        callFunctionResult_Detail_functionName: '',
+        callFunctionError: {},
+        genericDemoShowMessage: '',
+        isUniTest: false
+      }
+    },
+    onLoad() {
+    },
+    onUnload() {
+      if (this.isUniTest) {
+        uni.hideToast()
+      }
+    },
+    methods: {
+      notify(content : string, title : string) {
+        if (!this.isUniTest) {
+          uni.showModal({
+            title,
+            content,
+            showCancel: false
+          })
+        } else {
+          console.log(title, content, " at pages/API/unicloud/unicloud/cloud-function.uvue:52")
+        }
+      },
+      async callFunctionWithGeneric(): Promise<void> {
+        type EchoCfResult = { __$originalPosition?: UTSSourceMapPosition<"EchoCfResult", "pages/API/unicloud/unicloud/cloud-function.uvue", 56, 14>;
+          showMessage : string
+        }
+        uni.showLoading({
+          title: '加载中...'
+        })
+        await uniCloud.callFunction<EchoCfResult>({
+          name: 'echo-cf',
+          data: {
+            num: 1,
+            str: 'ABC'
+          }
+        }).then(res => {
+          const result = res.result
+          uni.hideLoading()
+          this.genericDemoShowMessage = result.showMessage
+          this.notify(result.showMessage, '提示')
+        }).catch((err : any | null) => {
+          const error = err as UniCloudError
+          this.callFunctionError = {
+            errCode: error.errCode,
+            errMsg: error.errMsg
+          }
+          uni.hideLoading()
+          this.notify(error.errMsg, '错误')
+        })
+      },
+      async callFunction(): Promise<void> {
+        uni.showLoading({
+          title: '加载中...'
+        })
+        await uniCloud.callFunction({
+          name: 'echo-cf',
+          data: {
+            num: 1,
+            str: 'ABC'
+          }
+        }).then(res => {
+          const result = res.result
+          this.callFunctionResult = result
+          const detail = result.get('detail') as UTSJSONObject
+          this.callFunctionResult_Detail_functionName = detail.get('functionName') as string
+          console.log('this.callFunctionResult_Detail_functionName: ' + this.callFunctionResult_Detail_functionName, " at pages/API/unicloud/unicloud/cloud-function.uvue:98")
+          console.log(JSON.stringify(result), " at pages/API/unicloud/unicloud/cloud-function.uvue:99")
+          uni.hideLoading()
+          this.notify(result['showMessage'] as string, '提示')
+        }).catch((err : any | null) => {
+          uni.hideLoading()
+          if(err instanceof UniCloudError) {
+            const error = err as UniCloudError
+            this.callFunctionError = {
+              errCode: error.errCode,
+              errMsg: error.errMsg
+            }
+            this.notify(error.errMsg, '错误')
+          } else {
+            console.error(err, " at pages/API/unicloud/unicloud/cloud-function.uvue:112")
+          }
+        })
+      },
+      callEncryptionFunction() {
+        uni.showLoading({
+          title: '加载中...'
+        })
+        uniCloud.callFunction({
+          name: 'encryption',
+          data: {},
+          secretType: 'both'
+        }).then(res => {
+          uni.hideLoading()
+          this.notify(JSON.stringify(res.result), '提示')
+        }).catch((err : any | null) => {
+          uni.hideLoading()
+          if(err instanceof UniCloudError) {
+            const error = err as UniCloudError
+            this.callFunctionError = {
+              errCode: error.errCode,
+              errMsg: error.errMsg
+            }
+            this.notify(error.errMsg, '错误')
+          } else {
+            console.error(err, " at pages/API/unicloud/unicloud/cloud-function.uvue:137")
+          }
+        })
+      },
+      callVerifyFunction() {
+        uni.showLoading({
+          title: '加载中...'
+        })
+        uniCloud.callFunction({
+          name: 'verify-client',
+          data: {}
+        }).then(res => {
+          uni.hideLoading()
+          this.notify(JSON.stringify(res.result), '提示')
+        }).catch((err : any | null) => {
+          uni.hideLoading()
+          if(err instanceof UniCloudError) {
+            const error = err as UniCloudError
+            this.callFunctionError = {
+              errCode: error.errCode,
+              errMsg: error.errMsg
+            }
+            this.notify(error.errMsg, '错误')
+          } else {
+            console.error(err, " at pages/API/unicloud/unicloud/cloud-function.uvue:161")
+          }
+        })
+      },
+      jest_UniCloudError() {
+        return new Error() instanceof UniCloudError
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesAPIUnicloudUnicloudCloudFunctionRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_page_head = resolveEasyComponent("page-head",_easycom_page_head)
+
+  return createElementVNode("scroll-view", utsMapOf({ class: "page-scroll-view" }), [
+    createElementVNode("view", null, [
+      createVNode(_component_page_head, utsMapOf({ title: _ctx.title }), null, 8 /* PROPS */, ["title"]),
+      createElementVNode("view", utsMapOf({ class: "uni-padding-wrap uni-common-mt" }), [
+        createElementVNode("view", utsMapOf({ class: "uni-btn-v uni-common-mt" }), [
+          createElementVNode("button", utsMapOf({
+            type: "primary",
+            onClick: _ctx.callFunction
+          }), "请求云函数", 8 /* PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            type: "primary",
+            onClick: _ctx.callFunctionWithGeneric
+          }), "请求云函数传入泛型", 8 /* PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            type: "primary",
+            onClick: _ctx.callEncryptionFunction
+          }), "请求安全网络加密云函数", 8 /* PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            type: "primary",
+            onClick: _ctx.callVerifyFunction
+          }), "请求安全网络客户端校验云函数", 8 /* PROPS */, ["onClick"]),
+          createElementVNode("view", null, [
+            createElementVNode("text", utsMapOf({ class: "tips" }), "安全网络相关功能需要打包自定义基座方可正常使用")
+          ])
+        ])
+      ])
+    ])
+  ])
+}
+const GenPagesAPIUnicloudUnicloudCloudFunctionStyles = [utsMapOf([["tips", padStyleMapOf(utsMapOf([["color", "#999999"], ["fontSize", 12], ["paddingTop", 10], ["paddingRight", 0], ["paddingBottom", 10], ["paddingLeft", 0]]))]])]
+
+import _easycom_page_head from '@/components/page-head/page-head.vue'

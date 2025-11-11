@@ -1,0 +1,178 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view class="page-scroll-view">
+  <!-- #endif -->
+    <view>
+      <page-head :title="title"></page-head>
+      <view class="uni-padding-wrap uni-common-mt">
+        <view class="uni-btn-v uni-common-mt">
+          <button type="primary" @click="callFunction">请求云函数</button>
+          <button type="primary" @click="callFunctionWithGeneric">请求云函数传入泛型</button>
+          <!-- #ifdef APP-ANDROID || APP-IOS -->
+          <button type="primary" @click="callEncryptionFunction">请求安全网络加密云函数</button>
+          <button type="primary" @click="callVerifyFunction">请求安全网络客户端校验云函数</button>
+          <view><text class="tips">安全网络相关功能需要打包自定义基座方可正常使用</text></view>
+          <!-- #endif -->
+        </view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        title: '请求云函数',
+        callFunctionResult: {},
+        callFunctionResult_Detail_functionName: '',
+        callFunctionError: {},
+        genericDemoShowMessage: '',
+        isUniTest: false
+      }
+    },
+    onLoad() {
+    },
+    onUnload() {
+      if (this.isUniTest) {
+        uni.hideToast()
+      }
+    },
+    methods: {
+      notify(content : string, title : string) {
+        if (!this.isUniTest) {
+          uni.showModal({
+            title,
+            content,
+            showCancel: false
+          })
+        } else {
+          console.log(title, content)
+        }
+      },
+      async callFunctionWithGeneric(): Promise<void> {
+        type EchoCfResult = {
+          showMessage : string
+        }
+        uni.showLoading({
+          title: '加载中...'
+        })
+        await uniCloud.callFunction<EchoCfResult>({
+          name: 'echo-cf',
+          data: {
+            num: 1,
+            str: 'ABC'
+          }
+        }).then(res => {
+          const result = res.result
+          uni.hideLoading()
+          this.genericDemoShowMessage = result.showMessage
+          this.notify(result.showMessage, '提示')
+        }).catch((err : any | null) => {
+          const error = err as UniCloudError
+          this.callFunctionError = {
+            errCode: error.errCode,
+            errMsg: error.errMsg
+          }
+          uni.hideLoading()
+          this.notify(error.errMsg, '错误')
+        })
+      },
+      async callFunction(): Promise<void> {
+        uni.showLoading({
+          title: '加载中...'
+        })
+        await uniCloud.callFunction({
+          name: 'echo-cf',
+          data: {
+            num: 1,
+            str: 'ABC'
+          }
+        }).then(res => {
+          const result = res.result
+          this.callFunctionResult = result
+          const detail = result.get('detail') as UTSJSONObject
+          this.callFunctionResult_Detail_functionName = detail.get('functionName') as string
+          console.log('this.callFunctionResult_Detail_functionName: ' + this.callFunctionResult_Detail_functionName)
+          console.log(JSON.stringify(result))
+          uni.hideLoading()
+          this.notify(result['showMessage'] as string, '提示')
+        }).catch((err : any | null) => {
+          uni.hideLoading()
+          if(err instanceof UniCloudError) {
+            const error = err as UniCloudError
+            this.callFunctionError = {
+              errCode: error.errCode,
+              errMsg: error.errMsg
+            }
+            this.notify(error.errMsg, '错误')
+          } else {
+            console.error(err)
+          }
+        })
+      },
+      callEncryptionFunction() {
+        uni.showLoading({
+          title: '加载中...'
+        })
+        uniCloud.callFunction({
+          name: 'encryption',
+          data: {},
+          secretType: 'both'
+        }).then(res => {
+          uni.hideLoading()
+          this.notify(JSON.stringify(res.result), '提示')
+        }).catch((err : any | null) => {
+          uni.hideLoading()
+          if(err instanceof UniCloudError) {
+            const error = err as UniCloudError
+            this.callFunctionError = {
+              errCode: error.errCode,
+              errMsg: error.errMsg
+            }
+            this.notify(error.errMsg, '错误')
+          } else {
+            console.error(err)
+          }
+        })
+      },
+      callVerifyFunction() {
+        uni.showLoading({
+          title: '加载中...'
+        })
+        uniCloud.callFunction({
+          name: 'verify-client',
+          data: {}
+        }).then(res => {
+          uni.hideLoading()
+          this.notify(JSON.stringify(res.result), '提示')
+        }).catch((err : any | null) => {
+          uni.hideLoading()
+          if(err instanceof UniCloudError) {
+            const error = err as UniCloudError
+            this.callFunctionError = {
+              errCode: error.errCode,
+              errMsg: error.errMsg
+            }
+            this.notify(error.errMsg, '错误')
+          } else {
+            console.error(err)
+          }
+        })
+      },
+      jest_UniCloudError() {
+        return new Error() instanceof UniCloudError
+      }
+    }
+  }
+</script>
+
+<style>
+  .tips {
+    color: #999999;
+    font-size: 12px;
+    padding: 10px 0px;
+  }
+</style>

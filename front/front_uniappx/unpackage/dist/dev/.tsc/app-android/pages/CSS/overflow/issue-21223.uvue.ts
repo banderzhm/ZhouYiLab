@@ -1,0 +1,37 @@
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        title: 'Hello'
+      }
+    },
+    onLoad() {
+
+    },
+    methods: {
+
+    }
+  })
+
+export default __sfc__
+function GenPagesCSSOverflowIssue21223Render(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_issue_21223_comp = resolveEasyComponent("issue-21223-comp",_easycom_issue_21223_comp)
+
+  return createVNode(_component_issue_21223_comp, null, utsMapOf({
+    default: withScopedSlotCtx((slotProps: Record<string, any | null>): any[] => {
+    const items = slotProps["items"]
+    return [
+      createElementVNode(Fragment, null, RenderHelpers.renderList((items as number[]), (item, __key, __index, _cached): any => {
+        return createElementVNode("view", utsMapOf({
+          style: normalizeStyle(utsMapOf({"position":"absolute","left":"0","top":"0","width":"150px","height":"150px","background-color":"black"}))
+        }), toDisplayString(item), 5 /* TEXT, STYLE */)
+      }), 256 /* UNKEYED_FRAGMENT */)
+    ]}),
+    _: 1 /* STABLE */
+  }))
+}
+const GenPagesCSSOverflowIssue21223Styles = []
+
+import _easycom_issue_21223_comp from '@/components/issue-21223-comp/issue-21223-comp.uvue'

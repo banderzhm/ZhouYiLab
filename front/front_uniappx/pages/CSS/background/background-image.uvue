@@ -1,0 +1,75 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex:1">
+  <!-- #endif -->
+    <view>
+      <!-- 测试iOS平台宽高为0时，设置渐变色会不会导致闪退 -->
+      <view style="width: 0px; height: 0px; background-image: linear-gradient(to bottom,#f5f5f5,#eff2f5);"></view>
+      <text>不支持背景图片，仅支持linear-gradient方法</text>
+      <view v-for="(direction) in directionData">
+        <text>background-image: linear-gradient({{direction}}, red, yellow)</text>
+        <view class="common"
+          :style="{'background-image': backgroundSelect ?'linear-gradient('+direction+', red, yellow)':''}"></view>
+      </view>
+      <view>
+        <text>style 动态切换 background</text>
+        <view @click='changeBgStyle' class="common" :style='testStyle'>{{ testStyle}}</view>
+      </view>
+      <view>
+        <text>class 动态切换 background</text>
+        <view @click='changeBgClass' class="common" :class='testClass'>{{testClass}}</view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        backgroundSelect: true,
+        directionData: ['to right', 'to left', 'to bottom', 'to top', 'to bottom left', 'to bottom right', 'to top left', 'to top right'],
+        testStyle: "background:linear-gradient(to right, red, yellow)",
+        testClass: "bg-color"
+      }
+    },
+    methods: {
+      //供自动化测试使用
+      updateBackgroundSelect() {
+        this.backgroundSelect = !this.backgroundSelect
+      },
+      changeBgStyle() {
+        const isColor = this.testStyle == "background:blue"
+        if (isColor) {
+          this.setBackgroundImage()
+        } else {
+          this.setBackgroundColor()
+        }
+      },
+      setBackgroundColor() {
+        this.testStyle = "background:blue"
+      },
+      setBackgroundImage() {
+        this.testStyle = "background:linear-gradient(to right, red, yellow)"
+      },
+      changeBgClass() {
+        this.testClass = this.testClass == "bg-color" ? "bg-image" : "bg-color"
+      }
+    }
+  }
+</script>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+  }
+  .bg-color {
+    background: blue;
+  }
+  .bg-image {
+    background: linear-gradient(to right, red, yellow);
+  }
+</style>

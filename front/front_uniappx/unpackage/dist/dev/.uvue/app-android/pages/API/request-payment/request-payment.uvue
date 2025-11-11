@@ -1,0 +1,203 @@
+export type PayItem = {
+    __$originalPosition?: UTSSourceMapPosition<"PayItem", "pages/API/request-payment/request-payment.uvue", 13, 15>;
+    id: string;
+    name: string;
+    provider?: UniProvider;
+};
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            btnText: "支付宝支付",
+            btnType: "primary",
+            orderInfo: "",
+            errorCode: 0,
+            errorMsg: "",
+            complete: false,
+            fail: false,
+            providerList: [] as PayItem[],
+            outTradeNo: "",
+            openid: ""
+        };
+    },
+    onLoad: function () {
+        let provider = uni.getProviderSync({
+            service: "payment",
+        } as GetProviderSyncOptions);
+        console.log(provider, " at pages/API/request-payment/request-payment.uvue:34");
+        provider.providerObjects.forEach((value: UniProvider) => {
+            switch (value.id) {
+                case 'alipay':
+                    var aliPayProvider = value as UniPaymentAlipayProvider;
+                    console.log('alipay', aliPayProvider, " at pages/API/request-payment/request-payment.uvue:39");
+                    this.providerList.push({
+                        name: aliPayProvider.description,
+                        id: aliPayProvider.id,
+                        provider: aliPayProvider
+                    } as PayItem);
+                    break;
+                case 'wxpay':
+                    var wxPayProvider = value as UniPaymentWxpayProvider;
+                    console.log('wxpay', wxPayProvider, " at pages/API/request-payment/request-payment.uvue:48");
+                    this.providerList.push({
+                        name: wxPayProvider.description,
+                        id: wxPayProvider.id,
+                        provider: wxPayProvider
+                    } as PayItem);
+                    break;
+                default:
+                    break;
+            }
+        });
+    },
+    methods: {
+        requestPayment(e: PayItem) {
+            const provider = e.id;
+            if (provider == "alipay") {
+                this.payAli(provider);
+            }
+            else if (provider == "wxpay") {
+                if (e.provider != null && e.provider instanceof UniPaymentWxpayProvider && !((e.provider as UniPaymentWxpayProvider).isWeChatInstalled)) {
+                    uni.showToast({
+                        title: "微信没有安装",
+                        icon: 'error'
+                    });
+                }
+                else {
+                    this.payWX(provider);
+                }
+            }
+        },
+        payAli(id: string) {
+            uni.showLoading({
+                title: "请求中..."
+            });
+            uni.request({
+                url: 'https://demo.dcloud.net.cn/payment/alipay/?total=0.01',
+                method: 'GET',
+                timeout: 6000,
+                success: (res) => {
+                    this.orderInfo = JSON.stringify(res.data);
+                    console.log("====" + this.orderInfo, " at pages/API/request-payment/request-payment.uvue:115");
+                    uni.hideLoading();
+                    uni.requestPayment({
+                        provider: id,
+                        orderInfo: res.data as string,
+                        fail: (res) => {
+                            console.log(JSON.stringify(res), " at pages/API/request-payment/request-payment.uvue:121");
+                            this.errorCode = res.errCode;
+                            uni.showToast({
+                                icon: 'error',
+                                title: 'errorCode:' + this.errorCode
+                            });
+                        },
+                        success: (res) => {
+                            console.log(JSON.stringify(res), " at pages/API/request-payment/request-payment.uvue:129");
+                            uni.showToast({
+                                icon: 'success',
+                                title: '支付成功'
+                            });
+                        }
+                    });
+                },
+                fail: (e) => {
+                    console.log(e, " at pages/API/request-payment/request-payment.uvue:138");
+                    uni.hideLoading();
+                },
+            });
+        },
+        payWX(id: string) {
+            uni.showLoading({
+                title: "请求中..."
+            });
+            let url = 'https://demo.dcloud.net.cn/payment/wxpayv3.__UNI__uniappx/?total=0.01';
+            const res = uni.getAppBaseInfo();
+            let packageName: string | null;
+            packageName = res.packageName;
+            if (packageName == 'io.dcloud.hellouniappx') { //hello uniappx
+                url = 'https://demo.dcloud.net.cn/payment/wxpayv3.__UNI__HelloUniAppX/?total=0.01';
+            }
+            uni.request({
+                url: url,
+                method: 'GET',
+                timeout: 6000,
+                header: {
+                    "Content-Type": "application/json"
+                } as UTSJSONObject,
+                success: (res) => {
+                    console.log(res.data, " at pages/API/request-payment/request-payment.uvue:170");
+                    uni.hideLoading();
+                    uni.requestPayment({
+                        provider: id,
+                        orderInfo: JSON.stringify(res.data),
+                        fail: (res) => {
+                            console.log(JSON.stringify(res), " at pages/API/request-payment/request-payment.uvue:176");
+                            this.errorCode = res.errCode;
+                            uni.showToast({
+                                duration: 5000,
+                                icon: 'error',
+                                title: 'errorCode:' + this.errorCode,
+                            });
+                        },
+                        success: (res) => {
+                            console.log(JSON.stringify(res), " at pages/API/request-payment/request-payment.uvue:185");
+                            uni.showToast({
+                                duration: 5000,
+                                icon: 'success',
+                                title: '支付成功'
+                            });
+                        }
+                    });
+                },
+                fail: (res) => {
+                    uni.hideLoading();
+                    console.log(res, " at pages/API/request-payment/request-payment.uvue:196");
+                },
+            });
+        },
+        //自动化测试使用
+        jest_pay() {
+            uni.requestPayment({
+                provider: "alipay",
+                orderInfo: this.orderInfo,
+                fail: (res: RequestPaymentFail) => {
+                    this.errorCode = res.errCode;
+                    this.complete = true;
+                    this.fail = true;
+                },
+                success: (res: RequestPaymentSuccess) => {
+                    console.log(JSON.stringify(res), " at pages/API/request-payment/request-payment.uvue:301");
+                    this.complete = true;
+                    this.fail = false;
+                }
+            } as RequestPaymentOptions);
+        }
+    }
+});
+export default __sfc__;
+function GenPagesAPIRequestPaymentRequestPaymentRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    const _component_page_head = resolveEasyComponent("page-head", _easycom_page_head);
+    return createElementVNode(Fragment, null, [
+        createVNode(_component_page_head, utsMapOf({ title: "发起支付" })),
+        createElementVNode("view", utsMapOf({
+            class: "uni-common-mt",
+            style: normalizeStyle(utsMapOf({ "padding": "0 10px" }))
+        }), [
+            createElementVNode("text", null, "如对当前页面的支付示例功能有任何疑问，通过电子邮件：service@dcloud.io 联系我们")
+        ], 4 /* STYLE */),
+        _ctx.providerList.length > 0
+            ? createElementVNode(Fragment, utsMapOf({ key: 0 }), RenderHelpers.renderList(_ctx.providerList, (item, index, __index, _cached): any => {
+                return createElementVNode("button", utsMapOf({
+                    style: normalizeStyle(utsMapOf({ "margin-top": "20px" })),
+                    type: "primary",
+                    key: index,
+                    onClick: () => { _ctx.requestPayment(item); }
+                }), toDisplayString(item.name), 13 /* TEXT, STYLE, PROPS */, ["onClick"]);
+            }), 128 /* KEYED_FRAGMENT */)
+            : createCommentVNode("v-if", true)
+    ], 64 /* STABLE_FRAGMENT */);
+}
+const GenPagesAPIRequestPaymentRequestPaymentStyles = [];
+import _easycom_page_head from '@/components/page-head/page-head.vue';
+//# sourceMappingURL=request-payment.uvue.map

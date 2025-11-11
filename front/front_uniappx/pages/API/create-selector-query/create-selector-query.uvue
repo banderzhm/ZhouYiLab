@@ -1,0 +1,248 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view class="page-scroll-view">
+  <!-- #endif -->
+    <view class="page uni-list-cell-db-text" id="page">
+      <page-head :title="title"></page-head>
+      <button class="btn btn-get-node-info" @click="getNodeInfo">getNodeInfo</button>
+      <button class="btn btn-get-all-node-info" @click="getAllNodeInfo">getAllNodeInfo</button>
+      <view id="rect-1-2" class="rect-1-2">
+        <view class="rect rect1"></view>
+        <view class="rect rect2"></view>
+      </view>
+      <view class="rect-info-1-2">
+        <view class="rect-info" v-for="(nodeInfo, index) in nodeInfoList" :key="index">
+          <view class="node-info-item">
+            <text class="node-info-item-k">left: </text>
+            <text class="node-info-item-v">{{nodeInfo.left}}</text>
+          </view>
+          <view class="node-info-item">
+            <text class="node-info-item-k">top: </text>
+            <text class="node-info-item-v">{{nodeInfo.top}}</text>
+          </view>
+          <view class="node-info-item">
+            <text class="node-info-item-k">right: </text>
+            <text class="node-info-item-v">{{nodeInfo.right}}</text>
+          </view>
+          <view class="node-info-item">
+            <text class="node-info-item-k">bottom: </text>
+            <text class="node-info-item-v">{{nodeInfo.bottom}}</text>
+          </view>
+          <view class="node-info-item">
+            <text class="node-info-item-k">width: </text>
+            <text class="node-info-item-v">{{nodeInfo.width}}</text>
+          </view>
+          <view class="node-info-item">
+            <text class="node-info-item-k">height: </text>
+            <text class="node-info-item-v">{{nodeInfo.height}}</text>
+          </view>
+        </view>
+      </view>
+      <node-child class="node-child"></node-child>
+      <text>子组件多根节点</text>
+      <multi-child ref="multi-child" id="multi-child"></multi-child>
+      <text>子组件多根节点(仅测试，用于验证查询是否超出范围)</text>
+      <multi-child id="multi-child-2"></multi-child>
+      <view>
+        <text>测试.fields</text>
+        <text>{{fieldsResultContainNode}}</text>
+      </view>
+      <view>
+        <text>测试.node</text>
+        <text>{{nodeResultContainNode}}</text>
+      </view>
+      <canvas id="canvas1"></canvas>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  import nodeChild from './nodes-info-child.uvue'
+  import multiChild from './selector-query-child-multi.uvue'
+
+  type NodeInfoType = {
+    left : number | null,
+    top : number | null,
+    right : number | null,
+    bottom : number | null,
+    width : number | null,
+    height : number | null,
+  }
+
+  export default {
+    components: {
+      nodeChild,
+      multiChild
+    },
+    data() {
+      return {
+        title: 'createSelectorQuery',
+        nodeInfoList: [] as NodeInfoType[],
+        // 仅用于自动化测试
+        rootNodeInfo: null as NodeInfoType | null,
+        //供自动化测试使用
+        // resizeRectValid: false
+        // TODO
+        selectCount: 0,
+        selectAllCount: 0,
+        fieldsResultContainNode: false,
+        nodeResultContainNode: false
+      }
+    },
+    onLoad() {
+      uni.$on('childReady', this.onChildReady)
+    },
+    onUnload() {
+      uni.$off('childReady', this.onChildReady)
+    },
+    onReady() {
+      this.testFields()
+      this.testNode()
+    },
+    onResize() {
+      //供自动化测试使用
+      /* var rect12Element = uni.getElementById("rect-1-2")
+      if(rect12Element != null) {
+        var domRect = rect12Element.getBoundingClientRect()
+        if(domRect.width > 100) {
+          this.resizeRectValid = true
+        }
+      } */
+    },
+    methods: {
+      // 仅用于自动化测试
+      onChildReady() {
+        const instance2 = (this.$refs['multi-child'] as ComponentPublicInstance);
+        this.selectCount = instance2.$data['selectCount'] as number;
+        this.selectAllCount = instance2.$data['selectAllCount'] as number;
+      },
+      // 仅用于自动化测试
+      getRootNodeInfo(selector : string) {
+        uni.createSelectorQuery().select(selector).boundingClientRect().exec((ret) => {
+          if (ret.length == 1) {
+            const nodeInfo = ret[0] as NodeInfo;
+            const nodeType = {
+              left: nodeInfo.left,
+              top: nodeInfo.top,
+              right: nodeInfo.right,
+              bottom: nodeInfo.bottom,
+              width: nodeInfo.width,
+              height: nodeInfo.height,
+            } as NodeInfoType;
+            this.rootNodeInfo = nodeType
+          }
+        })
+      },
+      getNodeInfo() {
+        uni.createSelectorQuery().select('.rect1').boundingClientRect().exec((ret) => {
+          this.nodeInfoList.length = 0
+          const i = ret[0] as NodeInfo
+          this.nodeInfoList.push({
+            left: i.left,
+            top: i.top,
+            right: i.right,
+            bottom: i.bottom,
+            width: i.width,
+            height: i.height,
+          } as NodeInfoType)
+        })
+      },
+      getAllNodeInfo() {
+        uni.createSelectorQuery().selectAll('.rect').boundingClientRect().exec((ret) => {
+          this.nodeInfoList.length = 0
+          const array = ret[0] as NodeInfo[]
+          array.forEach((i) => {
+            this.nodeInfoList.push({
+              left: i.left,
+              top: i.top,
+              right: i.right,
+              bottom: i.bottom,
+              width: i.width,
+              height: i.height,
+            } as NodeInfoType)
+          })
+        })
+      },
+      // test .fields
+      testFields() {
+        uni.createSelectorQuery().select('.rect1').fields({
+          node: true
+        } as NodeField, (ret) => {
+          const isElement = (ret as NodeInfo).node instanceof UniElement
+          if (isElement) {
+            this.fieldsResultContainNode = true
+          } else {
+            this.fieldsResultContainNode = false
+          }
+        }).exec()
+      },
+      // test .node
+      testNode() {
+        uni.createSelectorQuery().select('#canvas1').node((ret) => {
+          const isElement = (ret as NodeInfo).node instanceof UniElement
+          const isCanvasElement = ((ret as NodeInfo).node as UniCanvasElement).tagName == 'CANVAS'
+          if (isElement && isCanvasElement) {
+            this.nodeResultContainNode = true
+          } else {
+            this.nodeResultContainNode = false
+          }
+        }).exec()
+      },
+    }
+  }
+</script>
+
+<style>
+  .page {
+    padding: 15px;
+  }
+
+  .btn {
+    margin-top: 15px;
+  }
+
+  .rect-1-2 {
+    flex-direction: row;
+    margin-top: 15px;
+  }
+
+  .rect {
+    width: 150px;
+    height: 100px;
+  }
+
+  .rect1 {
+    background-color: dodgerblue;
+  }
+
+  .rect2 {
+    margin-left: auto;
+    background-color: seagreen;
+  }
+
+  .rect-info-1-2 {
+    flex-direction: row;
+    margin-top: 15px;
+  }
+
+  .rect-info {
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .node-info-item {
+    flex-direction: row;
+  }
+
+  .node-info-item-k {
+    width: 72px;
+    line-height: 2;
+  }
+
+  .node-info-item-v {
+    font-weight: bold;
+    line-height: 2;
+  }
+</style>

@@ -1,0 +1,47 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view style="flex-grow: 1">
+      <view>
+        <text>border-width: 5px (without border-style)</text>
+        <view class="common" style="border-width: 5px;"></view>
+      </view>
+
+      <view>
+        <text>border-width: 5px</text>
+        <view class="common" style="border-width: 5px; border-style: solid;"></view>
+      </view>
+
+      <view>
+        <text>border-left-width: 5px</text>
+        <view class="common" style="border-left-width: 5px; border-left-style: solid; "></view>
+      </view>
+
+      <view>
+        <text>border-top-width: 10px</text>
+        <view class="common" style="border-top-width: 10px; border-top-style: solid; "></view>
+      </view>
+
+      <view>
+        <text>border-right-width: 15px</text>
+        <view class="common" style="border-right-width: 15px; border-right-style: solid; "></view>
+      </view>
+
+      <view>
+        <text>border-bottom-width: 20px</text>
+        <view class="common" style="border-bottom-width: 20px; border-bottom-style: solid; "></view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+    background-color: gray;
+  }
+</style>

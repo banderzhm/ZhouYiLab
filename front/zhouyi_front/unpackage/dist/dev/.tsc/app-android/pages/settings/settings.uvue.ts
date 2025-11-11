@@ -1,0 +1,30 @@
+
+	import ThemeSettings from '../../components/theme-settings.uvue'
+	
+	const __sfc__ = defineComponent({
+		components: {
+			ThemeSettings
+		},
+		data() {
+			return {
+				
+			}
+		},
+		onLoad() {
+			
+		}
+	})
+
+export default __sfc__
+function GenPagesSettingsSettingsRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_theme_settings = resolveComponent("theme-settings")
+
+  return createElementVNode("scroll-view", utsMapOf({ class: "page-container" }), [
+    createElementVNode("view", utsMapOf({ class: "settings-page" }), [
+      createVNode(_component_theme_settings)
+    ])
+  ])
+}
+const GenPagesSettingsSettingsStyles = [utsMapOf([["page-container", padStyleMapOf(utsMapOf([["backgroundColor", "#f8f9fa"], ["height", "100%"]]))], ["settings-page", padStyleMapOf(utsMapOf([["paddingTop", 16], ["paddingRight", 0], ["paddingBottom", 16], ["paddingLeft", 0]]))]])]

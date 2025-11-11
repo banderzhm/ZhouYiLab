@@ -1,0 +1,110 @@
+<template>
+  <scroll-view class="page">
+    <unicloud-db ref="udb" v-slot:default="{data, loading, error}" :collection="collection" :where="where"
+      page-data="replace">
+      <view v-if="error!=null" class="error">{{error.errMsg}}</view>
+      <view v-if="loading" class="loading">正在加载...</view>
+      <view v-if="data.length>0">
+        <view class="form-item">
+          <text class="form-item-label">姓名</text>
+          <text class="form-item-input">{{data[0]['username']}}</text>
+        </view>
+        <view class="form-item">
+          <text class="form-item-label">电话</text>
+          <text class="form-item-input">{{data[0]['mobile']}}</text>
+        </view>
+        <view class="form-item">
+          <text class="form-item-label">邮箱</text>
+          <text class="form-item-input">{{data[0]['email']}}</text>
+        </view>
+        <view class="form-item">
+          <text class="form-item-label">备注</text>
+          <text class="form-item-input">{{data[0]['comment']}}</text>
+        </view>
+        <view class="form-item">
+          <text class="form-item-label">性别</text>
+          <text class="form-item-input">{{displayGender(data[0].getNumber('gender'))}}</text>
+        </view>
+        <button type="default" @click="gotoUpdatePage(data[0].getString('_id'))">编辑</button>
+      </view>
+    </unicloud-db>
+  </scroll-view>
+</template>
+
+<script>
+  import { COLLECTION_NAME, GenderType, GenderList, UNICLOUD_DB_CONTACTS_UPDATE } from './types.uts'
+
+  export default {
+    data() {
+      return {
+        collection: '',
+        where: '',
+        whereID: '',
+        uniCloudElement: null as UniCloudDBElement | null
+      }
+    },
+    onLoad(options) {
+      this.collection = COLLECTION_NAME;
+      this.whereID = options['id'] as string;
+      this.where = `_id=='${this.whereID}'`;
+    },
+    onShow() {
+      // TODO 后续通过 EventChannel 实现
+      uni.$off(UNICLOUD_DB_CONTACTS_UPDATE, this.onDataChange);
+    },
+    onUnload() {
+      // TODO 后续通过 EventChannel 实现
+      uni.$off(UNICLOUD_DB_CONTACTS_UPDATE, this.onDataChange);
+    },
+    onReady() {
+      this.uniCloudElement = this.$refs['udb'] as UniCloudDBElement
+    },
+    methods: {
+      displayGender(value : number | null) : string {
+        const str = value ?? -1
+        return (GenderList as GenderType[]).find((item : GenderType) : boolean => {
+          return item.value == str
+        })!.text;
+      },
+      gotoUpdatePage(id : string | null) {
+        // TODO 后续通过 EventChannel 实现
+        uni.$on(UNICLOUD_DB_CONTACTS_UPDATE, this.onDataChange);
+        uni.navigateTo({
+          url: './edit?id=' + id
+        })
+      },
+      onDataChange(_ : string) {
+        this.uniCloudElement!.loadData()
+      }
+    }
+  }
+</script>
+
+<style>
+  .page {
+    flex: 1;
+    padding: 15px;
+  }
+
+  .loading {
+    align-items: center;
+  }
+
+  .form-item {
+    flex-direction: row;
+    margin-bottom: 15px;
+    align-items: center;
+    padding: 8px 0;
+  }
+
+  .form-item-label {
+    width: 45px;
+    margin-right: 10px;
+  }
+
+  .form-item-input {
+    flex: 1;
+    font-size: 14px;
+    color: #666;
+  }
+</style>

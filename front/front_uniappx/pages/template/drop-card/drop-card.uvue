@@ -1,0 +1,37 @@
+<template>
+  <view class="root">
+    <template v-for="(item,index) in cardList" :key="index">
+      <card ref="card" :img="item" :cardIndex="index"></card>
+    </template>
+  </view>
+</template>
+<script lang="uts">
+  import card from './card/card.uvue';
+  export default {
+    components: {
+      card
+    },
+    data() {
+      return {
+        cardList: [
+          'https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/drop-card-1.jpg',
+          'https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/drop-card-2.jpg',
+          'https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/drop-card-3.jpg'
+        ] as string.ImageURIString[]
+      }
+    }
+  }
+</script>
+<style>
+  /* #ifdef MP */
+  page {
+    overflow: hidden
+  }
+  /* #endif */
+
+  .root {
+    flex: 1;
+    position: relative;
+    align-items: center;
+  }
+</style>

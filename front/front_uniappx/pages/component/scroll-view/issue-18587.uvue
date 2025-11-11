@@ -1,0 +1,34 @@
+<template>
+  <view style="flex: 1;">
+    <button id="test-btn" @click="scrollTo(100)">滚动到100px位置</button>
+    <scroll-view id="scroll" style="flex: 1;" direction="vertical" @scrollend="onScrollEnd">
+      <view style="border: dashed 10px black; height: 3000px;"></view>
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        scrollEndTriggeredTimes: 0
+      }
+    },
+    onLoad() {
+
+    },
+    methods: {
+      scrollTo(scrollTop: number) {
+        const scroll = uni.getElementById('scroll') as UniScrollViewElement
+        scroll.scrollTop = scrollTop
+      },
+      onScrollEnd() {
+        console.log('scrollEnd触发了')
+        this.scrollEndTriggeredTimes++
+      }
+    }
+  }
+</script>
+
+<style>
+</style>

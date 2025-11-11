@@ -1,0 +1,26 @@
+<template>
+	<view style="flex-grow: 1;">
+		<view style="height: 250px;background-color: gray;justify-content: center;align-items: center;">
+			<text class="common" style="text-align: left;">text-align: left</text>
+			<text class="common" style="text-align: center;">text-align: center</text>
+			<text class="common2" style="text-align: center;">text-align: center</text>
+			<text class="common" style="text-align: right;">text-align: right</text>
+		</view>
+	</view>
+</template>
+
+<script>
+
+</script>
+
+<style>
+	.common {
+		width: 250px;
+		font-size: 20px;
+	}
+
+  .common2 {
+    min-width: 250px;
+    font-size: 20px;
+  }
+</style>

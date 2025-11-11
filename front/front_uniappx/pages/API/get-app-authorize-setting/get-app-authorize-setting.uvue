@@ -1,0 +1,141 @@
+<template>
+  <page-head :title="title"></page-head>
+  <view class="uni-common-mt">
+    <view class="uni-list">
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否授权使用相册</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="albumAuthorized" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否授权使用蓝牙</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="bluetoothAuthorized" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否授权使用摄像头</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="cameraAuthorized" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否授权使用定位</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="locationAuthorized" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">定位准确度</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="locationAccuracy" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否授权使用麦克风</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="microphoneAuthorized" />
+        </view>
+      </view>
+
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否授权通知</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="notificationAuthorized" />
+        </view>
+      </view>
+      <!-- #ifdef APP-IOS -->
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否允许通知带有提醒</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="notificationAlertAuthorized" />
+        </view>
+      </view>
+
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否允许通知带有标记</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="notificationBadgeAuthorized" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">是否允许通知带有声音</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="notificationSoundAuthorized" />
+        </view>
+      </view>
+      <!-- #endif -->
+    </view>
+    <view class="uni-padding-wrap">
+      <view class="uni-btn-v">
+        <button type="primary" @tap="getAppAuthorizeSetting">获取App授权设置</button>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+  export default {
+    data() {
+      return {
+        title: 'getAppAuthorizeSetting',
+        cameraAuthorized: "",
+        albumAuthorized: "",
+        locationAuthorized: "",
+        locationAccuracy: "",
+        microphoneAuthorized: "",
+        bluetoothAuthorized: "",
+        notificationAuthorized: "",
+        notificationAlertAuthorized: "",
+        notificationBadgeAuthorized: "",
+        notificationSoundAuthorized: ""
+      }
+    },
+    onUnload: function () {
+    },
+    methods: {
+      getAppAuthorizeSetting: function () {
+        const res = uni.getAppAuthorizeSetting();
+        this.albumAuthorized = res.albumAuthorized;
+        this.bluetoothAuthorized = res.bluetoothAuthorized;
+        this.cameraAuthorized = res.cameraAuthorized;
+        this.locationAuthorized = res.locationAuthorized;
+        this.locationAccuracy = res.locationAccuracy ?? "unsupported";
+        this.microphoneAuthorized = res.microphoneAuthorized;
+        this.notificationAuthorized = res.notificationAuthorized;
+        // #ifdef APP-IOS
+        this.notificationAlertAuthorized = res.notificationAlertAuthorized;
+        this.notificationBadgeAuthorized = res.notificationBadgeAuthorized;
+        this.notificationSoundAuthorized = res.notificationSoundAuthorized;
+        // #endif
+
+      }
+    }
+  }
+</script>
+
+<style>
+  .uni-pd {
+    padding-left: 15px;
+  }
+</style>

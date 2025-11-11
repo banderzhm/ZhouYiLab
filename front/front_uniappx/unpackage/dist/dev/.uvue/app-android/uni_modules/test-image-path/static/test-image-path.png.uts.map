@@ -1,0 +1,1 @@
+{"version":3,"file":"test-image-path.png.uts","sourceRoot":"","sources":["uni_modules/test-image-path/static/test-image-path.png.ts"],"names":[],"mappings":"AAAA,eAAe,2BAA2B,CAAA","sourcesContent":["export default \"/assets/logo.abb6eead.png\""]}

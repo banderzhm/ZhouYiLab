@@ -1,0 +1,180 @@
+<template>
+  <view class="content">
+    <unicloud-db ref="udb" v-slot:default="{data, pagination, loading, error}" :collection="collection" :getcount="true"
+      loadtime="manual">
+      <list-view v-if="data.length>0" ref="listView" class="list" :scroll-y="true" @scrolltolower="loadMore()">
+        <list-item class="list-item" v-for="(item, _) in data">
+          <view class="list-item-fill">
+            <text>{{item}}</text>
+          </view>
+          <view>
+            <text class="list-item-remove" @click="remove(item.getString('_id')!)">❌</text>
+          </view>
+        </list-item>
+      </list-view>
+      <text class="loading" v-if="loading">Loading...</text>
+      <view v-if="error!=null">{{error.errMsg}}</view>
+      <view class="pagination" v-if="data.length>0">
+        <text class="pagination-item">{{data.length}} / {{pagination.count}}</text>
+      </view>
+    </unicloud-db>
+    <view class="btn-group">
+      <button class="btn" @click="add()">Add</button>
+      <button class="btn" @click="get()">Get</button>
+    </view>
+  </view>
+</template>
+
+<script>
+  const db = uniCloud.databaseForJQL()
+
+  export default {
+    data() {
+      return {
+        collection: 'unicloud-db-test',
+        collectionList: [
+          db.collection('book').where('name == "水浒传"').getTemp(),
+        ] as UTSJSONObject[],
+        uniCloudElement: null as UniCloudDBElement | null,
+        isTesting: false,
+        addResult: {},
+        updateResult: {},
+        removeResult: {}
+      }
+    },
+    onReady() {
+      this.uniCloudElement = this.$refs['udb'] as UniCloudDBElement
+      this.get();
+    },
+    onPullDownRefresh() {
+      this.uniCloudElement!.loadData({
+        clear: true,
+        success: (_ : UniCloudDBGetResult) => {
+          uni.stopPullDownRefresh()
+        }
+      })
+    },
+    methods: {
+      loadMore() {
+        this.uniCloudElement!.loadMore()
+      },
+      get() {
+        this.uniCloudElement!.loadData({
+          clear: true
+        })
+      },
+      add() {
+        const value = {
+          title: "title-" + Date.now(),
+          comment: "comment" + Date.now()
+        };
+        this.uniCloudElement!.add(value, {
+          showToast: false,
+          success: (res : UniCloudDBAddResult) => {
+            this.addResult = {
+              id: res.id
+            };
+            this.get();
+          },
+          fail: (err : any | null) => {
+            this.showError(err)
+          }
+        })
+      },
+      update(id : string) {
+        const value = {
+          title: "title-" + Date.now(),
+          comment: "comment" + Date.now()
+        };
+        this.uniCloudElement!.update(id, value, {
+          showToast: false,
+          needLoading: true,
+          needConfirm: false,
+          loadingTitle: "正在更新...",
+          success: (res : UniCloudDBUpdateResult) => {
+            this.updateResult = {
+              updated: res.updated
+            }
+          },
+          fail: (err : any | null) => {
+            this.showError(err)
+          }
+        })
+      },
+      remove(id : string) {
+        this.uniCloudElement!.remove(id, {
+          showToast: false,
+          needConfirm: false,
+          needLoading: false,
+          success: (res : UniCloudDBRemoveResult) => {
+            this.removeResult = {
+              deleted: res.deleted
+            }
+          },
+          fail: (err : any | null) => {
+            this.showError(err)
+          }
+        })
+      },
+      onQueryLoad(data : Array<UTSJSONObject>, ended : boolean, pagination : UTSJSONObject) {
+        console.log(data, ended, pagination);
+      },
+      showError(err : any | null) {
+        const error = err as UniCloudError
+        uni.showModal({
+          content: error.errMsg,
+          showCancel: false
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+  .content {
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .list {
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .list-item {
+    flex-direction: row;
+    padding: 10px;
+  }
+
+  .list-item-fill {
+    flex: 1;
+  }
+
+  .list-item-remove {
+    padding: 10px;
+  }
+
+  .loading {
+    padding: 10px;
+    text-align: center;
+  }
+
+  .pagination {
+    flex-direction: row;
+    background-color: #f2f2f2;
+  }
+
+  .pagination-item {
+    margin: auto;
+    padding: 5px 10px;
+  }
+
+  .btn-group {
+    flex-direction: row;
+  }
+
+  .btn {
+    flex: 1;
+    margin: 10px;
+  }
+</style>

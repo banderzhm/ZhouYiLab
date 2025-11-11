@@ -1,0 +1,18 @@
+<template>
+  <view style="flex-grow: 1;">
+    <view style="height: 250px;background-color: gray;justify-content: center;align-items: center;">
+      <text class="common" style="font-style: italic;">font-style: italic</text>
+      <text class="common" style="font-style: normal;">font-style: normal</text>
+    </view>
+  </view>
+</template>
+
+<script>
+
+</script>
+
+<style>
+  .common {
+    font-size: 20px;
+  }
+</style>

@@ -1,0 +1,96 @@
+<template>
+  <view style="flex: 1;">
+    <scroll-view direction="horizontal" style="flex-direction: row;">
+      <button class="button_item" @click="delayShow">测试延时显示</button>
+      <button class="button_item" @click="switchItemContent">修改item子元素</button>
+    </scroll-view>
+    <list-view v-show="list_show" id="listview" style="flex: 1;" show-scrollbar=false @scrolltolower="onScrollTolower">
+      <list-item v-for="index in item_count" :id="'item_'+index" class="item" @click="itemClick(index)">
+        <view style="flex-direction: row;">
+          <text>item-------<text>{{index}}</text></text>
+          <scroll-view direction="horizontal" show-scrollbar="false" class="scroll_item">
+            <text>scroll-view{{index}}：</text>
+            <text class="tip_text" v-for="tab in 5">元素{{tab}}</text>
+          </scroll-view>
+        </view>
+        <text v-show="displayArrow">item-------<text>{{index}}</text></text>
+
+        <switch :checked="true"></switch>
+      </list-item>
+    </list-view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        item_count: 20,
+        list_show: true,
+        listViewElement: null as UniListViewElement | null,
+        displayArrow: false
+      }
+    },
+    onReady() {
+      this.listViewElement = uni.getElementById<UniListViewElement>('listview')
+    },
+    methods: {
+      onScrollTolower(_ : ScrollToLowerEvent) {
+        setTimeout(() => {
+          this.item_count += 20
+        }, 300)
+      },
+      //用于自动化测试
+      listViewScrollByY(y : number) {
+        this.listViewElement?.scrollBy(0, y)
+      },
+      itemClick(index : number) {
+        console.log("itemTextClick---" + index)
+      },
+      delayShow() {
+        this.list_show = !this.list_show
+        this.item_count += 20
+        //延时显示list-view 测试list-item延时显示bug
+        setTimeout(() => {
+          this.list_show = !this.list_show
+        }, 400)
+      },
+      switchItemContent() {
+        this.displayArrow = !this.displayArrow
+        this.modifyItemPadding(1)
+      },
+      modifyItemPadding(index: number) {
+        var element = uni.getElementById("item_"+index)
+        element?.style.setProperty("padding", "0px")
+      }
+    }
+  }
+</script>
+
+<style>
+  .item {
+    padding: 15px;
+    margin: 0 0 5px 0;
+    border: 1px solid #000000;
+    background-color: #fdfdfd;
+    border-radius: 5px;
+  }
+
+  .button_item {
+    width: 200px;
+  }
+
+  .scroll_item {
+    flex: 1;
+    flex-direction: row;
+    overflow: hidden;
+    margin-left: 10px;
+  }
+
+  .tip_text {
+    border-style: solid;
+    border-radius: 3px;
+    border-width: 1px;
+    margin: 0px 10px;
+  }
+</style>

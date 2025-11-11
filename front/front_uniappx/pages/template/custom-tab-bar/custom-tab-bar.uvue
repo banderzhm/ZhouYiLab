@@ -1,0 +1,221 @@
+<template>
+  <view class="tabs">
+    <view ref="tabview" class="tab-view">
+      <!-- 注意tab的逻辑是：第一次使用v-if创建，创建之后不再使用v-if，而是设置visibility来隐藏和显示。不能设置tab的v-if为false，因为销毁再创建影响性能 -->
+      <tab1 ref="tab1" class="tab-page" v-if="tabList[0].init" :style="{visibility:(selectedIndex==0?'visible':'hidden')}"></tab1>
+      <tab2 ref="tab2" class="tab-page" v-if="tabList[1].init" :style="{visibility:(selectedIndex==1?'visible':'hidden')}"></tab2>
+    </view>
+    <view ref="tabbar" class="tab-bar">
+      <view class="tab-item" @click="onTabClick(0)">
+        <view ref="tab-item1" class="tab-item-content">
+          <text v-if="displayArrow" class="tab-item-icon tab-item-arrow uni-icon"
+            :class="selectedIndex==0 ? 'tab-item-text-active' : ''">
+            {{'\ue6bd'}}
+          </text>
+          <text v-if="!displayArrow" class="tab-item-icon uni-icon"
+            :class="selectedIndex==0 ? 'tab-item-text-active' : ''">{{'\ue644'}}</text>
+          <text v-if="!displayArrow" class="tab-item-text" :class="selectedIndex==0 ? 'tab-item-text-active' : ''">
+            首页
+          </text>
+        </view>
+      </view>
+      <view>
+        <image class="concave-image" mode="heightFix" src="/static/template/custom-tab-bar/concave.png"></image>
+      </view>
+      <view class="tab-item" @click="onTabClick(1)">
+        <view ref="tab-item2" class="tab-item-content">
+          <text class="tab-item-icon uni-icon"
+            :class="selectedIndex==1 ? 'tab-item-text-active' : ''">{{'\ue699'}}</text>
+          <text class="tab-item-text" :class="selectedIndex==1 ? 'tab-item-text-active' : ''">
+            我的
+          </text>
+        </view>
+      </view>
+    </view>
+    <view class="btn-plus" @click="onPlusClick">
+      <text class="btn-plus-text">+</text>
+    </view>
+  </view>
+</template>
+
+<script>
+  import tab1 from './custom-tab-bar-tab1.uvue';
+  import tab2 from './custom-tab-bar-tab2.uvue';
+
+  type TabItem = {
+    init : boolean,
+    preload : boolean,
+  }
+
+  export default {
+    components: {
+      tab1,
+      tab2
+    },
+    data() {
+      return {
+        tabList: [
+          {
+            init: true,
+            preload: false
+          } as TabItem,
+          {
+            init: false,
+            preload: false
+          } as TabItem,
+        ] as TabItem[],
+        selectedIndex: 0,
+        displayArrow: false,
+        lastTab1Top:0,
+        tabViewHeight: 0
+      }
+    },
+    onLoad() {
+      uni.$on('tabchange', this.onTabPageEvent) //监听tab1页面发出的tabchange事件，触发到本页面的onTabPageEvent方法。为了判断tab1的scroll-view滚动距离
+    },
+    onReady() {
+      // this.setSelectedIndex(0)
+      (this.$refs["tabview"] as UniElement).getBoundingClientRectAsync()!.then((res: DOMRect) => {
+        this.tabViewHeight = res.height
+      });
+    },
+    onUnload() {
+      uni.$off('tabchange', this.onTabPageEvent)
+    },
+    methods: {
+      onTabClick(index : number) {
+        if (this.selectedIndex == index && index == 0 && this.displayArrow == true) { //首页当tab按钮变成向上时，点向上就滚动到顶
+          // console.log("11");
+          this.displayArrow = false;
+          (this.$refs["tab1"]! as ComponentPublicInstance).$callMethod('scrollTop', 0)
+        }
+        else if (index !=0){ //不在首页时，把箭头变成图标
+          // console.log("22");
+          this.displayArrow = false
+        }
+        else if (index == 0 && this.selectedIndex !=0){ //从其他tab切回首页时，检查是否需要把图标变箭头
+          // console.log("33",this.lastTab1Top, this.tabViewHeight);
+          this.displayArrow = this.lastTab1Top > this.tabViewHeight
+        }
+        this.setSelectedIndex(index);
+        // console.log('index: ',index);
+        // console.log('this.selectedIndex: ',this.selectedIndex);
+        // console.log('this.displayArrow: ',this.displayArrow);
+        // console.log('this.lastTab1Top: ',this.lastTab1Top);
+      },
+      onTabPageEvent(top : number) {
+        // console.log('top: ',top);
+        this.displayArrow = top > this.tabViewHeight //滚动1屏后，就把第一个tab的图标从首页变成向上箭头
+        this.lastTab1Top = top
+      },
+      setSelectedIndex(index : number) {
+        if (this.selectedIndex === index) {
+          return
+        }
+        if (!this.tabList[index].init) {
+          this.tabList[index].init = true
+        }
+        this.selectedIndex = index
+      },
+      onPlusClick() {
+        uni.showModal({
+          title: "提示",
+          content: "你点击了 +",
+          showCancel: false
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+  @font-face {
+    font-family: "UniIcon";
+    src: url('@/static/fonts/uni-icon.ttf');
+  }
+
+  .uni-icon {
+    font-family: "UniIcon";
+    font-size: 16px;
+    font-style: normal;
+  }
+
+  .tabs {
+    flex: 1;
+    background-color: #fff;
+    overflow: visible;
+  }
+
+  .tab-view {
+    flex: 1;
+  }
+
+  .tab-page {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .tab-bar {
+    flex-direction: row;
+    height: 56px;
+    overflow: visible;
+  }
+
+  .tab-item {
+    flex: 1;
+    position: relative;
+    background-color: #1e90ff;
+    overflow: visible;
+  }
+
+  .tab-item-content {
+    margin: auto;
+    transition: transform 0.3s;
+  }
+
+  .tab-item-icon {
+    color: #ccc;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .tab-item-text {
+    color: #ccc;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .tab-item-text-active {
+    color: #fff;
+  }
+
+  .tab-item-arrow {
+    font-size: 30px !important;
+    font-weight: bold;
+  }
+
+  .concave-image {
+    height: 56px;
+  }
+
+  .btn-plus {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    bottom: 21px;
+    border-radius: 50px;
+    background-color: #FE5722;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .btn-plus-text {
+    color: #fff;
+    font-size: 32px;
+  }
+</style>

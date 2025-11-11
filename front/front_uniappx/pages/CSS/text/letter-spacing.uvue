@@ -1,0 +1,19 @@
+<template>
+	<view style="flex-grow: 1;">
+		<view style="height: 250px;background-color: gray;justify-content: center;align-items: center;">
+			<text class="common">letter-spacing</text>
+			<text class="common" style="letter-spacing: 5px;">letter-spacing: 5px</text>
+			<text class="common" style="letter-spacing: -2px;">letter-spacing: -2px</text>
+		</view>
+	</view>
+</template>
+
+<script>
+
+</script>
+
+<style>
+	.common {
+		font-size: 20px;
+	}
+</style>

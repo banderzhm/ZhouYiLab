@@ -1,0 +1,214 @@
+type ShareElementOpenAnimationType = 'auto' | 'none' | 'slide-in-right' | 'slide-in-left' | 'slide-in-top' | 'slide-in-bottom' | 'fade-in' | 'pop-in' | 'zoom-out' | 'zoom-fade-out';
+type ShareElementEasingFunctionType = 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear';
+type ShuttleOnType = 'from' | 'to';
+import { ItemType } from '@/components/enum-data/enum-data-types';
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            transitionOnGesture: true,
+            shuttleOnPopType: 'to' as ShuttleOnType,
+            shuttleOnPushType: 'to' as ShuttleOnType,
+            shuttleOnTypeList: [
+                'from',
+                'to'
+            ],
+            openAnimationType: 'slide-in-right' as ShareElementOpenAnimationType,
+            openAnimationTypeList: [
+                'auto',
+                'none',
+                'slide-in-right',
+                'slide-in-left',
+                'slide-in-top',
+                'slide-in-bottom',
+                'fade-in',
+                'pop-in',
+                'zoom-out',
+                'zoom-fade-out'
+            ],
+            easingFunctionType: 'ease' as ShareElementEasingFunctionType,
+            easingFunctionTypeList: [
+                'ease',
+                'ease-in',
+                'ease-out',
+                'ease-in-out',
+                'linear'
+            ]
+        };
+    },
+    methods: {
+        openPage() {
+            uni.navigateTo({
+                animationType: this.openAnimationType,
+                url: "/pages/component/share-element/share-element-to?shuttleOnPush=" + this.shuttleOnPushType + "&transitionOnGesture=" + this.transitionOnGesture
+            });
+        },
+        gotoShareElementWithSwiper() {
+            uni.navigateTo({
+                url: '/pages/component/share-element/share-element-with-swiper'
+            });
+        },
+        changeTransitionOnGesture(checked: boolean) {
+            console.log(`changeTransitionOnGesture:${checked}`, " at pages/component/share-element/share-element.uvue:130");
+            this.transitionOnGesture = checked;
+        },
+        handleOpenAnimationType(e: RadioGroupChangeEvent) {
+            this.openAnimationType = e.detail.value as ShareElementOpenAnimationType;
+        },
+        handleEasingFunction(e: RadioGroupChangeEvent) {
+            this.easingFunctionType = e.detail.value as ShareElementEasingFunctionType;
+        },
+        handleShuttleOnPopType(e: RadioGroupChangeEvent) {
+            this.shuttleOnPopType = e.detail.value as ShuttleOnType;
+        },
+        handleShuttleOnPushType(e: RadioGroupChangeEvent) {
+            this.shuttleOnPushType = e.detail.value as ShuttleOnType;
+        },
+    }
+});
+export default __sfc__;
+function GenPagesComponentShareElementShareElementRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    const _component_page_head = resolveEasyComponent("page-head", _easycom_page_head);
+    const _component_boolean_data = resolveEasyComponent("boolean-data", _easycom_boolean_data);
+    const _component_radio = resolveComponent("radio");
+    const _component_radio_group = resolveComponent("radio-group");
+    return createElementVNode(Fragment, null, [
+        createVNode(_component_page_head, utsMapOf({ title: "share-element" })),
+        createElementVNode("view", utsMapOf({ class: "main" }), [
+            createElementVNode("share-element", utsMapOf({
+                class: "share-element",
+                "share-key": "left",
+                "shuttle-on-pop": _ctx.shuttleOnPopType,
+                "transition-on-gesture": _ctx.transitionOnGesture,
+                "shuttle-on-push": _ctx.shuttleOnPushType,
+                "easing-function": _ctx.easingFunctionType,
+                onClick: () => { _ctx.openPage(); }
+            }), [
+                createElementVNode("image", utsMapOf({
+                    style: normalizeStyle(utsMapOf({ "width": "100px", "height": "150px" })),
+                    src: "https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/drop-card-1.jpg"
+                }), null, 4 /* STYLE */)
+            ], 8 /* PROPS */, ["shuttle-on-pop", "transition-on-gesture", "shuttle-on-push", "easing-function", "onClick"])
+        ]),
+        createElementVNode("button", utsMapOf({
+            type: "primary",
+            onClick: _ctx.openPage,
+            class: "button"
+        }), " 打开share-element页面 ", 8 /* PROPS */, ["onClick"]),
+        createElementVNode("scroll-view", utsMapOf({
+            style: normalizeStyle(utsMapOf({ "flex": "1" }))
+        }), [
+            createElementVNode("view", utsMapOf({ class: "content" }), [
+                createVNode(_component_boolean_data, utsMapOf({
+                    defaultValue: _ctx.transitionOnGesture,
+                    title: "transition-on-gesture= true(仅iOS生效)",
+                    onChange: _ctx.changeTransitionOnGesture
+                }), null, 8 /* PROPS */, ["defaultValue", "onChange"]),
+                createElementVNode("text", utsMapOf({ class: "uni-common-mt choose-property-title" }), "easing-function:"),
+                createVNode(_component_radio_group, utsMapOf({
+                    class: "choose-property-type-radio-group",
+                    onChange: _ctx.handleEasingFunction
+                }), utsMapOf({
+                    default: withSlotCtx((): any[] => [
+                        createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.easingFunctionTypeList, (item, __key, __index, _cached): any => {
+                            return createVNode(_component_radio, utsMapOf({
+                                class: "ml-10 uni-common-mt",
+                                key: item,
+                                value: item,
+                                checked: _ctx.easingFunctionType == item
+                            }), utsMapOf({
+                                default: withSlotCtx((): any[] => [toDisplayString(item)]),
+                                _: 2 /* DYNAMIC */
+                            }), 1032 /* PROPS, DYNAMIC_SLOTS */, ["value", "checked"]);
+                        }), 128 /* KEYED_FRAGMENT */)
+                    ]),
+                    _: 1 /* STABLE */
+                }), 8 /* PROPS */, ["onChange"]),
+                createElementVNode("text", utsMapOf({ class: "uni-common-mt choose-property-title" }), "shuttle-on-push(仅iOS生效):"),
+                createVNode(_component_radio_group, utsMapOf({
+                    class: "choose-property-type-radio-group",
+                    onChange: _ctx.handleShuttleOnPushType
+                }), utsMapOf({
+                    default: withSlotCtx((): any[] => [
+                        createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.shuttleOnTypeList, (item, __key, __index, _cached): any => {
+                            return createVNode(_component_radio, utsMapOf({
+                                class: "ml-10 uni-common-mt",
+                                key: item,
+                                value: item,
+                                checked: _ctx.shuttleOnPushType == item
+                            }), utsMapOf({
+                                default: withSlotCtx((): any[] => [toDisplayString(item)]),
+                                _: 2 /* DYNAMIC */
+                            }), 1032 /* PROPS, DYNAMIC_SLOTS */, ["value", "checked"]);
+                        }), 128 /* KEYED_FRAGMENT */)
+                    ]),
+                    _: 1 /* STABLE */
+                }), 8 /* PROPS */, ["onChange"]),
+                createElementVNode("text", utsMapOf({ class: "uni-common-mt choose-property-title" }), "shuttle-on-pop(仅iOS生效):"),
+                createVNode(_component_radio_group, utsMapOf({
+                    class: "choose-property-type-radio-group",
+                    onChange: _ctx.handleShuttleOnPopType
+                }), utsMapOf({
+                    default: withSlotCtx((): any[] => [
+                        createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.shuttleOnTypeList, (item, __key, __index, _cached): any => {
+                            return createVNode(_component_radio, utsMapOf({
+                                class: "ml-10 uni-common-mt",
+                                key: item,
+                                value: item,
+                                checked: _ctx.shuttleOnPopType == item
+                            }), utsMapOf({
+                                default: withSlotCtx((): any[] => [toDisplayString(item)]),
+                                _: 2 /* DYNAMIC */
+                            }), 1032 /* PROPS, DYNAMIC_SLOTS */, ["value", "checked"]);
+                        }), 128 /* KEYED_FRAGMENT */)
+                    ]),
+                    _: 1 /* STABLE */
+                }), 8 /* PROPS */, ["onChange"]),
+                createElementVNode("text", utsMapOf({ class: "uni-common-mt choose-property-title" }), "animationType(页面动画降级):"),
+                createVNode(_component_radio_group, utsMapOf({
+                    class: "choose-property-type-radio-group",
+                    onChange: _ctx.handleOpenAnimationType
+                }), utsMapOf({
+                    default: withSlotCtx((): any[] => [
+                        createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.openAnimationTypeList, (item, __key, __index, _cached): any => {
+                            return createVNode(_component_radio, utsMapOf({
+                                class: "ml-10 uni-common-mt",
+                                key: item,
+                                value: item,
+                                checked: _ctx.openAnimationType == item
+                            }), utsMapOf({
+                                default: withSlotCtx((): any[] => [toDisplayString(item)]),
+                                _: 2 /* DYNAMIC */
+                            }), 1032 /* PROPS, DYNAMIC_SLOTS */, ["value", "checked"]);
+                        }), 128 /* KEYED_FRAGMENT */)
+                    ]),
+                    _: 1 /* STABLE */
+                }), 8 /* PROPS */, ["onChange"])
+            ])
+        ], 4 /* STYLE */),
+        createElementVNode("button", utsMapOf({
+            onClick: _ctx.gotoShareElementWithSwiper,
+            class: "button"
+        }), " 打开share-element-with-swiper页面 ", 8 /* PROPS */, ["onClick"]),
+        createElementVNode("view", utsMapOf({
+            style: normalizeStyle(utsMapOf({ "height": "80px" }))
+        }), null, 4 /* STYLE */),
+        createElementVNode("share-element", utsMapOf({
+            class: "bottomWrap",
+            "share-key": "bottom",
+            onClick: () => { _ctx.openPage(); },
+            transitionOnGesture: "true"
+        }), [
+            createElementVNode("view", utsMapOf({ class: "bottom" }), [
+                createElementVNode("text", utsMapOf({
+                    style: normalizeStyle(utsMapOf({ "color": "white" }))
+                }), "share-element(底部固定)", 4 /* STYLE */)
+            ])
+        ], 8 /* PROPS */, ["onClick"])
+    ], 64 /* STABLE_FRAGMENT */);
+}
+const GenPagesComponentShareElementShareElementStyles = [utsMapOf([["ml-10", padStyleMapOf(utsMapOf([["marginLeft", 10]]))], ["choose-property-title", padStyleMapOf(utsMapOf([["fontWeight", "bold"]]))], ["choose-property-type-radio-group", padStyleMapOf(utsMapOf([["flexDirection", "row"], ["flexWrap", "wrap"]]))], ["bottomWrap", padStyleMapOf(utsMapOf([["width", "100%"], ["bottom", 0], ["height", 80], ["position", "fixed"]]))], ["bottom", padStyleMapOf(utsMapOf([["width", "100%"], ["height", "100%"], ["alignItems", "center"], ["justifyContent", "center"], ["backgroundColor", "#007aff"]]))], ["main", padStyleMapOf(utsMapOf([["paddingTop", 5], ["paddingRight", 0], ["paddingBottom", 5], ["paddingLeft", 0], ["alignItems", "center"], ["justifyContent", "center"]]))]])];
+import _easycom_page_head from '@/components/page-head/page-head.vue';
+import _easycom_boolean_data from '@/components/boolean-data/boolean-data.vue';
+//# sourceMappingURL=share-element.uvue.map

@@ -1,0 +1,131 @@
+<template>
+  <scroll-view ref="scroll" @scroll="onScroll" class="page" bounces="false">
+    <view class="content-item">
+      <text class="text">向上滑动页面，体验元素吸顶效果。</text>
+    </view>
+    <view v-for="(item,index) in list" :key="index" class="content-item">
+      <text class="text">first content-{{item}}</text>
+    </view>
+
+    <view ref="sticky" class="search">
+      <view style="flex-direction: row;">
+        <image src="/static/template/scroll-fold-nav/search.png" style="width: 15px;" mode="widthFix"></image>
+        <text class="search-tip-text">请输入你要搜索的内容</text>
+      </view>
+      <text class="search-btn">搜索</text>
+    </view>
+
+    <view v-for="(item,index) in list" :key="index" class="content-item">
+      <text class="text">second content-{{item}}</text>
+    </view>
+
+    <view v-for="(item,index) in list" :key="index" class="content-item">
+      <text class="text">second content-{{item}}</text>
+    </view>
+
+  </scroll-view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        list: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
+        stickyTop: 0,
+        stickyTran: 0,
+        scrollTop: 0,
+        stickyNode: null as UniElement | null
+      }
+    },
+    methods: {
+      onScroll(e : ScrollEvent) {
+        if (e.detail.scrollTop > this.stickyTop) {
+          let stickyTran = e.detail.scrollTop - this.stickyTop;
+          if (stickyTran != this.stickyTran) {
+            this.stickyNode?.style?.setProperty('transform', 'translateY(' + stickyTran + 'px)');
+          }
+          this.stickyTran = stickyTran;
+        } else {
+          this.stickyNode?.style?.setProperty('transform', '');
+          this.stickyTran = 0;
+        }
+      },
+      back() {
+        uni.navigateBack({
+          success(result) {
+            console.log('navigateBack success', result.errMsg)
+          },
+          fail(error) {
+            console.log('navigateBack fail', error.errMsg)
+          },
+          complete(result) {
+            console.log('navigateBack complete', result.errMsg)
+          },
+        })
+      },
+      async calcStickyTop() {
+        this.stickyNode = this.$refs['sticky'] as UniElement;
+        // let rect = this.stickyNode?.getBoundingClientRect();
+        // this.stickyTop = rect?.top;
+        //this.stickyTop = this.stickyNode?.getBoundingClientRect()?.top;
+        const stickyRect = await (this.$refs['sticky'] as UniElement).getBoundingClientRectAsync()!;
+        const scrollRect = await (this.$refs['scroll'] as UniElement).getBoundingClientRectAsync()!;
+        this.stickyTop = stickyRect.top - scrollRect.top;
+        console.log(stickyRect, scrollRect);
+      }
+    },
+    onLoad() {
+    },
+    onReady() {
+      this.calcStickyTop()
+    }
+  }
+</script>
+
+<style>
+  .page {
+    flex: 1;
+    padding: 0 15px;
+    background-color: #f5f5f5;
+  }
+
+  .content-item {
+    padding: 15px;
+    margin: 5px 0;
+    background-color: #fff;
+    border-radius: 5px;
+
+  }
+
+  .text {
+    font-size: 14px;
+    color: #666;
+    line-height: 20px;
+  }
+
+  .search {
+    background-color: #FFFFFF;
+    border: 1px solid #fbdf0d;
+    height: 35px;
+    border-radius: 100px;
+    margin: 0 12px;
+    padding: 8px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+  }
+
+  .search-tip-text {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .search-btn {
+    font-size: 12px;
+    background-color: #ff6900;
+    color: #FFF;
+    padding: 5px 8px;
+    border-radius: 100px;
+  }
+</style>

@@ -1,0 +1,304 @@
+<template>
+	<view class="theme-settings">
+		<view class="settings-header">
+			<text class="settings-title">主题设置</text>
+		</view>
+		
+		<view class="settings-section">
+			<text class="section-title">选择主题</text>
+			<view class="theme-grid">
+				<view 
+					class="theme-card" 
+					:class="{'theme-active': currentTheme === 'light'}"
+					@click="selectTheme('light')"
+				>
+					<view class="theme-preview theme-preview-light"></view>
+					<text class="theme-name">浅色主题</text>
+				</view>
+				
+				<view 
+					class="theme-card" 
+					:class="{'theme-active': currentTheme === 'dark'}"
+					@click="selectTheme('dark')"
+				>
+					<view class="theme-preview theme-preview-dark"></view>
+					<text class="theme-name">深色主题</text>
+				</view>
+				
+				<view 
+					class="theme-card" 
+					:class="{'theme-active': currentTheme === 'gold'}"
+					@click="selectTheme('gold')"
+				>
+					<view class="theme-preview theme-preview-gold"></view>
+					<text class="theme-name">黑金主题</text>
+				</view>
+				
+				<view 
+					class="theme-card" 
+					:class="{'theme-active': currentTheme === 'green'}"
+					@click="selectTheme('green')"
+				>
+					<view class="theme-preview theme-preview-green"></view>
+					<text class="theme-name">护眼主题</text>
+				</view>
+				
+				<view 
+					class="theme-card" 
+					:class="{'theme-active': currentTheme === 'tech'}"
+					@click="selectTheme('tech')"
+				>
+					<view class="theme-preview theme-preview-tech"></view>
+					<text class="theme-name">科技主题</text>
+				</view>
+				
+				<view 
+					class="theme-card" 
+					:class="{'theme-active': currentTheme === 'minimal'}"
+					@click="selectTheme('minimal')"
+				>
+					<view class="theme-preview theme-preview-minimal"></view>
+					<text class="theme-name">简洁主题</text>
+				</view>
+			</view>
+		</view>
+		
+		<view class="settings-section">
+			<view class="setting-item">
+				<view class="setting-label">
+					<text class="label-text">五行配色</text>
+					<text class="label-desc">按五行属性显示颜色</text>
+				</view>
+				<switch :checked="enableWuxingColors" @change="onWuxingColorsChange" />
+			</view>
+		</view>
+		
+		<view class="settings-section">
+			<text class="section-title">五行颜色预览</text>
+			<view class="wuxing-preview">
+				<view class="wuxing-item">
+					<text class="wuxing-mu">木</text>
+					<text class="wuxing-label">#28a745</text>
+				</view>
+				<view class="wuxing-item">
+					<text class="wuxing-huo">火</text>
+					<text class="wuxing-label">#dc3545</text>
+				</view>
+				<view class="wuxing-item">
+					<text class="wuxing-tu">土</text>
+					<text class="wuxing-label">#8b7355</text>
+				</view>
+				<view class="wuxing-item">
+					<text class="wuxing-jin">金</text>
+					<text class="wuxing-label">#ffd700</text>
+				</view>
+				<view class="wuxing-item">
+					<text class="wuxing-shui">水</text>
+					<text class="wuxing-label">#0d6efd</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import { themeStore } from '../store/theme.uts'
+	import type { ThemeType } from '../utils/theme.uts'
+	
+	export default {
+		data() {
+			return {
+				currentTheme: 'light' as ThemeType,
+				enableWuxingColors: true
+			}
+		},
+		
+		onLoad() {
+			this.currentTheme = themeStore.currentTheme
+			this.enableWuxingColors = themeStore.enableWuxingColors
+			
+			// 监听主题变化
+			uni.$on('themeChanged', (theme : ThemeType) => {
+				this.currentTheme = theme
+			})
+		},
+		
+		onUnload() {
+			uni.$off('themeChanged')
+		},
+		
+		methods: {
+			// 选择主题
+			selectTheme(theme : ThemeType) {
+				this.currentTheme = theme
+				themeStore.setTheme(theme)
+				
+				// 显示提示
+				uni.showToast({
+					title: '主题已切换',
+					icon: 'success',
+					duration: 1500
+				})
+			},
+			
+			// 切换五行配色
+			onWuxingColorsChange(e : any) {
+				this.enableWuxingColors = e.detail.value
+				themeStore.toggleWuxingColors()
+			}
+		}
+	}
+</script>
+
+<style>
+	.theme-settings {
+		background-color: #ffffff;
+		border-radius: 12px;
+		padding: 20px;
+		margin: 16px;
+	}
+	
+	.settings-header {
+		margin-bottom: 20px;
+		border-bottom: 1px solid #dee2e6;
+		padding-bottom: 12px;
+	}
+	
+	.settings-title {
+		font-size: 18px;
+		font-weight: 600;
+		color: #212529;
+	}
+	
+	.settings-section {
+		margin-bottom: 24px;
+	}
+	
+	.setting-item {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		padding: 16px 0;
+		border-bottom: 1px solid #f1f3f5;
+	}
+	
+	.setting-item:last-child {
+		border-bottom: none;
+	}
+	
+	.setting-label {
+		flex-direction: column;
+		flex: 1;
+	}
+	
+	.label-text {
+		font-size: 16px;
+		color: #212529;
+		font-weight: 500;
+		margin-bottom: 4px;
+	}
+	
+	.label-desc {
+		font-size: 13px;
+		color: #6c757d;
+	}
+	
+	.section-title {
+		font-size: 14px;
+		font-weight: 600;
+		color: #495057;
+		margin-bottom: 12px;
+	}
+	
+	/* 主题网格 */
+	.theme-grid {
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-between;
+	}
+	
+	.theme-card {
+		width: 48%;
+		margin-bottom: 12px;
+		padding: 12px;
+		background-color: #ffffff;
+		border: 2px solid #e0e0e0;
+		border-radius: 8px;
+		flex-direction: column;
+		align-items: center;
+	}
+	
+	.theme-active {
+		border-color: #28a745;
+		box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+	}
+	
+	.theme-preview {
+		width: 100%;
+		height: 60px;
+		border-radius: 6px;
+		margin-bottom: 8px;
+	}
+	
+	.theme-preview-light {
+		background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+		border: 1px solid #dee2e6;
+	}
+	
+	.theme-preview-dark {
+		background: linear-gradient(135deg, #1a1d20 0%, #2d3338 100%);
+		border: 1px solid #495057;
+	}
+	
+	.theme-preview-gold {
+		background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+		border: 2px solid #ffd700;
+	}
+	
+	.theme-preview-green {
+		background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+		border: 1px solid #a5d6a7;
+	}
+	
+	.theme-preview-tech {
+		background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+		border: 1px solid #00d9ff;
+		box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+	}
+	
+	.theme-preview-minimal {
+		background: #ffffff;
+		border: 1px solid #e0e0e0;
+	}
+	
+	.theme-name {
+		font-size: 13px;
+		color: #212529;
+		font-weight: 500;
+	}
+	
+	.wuxing-preview {
+		flex-direction: row;
+		justify-content: space-around;
+		padding: 16px;
+		background-color: #f8f9fa;
+		border-radius: 8px;
+	}
+	
+	.wuxing-item {
+		flex-direction: column;
+		align-items: center;
+	}
+	
+	.wuxing-item text:first-child {
+		font-size: 24px;
+		font-weight: 600;
+		margin-bottom: 4px;
+	}
+	
+	.wuxing-label {
+		font-size: 10px;
+		color: #6c757d;
+	}
+</style>
+

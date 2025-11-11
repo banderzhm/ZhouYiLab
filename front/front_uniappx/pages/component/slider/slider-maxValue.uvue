@@ -1,0 +1,41 @@
+<template>
+	<view class="uni-padding-wrap">
+    <view class="uni-title">最大值溢出测试（不能滑动到最右侧）</view>
+    <view>
+      <slider id="slider" :value="0" :min="0" :max="10.5" :step="1" :show-value="true" @change="valueChange"/>
+    </view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+        sliderX: 0,
+        sliderY: 0,
+        sliderHeight: 0,
+        sliderValue: 0
+			}
+		},
+    onReady() {
+      // #ifdef APP-IOS || APP-HARMONY
+      const sliderEle = uni.getElementById("slider")
+      const sliderRect = sliderEle?.getBoundingClientRect()
+      if (sliderRect != null) {
+        this.sliderX = sliderRect.x
+        this.sliderY = sliderRect.y
+        this.sliderHeight = sliderRect.height
+      }
+      // 加上导航栏及状态栏高度
+      const systemInfo = uni.getSystemInfoSync()
+      this.sliderY += systemInfo.safeAreaInsets.top + 44
+      // #endif
+    },
+		methods: {
+      valueChange(e: UniSliderChangeEvent) {
+				console.log('valueChange', e.detail.value)
+        this.sliderValue = e.detail.value
+			}
+		}
+	}
+</script>

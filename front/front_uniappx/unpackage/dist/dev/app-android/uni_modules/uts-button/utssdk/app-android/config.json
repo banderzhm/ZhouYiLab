@@ -1,0 +1,8 @@
+{
+  "components": [
+    {
+      "name": "uts-button",
+      "class": "uts.sdk.modules.utsButton.UtsButtonComponent"
+    }
+  ]
+}

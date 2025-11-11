@@ -1,0 +1,37 @@
+<template>
+  <view style="flex-grow: 1;">
+    <view @click="changeVisibility">
+      <text>visibility: {{visibility}}（点击切换）</text>
+      <view class="common" :style="{'visibility': visibility}"></view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        visibility: 'visible',
+        flag: true
+      }
+    },
+    methods: {
+      changeVisibility() {
+        this.flag = !this.flag;
+        if (this.flag) {
+          this.visibility = 'visible';
+        } else {
+          this.visibility = 'hidden';
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+    background-color: red;
+  }
+</style>

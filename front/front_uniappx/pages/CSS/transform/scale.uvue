@@ -1,0 +1,99 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view class="page">
+  <!-- #endif -->
+    <view class="scale-container">
+      <view class="trace">
+        <view class="base reserve">
+          <text class="reserve-text">scaleX(0.6)</text>
+          <text class="reserve-text">转变前位置</text>
+        </view>
+        <view class="base reserve">
+          <text class="reserve-text">scaleY(0.8)</text>
+          <text class="reserve-text">转变前位置</text>
+        </view>
+        <view class="base reserve">
+          <text class="reserve-text">scale(0.8,0.8)</text>
+          <text class="reserve-text">转变前位置</text>
+        </view>
+        <view class="base reserve">
+          <text class="reserve-text">scaleX(-1)</text>
+          <text class="reserve-text">转变前位置</text>
+        </view>
+        <view class="base reserve">
+          <text class="reserve-text">scaleY(-1)</text>
+          <text class="reserve-text">转变前位置</text>
+        </view>
+      </view>
+
+      <view class="base transform" style="transform: scaleX(0.6)">
+        <text>scaleX(0.6)</text>
+        <text>转变后位置</text>
+      </view>
+      <view class="base transform" style="transform: scaleY(0.6)">
+        <text>scaleY(0.6)</text>
+        <text>转变后位置</text>
+      </view>
+      <view class="base transform" style="transform: scale(1.2,1.2)">
+        <text>scale(1.2,1.2)</text>
+        <text>转变后位置</text>
+      </view>
+      <view class="base transform" style="transform: scaleX(-1)">
+        <text>scaleX(-1)</text>
+        <text>转变后位置</text>
+      </view>
+      <view class="base transform" style="transform: scaleY(-1)">
+        <text>scaleY(-1)</text>
+        <text>转变后位置</text>
+      </view>
+
+      <view class="base" style="width:auto">
+        <text>通过scaleY(0.5)实现0.5px的线</text>
+        <view style="width: 200px; height: 1px; background-color: #000; transform: scaleY(0.5)"></view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<style>
+  .page {
+    flex: 1;
+  }
+
+  .scale-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .trace {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .base {
+    margin: 10px;
+    width: 150px;
+    height: 150px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .reserve {
+    border: 1px dotted #588;
+    background-color: #DDD;
+  }
+
+  .reserve-text {
+    color: #CCC;
+  }
+
+  .transform {
+    border: 1px solid #00F;
+    background-color: rgba(0, 255, 255, 0.5);
+  }
+</style>

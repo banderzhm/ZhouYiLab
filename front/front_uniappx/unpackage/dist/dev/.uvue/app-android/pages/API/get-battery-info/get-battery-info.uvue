@@ -1,0 +1,36 @@
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            level: 0,
+            isCharging: false
+        };
+    },
+    onLoad() {
+        try {
+            uni.getBatteryInfo({
+                success: res => {
+                    this.level = res.level;
+                    this.isCharging = res.isCharging;
+                }
+            });
+        }
+        catch (e: any) {
+            console.error((e as Error).message, " at pages/API/get-battery-info/get-battery-info.uvue:25");
+            uni.showModal({
+                content: (e as Error).message,
+                showCancel: false
+            });
+        }
+    }
+});
+export default __sfc__;
+function GenPagesAPIGetBatteryInfoGetBatteryInfoRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    return createElementVNode("view", null, [
+        createElementVNode("text", null, "当前电量：" + toDisplayString(_ctx.level) + "%", 1 /* TEXT */),
+        createElementVNode("text", null, "是否充电中：" + toDisplayString(_ctx.isCharging), 1 /* TEXT */)
+    ]);
+}
+const GenPagesAPIGetBatteryInfoGetBatteryInfoStyles = [];
+//# sourceMappingURL=get-battery-info.uvue.map

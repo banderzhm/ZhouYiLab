@@ -1,0 +1,92 @@
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        title: 'getNetworkType',
+        hasNetworkType: false,
+        networkType: '',
+        connectedWifi: '',
+        //自动化测试例专用
+        jest_result: false,
+      }
+    },
+    onLoad() {
+    },
+    onUnload: function () {
+      this.networkType = '';
+      this.hasNetworkType = false;
+    },
+    methods: {
+      getNetworkType: function () {
+        uni.getNetworkType({
+          success: (res) => {
+            console.log(res, " at pages/API/get-network-type/get-network-type.uvue:42")
+            this.hasNetworkType = true;
+            this.networkType = res.networkType
+          },
+          fail: () => {
+            uni.showModal({
+              content: '获取失败！',
+              showCancel: false
+            })
+          }
+        })
+      },
+      clear: function () {
+        this.hasNetworkType = false;
+        this.networkType = '';
+        this.connectedWifi = '';
+      },
+      //自动化测试例专用
+      jest_getNetworkType() {
+        uni.getNetworkType({
+          success: () => {
+            this.jest_result = true;
+          },
+          fail: () => {
+            this.jest_result = false;
+          }
+        })
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesAPIGetNetworkTypeGetNetworkTypeRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_page_head = resolveEasyComponent("page-head",_easycom_page_head)
+
+  return createElementVNode(Fragment, null, [
+    createVNode(_component_page_head, utsMapOf({ title: _ctx.title }), null, 8 /* PROPS */, ["title"]),
+    createElementVNode("view", utsMapOf({ class: "uni-padding-wrap uni-common-mt" }), [
+      createElementVNode("view", utsMapOf({ class: "uni-container" }), [
+        createElementVNode("view", utsMapOf({ class: "uni-center" }), "网络状态"),
+        _ctx.hasNetworkType == false
+          ? createElementVNode("view", utsMapOf({ key: 0 }), [
+              createElementVNode("view", utsMapOf({ class: "uni-center uni-common-mt" }), "未获取"),
+              createElementVNode("view", utsMapOf({ class: "uni-center uni-common-mt" }), "请点击下面按钮获取网络状态")
+            ])
+          : createCommentVNode("v-if", true),
+        _ctx.hasNetworkType == true
+          ? createElementVNode("view", utsMapOf({ key: 1 }), [
+              createElementVNode("view", utsMapOf({ class: "uni-center uni-common-mt" }), toDisplayString(_ctx.networkType), 1 /* TEXT */)
+            ])
+          : createCommentVNode("v-if", true)
+      ]),
+      createElementVNode("view", utsMapOf({ class: "uni-btn-v uni-common-mt" }), [
+        createElementVNode("button", utsMapOf({
+          type: "primary",
+          onClick: _ctx.getNetworkType
+        }), "获取设备网络状态", 8 /* PROPS */, ["onClick"]),
+        createElementVNode("button", utsMapOf({
+          class: "uni-common-mt",
+          onClick: _ctx.clear
+        }), "清空", 8 /* PROPS */, ["onClick"])
+      ])
+    ])
+  ], 64 /* STABLE_FRAGMENT */)
+}
+const GenPagesAPIGetNetworkTypeGetNetworkTypeStyles = []
+
+import _easycom_page_head from '@/components/page-head/page-head.vue'

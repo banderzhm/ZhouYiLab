@@ -1,0 +1,266 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view>
+      <page-head :title="title"></page-head>
+
+      <view class="uni-padding-wrap uni-common-mt">
+        <view class="uni-title">
+          <text class="uni-title-text">text相关属性示例</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">根据宽度自动折行</text>
+        </view>
+        <view class="text-box">
+          <text>{{ multiLineText }}</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">\\n换行</text>
+        </view>
+        <view class="text-box">
+          <text>\n 换行</text>
+          <text>\\n 换行</text>
+          <text>\\\n 换行</text>
+          <text>\n 换行 \\n 换行 \\\n 换行 \\\\n 换行 \\\\\n 换行</text>
+          <text space="nbsp">HBuilderX，轻巧、极速，极客编辑器;\nuni-app x，终极跨平台方案;</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">截断（clip）</text>
+        </view>
+        <view class="text-box">
+          <text class="uni-flex-item" style="width: 100%;text-overflow: clip;white-space: nowrap;">{{
+            multiLineText
+          }}</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">截断（ellipsis）</text>
+        </view>
+        <view class="text-box">
+          <text class="uni-flex-item" style="width: 100%;text-overflow: ellipsis;white-space: nowrap;">{{
+            multiLineText
+          }}</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">selectable</text>
+        </view>
+        <view class="text-box">
+          <text :selectable="true">{{ singleLineText }}</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">space</text>
+          <text class="uni-subtitle-text">依次为nbsp ensp emsp效果</text>
+        </view>
+        <view class="text-box">
+          <text space="nbsp">{{ singleLineText }}</text>
+          <text space="ensp">{{ singleLineText }}</text>
+          <text space="emsp">{{ singleLineText }}</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">decode</text>
+          <text class="uni-subtitle-text">依次为lt gt amp apos nbsp ensp emsp效果</text>
+        </view>
+        <view class="text-box">
+          <text :decode="true">{{ decodeStr }}</text>
+          <text :decode="true">uni-app&nbsp;x，终极跨平台方案</text>
+          <text :decode="true">uni-app&ensp;x，终极跨平台方案</text>
+          <text :decode="true">uni-app&emsp;x，终极跨平台方案</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">嵌套1</text>
+        </view>
+        <view class="text-box">
+          <text @tap="nestedText1Tap">一级节点黑色
+            <text style="color: red;background-color: yellow;" @tap="nestedText2Tap">二级节点红色且背景色黄色
+              <text style="text-decoration-line:underline;color:blue;" @tap="nestedText3Tap">App三级节点不继承二级的颜色</text>
+            </text>
+            <text style="font-size: 50px">二级节点大字体</text>
+          </text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">嵌套2</text>
+        </view>
+        <view class="text-box">
+          <text>
+            <text>文字应居中显示</text>
+          </text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">padding和border</text>
+        </view>
+        <view class="text-box">
+          <text class="text-padding-border">hello uni-app x</text>
+          <text class="text-padding-border" style="width: 200px;">hello uni-app x</text>
+          <text class="text-padding-border" style="height: 100px;">hello uni-app x</text>
+          <text class="text-padding-border" style="width: 200px;height: 100px;">hello uni-app x</text>
+        </view>
+
+        <view class="uni-title">
+          <text class="uni-subtitle-text">含换行符的多行文本(3行)，但不自动换行，可横向滚动</text>
+        </view>
+        <scroll-view class="text-container" direction="horizontal">
+          <text style="white-space: nowrap;align-self: flex-start;">HBuilderX，轻巧、极速，极客编辑器；\nuni-app x，是下一代 uni-app，是一个跨平台应用开发引擎。uni-app x 是一个庞大的工程，它包括uts语言、uvue渲染引擎、uni的组件和API、以及扩展机制。\nuts是一门类ts的、跨平台的、新语言。</text>
+        </scroll-view>
+
+        <!-- #ifdef APP -->
+        <view class="uni-title">
+          <text class="uni-subtitle-text">点击事件测试</text>
+        </view>
+        <view class="text-box" style="flex-direction: row;">
+          <text class="text-icon" style="background-color: aqua;" @tap="iconTap">{{String.fromCharCode(parseInt('E650',16))}}</text>
+          <text class="text-icon" style="background-color: yellow;" @tap="iconTap2">{{String.fromCharCode(parseInt('EA08',16))}}</text>
+        </view>
+        <!-- #endif -->
+
+        <view v-if="autoTest">
+          <view class="uni-row">
+            <text id="empty-text"></text>
+          </view>
+          <view class="uni-row">
+            <text id="empty-text2">{{emptyText}}</text>
+          </view>
+          <view class="uni-row">
+            <text id="empty-text3" style="width: 100px;height: 100px;">{{emptyText}}</text>
+          </view>
+          <text>一级节点文本
+            <text>二级节点文本
+              <text id="nested-text">{{nestedText}}</text>
+            </text>
+          </text>
+          <text id="height-text" style="height: 50px;">{{heightText}}</text>
+          <text style="position: fixed;" id="nested-text2" @tap="nestedText1TapForTest">1
+            <text @tap="nestedText2TapForTest">2
+              <text>3</text>
+            </text>
+          </text>
+        </view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        decodeStr: '&lt; &gt; &amp; &apos;',
+        title: 'text-props',
+        multiLineText:
+          'HBuilderX，轻巧、极速，极客编辑器；uni-app x，终极跨平台方案；uts，大一统语言；HBuilderX，轻巧、极速，极客编辑器；uni-app x，终极跨平台方案；uts，大一统语言',
+        singleLineText: 'uni-app x，终极跨平台方案',
+        // 自动化测试
+        autoTest: false,
+        nestedText: '三级节点文本',
+        emptyText: '空文本',
+        heightText: '设置高度文本',
+        isNestedText1TapTriggered: false,
+        isNestedText2TapTriggered: false
+      }
+    },
+    methods: {
+      nestedText1Tap() {
+        uni.showModal({
+          title: '点击了',
+          content: '一级节点黑色',
+          showCancel: false
+        });
+      },
+      nestedText2Tap(e : UniPointerEvent) {
+        e.stopPropagation();
+        uni.showModal({
+          title: '点击了',
+          content: '二级节点红色且背景色黄色',
+          showCancel: false
+        });
+      },
+      nestedText3Tap(e : UniPointerEvent) {
+        e.stopPropagation();
+        uni.showModal({
+          title: '点击了',
+          content: 'App三级节点不继承二级的颜色',
+          showCancel: false
+        });
+      },
+      iconTap() {
+        uni.showModal({
+          title: '点击了',
+          content: '字体图标1',
+          showCancel: false
+        });
+      },
+      iconTap2() {
+        uni.showModal({
+          title: '点击了',
+          content: '字体图标2',
+          showCancel: false
+        });
+      },
+      // 自动化测试
+      setNestedText() {
+        this.nestedText = "修改三级节点文本";
+      },
+      setEmptyText() {
+        this.emptyText = "";
+      },
+      setHeightText() {
+        this.heightText = "修改设置高度文本";
+      },
+      getBoundingClientRectForTest() : DOMRect | null {
+        return uni.getElementById('nested-text2')?.getBoundingClientRect();
+      },
+      nestedText1TapForTest() {
+        this.isNestedText1TapTriggered = true;
+      },
+      nestedText2TapForTest() {
+        this.isNestedText2TapTriggered = true;
+      }
+    }
+  }
+</script>
+
+<style>
+  .text-box {
+    margin-bottom: 20px;
+    padding: 20px 0;
+    background-color: #ffffff;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .text-container {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 10px;
+  }
+
+  .text {
+    font-size: 15px;
+    color: #353535;
+    line-height: 27px;
+    text-align: center;
+  }
+
+  .text-padding-border {
+    margin-top: 5px;
+    padding: 20px;
+    border: 5px solid red;
+    text-align: center;
+  }
+
+  .text-icon {
+    font-family: uni-icon;
+    font-size: 100px;
+  }
+</style>

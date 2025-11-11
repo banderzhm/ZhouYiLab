@@ -1,0 +1,1 @@
+{"version":3,"file":"enum-data-types.uts","sourceRoot":"","sources":["components/enum-data/enum-data-types.uts"],"names":[],"mappings":"AAAA,MAAM,MAAM,QAAQ,GAAG;IAAE,KAAK,EAAG,MAAM,CAAC;IAAC,IAAI,EAAG,MAAM,CAAA;CAAE,CAAA","sourcesContent":["export type ItemType = { value : number; name : string }"]}

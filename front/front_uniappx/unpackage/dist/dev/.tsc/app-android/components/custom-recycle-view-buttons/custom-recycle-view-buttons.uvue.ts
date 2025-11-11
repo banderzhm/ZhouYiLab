@@ -1,0 +1,48 @@
+const __sfc__ = defineComponent({
+  __name: 'custom-recycle-view-buttons',
+  props: {
+    name: {
+      type: String,
+      default: ''
+    }
+  },
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+  const props = __props
+
+  const testName = props.name // 开发者如果意识不到item会被复用，错误的存储了初次传入的name，在触发onClick事件时会一直使用初次传入的name
+  function onClickWrong() {
+    console.log('current name is ' + testName, " at components/custom-recycle-view-buttons/custom-recycle-view-buttons.uvue:22")
+  }
+  function onClickRight() {
+    console.log('current name is ' + props.name, " at components/custom-recycle-view-buttons/custom-recycle-view-buttons.uvue:25")
+  }
+
+return (): any | null => {
+
+  return createElementVNode("view", utsMapOf({
+    style: normalizeStyle(utsMapOf({"flex-direction":"row"}))
+  }), [
+    createElementVNode("view", utsMapOf({
+      onClick: onClickWrong,
+      class: "btn"
+    }), [
+      createElementVNode("text", utsMapOf({ class: "btn-text" }), "点击测试，错误写法")
+    ]),
+    createElementVNode("view", utsMapOf({
+      onClick: onClickRight,
+      class: "btn"
+    }), [
+      createElementVNode("text", utsMapOf({ class: "btn-text" }), "点击测试，正确写法")
+    ])
+  ], 4 /* STYLE */)
+}
+}
+
+})
+export default __sfc__
+export type CustomRecycleViewButtonsComponentPublicInstance = InstanceType<typeof __sfc__>;
+const GenComponentsCustomRecycleViewButtonsCustomRecycleViewButtonsStyles = [utsMapOf([["btn", padStyleMapOf(utsMapOf([["paddingTop", 5], ["paddingRight", 5], ["paddingBottom", 5], ["paddingLeft", 5]]))], ["btn-text", padStyleMapOf(utsMapOf([["fontSize", 12], ["color", "#cccccc"], ["borderTopLeftRadius", 3], ["borderTopRightRadius", 3], ["borderBottomRightRadius", 3], ["borderBottomLeftRadius", 3], ["borderTopWidth", 1], ["borderRightWidth", 1], ["borderBottomWidth", 1], ["borderLeftWidth", 1], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#cccccc"], ["borderRightColor", "#cccccc"], ["borderBottomColor", "#cccccc"], ["borderLeftColor", "#cccccc"]]))]])]

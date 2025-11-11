@@ -1,0 +1,1 @@
+export default "/assets/target.028ddf0a.png"

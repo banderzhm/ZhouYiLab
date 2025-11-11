@@ -1,0 +1,22 @@
+<template>
+  <view style="flex: 1;">
+    <text style="text-align: center;">测试页面 2</text>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        page: 2
+      }
+    },
+    methods: {
+
+    }
+  }
+</script>
+
+<style>
+
+</style>

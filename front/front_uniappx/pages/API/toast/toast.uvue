@@ -1,0 +1,196 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view direction="vertical" style="flex:1">
+  <!-- #endif -->
+    <page-head :title="title"></page-head>
+    <view class="uni-padding-wrap">
+      <view class="uni-padding-wrap">
+        <text class="uni-title-text uni-common-mb">设置icon</text>
+      </view>
+      <view class="uni-list uni-common-pl">
+        <radio-group @change="radioChangeIcon">
+          <radio class="uni-list-cell uni-list-cell-pd radio-icon" v-for="(icon, index) in icon_enum" :key="icon.value"
+            :class="index < icon_enum.length - 1 ? 'uni-list-cell-line' : ''" :value="icon.value"
+            :checked="index === icon_current">{{icon.name}}</radio>
+        </radio-group>
+      </view>
+      <view class="uni-list-cell uni-list-cell-padding">
+        <view class="uni-list-cell-db">是否显示自定义图标</view>
+        <switch :checked="imageSelect" @change="change_image_boolean" />
+      </view>
+      <view class="uni-list-cell uni-list-cell-padding">
+        <view class="uni-list-cell-db">是否显示透明蒙层-屏蔽点击事件</view>
+        <switch :checked="maskSelect" @change="change_mask_boolean" />
+      </view>
+      <view class="uni-title uni-list-cell-padding">提示的延迟时间，默认：1500（单位毫秒）</view>
+      <view class="uni-list-cell-padding">
+        <slider @change="sliderChange" foreColor="#007AFF" :value="intervalSelect" :min="1500" :max="5000"
+          :show-value="true" />
+      </view>
+      <view class="uni-btn-v">
+        <button class="uni-btn-v" type="default" @tap="toast1Tap" id="btn-toast-default">点击弹出toast</button>
+        <button class="uni-btn-v" type="default" @tap="hideToast" id="btn-toast-hide">点击隐藏toast</button>
+      </view>
+      <!-- #ifdef APP -->
+      <view class="uni-padding-wrap uni-common-mt">
+        <text class="uni-title-text uni-common-mb"> 设置position，仅App生效 </text>
+      </view>
+      <view class="uni-list uni-common-pl">
+        <radio-group @change="radioChangePosition">
+          <radio class="uni-list-cell uni-list-cell-pd radio-position" v-for="(position, index) in position_enum"
+            :key="position.value" :class="index < position_enum.length - 1 ? 'uni-list-cell-line' : ''"
+            :value="position.value" :checked="index === position_current">{{position.name}}</radio>
+        </radio-group>
+      </view>
+      <button class="uni-btn uni-btn-v uni-common-mb" type="default" @tap="toast2Tap">点击弹出设置position的toast</button>
+      <!-- #endif -->
+      <text>{{exeRet}}</text>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script lang="uts">
+  type IconItemType = {
+    value : "success" | "error" | "fail" | "exception" | "loading" | "none";
+    name : string
+  }
+  type PositionItemType = {
+    value : "top" | "center" | "bottom";
+    name : string
+  }
+  export default {
+    data() {
+      return {
+        title: 'toast',
+        exeRet: '',
+        imageSelect: false,
+        maskSelect: false,
+        intervalSelect: 1500,
+        position_current: 0,
+        position_enum: [
+          { "value": "top", "name": "top: 居上显示（Android 暂不支持）" },
+          { "value": "center", "name": "center: 居中显示（Android 暂不支持）" },
+          { "value": "bottom", "name": "bottom: 居底显示" },
+        ] as PositionItemType[],
+        icon_current: 0,
+        icon_enum: [
+          {
+            value: 'success',
+            name: '显示成功图标',
+          },
+          {
+            value: 'error',
+            name: '显示错误图标',
+          },
+          // {
+          //   value: 'fail',
+          //   name: '显示错误图标',
+          // },
+          // {
+          //   value: 'exception',
+          //   name: '显示异常图标，此时title文本无长度显示',
+          // },
+          {
+            value: 'loading',
+            name: '显示加载图标',
+          },
+          {
+            value: 'none',
+            name: '不显示图标',
+          },
+        ] as IconItemType[],
+      }
+    },
+    onLoad() {
+      uni.showToast({
+        title: 'onLoad 调用示例,2秒后消失'
+      })
+      setTimeout(function () {
+        uni.hideToast()
+      }, 2000);
+    },
+    methods: {
+      //自动化测试例专用
+      jest_getWindowInfo() : GetWindowInfoResult {
+        return uni.getWindowInfo();
+      },
+      radioChangeIcon(e : UniRadioGroupChangeEvent) {
+        for (let i = 0; i < this.icon_enum.length; i++) {
+          if (this.icon_enum[i].value === e.detail.value) {
+            this.icon_current = i;
+            break;
+          }
+        }
+      },
+      change_image_boolean: function (e : UniSwitchChangeEvent) {
+        this.imageSelect = e.detail.value
+      },
+      change_mask_boolean: function (e : UniSwitchChangeEvent) {
+        this.maskSelect = e.detail.value
+      },
+      sliderChange(e : UniSliderChangeEvent) {
+        this.intervalSelect = e.detail.value
+      },
+      radioChangePosition(e : UniRadioGroupChangeEvent) {
+        for (let i = 0; i < this.position_enum.length; i++) {
+          if (this.position_enum[i].value === e.detail.value) {
+            this.position_current = i;
+            break;
+          }
+        }
+      },
+      toast1Tap: function () {
+        uni.showToast({
+          title: "默认",
+          icon: this.icon_enum[this.icon_current].value,
+          duration: this.intervalSelect,
+          image: this.imageSelect ? "/static/uni.png" : null,
+          mask: this.maskSelect,
+          success: (res) => {
+            // console.log('success:',res)
+            this.exeRet = "success:" + JSON.stringify(res)
+          },
+          fail: (res) => {
+            this.exeRet = "fail:" + JSON.stringify(res)
+          },
+        })
+      },
+      toast3Tap: function () {
+        uni.showToast({
+          title: "默认",
+          icon: 'none',
+          duration: this.intervalSelect,
+          image: this.imageSelect ? "/static/uni.png" : null,
+          mask: this.maskSelect,
+          success: (res) => {
+            // console.log('success:',res)
+            this.exeRet = "success:" + JSON.stringify(res)
+          },
+          fail: (res) => {
+            this.exeRet = "fail:" + JSON.stringify(res)
+          },
+        })
+      },
+      // #ifdef APP
+      toast2Tap: function () {
+        let positionValue = this.position_enum[this.position_current].value
+        uni.showToast({
+          title: "显示一段轻提示,position:" + positionValue,
+          position: positionValue,
+          success: (res) => {
+            this.exeRet = "success:" + JSON.stringify(res)
+          },
+          fail: (res) => {
+            this.exeRet = "fail:" + JSON.stringify(res)
+          },
+        })
+      },
+      // #endif
+      hideToast: function () {
+        uni.hideToast()
+      }
+    }
+  }
+</script>

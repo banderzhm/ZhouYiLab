@@ -1,0 +1,188 @@
+<template>
+  <view style="flex: 1">
+    <view @click="back" class="nav-back">
+      <image class="back-img" src="/static/template/pull-zoom-image/back.png" mode="widthFix"></image>
+    </view>
+    <scroll-view style="flex:1;" :refresher-enabled="true"
+      refresher-default-style="none" @refresherpulling="onRefresherpulling"
+      :refresher-threshold="300" :refresher-max-drag-distance="299"
+      @scroll="onScroll" :bounces="false"
+      >
+      <view class="head-img-box-2" ref="head-img-box-2">
+        <image class="img" ref="head-img-2" src="https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/pull-zoom-image-head-img.jpg" mode="scaleToFill"></image>
+      </view>
+      <view class="user-info" ref="user-info">
+        <image class="user-avatar" src="../../../static/test-image/logo.png" mode="widthFix"></image>
+        <view class="font-box">
+          <text class="username">uni-app-x</text>
+          <text class="slogan">一次开发，多端覆盖</text>
+        </view>
+      </view>
+      <view class="list-box">
+        <view class="item" v-for="(item,index) in 30" :key="index">
+          <text class="text">{{item}}. 占位</text>
+        </view>
+      </view>
+
+      <!--#ifdef APP -->
+      <view slot="refresher">
+        <view class="head-img-box-1">
+          <image class="img" ref="head-img-1" src="https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/pull-zoom-image-head-img.jpg" mode="scaleToFill"></image>
+        </view>
+      </view>
+      <!--#endif-->
+
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        $elementMap: new Map<string, UniElement>()
+      }
+    },
+    methods: {
+      onScroll(e : ScrollEvent) {
+        const {scrollTop} = e.detail
+        let y : number = scrollTop - 110
+        let s : number = (100 - scrollTop/3)/100
+        if(y < 0){
+          y = 0
+        }
+        if(s < 0.7){
+          s = 0.7
+        }
+        let x : number = (1 - s) * -100
+        this.setElementStyle("user-info", "transform", `translate(${x}px, ${y + (s-1)* -50}px) scale(${s})`)
+        this.setElementStyle("head-img-box-2", "transform", `translateY(${y}px)`)
+      },
+      onRefresherpulling(e : RefresherEvent) {
+        // console.log('onRefresherpulling',e.detail.dy)
+        let pullingDistance : number = e.detail.dy
+        this.setElementStyle("head-img-1", 'transform', `scale(${pullingDistance / 200 + 1})`)
+        this.setElementStyle("head-img-2", 'transform', `scale(${pullingDistance / 200 + 1})`)
+      },
+      // 工具方法，用于快速设置 Element 的 style
+      setElementStyle(refName : string, propertyName : string, propertyStyle : any) : void {
+        let element : UniElement | null = (this.$data['$elementMap'] as Map<string, UniElement>).get(refName)
+        if (element == null) {
+          element = this.$refs[refName] as UniElement;
+          (this.$data['$elementMap'] as Map<string, UniElement>).set(refName, element)
+        }
+        element.style.setProperty(propertyName, propertyStyle);
+      },
+      back() {
+        uni.navigateBack({
+          success(result) {
+            console.log('navigateBack success', result.errMsg)
+          },
+          fail(error) {
+            console.log('navigateBack fail', error.errMsg)
+          },
+          complete(result) {
+            console.log('navigateBack complete', result.errMsg)
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+  .head-img-box-1,
+  .head-img-box-2
+  {
+    position: relative;
+    height: 300px;
+  }
+
+  .head-img-box-1 .img,
+  .head-img-box-2 .img
+  {
+    position: absolute;
+    width: 100%;
+    height: 600px;
+  }
+
+  .head-img-box-1 .img {
+    top: 0px;
+  }
+
+  .head-img-box-2 .img {
+    bottom: -100px;
+  }
+
+  .head-img-box-2 {
+    z-index: 9;
+    height: 200px;
+  }
+
+  .user-info{
+    margin-top: -110px;
+    flex: 1;
+    padding: 15px;
+    flex-direction: row;
+    z-index: 10;
+  }
+
+  .user-info .user-avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 100px;
+    border: 3px solid #FFF;
+  }
+
+  .user-info .font-box {
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 10px;
+  }
+
+  .user-info .username {
+    font-size: 26px;
+    color: #FFF;
+  }
+
+  .user-info .slogan {
+    font-size: 16px;
+    color: #FFF;
+  }
+
+
+  .list-box {
+    background-color: #FFF;
+    z-index: 1;
+  }
+
+  .list-box .item {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid rgba(220, 220, 220, 0.3);
+  }
+
+  .list-box .text {
+    font-size: 14px;
+    color: #666;
+    line-height: 20px;
+  }
+
+  .nav-back {
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    border-radius: 100px;
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .nav-back .back-img {
+    width: 18px;
+    height: 18px;
+  }
+</style>

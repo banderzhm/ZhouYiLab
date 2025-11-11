@@ -1,0 +1,65 @@
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            title: '周易实验室'
+        };
+    },
+    onLoad() {
+    },
+    methods: {
+        navigateTo(url: string) {
+            uni.navigateTo({
+                url: url
+            });
+        }
+    }
+});
+export default __sfc__;
+function GenPagesIndexIndexRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    return createElementVNode("view", utsMapOf({ class: "container" }), [
+        createElementVNode("image", utsMapOf({
+            class: "logo",
+            src: "/static/logo.png"
+        })),
+        createElementVNode("view", utsMapOf({ class: "text-area" }), [
+            createElementVNode("text", utsMapOf({ class: "title" }), toDisplayString(_ctx.title), 1 /* TEXT */)
+        ]),
+        createElementVNode("view", utsMapOf({ class: "menu-area" }), [
+            createElementVNode("view", utsMapOf({
+                class: "menu-item",
+                onClick: () => { _ctx.navigateTo('/pages/daluren/daluren'); }
+            }), [
+                createElementVNode("text", utsMapOf({ class: "menu-icon" }), "☯️"),
+                createElementVNode("text", utsMapOf({ class: "menu-title" }), "大六壬排盘"),
+                createElementVNode("text", utsMapOf({ class: "menu-desc" }), "传统术数排盘工具")
+            ], 8 /* PROPS */, ["onClick"]),
+            createElementVNode("view", utsMapOf({ class: "menu-item disabled" }), [
+                createElementVNode("text", utsMapOf({ class: "menu-icon" }), "🔮"),
+                createElementVNode("text", utsMapOf({ class: "menu-title" }), "六爻起卦"),
+                createElementVNode("text", utsMapOf({ class: "menu-desc" }), "即将推出")
+            ]),
+            createElementVNode("view", utsMapOf({ class: "menu-item disabled" }), [
+                createElementVNode("text", utsMapOf({ class: "menu-icon" }), "⭐"),
+                createElementVNode("text", utsMapOf({ class: "menu-title" }), "紫微斗数"),
+                createElementVNode("text", utsMapOf({ class: "menu-desc" }), "即将推出")
+            ]),
+            createElementVNode("view", utsMapOf({ class: "menu-item disabled" }), [
+                createElementVNode("text", utsMapOf({ class: "menu-icon" }), "🎋"),
+                createElementVNode("text", utsMapOf({ class: "menu-title" }), "八字排盘"),
+                createElementVNode("text", utsMapOf({ class: "menu-desc" }), "即将推出")
+            ]),
+            createElementVNode("view", utsMapOf({
+                class: "menu-item",
+                onClick: () => { _ctx.navigateTo('/pages/settings/settings'); }
+            }), [
+                createElementVNode("text", utsMapOf({ class: "menu-icon" }), "🎨"),
+                createElementVNode("text", utsMapOf({ class: "menu-title" }), "主题设置"),
+                createElementVNode("text", utsMapOf({ class: "menu-desc" }), "六种主题 · 五行配色")
+            ], 8 /* PROPS */, ["onClick"])
+        ])
+    ]);
+}
+const GenPagesIndexIndexStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["flex", 1], ["backgroundColor", "#f8f9fa"]]))], ["logo", padStyleMapOf(utsMapOf([["height", 100], ["width", 100], ["marginTop", 60], ["marginRight", "auto"], ["marginBottom", 25], ["marginLeft", "auto"]]))], ["text-area", padStyleMapOf(utsMapOf([["textAlign", "center"], ["marginBottom", 40]]))], ["title", padStyleMapOf(utsMapOf([["fontSize", 24], ["color", "#212529"], ["textAlign", "center"]]))], ["menu-area", padStyleMapOf(utsMapOf([["paddingTop", 0], ["paddingRight", 24], ["paddingBottom", 0], ["paddingLeft", 24]]))], ["menu-item", utsMapOf([["", utsMapOf([["backgroundColor", "#ffffff"], ["borderTopLeftRadius", 12], ["borderTopRightRadius", 12], ["borderBottomRightRadius", 12], ["borderBottomLeftRadius", 12], ["paddingTop", 20], ["paddingRight", 20], ["paddingBottom", 20], ["paddingLeft", 20], ["marginBottom", 16], ["boxShadow", "0 2px 8px rgba(0, 0, 0, 0.08)"], ["flexDirection", "row"], ["alignItems", "center"], ["position", "relative"]])], [".disabled", utsMapOf([["opacity", 0.5]])]])], ["menu-icon", padStyleMapOf(utsMapOf([["fontSize", 32], ["marginRight", 16]]))], ["menu-title", padStyleMapOf(utsMapOf([["fontSize", 18], ["color", "#212529"], ["marginBottom", 4]]))], ["menu-desc", padStyleMapOf(utsMapOf([["fontSize", 13], ["color", "#6c757d"], ["position", "absolute"], ["left", 68], ["bottom", 18]]))]])];
+//# sourceMappingURL=index.uvue.map

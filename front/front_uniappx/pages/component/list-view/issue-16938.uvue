@@ -1,0 +1,41 @@
+<template>
+  <list-view ref="list" style="flex: 1;">
+    <list-item class="item" v-for="item in 1000" @click="toNextPage">
+      {{item}}点击跳转下一页
+    </list-item>
+  </list-view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        scrollTop: 0
+      }
+    },
+    onLoad() {
+
+    },
+    onReady() {
+    },
+    methods: {
+      toNextPage() {
+        uni.navigateTo({
+          url: '/pages/component/list-view/list-view'
+        })
+      },
+      getScrollTop() {
+        return (this.$refs['list'] as UniListViewElement).scrollTop
+      },
+      setScrollTop(top: number) {
+        (this.$refs['list'] as UniListViewElement).scrollTop = top
+      }
+    }
+  }
+</script>
+
+<style>
+  .item {
+    height: 100px;
+  }
+</style>

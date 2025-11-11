@@ -1,0 +1,30 @@
+const __sfc__ = defineComponent({
+    data() {
+        return {};
+    },
+    methods: {
+        go() {
+            uni.openAppAuthorizeSetting({
+                success(res) {
+                    console.log(res, " at pages/API/open-app-authorize-setting/open-app-authorize-setting.uvue:22");
+                }
+            });
+        }
+    }
+});
+export default __sfc__;
+function GenPagesAPIOpenAppAuthorizeSettingOpenAppAuthorizeSettingRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    return createElementVNode("scroll-view", utsMapOf({
+        style: normalizeStyle(utsMapOf({ "flex": "1" }))
+    }), [
+        createElementVNode("button", utsMapOf({
+            type: "primary",
+            style: normalizeStyle(utsMapOf({ "margin": "20px" })),
+            onClick: _ctx.go
+        }), "跳转系统授权管理页", 12 /* STYLE, PROPS */, ["onClick"])
+    ], 4 /* STYLE */);
+}
+const GenPagesAPIOpenAppAuthorizeSettingOpenAppAuthorizeSettingStyles = [];
+//# sourceMappingURL=open-app-authorize-setting.uvue.map

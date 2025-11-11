@@ -1,0 +1,55 @@
+<template>
+  <view class="page" style="flex:1">
+    <view class="head">
+      <text class="tip">下面有一个灰色区域，display默认值为none</text>
+      <text class="tip">当前display值：{{display}}</text>
+    </view>
+    <view class="content" :style="{display:display}">
+      <text style="background-color: aquamarine;">展示display区域</text>
+    </view>
+    <button @tap="switchDisplay">切换display属性</button>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        display: 'none'
+      }
+    },
+    methods: {
+      switchDisplay() {
+        this.display = ('flex' == this.display) ? 'none' : 'flex';
+      }
+    }
+  }
+</script>
+
+<style>
+  .page {
+    align-items: center;
+    height: 100%;
+  }
+
+  .head {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .tip {
+    color: red;
+  }
+
+  .content {
+    border: 5px solid blue;
+    margin: 50px 0px;
+    padding: 50px;
+    width: 200px;
+    height: 200px;
+    background-color: gray;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

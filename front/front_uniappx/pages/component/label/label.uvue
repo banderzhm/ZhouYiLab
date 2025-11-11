@@ -1,0 +1,134 @@
+<template>
+  <view>
+    <page-head :title="title"></page-head>
+    <view class="uni-common-mt">
+      <view class="uni-form-item uni-column">
+        <view class="title">表单组件在label内</view>
+        <checkbox-group class="uni-list" @change="checkboxChange">
+          <label class="uni-list-cell uni-list-cell-pd checkboxItemsTest label" v-for="item in checkboxItems"
+            :key="item.name">
+            <view>
+              <checkbox :value="item.name" :checked="item.checked"></checkbox>
+            </view>
+            <view>{{item.value}}</view>
+          </label>
+        </checkbox-group>
+      </view>
+
+      <view class="uni-form-item uni-column">
+        <view class="title">label用for标识表单组件</view>
+        <radio-group class="uni-list radio-group" @change="radioChange">
+          <view class="uni-list-cell uni-list-cell-pd" v-for="(item,index) in radioItems" :key="index">
+            <view>
+              <radio :id="item.name" :value="item.name" :checked="item.checked"></radio>
+            </view>
+            <label class="label-2-text" :for="item.name">
+              <text>{{item.value}}</text>
+            </label>
+          </view>
+        </radio-group>
+      </view>
+
+      <view class="uni-form-item uni-column">
+        <view class="title">label内有多个时选中第一个</view>
+        <checkbox-group class="uni-list" @change="checkboxForChange">
+          <label class="label-3 label">
+            <view class="uni-list-cell uni-list-cell-pd">
+              <checkbox value="for1">选项一</checkbox>
+            </view>
+            <view class="uni-list-cell uni-list-cell-pd">
+              <checkbox value="for2">选项二</checkbox>
+            </view>
+            <view class="uni-center" style="margin:10px 0;">
+              <text class="uni-link">点击该label下的文字默认选中第一个checkbox</text>
+            </view>
+          </label>
+        </checkbox-group>
+      </view>
+    </view>
+  </view>
+</template>
+<script lang="uts">
+  type controlItem = {
+    name : string,
+    value : string,
+    checked ?: Boolean
+  }
+  export default {
+    data() {
+      return {
+        title: 'label',
+        checkboxItems: [{
+          name: 'USA',
+          value: '美国'
+        },
+        {
+          name: 'CHN',
+          value: '中国',
+          checked: 'true'
+        }
+        ] as controlItem[],
+        radioItems: [{
+          name: 'USA',
+          value: '美国'
+        },
+        {
+          name: 'CHN',
+          value: '中国',
+          checked: 'true'
+        }
+        ] as controlItem[],
+        hidden: false,
+        checkboxValue: [] as string[],
+        checkboxForValue: [] as string[],
+        radioValue: ''
+      }
+    },
+    methods: {
+      checkboxChange: function (e : UniCheckboxGroupChangeEvent) {
+        console.log(e.detail.value)
+        this.checkboxValue = e.detail.value
+      },
+      checkboxForChange: function (e : UniCheckboxGroupChangeEvent) {
+        console.log(e.detail.value)
+        this.checkboxForValue = e.detail.value
+      },
+      radioChange: function (e : UniRadioGroupChangeEvent) {
+        console.log(e.detail.value)
+        this.radioValue = e.detail.value
+      }
+    }
+  }
+</script>
+
+<style>
+  .uni-list-cell {
+    justify-content: flex-start
+  }
+
+  .uni-list .label-3 {
+    padding: 0;
+  }
+
+  .label-2-text {
+    flex: 1;
+  }
+
+  .uni-form-item {
+    display: flex;
+    width: 100%;
+    padding: 5px 0;
+  }
+
+  .uni-form-item .title {
+    padding: 5px 12px;
+  }
+
+  .radio-group {
+    padding: 0 10px;
+  }
+
+  .label {
+    margin: 0 10px;
+  }
+</style>

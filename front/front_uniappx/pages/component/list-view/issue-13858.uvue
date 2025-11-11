@@ -1,0 +1,40 @@
+<template>
+  <view>
+    <list-view>
+      <list-item>
+        <Item @itemMounted="itemMounted"></Item>
+      </list-item>
+    </list-view>
+  </view>
+</template>
+
+<script>
+  import Item from './issue-13858-item.uvue'
+
+  export default {
+    data() {
+      return {
+        childMountedTriggeredCount: 0
+      }
+    },
+    components: {
+      Item
+    },
+    onLoad() {
+
+    },
+    methods: {
+      itemMounted() {
+        this.childMountedTriggeredCount++
+      }
+    }
+  }
+</script>
+
+<style>
+  .title {
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

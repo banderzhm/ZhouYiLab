@@ -1,0 +1,62 @@
+<template>
+	<view>
+		<view style="padding: 8px;">
+			<view class="position-error" id="fullscreen" @click="requestfullscreen">
+				<text style="color: white;">测试position：fixed在安卓上的bug</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				fullscreenElement: null as UniElement | null,
+				isFullscreen: false,
+			}
+
+		},
+		onReady() {
+			this.fullscreenElement = uni.getElementById('fullscreen') as UniElement
+		},
+		methods: {
+			getCurrentPage() : UniPage {
+				const pages = getCurrentPages()
+				return pages[pages.length - 1]
+			},
+			requestfullscreen() {
+				if (this.isFullscreen) {
+					const page = this.getCurrentPage()
+					page.exitFullscreen({
+						success: () => {
+						},
+						fail: () => {
+						},
+						complete: () => {
+						}
+					})
+				} else {
+					this.fullscreenElement?.requestFullscreen({
+						success: () => { },
+						fail: () => { },
+						complete: () => { }
+					})
+				}
+				this.isFullscreen = !this.isFullscreen
+			},
+			exitfullscreen() {
+
+			}
+		}
+	}
+</script>
+
+<style>
+	.position-error {
+		width: 200px;
+		height: 200px;
+		position: fixed;
+		background-color: brown;
+	}
+</style>

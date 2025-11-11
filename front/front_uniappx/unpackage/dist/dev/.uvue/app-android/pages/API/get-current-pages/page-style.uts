@@ -1,0 +1,98 @@
+export type PageStyleItem = {
+    key: string;
+    type: string;
+    value: Array<any>;
+};
+export const PageStyleArray = [
+    {
+        key: "navigationBarBackgroundColor",
+        type: "string",
+        value: ["#007AFF", "#FFFFFF", "#000000"]
+    } as PageStyleItem,
+    {
+        key: "navigationBarTextStyle",
+        type: "string",
+        value: ["white", "black"]
+    } as PageStyleItem,
+    {
+        key: "navigationBarTitleText",
+        type: "string",
+        value: ["title1", "title2", "title3"]
+    } as PageStyleItem,
+    {
+        key: "navigationStyle",
+        type: "string",
+        value: ["default", "custom"]
+    } as PageStyleItem,
+    {
+        key: "backgroundColor",
+        type: "string",
+        value: ["#FFFFFF", "#000000"]
+    } as PageStyleItem,
+    {
+        key: "backgroundColorContent",
+        type: "string",
+        value: ["#FFFFFF", "#F0F0F0", "#000000"]
+    } as PageStyleItem,
+    {
+        key: "backgroundTextStyle",
+        type: "string",
+        value: ["dark", "light"]
+    } as PageStyleItem,
+    {
+        key: "enablePullDownRefresh",
+        type: "boolean",
+        value: [true, false]
+    } as PageStyleItem,
+    {
+        key: "onReachBottomDistance",
+        type: "number",
+        value: [50, 100]
+    } as PageStyleItem,
+    {
+        key: "pageOrientation",
+        type: "string",
+        value: ["auto", "portrait", "landscape"]
+    } as PageStyleItem,
+    {
+        key: "backgroundColorTop",
+        type: "string",
+        value: ["#FFFFFF", "#000000"]
+    } as PageStyleItem,
+    {
+        key: "backgroundColorBottom",
+        type: "string",
+        value: ["#FFFFFF", "#000000"]
+    } as PageStyleItem,
+    {
+        key: "navigationBarAutoBackButton",
+        type: "boolean",
+        value: [true, false]
+    } as PageStyleItem,
+    {
+        key: "hideStatusBar",
+        type: "boolean",
+        value: [true, false]
+    } as PageStyleItem,
+    {
+        key: "hideBottomNavigationIndicator",
+        type: "boolean",
+        value: [true, false]
+    } as PageStyleItem,
+    {
+        key: "androidThreeButtonNavigationTranslucent",
+        type: "boolean",
+        value: [true, false]
+    } as PageStyleItem,
+    {
+        key: "androidThreeButtonNavigationBackgroundColor",
+        type: "string",
+        value: ["#000000", "#FFF00033", "aqua"]
+    } as PageStyleItem,
+    {
+        key: "androidThreeButtonNavigationStyle",
+        type: "string",
+        value: ["white", "black"]
+    } as PageStyleItem
+] as PageStyleItem[];
+//# sourceMappingURL=page-style.uts.map

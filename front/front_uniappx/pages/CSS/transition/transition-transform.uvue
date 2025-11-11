@@ -1,0 +1,57 @@
+<template>
+	<view style="flex: 1;">
+		<view id="v" class="popup" @click="open"></view>
+		<view class="test"></view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				transform: 'scale(0.6) translate(-50%, -50%)',
+			}
+		},
+		onLoad() {
+
+		},
+		methods: {
+			open() {
+				if ('scale(0.6) translate(-50%, -50%)' == this.transform) {
+					this.transform = 'scale(1) translate(-50%, -50%)';
+				} else {
+					this.transform = 'scale(0.6) translate(-50%, -50%)';
+				}
+				uni.getElementById('v')?.style.setProperty('transform', this.transform)
+			}
+		}
+	}
+</script>
+
+<style>
+	.popup {
+		position: fixed;
+		left: 50%;
+		top: 50%;
+		width: 200px;
+		height: 200px;
+		background: red;
+
+		transition-duration: 300ms;
+		transition-property: transform, opacity;
+		transition-timing-function: ease;
+		overflow: visible;
+		transform-origin: left top;
+		transform: scale(0.6) translate(-50%, -50%);
+
+	}
+
+	.test {
+		position: fixed;
+		left: 50%;
+		top: 50%;
+		width: 200px;
+		height: 200px;
+		background: rgba(0, 0, 0, 0.5);
+	}
+</style>

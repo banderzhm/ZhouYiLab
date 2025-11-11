@@ -1,0 +1,28 @@
+<template>
+  <view style="flex-grow: 1;">
+    <view style="height: 250px;background-color: gray;justify-content: center;align-items: center;">
+      <text ref="text" :style="{'font-size': fontSize}">font-size: {{fontSize}}</text>
+      <text style="font-size: 30px;">font-size: 30px</text>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        fontSize: '15px'
+      }
+    },
+    methods: {
+      // 自动化测试
+      setFontSize() {
+        this.fontSize = '30px';
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>

@@ -1,0 +1,37 @@
+
+	const __sfc__ = defineComponent({
+		data() {
+			return {
+				text: "<h2>uni-app x，终极跨平台方案</h2>"
+			}
+		},
+		methods: {
+
+		}
+	})
+
+export default __sfc__
+function GenPagesComponentRichTextRichTextListRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode("view", utsMapOf({
+    style: normalizeStyle(utsMapOf({"flex":"1"}))
+  }), [
+    createElementVNode("list-view", utsMapOf({
+      style: normalizeStyle(utsMapOf({"flex":"1"}))
+    }), [
+      createElementVNode(Fragment, null, RenderHelpers.renderList(5, (index, __key, __index, _cached): any => {
+        return createElementVNode("list-item", utsMapOf({
+          type: "1",
+          name: index
+        }), [
+          createElementVNode("rich-text", utsMapOf({ nodes: _ctx.text }), null, 8 /* PROPS */, ["nodes"]),
+          createElementVNode("text", utsMapOf({
+            style: normalizeStyle(utsMapOf({"height":"150px"}))
+          }), toDisplayString(index), 5 /* TEXT, STYLE */)
+        ], 8 /* PROPS */, ["name"])
+      }), 64 /* STABLE_FRAGMENT */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */)
+}
+const GenPagesComponentRichTextRichTextListStyles = []

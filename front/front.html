@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大六壬排盘 (分离三传四课)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+            font-family: 'Inter', sans-serif;
+            color: #212529;
+        }
+        .chart-container {
+            max-width: 550px; /* Adjust max width */
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin: 1.5rem auto;
+            overflow: hidden; /* Hide overflow */
+        }
+        /* Simulated mobile top bar */
+        .top-bar {
+            font-size: 0.8rem;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        /* Main header */
+        .chart-header-main {
+            border-bottom: 1px solid #dee2e6;
+        }
+        /* Date/Time info */
+        .info-section {
+            font-size: 0.9rem;
+        }
+        .info-section .pillars span {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .info-section .details {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .info-section .chart-type {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #dc3545;
+        }
+
+        /* Plate Grid Area */
+        .plate-grid-area {
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        /* Styling for each grid cell (col-3) */
+        .grid-cell {
+            border: 1px solid #f1f3f5; /* Lighter border */
+            padding: 0.3rem;
+            display: flex;
+            flex-direction: column;
+            /* justify-content: space-between; REMOVED */
+            overflow: hidden;
+            aspect-ratio: 1 / 1; /* Attempt square cells */
+            min-height: 85px; /* Ensure min height */
+        }
+        /* Styling for center content cells (col-6) */
+        .center-content-cell {
+            padding: 0.5rem;
+            font-size: 0.75rem; /* Base font size */
+            line-height: 1.3;
+            text-align: center;
+            /* aspect-ratio: 2 / 1; /* Make the container rectangular */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center; /* Center horizontally */
+            min-height: 85px; /* Match row height */
+        }
+
+        /* San Chuan Styling */
+        .center-san-chuan {
+            width: 100%;
+            text-align: center;
+            /* Removed margin-bottom */
+            font-size: 0.85rem;
+        }
+        .center-san-chuan div { line-height: 1.35; }
+        .center-san-chuan .relation { font-weight: 600; margin-right: 3px;}
+        .center-san-chuan .dun-gan { margin: 0 2px; }
+        .center-san-chuan .branch { color: #dc3545; font-weight: 600; margin: 0 2px; font-size: 0.95rem;}
+        .center-san-chuan .general-name { color: #198754; margin-left: 3px;}
+
+        /* Si Ke Styling - NEW 3x4 Layout */
+        .center-si-ke {
+            width: 100%;
+            font-size: 0.9rem; /* Adjust size as needed */
+            line-height: 1.35; /* Adjusted line height */
+            font-weight: 600; /* Bold text */
+            text-align: center;
+            margin-top: 0.5rem; /* Add some top margin */
+            /* Removed margin-top */
+        }
+        .center-si-ke .si-ke-row {
+            justify-content: space-around; /* Distribute items evenly */
+            margin-bottom: 0px; /* Reduced space between rows */
+        }
+        .center-si-ke .si-ke-item {
+            width: 25%; /* Each item takes 1/4 width */
+            text-align: center;
+            padding: 0 1px; /* Add minimal horizontal padding */
+        }
+        /* Specific colors if needed */
+        .si-ke-general { color: #198754; } /* Green for generals */
+        .si-ke-heaven { color: #0d6efd; } /* Blue for heaven plate */
+        .si-ke-earth { color: #212529; } /* Default for earth plate */
+
+
+        /* Specific styling for outer plate positions */
+        .plate-position {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .plate-shensha {
+            color: #6c757d;
+            font-size: 0.65rem; /* Base font size for JS */
+            text-align: start;
+            line-height: 1.15;
+            display: flex;
+            flex-direction: row; /* Stack vertically */
+            align-items: flex-start;
+            /* margin-bottom: auto; REMOVED */
+            max-height: 50%; /* Limit height */
+            overflow: hidden; /* Hide overflow for JS check */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .shensha-item {
+            display: block;
+            white-space: nowrap;
+            writing-mode:vertical-lr;
+            margin-bottom: 0px;
+        }
+
+        .plate-bottom-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            margin-top: auto; /* Push to bottom */
+            flex-grow: 1; /* Allow this to take remaining space */
+        }
+
+        .plate-relations {
+            color: #495057;
+            font-size: 0.65rem;
+            text-align: start;
+            line-height: 1.1;
+            overflow-wrap: break-word;
+            padding-right: 2px;
+            flex-shrink: 1;
+        }
+
+        .plate-main {
+            text-align: end;
+            flex-shrink: 0;
+        }
+        .plate-main .general {
+            color: #198754;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 1px;
+        }
+        .plate-main .branches {
+            font-size: 0.9rem;
+        }
+        .plate-main .earth-plate {
+            font-weight: 600;
+            margin-right: 2px;
+        }
+        .plate-main .heaven-plate {
+            color: #0d6efd;
+        }
+
+        /* Subject and Footer */
+        .chart-subject {
+            font-size: 0.9rem;
+        }
+        .footer-tabs {
+            font-size: 0.8rem;
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+        .footer-tabs span {
+            cursor: pointer;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        .footer-tabs span:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        /* Helper class for small text */
+        .text-xs { font-size: 0.75rem; }
+        .text-xxs { font-size: 0.65rem; }
+        .text-xxxs { font-size: 0.55rem; }
+
+    </style>
+</head>
+<body>
+
+<div class="container chart-container p-0">
+    <div class="info-section p-3 border-bottom text-center">
+        <p class="mb-1">2025-04-16 (三月十九) 15:56 (真太阳)</p>
+        <div class="pillars d-flex justify-content-center gap-3 my-1">
+            <span>乙 巳</span> <span>庚 辰</span> <span>乙 卯</span> <span>甲 申</span>
+        </div>
+        <p class="details mb-1">乙卯 日 甲申 时 (正时) 戌 将</p>
+        <p class="details text-muted mb-1">甲寅 旬 子丑 空 | 驿马: 巳 | 丁马: 巳 | 天马: 戌</p>
+        <p class="chart-type mt-1 mb-0">重审, 间传, 涉三渊</p>
+    </div>
+
+    <div class="p-3">
+        <div class="plate-grid-area">
+            <div class="row g-1"> <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                <span class="shensha-item">驿马</span>
+                <span class="shensha-item">火鬼</span>
+                <span class="shensha-item">医廉</span>
+            </div>
+                <div class="plate-bottom-content">
+                    <div class="plate-relations">干:绝 后合<br/>支:绝<br/>天:沐浴</div>
+                    <div class="plate-main">
+                        <span class="general">勾</span>
+                        <div class="branches"><span class="earth-plate">巳</span><span class="heaven-plate">申</span></div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">日德</span>
+                    <span class="shensha-item">死符</span>
+                    <span class="shensha-item">死气</span>
+                    <span class="shensha-item">飞廉</span>
+                    <span class="shensha-item">月厌</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:病 常贵<br/>支:病<br/>天:冠带</div>
+                        <div class="plate-main">
+                            <span class="general">龙</span>
+                            <div class="branches"><span class="earth-plate">午</span><span class="heaven-plate">酉</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">月建</span>
+                    <span class="shensha-item">破碎</span>
+                    <span class="shensha-item">丧门</span>
+                    <span class="shensha-item">咸池</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:衰 虎后<br/>支:衰<br/>天:冠带</div>
+                        <div class="plate-main">
+                            <span class="general">空</span>
+                            <div class="branches"><span class="earth-plate">未</span><span class="heaven-plate">戌</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">天马</span>
+                    <span class="shensha-item">天解</span>
+                    <span class="shensha-item">神耗</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:死 玄蛇<br/>支:死<br/>天:沐浴</div>
+                        <div class="plate-main">
+                            <span class="general">虎</span>
+                            <div class="branches"><span class="earth-plate">申</span><span class="heaven-plate">亥</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-1 mt-1"> <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                <span class="shensha-item">天喜</span>
+                <span class="shensha-item">小耗</span>
+                <span class="shensha-item">月破</span>
+            </div>
+                <div class="plate-bottom-content">
+                    <div class="plate-relations">干:胎 贵勾<br/>支:胎<br/>天:绝</div>
+                    <div class="plate-main">
+                        <span class="general">合</span>
+                        <div class="branches"><span class="earth-plate">辰</span><span class="heaven-plate">未</span></div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-6 center-content-cell">
+                    <div class="center-san-chuan">
+                        <div><span class="relation">官</span><span class="dun-gan">庚</span><span class="branch">申</span><span class="general-name">勾</span></div>
+                        <div><span class="relation">财</span><span class="dun-gan">壬</span><span class="branch">戌</span><span class="general-name">雀</span></div>
+                        <div><span class="relation">父</span><span class="dun-gan">己</span><span class="branch">子</span><span class="general-name">贵</span></div>
+                    </div>
+                </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">咸池</span>
+                    <span class="shensha-item">大耗</span>
+                    <span class="shensha-item">岁破</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:墓 阴雀<br/>支:墓<br/>天:长生</div>
+                        <div class="plate-main">
+                            <span class="general">常</span>
+                            <div class="branches"><span class="earth-plate">酉</span><span class="heaven-plate">子</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-1 mt-1"> <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                <span class="shensha-item">亡神</span>
+                <span class="shensha-item">天贼</span>
+                <span class="shensha-item">血支</span>
+            </div>
+                <div class="plate-bottom-content">
+                    <div class="plate-relations">干:临官 龙玄<br/>支:临官<br/>天:冠带</div>
+                    <div class="plate-main">
+                        <span class="general">蛇</span>
+                        <div class="branches"><span class="earth-plate">寅</span><span class="heaven-plate">巳</span></div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-6">
+                    <div class="center-si-ke">
+                        <div class="si-ke-row">
+                            <span class="si-ke-item si-ke-general">蛇</span>
+                            <span class="si-ke-item si-ke-general">青</span>
+                            <span class="si-ke-item si-ke-general">勾</span>
+                            <span class="si-ke-item si-ke-general">常</span>
+                        </div>
+                        <div class="si-ke-row">
+                            <span class="si-ke-item si-ke-heaven">戌</span>
+                            <span class="si-ke-item si-ke-heaven">午</span>
+                            <span class="si-ke-item si-ke-heaven">未</span>
+                            <span class="si-ke-item si-ke-heaven">卯</span>
+                        </div>
+                        <div class="si-ke-row">
+                            <span class="si-ke-item si-ke-earth">午</span>
+                            <span class="si-ke-item si-ke-earth">寅</span>
+                            <span class="si-ke-item si-ke-earth">卯</span>
+                            <span class="si-ke-item si-ke-earth">壬</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">月德</span>
+                    <span class="shensha-item">合德</span>
+                    <span class="shensha-item">天医</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:长生 雀空<br/>支:长生<br/>天:沐浴</div>
+                        <div class="plate-main">
+                            <span class="general">阴</span>
+                            <div class="branches"><span class="earth-plate">戌</span><span class="heaven-plate">寅</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-1 mt-1"> <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                <span class="shensha-item">日禄</span>
+                <span class="shensha-item">桃花</span>
+                <span class="shensha-item">将星</span>
+            </div>
+                <div class="plate-bottom-content">
+                    <div class="plate-relations">干:帝旺 空阴<br/>支:帝旺<br/>天:病</div>
+                    <div class="plate-main">
+                        <span class="general">雀</span>
+                        <div class="branches"><span class="earth-plate">卯</span><span class="heaven-plate">午</span></div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">空亡</span>
+                    <span class="shensha-item">华盖</span>
+                    <span class="shensha-item">月刑</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:冠带 勾常<br/>支:冠带<br/>天:病</div>
+                        <div class="plate-main">
+                            <span class="general">贵</span>
+                            <div class="branches"><span class="earth-plate">丑</span><span class="heaven-plate">辰</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">劫煞</span>
+                    <span class="shensha-item">孤辰</span>
+                    <span class="shensha-item">地医</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:沐浴 合虎<br/>支:沐浴<br/>天:冠带</div>
+                        <div class="plate-main">
+                            <span class="general">后</span>
+                            <div class="branches"><span class="earth-plate">子</span><span class="heaven-plate">卯</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 grid-cell plate-position"> <div class="plate-shensha">
+                    <span class="shensha-item">官符</span>
+                    <span class="shensha-item">寡宿</span>
+                    <span class="shensha-item">月煞</span>
+                </div>
+                    <div class="plate-bottom-content">
+                        <div class="plate-relations">干:养 蛇龙<br/>支:养<br/>天:长生</div>
+                        <div class="plate-main">
+                            <span class="general">玄</span>
+                            <div class="branches"><span class="earth-plate">亥</span><span class="heaven-plate">丑</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> </div>
+
+    <div class="chart-subject p-3 border-top">
+        <p class="mb-0"><strong>占事:</strong> 问感情发展</p>
+    </div>
+
+    <div class="footer-tabs d-flex justify-content-around p-2 border-top">
+        <span>直指</span> <span>集应铃</span> <span>神煞</span> <span>案例</span> <span>占法</span> <span>取象</span> <span>批注</span> <span>⚙️</span>
+    </div>
+
+</div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+    // Function to adjust font size if content overflows horizontally
+    function adjustShenshaFontSize() {
+        const shenshaContainers = document.querySelectorAll('.plate-shensha');
+
+        shenshaContainers.forEach(container => {
+            const items = container.querySelectorAll('.shensha-item');
+            if (!items.length) return; // Skip if no items
+
+            // Reset font size to initial before checking
+            items.forEach(item => item.style.fontSize = ''); // Reset to CSS defined size
+            // Need to get initial font size from the item itself, not container
+            const initialFontSize = parseFloat(window.getComputedStyle(items[0]).fontSize); // Get initial size
+            let currentFontSize = initialFontSize;
+            const minFontSize = 6; // Minimum font size in pixels
+            const step = 0.5; // Font size reduction step
+            const containerWidth = container.clientWidth; // Get container width
+
+            // Function to calculate total width of items at current font size
+            function getTotalWidth() {
+                let totalWidth = 0;
+                // Apply current size for measurement
+                items.forEach(item => {
+                    item.style.fontSize = currentFontSize + 'px';
+                    // For vertical text, offsetWidth might not be right. Use scrollWidth? Or measure differently?
+                    // Let's assume offsetWidth works for now with display: block
+                    totalWidth += item.offsetWidth;
+                });
+                // Add gap space (approximated) - This logic might be wrong for vertical text in flex row
+                if(items.length > 1) {
+                    const gap = parseFloat(window.getComputedStyle(container).gap); // Get gap if set
+                    totalWidth += (items.length - 1) * (isNaN(gap) ? 2 : gap); // Estimate gap width
+                }
+                return totalWidth;
+            }
+
+            // Check for overflow and adjust font size
+            // Re-applying style inside loop for accurate measurement
+            while (true) {
+                let overflows = false;
+                let currentTotalWidth = 0;
+                items.forEach(item => {
+                    item.style.fontSize = currentFontSize + 'px';
+                    currentTotalWidth += item.offsetWidth; // Use offsetWidth
+                });
+                if(items.length > 1) {
+                    const gap = parseFloat(window.getComputedStyle(container).gap);
+                    currentTotalWidth += (items.length - 1) * (isNaN(gap) ? 1 : gap); // Use gap or estimate
+                }
+
+
+                if (currentTotalWidth > containerWidth && currentFontSize > minFontSize) {
+                    currentFontSize -= step;
+                } else {
+                    break; // Exit loop if it fits or min size reached
+                }
+            }
+
+            // Final application of the adjusted font size
+            items.forEach(item => {
+                item.style.fontSize = currentFontSize + 'px';
+            });
+        });
+    }
+
+    // Adjust font size on initial load and on window resize
+    window.addEventListener('load', adjustShenshaFontSize);
+    window.addEventListener('resize', adjustShenshaFontSize);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+<template>
+  <scroll-view style="flex: 1">
+    <page-head title="拖拽图标测试相关事件(在小程序上本示例会卡顿,小程序上应使用movable-view)"></page-head>
+    <view class="uni-padding-wrap uni-common-mt" style="bottom: 20px;">
+      <navigator url="/pages/component/global-events/touch-events-case" hover-class="none">
+        <button type="default">
+          stopPropagation / preventDefault
+        </button>
+      </navigator>
+    </view>
+    <view class="container">
+      <view class="view-box" @touchstart="onViewTouchStart">
+        <image class="icon" id="icon" src="../image/logo.png" @touchstart="onTouchStart" @touchcancel="onTouchCancel"
+          @touchmove="onTouchMove" @touchend="onTouchEnd"></image>
+      </view>
+
+    </view>
+    <view v-if="touchEvent !== null">
+      <text class="title1">touches: </text>
+      <template v-for="(touch, index) in touchEvent!.touches" :key="index">
+        <text class="title2">touch[{{ index }}]:</text>
+        <text>identifier: {{touch.identifier}}</text>
+        <text>pageX: {{ touch.pageX }}, pageY: {{ touch.pageY }}</text>
+        <text>clientX: {{ touch.clientX }}, clientY: {{ touch.clientY }}</text>
+        <text>screenX: {{ touch.screenX }}, screenY: {{ touch.screenY }}</text>
+      </template>
+    </view>
+  </scroll-view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        move: false,
+        posX: 0,
+        posY: 0,
+        lastX: 0,
+        lastY: 0,
+        touchEvent: null as TouchEvent | null,
+        icon: null as UniElement | null,
+        touchTargets: "",
+        touchTargetsCount: 0,
+        iconRect : null as DOMRect | null
+      }
+    },
+    onReady() {
+      this.icon = uni.getElementById("icon")
+      // #ifdef APP-IOS || APP-HARMONY
+      this.iconRect = this.icon?.getBoundingClientRect()
+      // 加上导航栏及状态栏高度
+      this.iconRect.y += uni.getSystemInfoSync().safeArea.top + 44
+      // #endif
+    },
+    methods: {
+      onViewTouchStart(e : TouchEvent) {
+        this.touchTargets += e.target!.tagName + e.currentTarget!.tagName
+        this.touchTargetsCount++
+      },
+      onTouchStart(e : TouchEvent) {
+        this.touchTargetsCount++
+        this.touchTargets += e.target!.tagName + e.currentTarget!.tagName
+
+        this.touchEvent = e
+        if (!this.move) {
+          this.move = true
+          this.posX = e.touches[0].screenX
+          this.posY = e.touches[0].screenY
+        }
+      },
+      onTouchMove(e : TouchEvent) {
+        e.preventDefault()
+        this.touchEvent = e
+        let p = e.touches[0]
+        if (p.screenX == this.lastX && p.screenY == this.lastY) {
+          return
+        }
+        let x = p.screenX - this.posX
+        let y = p.screenY - this.posY
+        this.lastX = p.screenX
+        this.lastY = p.screenY
+        this.icon?.style?.setProperty('transform', 'translate(' + x + 'px,' + y + 'px)')
+      },
+      onTouchEnd(e : TouchEvent) {
+        if (e.touches.length == 0) {
+          this.resetIcon()
+          this.touchEvent = null
+        }
+      },
+      onTouchCancel(_ : TouchEvent) {
+        this.resetIcon()
+        this.touchEvent = null
+      },
+      resetIcon() {
+        this.move = false;
+        this.posX = 0;
+        this.posY = 0;
+        this.icon?.style?.setProperty('transform', 'translate(0px,0px)')
+      }
+    }
+  }
+</script>
+
+<style>
+  .container {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .view-box {
+    width: 300px;
+    height: 300px;
+    align-items: center;
+    justify-content: center;
+    border-style: solid;
+  }
+
+  .icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .title1 {
+    margin-top: 10px;
+    font-size: 18px;
+  }
+
+  .title2 {
+    margin-top: 5px;
+    font-size: 16px;
+  }
+</style>

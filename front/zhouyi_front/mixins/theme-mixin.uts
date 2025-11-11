@@ -1,0 +1,76 @@
+/**
+ * 主题 Mixin
+ * 为组件提供主题相关的计算属性和方法
+ */
+
+import { themeStore } from '../store/theme.uts'
+import type { ThemeType, WuxingType, TianganType, DizhiType } from '../utils/theme.uts'
+
+export default {
+	data() {
+		return {
+			currentTheme: 'light' as ThemeType,
+			enableWuxingColors: true
+		}
+	},
+	
+	onLoad() {
+		// 初始化主题
+		this.currentTheme = themeStore.currentTheme
+		this.enableWuxingColors = themeStore.enableWuxingColors
+		
+		// 监听主题变化
+		uni.$on('themeChanged', (theme : ThemeType) => {
+			this.currentTheme = theme
+		})
+		
+		uni.$on('wuxingColorsChanged', (enabled : boolean) => {
+			this.enableWuxingColors = enabled
+		})
+	},
+	
+	onUnload() {
+		// 移除监听
+		uni.$off('themeChanged')
+		uni.$off('wuxingColorsChanged')
+	},
+	
+	computed: {
+		// 获取当前主题配置
+		themeConfig() {
+			return themeStore.getThemeConfig()
+		}
+	},
+	
+	methods: {
+		// 获取天干颜色
+		getTianganColor(tiangan : TianganType, variant : 'primary' | 'light' | 'dark' = 'primary') : string {
+			return themeStore.getTianganColor(tiangan, variant)
+		},
+		
+		// 获取地支颜色
+		getDizhiColor(dizhi : DizhiType, variant : 'primary' | 'light' | 'dark' = 'primary') : string {
+			return themeStore.getDizhiColor(dizhi, variant)
+		},
+		
+		// 获取五行颜色
+		getWuxingColor(wuxing : WuxingType, variant : 'primary' | 'light' | 'dark' = 'primary') : string {
+			return themeStore.getWuxingColor(wuxing, variant)
+		},
+		
+		// 切换主题
+		toggleTheme() {
+			themeStore.toggleTheme()
+		},
+		
+		// 切换五行颜色显示
+		toggleWuxingColors() {
+			themeStore.toggleWuxingColors()
+		}
+	}
+}
+
+
+
+
+

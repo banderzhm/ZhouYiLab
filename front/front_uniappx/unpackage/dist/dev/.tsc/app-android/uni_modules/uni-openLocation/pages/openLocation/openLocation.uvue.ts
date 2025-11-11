@@ -1,0 +1,416 @@
+import { openSchema } from '@/uni_modules/uts-openSchema'
+
+  import { canOpenURL } from '@/uni_modules/uts-openSchema'
+
+
+  import targetPath from '@/uni_modules/uni-openLocation/pages/openLocation/target.png'
+
+  type AafeArea = { __$originalPosition?: UTSSourceMapPosition<"AafeArea", "uni_modules/uni-openLocation/pages/openLocation/openLocation.uvue", 44, 8>;
+    top : number,
+    bottom : number,
+    left : number,
+    right : number
+  }
+
+  type IconPath = { __$originalPosition?: UTSSourceMapPosition<"IconPath", "uni_modules/uni-openLocation/pages/openLocation/openLocation.uvue", 51, 8>;
+    target : string,
+    position : string,
+    navigation : string,
+    back : string,
+  }
+
+  
+const __sfc__ = defineComponent({
+  __name: 'openLocation',
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+  const languageData = {__$originalPosition: new UTSSourceMapPosition("languageData", "uni_modules/uni-openLocation/pages/openLocation/openLocation.uvue", 58, 9),
+    "en": {
+      "navigation": "navigation"
+    },
+    "zh-Hans": {
+      "navigation": "导航"
+    },
+    "zh-Hant": {
+      "navigation": "導航"
+    }
+  };
+
+  const currentInstance = getCurrentInstance()!.proxy!
+  const uniPage = currentInstance.$page
+
+  const id1 = `UniMap1_${(Math.random() * 10e5).toString(36)}` as string;
+
+  // 响应式数据
+  const readyEventName = ref('');
+  const optionsEventName = ref('');
+  const successEventName = ref('');
+  const failEventName = ref('');
+  const openLocationOptions = ref({
+    latitude: 0,
+    longitude: 0,
+    scale: 18,
+    name: '',
+    address: ''
+  } as OpenLocationOptions);
+  const safeArea = ref({
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0
+  } as AafeArea);
+  const icon = ref({
+    target: '\ue683',
+    position: '\ue653',
+    navigation: '\ue640',
+    back: '\ue651',
+  } as IconPath);
+  const language = ref("zh-Hans");
+  const isLandscape = ref(false);
+  const theme = ref("light");
+  const mapId = ref(id1);
+  const latitude = ref(0);
+  const longitude = ref(0);
+  const markers = ref([] as Marker[]);
+
+  // 计算属性
+  const languageCom = computed(() => {
+    const textInfo = languageData[language.value] != null ? languageData[language.value] as UTSJSONObject : languageData['zh-Hans'] as UTSJSONObject;
+    return textInfo;
+  });
+
+  const classCom = computed(() => {
+    let list = [] as Array<string>;
+    if (theme.value == 'dark') {
+      list.push('uni-open-location-dark');
+    } else {
+      list.push('uni-open-location-light');
+    }
+    return list.join(' ');
+  });
+
+  const landscapeClassCom = computed(() => {
+    return isLandscape.value ? 'uni-open-location-landscape' : '';
+  });
+
+  // 方法
+  const initPageOptions = (options : UTSJSONObject) => {
+    readyEventName.value = options['readyEventName']! as string;
+    optionsEventName.value = options['optionsEventName']! as string;
+    successEventName.value = options['successEventName']! as string;
+    failEventName.value = options['failEventName']! as string;
+    uni.$on(optionsEventName.value, (data : UTSJSONObject) => {
+      console.log('data: ', JSON.stringify(data), " at uni_modules/uni-openLocation/pages/openLocation/openLocation.uvue:134")
+      if (data['latitude'] != null) {
+        openLocationOptions.value.latitude = data['latitude'] as number;
+        latitude.value = openLocationOptions.value.latitude;
+      }
+      if (data['longitude'] != null) {
+        openLocationOptions.value.longitude = data['longitude'] as number;
+        longitude.value = openLocationOptions.value.longitude;
+      }
+      if (data['scale'] != null) {
+        openLocationOptions.value.scale = data['scale'] as number;
+      }
+      if (data['name'] != null) {
+        openLocationOptions.value.name = data['name'] as string;
+      }
+      if (data['address'] != null) {
+        openLocationOptions.value.address = data['address'] as string;
+      }
+      setTimeout(() => {
+        markers.value = [
+          {
+            id: 1,
+            latitude: openLocationOptions.value.latitude,
+            longitude: openLocationOptions.value.longitude,
+            iconPath: targetPath,
+            width: 50,
+            height: 50
+          } as Marker
+        ] as Marker[];
+      }, 300);
+      uni.$emit(successEventName.value, {});
+    });
+    uni.$emit(readyEventName.value, {});
+  };
+
+  const getSystemInfo = () => {
+    const info = uni.getWindowInfo();
+    safeArea.value.top = info.safeAreaInsets.top;
+    safeArea.value.bottom = info.safeAreaInsets.bottom;
+    safeArea.value.left = info.safeAreaInsets.left;
+    safeArea.value.right = info.safeAreaInsets.right;
+    const systemInfo = uni.getSystemInfoSync()
+    // const osLanguage = systemInfo.osLanguage
+    const appLanguage = systemInfo.appLanguage
+    language.value = appLanguage
+    const osTheme = systemInfo.osTheme
+    const appTheme = systemInfo.appTheme
+    if (appTheme != null && appTheme != "auto") {
+      theme.value = appTheme
+    } else if (osTheme != null) {
+      theme.value = osTheme
+    }
+    isLandscape.value = systemInfo.deviceOrientation == 'landscape'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    uni.onAppThemeChange((res : AppThemeChangeResult) => {
+      theme.value = res.appTheme
+    })
+    uni.onOsThemeChange((res : OsThemeChangeResult) => {
+      theme.value = res.osTheme
+    })
+
+  };
+
+  const closeDialogPage = () => {
+
+    uni.closeDialogPage({
+      dialogPage: uniPage
+    } as io.dcloud.uniapp.framework.extapi.CloseDialogPageOptions)
+
+
+
+
+
+
+  };
+
+  const back = () => {
+    closeDialogPage();
+  };
+
+  const getMapContext = () : MapContext | null => {
+    return uni.createMapContext(mapId.value, currentInstance);
+  };
+
+  const moveToLocation = () => {
+    const mapContext = getMapContext();
+    if (mapContext != null) {
+      mapContext.moveToLocation({});
+    }
+  };
+
+  const mapReset = () => {
+    moveToLocation();
+  };
+
+  const navigation = () => {
+    const appBaseInfo = uni.getAppBaseInfo();
+
+    const src = appBaseInfo.packageName;
+
+
+
+
+
+
+
+
+
+
+
+    const list = ["腾讯地图", "高德地图", "百度地图"] as Array<string>;
+
+
+
+
+
+
+
+    uni.showActionSheet({
+      itemList: list,
+      success: (res) => {
+        let index = res.tapIndex;
+        if (index >= 0) {
+          let item = list[index] as string;
+          try {
+            let url = "";
+            if (item == "腾讯地图") {
+
+              url = `qqmap://map/routeplan?type=drive&from=我的位置&fromcoord=CurrentLocation&to=${openLocationOptions.value.name}&tocoord=${openLocationOptions.value.latitude},${openLocationOptions.value.longitude}&referer=1`;
+
+
+
+
+            } else if (item == "高德地图") {
+
+              url = `androidamap://route/plan/?sourceApplication=${src}&slat=&slon=&sname=我的位置&dlat=${openLocationOptions.value.latitude}&dlon=${openLocationOptions.value.longitude}&dname=${openLocationOptions.value.name}&dev=0&t=0`;
+
+
+
+
+
+
+
+
+
+
+            } else if (item == "百度地图") {
+
+              url = `baidumap://map/direction?origin=我的位置&destination=latlng:${openLocationOptions.value.latitude},${openLocationOptions.value.longitude}|name:${openLocationOptions.value.name}&coord_type=gcj02&mode=driving&src=${src}`;
+
+
+
+
+            } else if (item == "苹果地图") {
+
+
+
+            } else if (item == "华为地图") {
+
+
+
+            }
+            if (url != "") {
+
+
+
+
+
+
+
+
+
+
+
+
+              let schemaPrefix = "";
+              const schemaIndex = url.indexOf('?');
+              if (schemaIndex != -1) {
+                schemaPrefix = url.substring(0, schemaIndex);
+              }
+              if (canOpenURL(schemaPrefix)) {
+                openSchema(url);
+              } else {
+                uni.showToast({
+                  title: `请先安装${item}`,
+                  icon: "none"
+                });
+              }
+
+
+
+
+
+            }
+          } catch (err) {
+            console.error(err, " at uni_modules/uni-openLocation/pages/openLocation/openLocation.uvue:345");
+          }
+        }
+      }
+    });
+  };
+
+  // 生命周期
+  onLoad((options : UTSJSONObject) => {
+    initPageOptions(options);
+    getSystemInfo();
+  });
+
+  onUnload(() => {
+    uni.$off(optionsEventName.value, null);
+    uni.$off(readyEventName.value, null);
+    uni.$off(successEventName.value, null);
+    uni.$off(failEventName.value, null);
+
+
+
+
+
+
+  });
+
+  onResize(() => {
+    const systemInfo = uni.getSystemInfoSync();
+    isLandscape.value = systemInfo.deviceOrientation == 'landscape';
+  });
+
+return (): any | null => {
+
+const _component_map = resolveComponent("map")
+
+  return createElementVNode("view", utsMapOf({
+    class: normalizeClass(["uni-open-location", unref(classCom)])
+  }), [
+    createElementVNode("view", utsMapOf({ class: "uni-open-location-map-box" }), [
+      createVNode(_component_map, utsMapOf({
+        class: "uni-open-location-map",
+        id: unref(mapId),
+        ref: unref(mapId),
+        latitude: unref(latitude),
+        longitude: unref(longitude),
+        scale: unref(openLocationOptions).scale,
+        markers: unref(markers),
+        "layer-style": unref(theme) == 'dark' ? '2' : '1',
+        "show-compass": false,
+        "enable-zoom": true,
+        "enable-scroll": true,
+        "enable-rotate": false,
+        "enable-poi": true,
+        "show-location": true
+      }), null, 8 /* PROPS */, ["id", "latitude", "longitude", "scale", "markers", "layer-style"]),
+      createElementVNode("view", utsMapOf({
+        class: "uni-open-location-map-reset",
+        onClick: mapReset
+      }), [
+        createElementVNode("text", utsMapOf({ class: "uni-open-location-icons uni-open-location-map-reset-icon" }), toDisplayString(unref(icon).position), 1 /* TEXT */)
+      ])
+    ]),
+    createElementVNode("view", utsMapOf({
+      class: "uni-open-location-nav",
+      style: normalizeStyle('height:' + (60 + unref(safeArea).top) + 'px;')
+    }), [
+      createElementVNode("view", utsMapOf({
+        class: normalizeClass(["uni-open-location-nav-btn uni-open-location-nav-back-btn", [unref(landscapeClassCom)]]),
+        style: normalizeStyle(unref(safeArea).top > 0 ? 'top: ' + unref(safeArea).top + 'px;' : '')
+      }), [
+        createElementVNode("text", utsMapOf({
+          class: "uni-open-location-nav-text uni-open-location-nav-back-text uni-open-location-icons",
+          onClick: back
+        }), toDisplayString(unref(icon).back), 1 /* TEXT */)
+      ], 6 /* CLASS, STYLE */)
+    ], 4 /* STYLE */),
+    createElementVNode("view", utsMapOf({ class: "uni-open-location-footer" }), [
+      createElementVNode("view", utsMapOf({ class: "uni-open-location-address" }), [
+        createElementVNode("text", utsMapOf({ class: "uni-open-location-name-text" }), toDisplayString(unref(openLocationOptions).name), 1 /* TEXT */),
+        createElementVNode("text", utsMapOf({ class: "uni-open-location-address-text" }), toDisplayString(unref(openLocationOptions).address), 1 /* TEXT */)
+      ]),
+      createElementVNode("view", utsMapOf({ class: "uni-open-location-footer-icon-btns" }), [
+        createElementVNode("view", utsMapOf({
+          class: "uni-open-location-footer-icon-btns-item",
+          onClick: navigation
+        }), [
+          createElementVNode("view", utsMapOf({ class: "uni-open-location-footer-icon-box" }), [
+            createElementVNode("text", utsMapOf({ class: "uni-open-location-icons" }), toDisplayString(unref(icon).navigation), 1 /* TEXT */)
+          ]),
+          createElementVNode("text", utsMapOf({ class: "uni-open-location-footer-btn-text" }), toDisplayString(unref(languageCom)['navigation']), 1 /* TEXT */)
+        ])
+      ])
+    ])
+  ], 2 /* CLASS */)
+}
+}
+
+})
+export default __sfc__
+const GenUniModulesUniOpenLocationPagesOpenLocationOpenLocationStyles = [utsMapOf([["uni-open-location-icons", utsMapOf([["", utsMapOf([["fontFamily", "UniOpenLocationFontFamily"], ["fontSize", 16], ["fontStyle", "normal"]])], [".uni-open-location .uni-open-location-footer-icon-btns .uni-open-location-footer-icon-btns-item .uni-open-location-footer-icon-box ", utsMapOf([["color", "#007aff"], ["fontSize", 24]])]])], ["uni-open-location", padStyleMapOf(utsMapOf([["position", "relative"], ["left", 0], ["top", 0], ["width", "100%"], ["height", "100%"], ["backgroundImage", "none"], ["backgroundColor", "#f8f8f8"], ["zIndex", 999], ["display", "flex"], ["flexDirection", "column"]]))], ["uni-open-location-map-box", utsMapOf([[".uni-open-location ", utsMapOf([["width", "100%"], ["flex", 1]])]])], ["uni-open-location-map", utsMapOf([[".uni-open-location ", utsMapOf([["width", "100%"], ["height", "100%"]])]])], ["uni-open-location-map-reset", utsMapOf([[".uni-open-location ", utsMapOf([["position", "absolute"], ["left", 20], ["bottom", 40], ["width", 40], ["height", 40], ["boxSizing", "border-box"], ["backgroundColor", "#ffffff"], ["borderTopLeftRadius", 20], ["borderTopRightRadius", 20], ["borderBottomRightRadius", 20], ["borderBottomLeftRadius", 20], ["pointerEvents", "auto"], ["boxShadow", "0px 0px 20px 2px rgba(0, 0, 0, .3)"], ["zIndex", 9], ["display", "flex"], ["justifyContent", "center"], ["alignItems", "center"]])], [".uni-open-location.uni-open-location-dark ", utsMapOf([["backgroundColor", "#111111"]])]])], ["uni-open-location-map-reset-icon", utsMapOf([[".uni-open-location .uni-open-location-map-reset ", utsMapOf([["fontSize", 26], ["textAlign", "center"], ["lineHeight", "40px"]])], [".uni-open-location.uni-open-location-dark .uni-open-location-map-reset ", utsMapOf([["color", "#d1d1d1"]])]])], ["uni-open-location-nav", utsMapOf([[".uni-open-location ", utsMapOf([["position", "absolute"], ["top", 0], ["left", 0], ["width", "100%"], ["height", 60], ["backgroundColor", "rgba(0,0,0,0)"], ["backgroundImage", "linear-gradient(to bottom, rgba(0, 0, 0, .3), rgba(0, 0, 0, 0))"]])]])], ["uni-open-location-nav-btn", utsMapOf([[".uni-open-location .uni-open-location-nav ", utsMapOf([["position", "absolute"], ["top", 5], ["left", 5], ["width", 44], ["height", 44], ["display", "flex"], ["justifyContent", "center"], ["alignItems", "center"]])]])], ["uni-open-location-nav-back-text", utsMapOf([[".uni-open-location .uni-open-location-nav .uni-open-location-nav-btn.uni-open-location-nav-back-btn ", utsMapOf([["color", "#ffffff"], ["fontSize", 26]])]])], ["uni-open-location-footer", utsMapOf([[".uni-open-location ", utsMapOf([["height", 150], ["borderTopLeftRadius", 10], ["borderTopRightRadius", 10], ["borderBottomRightRadius", 0], ["borderBottomLeftRadius", 0], ["overflow", "hidden"], ["backgroundColor", "#ffffff"], ["display", "flex"], ["flexDirection", "row"], ["alignItems", "center"], ["justifyContent", "space-between"], ["paddingTop", 0], ["paddingRight", 20], ["paddingBottom", 0], ["paddingLeft", 20]])], [".uni-open-location.uni-open-location-dark ", utsMapOf([["backgroundColor", "#181818"]])]])], ["uni-open-location-address", utsMapOf([[".uni-open-location .uni-open-location-footer ", utsMapOf([["display", "flex"], ["flexDirection", "column"], ["flex", 1]])]])], ["uni-open-location-name-text", utsMapOf([[".uni-open-location .uni-open-location-footer ", utsMapOf([["fontSize", 18], ["fontWeight", "bold"], ["overflow", "hidden"], ["textOverflow", "ellipsis"], ["whiteSpace", "nowrap"]])], [".uni-open-location.uni-open-location-dark .uni-open-location-footer ", utsMapOf([["color", "#fafafa"]])]])], ["uni-open-location-address-text", utsMapOf([[".uni-open-location .uni-open-location-footer ", utsMapOf([["fontSize", 16], ["marginTop", 10], ["overflow", "hidden"], ["textOverflow", "ellipsis"], ["whiteSpace", "nowrap"]])], [".uni-open-location.uni-open-location-dark .uni-open-location-footer ", utsMapOf([["color", "#fafafa"]])]])], ["uni-open-location-footer-icon-btns", utsMapOf([[".uni-open-location ", utsMapOf([["width", 100], ["display", "flex"], ["flexDirection", "row"], ["justifyContent", "flex-end"]])]])], ["uni-open-location-footer-icon-btns-item", utsMapOf([[".uni-open-location .uni-open-location-footer-icon-btns ", utsMapOf([["display", "flex"], ["flexDirection", "column"], ["alignItems", "center"], ["opacity:active", 0.6]])]])], ["uni-open-location-footer-icon-box", utsMapOf([[".uni-open-location .uni-open-location-footer-icon-btns .uni-open-location-footer-icon-btns-item ", utsMapOf([["backgroundColor", "#f8f8f8"], ["width", 40], ["height", 40], ["borderTopLeftRadius", 6], ["borderTopRightRadius", 6], ["borderBottomRightRadius", 6], ["borderBottomLeftRadius", 6], ["display", "flex"], ["justifyContent", "center"], ["alignItems", "center"], ["marginBottom", 6]])], [".uni-open-location.uni-open-location-dark .uni-open-location-footer-icon-btns .uni-open-location-footer-icon-btns-item ", utsMapOf([["backgroundColor", "#393939"]])]])], ["uni-open-location-footer-btn-text", utsMapOf([[".uni-open-location .uni-open-location-footer-icon-btns .uni-open-location-footer-icon-btns-item ", utsMapOf([["fontSize", 12], ["textAlign", "center"]])], [".uni-open-location.uni-open-location-dark .uni-open-location-footer-icon-btns .uni-open-location-footer-icon-btns-item ", utsMapOf([["color", "#909090"]])]])], ["@FONT-FACE", utsMapOf([["0", utsMapOf([["fontFamily", "UniOpenLocationFontFamily"], ["src", "url('data:font/ttf;charset=utf-8;base64,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') format('truetype')"]])]])]])]

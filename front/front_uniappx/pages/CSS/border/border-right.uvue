@@ -1,0 +1,20 @@
+<template>
+  <view style="flex-grow: 1;">
+    <view>
+      <text>border-right: 5px solid blue</text>
+      <view class="common" style="border-right: 5px solid blue;"></view>
+    </view>
+  </view>
+</template>
+
+<script>
+
+</script>
+
+<style>
+  .common {
+    width: 250px;
+    height: 250px;
+    background-color: gray;
+  }
+</style>

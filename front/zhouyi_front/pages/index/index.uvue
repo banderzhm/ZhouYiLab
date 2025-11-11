@@ -1,0 +1,124 @@
+<template>
+	<view class="container">
+		<image class="logo" src="/static/logo.png"></image>
+		<view class="text-area">
+			<text class="title">{{title}}</text>
+		</view>
+		
+		<view class="menu-area">
+			<view class="menu-item" @click="navigateTo('/pages/daluren/daluren')">
+				<text class="menu-icon">☯️</text>
+				<text class="menu-title">大六壬排盘</text>
+				<text class="menu-desc">传统术数排盘工具</text>
+			</view>
+			
+			<view class="menu-item disabled">
+				<text class="menu-icon">🔮</text>
+				<text class="menu-title">六爻起卦</text>
+				<text class="menu-desc">即将推出</text>
+			</view>
+			
+			<view class="menu-item disabled">
+				<text class="menu-icon">⭐</text>
+				<text class="menu-title">紫微斗数</text>
+				<text class="menu-desc">即将推出</text>
+			</view>
+			
+			<view class="menu-item disabled">
+				<text class="menu-icon">🎋</text>
+				<text class="menu-title">八字排盘</text>
+				<text class="menu-desc">即将推出</text>
+			</view>
+			
+			<view class="menu-item" @click="navigateTo('/pages/settings/settings')">
+				<text class="menu-icon">🎨</text>
+				<text class="menu-title">主题设置</text>
+				<text class="menu-desc">六种主题 · 五行配色</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				title: '周易实验室'
+			}
+		},
+		onLoad() {
+
+		},
+		methods: {
+			navigateTo(url : string) {
+				uni.navigateTo({
+					url: url
+				})
+			}
+		}
+	}
+</script>
+
+<style>
+	.container {
+		flex: 1;
+		background-color: #f8f9fa;
+	}
+
+	.logo {
+		height: 100px;
+		width: 100px;
+		margin: 60px auto 25px auto;
+	}
+
+	.text-area {
+		text-align: center;
+		margin-bottom: 40px;
+	}
+
+	.title {
+		font-size: 24px;
+		font-weight: 600;
+		color: #212529;
+		text-align: center;
+	}
+
+	.menu-area {
+		padding: 0 24px;
+	}
+
+	.menu-item {
+		background-color: #ffffff;
+		border-radius: 12px;
+		padding: 20px;
+		margin-bottom: 16px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		flex-direction: row;
+		align-items: center;
+		position: relative;
+	}
+
+	.menu-item.disabled {
+		opacity: 0.5;
+	}
+
+	.menu-icon {
+		font-size: 32px;
+		margin-right: 16px;
+	}
+
+	.menu-title {
+		font-size: 18px;
+		font-weight: 600;
+		color: #212529;
+		margin-bottom: 4px;
+	}
+
+	.menu-desc {
+		font-size: 13px;
+		color: #6c757d;
+		position: absolute;
+		left: 68px;
+		bottom: 18px;
+	}
+</style>

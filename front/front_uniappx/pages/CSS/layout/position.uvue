@@ -1,0 +1,86 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view style="flex-grow: 1">
+      <view>
+        <text>position: fixed</text>
+        <scroll-view style="width: 250px; height: 250px; background-color: gray">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view class="common fixed" style="position: fixed">
+            <text class="text">fixed</text>
+          </view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </scroll-view>
+      </view>
+
+      <view>
+        <text>position: relative</text>
+        <scroll-view style="width: 250px; height: 250px; background-color: gray">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view class="common" style="position: relative">
+            <text class="text">relative</text>
+          </view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </scroll-view>
+      </view>
+
+      <view>
+        <text>position: absolute</text>
+        <scroll-view style="width: 250px; height: 250px; background-color: gray">
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view class="common" style="position: absolute">
+            <text class="text">absolute</text>
+          </view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+          <view style="width: 50px; height: 50px; background-color: red"></view>
+          <view style="width: 50px; height: 50px; background-color: green"></view>
+          <view style="width: 50px; height: 50px; background-color: blue"></view>
+        </scroll-view>
+      </view>
+
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+
+</template>
+
+<style>
+  .common {
+    width: 50px;
+    height: 50px;
+    background-color: green;
+    top: 25px;
+    left: 25px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .fixed {
+    /* #ifdef WEB*/
+    top: calc(var(--uni-safe-area-inset-top) + 25px);
+    left: calc(var(--uni-safe-area-inset-left) + 25px);
+    /* #endif */
+  }
+
+  .text {
+    white-space: nowrap;
+    width: 100%;
+  }
+</style>

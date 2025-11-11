@@ -1,0 +1,85 @@
+<template>
+  <scroll-view style="flex:1" type="nested" direction="vertical">
+    <nested-scroll-header>
+      <view class="scroll-header-tiem1">
+        <text>会渲染的nested-scroll-header</text>
+      </view>
+      <view class="scroll-header-tiem1">
+        <text>不会渲染nested-scroll-header，因为 nested-scroll-header 只会渲染第一个子节点</text>
+      </view>
+    </nested-scroll-header>
+    <nested-scroll-header>
+      <swiper ref="header" indicator-dots="true" circular="true">
+        <swiper-item v-for="i in num" :item-id="i">
+          <view class="scroll-header-tiem2">
+            <text>如果存在多个头部节点，那么就使用多个 nested-scroll-header 来将其包裹</text>
+          </view>
+        </swiper-item>
+      </swiper>
+    </nested-scroll-header>
+    <nested-scroll-body>
+      <scroll-view style="flex:1" associative-container="nested-scroll-view">
+        <view v-for="key in scrollData">
+          <view class="scroll-item">
+            <text class="scroll-item-title">{{key}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </nested-scroll-body>
+  </scroll-view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        scrollData: [] as Array<string>,
+        num: 0,
+      }
+    },
+    onLoad() {
+      let lists : Array<string> = []
+      for (let i = 0; i < 30; i++) {
+        lists.push("item---" + i)
+      }
+      this.scrollData = lists
+    },
+    onReady() {
+      this.num = 3
+    },
+    methods: {
+    }
+  }
+</script>
+
+<style>
+  .scroll-item {
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 6px;
+    background-color: #fff;
+    border-radius: 4px;
+  }
+
+  .scroll-item-title {
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    color: #555;
+  }
+
+  .scroll-header-tiem1 {
+    height: 200px;
+    background-color: #66ccff;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scroll-header-tiem2 {
+    height: 100px;
+    background-color: #89ff8d;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

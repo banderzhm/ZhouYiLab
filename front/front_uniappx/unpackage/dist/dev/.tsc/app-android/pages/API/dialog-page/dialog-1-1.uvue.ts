@@ -1,0 +1,46 @@
+
+  import {
+    state,
+    setLifeCycleNum
+  } from '@/store/index.uts'
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        title: 'dialog 1-1',
+      }
+    },
+    onReady() {
+      console.log('dialog 1-1 onReady', " at pages/API/dialog-page/dialog-1-1.uvue:23")
+      // 自动化测试
+      setLifeCycleNum(state.lifeCycleNum + 2)
+    },
+    onUnload() {
+      console.log('dialog 1-1 onUnload', " at pages/API/dialog-page/dialog-1-1.uvue:28")
+      // 自动化测试
+      setLifeCycleNum(state.lifeCycleNum - 5)
+    },
+    methods: {
+      closeThisDialog() {
+        uni.closeDialogPage({
+          dialogPage: this.$page,
+        })
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesAPIDialogPageDialog11Render(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode("view", utsMapOf({
+    id: "dialog1",
+    class: "dialog-container"
+  }), [
+    createElementVNode("view", utsMapOf({ class: "dialog-content" }), [
+      createElementVNode("text", null, "title: " + toDisplayString(_ctx.title), 1 /* TEXT */),
+      createElementVNode("button", utsMapOf({ onClick: _ctx.closeThisDialog }), "Close", 8 /* PROPS */, ["onClick"])
+    ])
+  ])
+}
+const GenPagesAPIDialogPageDialog11Styles = [utsMapOf([["dialog-container", padStyleMapOf(utsMapOf([["width", "100%"], ["height", "100%"], ["backgroundColor", "rgba(0,0,0,0.3)"], ["display", "flex"], ["justifyContent", "center"], ["alignItems", "center"]]))], ["dialog-content", padStyleMapOf(utsMapOf([["width", "80%"], ["paddingTop", 10], ["paddingRight", 10], ["paddingBottom", 10], ["paddingLeft", 10], ["backgroundColor", "#ffffff"], ["borderTopLeftRadius", 6], ["borderTopRightRadius", 6], ["borderBottomRightRadius", 6], ["borderBottomLeftRadius", 6]]))]])]

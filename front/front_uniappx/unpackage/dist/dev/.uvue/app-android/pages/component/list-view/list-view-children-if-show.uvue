@@ -1,0 +1,89 @@
+type Child = {
+    __$originalPosition?: UTSSourceMapPosition<"Child", "pages/component/list-view/list-view-children-if-show.uvue", 32, 6>;
+    id: string;
+};
+type List = {
+    __$originalPosition?: UTSSourceMapPosition<"List", "pages/component/list-view/list-view-children-if-show.uvue", 35, 6>;
+    id: string;
+    children: Child[];
+};
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            list: [] as List[],
+            expandIds: [] as string[],
+        };
+    },
+    onLoad() {
+        this.init();
+    },
+    methods: {
+        init() {
+            this.list = [
+                { id: '1', children: [{ id: '1-1' } as Child, { id: '1-2' } as Child, { id: '1-3' } as Child] } as List,
+                { id: '2', children: [{ id: '2-1' } as Child, { id: '2-2' } as Child, { id: '2-3' } as Child] } as List,
+                { id: '3', children: [{ id: '3-1' } as Child, { id: '3-2' } as Child, { id: '3-3' } as Child] } as List,
+            ] as List[];
+            this.expandIds = [this.list[0].id];
+        },
+        clear() {
+            this.list = [] as List[];
+            this.expandIds = [] as string[];
+        },
+        toggleChildrenShow(id: string) {
+            const index = this.expandIds.findIndex((item): boolean => item == id);
+            if (index == -1) {
+                this.expandIds.push(id);
+            }
+            else {
+                this.expandIds.splice(index, 1);
+            }
+        },
+    }
+});
+export default __sfc__;
+function GenPagesComponentListViewListViewChildrenIfShowRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    return createElementVNode("view", utsMapOf({ class: "p-10" }), [
+        createElementVNode("button", utsMapOf({
+            id: "init-btn",
+            class: "uni-btn",
+            onClick: _ctx.init
+        }), "init", 8 /* PROPS */, ["onClick"]),
+        createElementVNode("button", utsMapOf({
+            id: "clear-btn",
+            class: "uni-btn",
+            onClick: _ctx.clear
+        }), "clear", 8 /* PROPS */, ["onClick"]),
+        createElementVNode("view", utsMapOf({
+            class: normalizeClass(["uni-common-mt list-view-container", utsMapOf({ ' p-10': _ctx.list.length > 0 })])
+        }), [
+            createElementVNode("list-view", null, [
+                createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.list, (item, index, __index, _cached): any => {
+                    return createElementVNode(Fragment, null, [
+                        createElementVNode("list-item", utsMapOf({
+                            id: "toggle-children-show-btn",
+                            class: normalizeClass(utsMapOf({ 'uni-common-mt': index > 0 })),
+                            onClick: () => { _ctx.toggleChildrenShow(item.id); }
+                        }), [
+                            createElementVNode("text", null, "toggle children isShow")
+                        ], 10 /* CLASS, PROPS */, ["onClick"]),
+                        isTrue(_ctx.expandIds.includes(item.id))
+                            ? createElementVNode(Fragment, utsMapOf({ key: 0 }), RenderHelpers.renderList(item.children, (child, __key, __index, _cached): any => {
+                                return createElementVNode("list-item", utsMapOf({
+                                    id: "list-item-child",
+                                    class: "mt-5"
+                                }), [
+                                    createElementVNode("text", null, toDisplayString(child.id), 1 /* TEXT */)
+                                ]);
+                            }), 256 /* UNKEYED_FRAGMENT */)
+                            : createCommentVNode("v-if", true)
+                    ], 64 /* STABLE_FRAGMENT */);
+                }), 256 /* UNKEYED_FRAGMENT */)
+            ])
+        ], 2 /* CLASS */)
+    ]);
+}
+const GenPagesComponentListViewListViewChildrenIfShowStyles = [utsMapOf([["p-10", padStyleMapOf(utsMapOf([["paddingTop", 10], ["paddingRight", 10], ["paddingBottom", 10], ["paddingLeft", 10]]))], ["list-view-container", padStyleMapOf(utsMapOf([["backgroundColor", "#ffffff"]]))], ["mt-5", padStyleMapOf(utsMapOf([["marginTop", 5]]))]])];
+//# sourceMappingURL=list-view-children-if-show.uvue.map

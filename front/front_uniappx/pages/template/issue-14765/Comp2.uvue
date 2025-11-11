@@ -1,0 +1,20 @@
+<template>
+  <view :id="compId" ref="uxToastItemRef">
+    <text>hello</text>
+    <slot></slot>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        compId: 'comp2-id'
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>

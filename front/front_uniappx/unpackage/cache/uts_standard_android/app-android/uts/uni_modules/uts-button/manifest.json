@@ -1,0 +1,14 @@
+{
+  "version": "1",
+  "env": {
+    "compilerVersion": "4.66"
+  },
+  "files": {
+    "package.json": {
+      "md5": "3cf26275443e252cdd109a8c1ea4f1b2"
+    },
+    "utssdk/app-android/index.vue": {
+      "md5": "4d46cc08c5c9e121b5cb4c8fcd6cbd8e"
+    }
+  }
+}

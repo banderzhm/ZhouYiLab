@@ -1,0 +1,32 @@
+<template>
+  <view style="flex-grow: 1">
+    <view>
+      <text>flex-shrink</text>
+      <view style="
+          width: 250px;
+          height: 150px;
+          background-color: gray;
+          flex-direction: row;
+        ">
+        <view class="common" style="background-color: red; flex-shrink: 1">
+          <text>1</text>
+        </view>
+        <view class="common" style="background-color: green; flex-shrink: 2">
+          <text>2</text>
+        </view>
+        <view class="common" style="background-color: blue; flex-shrink: 3">
+          <text>3</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<style>
+  .common {
+    width: 125px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

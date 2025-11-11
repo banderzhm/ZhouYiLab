@@ -1,0 +1,332 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view class="page-scroll-view">
+  <!-- #endif -->
+    <view class="uni-common-mb uni-common-pb">
+      <page-head title="swiper,可滑动视图"></page-head>
+      <view>
+        <!-- 微信小程序自身Bug，autoplay为false时更新interval会导致swiper启用自动播放 -->
+        <swiper id="swiper-view" class="swiper" :vertical="verticalSelect" :indicator-dots="dotsSelect"
+          :autoplay="autoplaySelect" :bounces="reboundSelect" :interval="intervalSelect" :circular="circularSelect"
+          :duration="durationSelect" :indicator-color="indicatorColor" :indicator-active-color="indicatorColorActive"
+          :disable-touch="disableTouchSelect" :current="currentVal" :current-item-id="currentItemIdVal"
+          @change="swiperChange" @transition="swiperTransition" @animationfinish="swiperAnimationfinish"
+          @touchstart="swipertouchStart">
+          <swiper-item item-id="A">
+            <view class="swiper-item uni-bg-red"><text class="swiper-item-Text" @touchstart="viewtouchStart">A</text>
+            </view>
+          </swiper-item>
+          <swiper-item item-id="B">
+            <view class="swiper-item uni-bg-green"><text class="swiper-item-Text">B</text></view>
+          </swiper-item>
+          <swiper-item item-id="C">
+            <view class="swiper-item uni-bg-blue"><text class="swiper-item-Text">C</text></view>
+          </swiper-item>
+        </swiper>
+      </view>
+      <view class="uni-list">
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">显示面板指示点</view>
+          <switch :checked="dotsSelect" @change="dotsChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">定制指示器颜色</view>
+          <switch :checked="indicatorColorSelect" @change="indicatorColorChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">禁止 touch 操作</view>
+          <switch :checked="disableTouchSelect" @change="disableTouchChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">是否自动切换</view>
+          <switch :checked="autoplaySelect" @change="autoplayChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">是否衔接滑动</view>
+          <switch :checked="circularSelect" @change="circularChange" />
+        </view>
+        <view class="uni-title uni-list-cell-padding">间隔时间(毫秒)</view>
+        <view class="uni-padding-wrap">
+          <slider @change="sliderChange" :value="2000" :min="500" :max="5000" :show-value="true" />
+        </view>
+        <view class="uni-title uni-list-cell-padding">动画时长(毫秒)</view>
+        <view class="uni-padding-wrap">
+          <slider @change="durationSliderChange" :value="500" :min="50" :max="2000" :show-value="true" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">是否纵向滑动</view>
+          <switch :checked="verticalSelect" @change="verticalChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">是否回弹效果</view>
+          <!-- 仅 android ios harmony 支持，web 微信小程序 bounces 为 true -->
+          <switch :checked="reboundSelect" @change="reboundSelectChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">指定current为最后一个元素</view>
+          <switch :checked="currentSelect" @change="currentChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">指定current-item-id为最后一个元素</view>
+          <switch :checked="currentItemIdSelect" @change="currentItemIdChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">打印 swiperChange 日志</view>
+          <switch :checked="swiperChangeSelect" @change="swiperChangeChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">打印 swiperTransition 日志</view>
+          <switch :checked="swiperTransitionSelect" @change="swiperTransitionChange" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">打印 swiperAnimationfinish 日志</view>
+          <switch :checked="swiperAnimationfinishSelect" @change="swiperAnimationfinishChange" />
+        </view>
+
+        <view class="uni-list-cell-padding">测试 swiper 默认行为</view>
+        <swiper class="swiper" :autoplay="autoplayForDefault" :circular="circularForDefault">
+          <swiper-item item-id="A">
+            <view class="swiper-item uni-bg-red"><text class="swiper-item-Text">A</text></view>
+          </swiper-item>
+          <swiper-item item-id="B">
+            <view class="swiper-item uni-bg-green"><text class="swiper-item-Text">B</text></view>
+          </swiper-item>
+          <swiper-item item-id="C">
+            <view class="swiper-item uni-bg-blue"><text class="swiper-item-Text">C</text></view>
+          </swiper-item>
+        </swiper>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">是否自动切换</view>
+          <switch :checked="autoplayForDefault" @change="() => {autoplayForDefault = !autoplayForDefault}" />
+        </view>
+        <view class="uni-list-cell uni-list-cell-padding">
+          <view class="uni-list-cell-db">是否衔接滑动</view>
+          <switch :checked="circularForDefault" @change="() => {circularForDefault = !circularForDefault}" />
+        </view>
+        <!-- #ifndef MP -->
+        <navigator url="/pages/component/swiper/swiper-list-view">
+          <button type="primary">
+            swiper 嵌套 list-view 测试
+          </button>
+        </navigator>
+        <navigator url="/pages/component/swiper/swiper-anim" style="margin-top: 10px;">
+        	<button type="primary">
+        		swiper 动画测试
+        	</button>
+        </navigator>
+        <!-- #endif -->
+
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  type SwiperEventTest = {
+    type : string;
+    target : UniElement | null;
+    currentTarget : UniElement | null;
+  }
+  export default {
+    data() {
+      return {
+        background: ['color1', 'color2', 'color3'],
+        dotsSelect: false,
+        reboundSelect: false,
+        autoplaySelect: false,
+        circularSelect: false,
+        indicatorColorSelect: false,
+        verticalSelect: false,
+        currentSelect: false,
+        currentItemIdSelect: false,
+        intervalSelect: 2000,
+        durationSelect: 500,
+        indicatorColor: "",
+        indicatorColorActive: "",
+        currentVal: 0,
+        currentItemIdVal: "",
+        disableTouchSelect: false,
+        swiperTransitionSelect: false,
+        swiperAnimationfinishSelect: false,
+        swiperChangeSelect: false,
+        currentValChange: 0,
+        autoplayForDefault: false,
+        circularForDefault: false,
+        // 自动化测试
+        changeDetailTest: null as UniSwiperChangeEventDetail | null,
+        transitionDetailTest: null as UniSwiperTransitionEventDetail | null,
+        animationfinishDetailTest: null as UniSwiperAnimationFinishEventDetail | null,
+        isChangeTest: '',
+        isTransitionTest: '',
+        isAnimationfinishTest: '',
+        swipeX: 0,
+        swipeY: 0
+      }
+    },
+    onReady() {
+      // #ifndef MP
+      // 获取模拟滑动手势的起始点
+      let ele = uni.getElementById("swiper-view")
+      let eleRect = ele?.getBoundingClientRect()
+      if (eleRect != null) {
+        // 避开右侧边界，避免滑动行为响应为侧滑
+        this.swipeX = eleRect.width - 40
+        this.swipeY += eleRect.y + uni.getSystemInfoSync().safeArea.top + 44 + 35
+      }
+      // #endif
+    },
+    methods: {
+      swipertouchStart(e : UniTouchEvent) {
+        console.log("swiper touchstart")
+      },
+      viewtouchStart(e : UniTouchEvent) {
+        console.log("view touchstart:")
+      },
+      swiperChange: function (e : UniSwiperChangeEvent) {
+        this.changeDetailTest = e.detail
+        this.checkEventTest({
+          type: e.type,
+          target: e.target,
+          currentTarget: e.currentTarget
+        } as SwiperEventTest, 'change')
+        this.currentValChange = e.detail.current
+        console.log(this.currentValChange)
+        if (this.swiperChangeSelect) {
+          console.log("swiperChange", e)
+        }
+      },
+      swiperTransition: function (e : UniSwiperTransitionEvent) {
+        this.transitionDetailTest = e.detail
+        this.checkEventTest({
+          type: e.type,
+          target: e.target,
+          currentTarget: e.currentTarget
+        } as SwiperEventTest, 'transition')
+        if (this.swiperTransitionSelect) {
+          console.log("swiperTransition", e)
+        }
+      },
+      swiperAnimationfinish: function (e : UniSwiperAnimationFinishEvent) {
+        this.animationfinishDetailTest = e.detail
+        this.checkEventTest({
+          type: e.type,
+          target: e.target,
+          currentTarget: e.currentTarget
+        } as SwiperEventTest, 'animationfinish')
+        if (this.swiperAnimationfinishSelect) {
+          console.log("swiperAnimationfinish", e)
+        }
+      },
+      //自动化测试例专用
+      jest_getSystemInfo() : GetSystemInfoResult {
+        return uni.getSystemInfoSync();
+      },
+      // 自动化测试专用（由于事件event参数对象中存在循环引用，在ios端JSON.stringify报错，自动化测试无法page.data获取）
+      checkEventTest(e : SwiperEventTest, eventName : String) {
+        // #ifndef MP
+        const isPass = e.type === eventName && e.target instanceof UniElement && e.currentTarget instanceof UniElement;
+        // #endif
+        // #ifdef MP
+        const isPass = true;
+        // #endif
+        const result = isPass ? `${eventName}:Success` : `${eventName}:Fail`;
+        switch (eventName) {
+          case 'change':
+            this.isChangeTest = result
+            break;
+          case 'transition':
+            this.isTransitionTest = result
+            break;
+          case 'animationfinish':
+            this.isAnimationfinishTest = result
+            break;
+          default:
+            break;
+        }
+      },
+      dotsChange: function (e : UniSwitchChangeEvent) {
+        this.dotsSelect = e.detail.value
+      },
+      swiperTransitionChange: function (e : UniSwitchChangeEvent) {
+        this.swiperTransitionSelect = e.detail.value
+      },
+      swiperChangeChange: function (e : UniSwitchChangeEvent) {
+        this.swiperChangeSelect = e.detail.value
+      },
+      swiperAnimationfinishChange: function (e : UniSwitchChangeEvent) {
+        this.swiperAnimationfinishSelect = e.detail.value
+      },
+      autoplayChange: function (e : UniSwitchChangeEvent) {
+        this.autoplaySelect = e.detail.value
+      },
+      verticalChange: function (e : UniSwitchChangeEvent) {
+        this.verticalSelect = e.detail.value
+      },
+      disableTouchChange: function (e : UniSwitchChangeEvent) {
+        this.disableTouchSelect = e.detail.value
+      },
+      currentItemIdChange: function (e : UniSwitchChangeEvent) {
+        this.currentItemIdSelect = e.detail.value
+        if (this.currentItemIdSelect) {
+          this.currentItemIdVal = 'C'
+        } else {
+          this.currentItemIdVal = 'A'
+        }
+      },
+      currentChange: function (e : UniSwitchChangeEvent) {
+        this.currentSelect = e.detail.value
+        if (this.currentSelect) {
+          this.currentVal = 2
+        } else {
+          this.currentVal = 0
+        }
+
+      },
+      circularChange: function (e : UniSwitchChangeEvent) {
+        this.circularSelect = e.detail.value
+        console.log(this.circularSelect)
+      },
+      reboundSelectChange: function (e : UniSwitchChangeEvent) {
+        this.reboundSelect = e.detail.value
+        console.log(this.reboundSelect)
+      },
+      sliderChange(e : UniSliderChangeEvent) {
+        this.intervalSelect = e.detail.value
+      },
+      durationSliderChange(e : UniSliderChangeEvent) {
+        this.durationSelect = e.detail.value
+      },
+      indicatorColorChange(e : UniSwitchChangeEvent) {
+        this.indicatorColorSelect = e.detail.value
+        if (this.indicatorColorSelect) {
+          // 选择了定制指示器颜色
+          this.indicatorColor = "#ff00ff"
+          this.indicatorColorActive = "#0000ff"
+        } else {
+          // 没有选择颜色
+          this.indicatorColor = ""
+          this.indicatorColorActive = ""
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  .swiper {
+    height: 150px;
+  }
+
+  .swiper-item {
+    width: 100%;
+    height: 150px;
+  }
+
+  .swiper-item-Text {
+    width: 100%;
+    text-align: center;
+    line-height: 150px;
+  }
+</style>

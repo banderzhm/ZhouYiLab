@@ -1,0 +1,248 @@
+<template>
+  <view ref="page" class="page">
+    <text class="tip">半屏弹窗，演示了弹出层内scroll-view滚动到顶时由滚变拖。本效果是通过监听TouchEvent实现，当半屏窗口移动时禁用scroll-view的滚动，避免两者的冲突。</text>
+    <button class="bottomButton" @click="switchHalfScreen(true)">打开弹窗</button>
+    <view ref="halfScreen" class="halfScreen" @touchstart="onHalfTouchStart" @touchmove="onHalfTouchMove"
+      @touchend="onHalfTouchEnd">
+      <view class="halfTitle">半屏弹窗标题</view>
+      <scroll-view ref="halfScroll" class="halfScroll" bounces="true" :direction="scrollDirection">
+        <view v-for="(item,index) in list" :key="index" class="item">
+          half screen content-{{item}}
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        list: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
+        totalHeight: 0,		//总高度
+        halfMove: false,	//是否Move，响应TouchMove
+        halfScreenY: 0,		//响应TouchMove的起始点Y坐标
+        halfOffset: 0,		//偏移的位置，translateY
+        halfHeight: 0,		//高度
+        lastY: 0,			//上次
+        lastY2: 0,			//
+        bAnimation: false,	//是否动画
+        halfNode: null as UniElement | null,
+        scrollNode: null as UniElement | null,
+        scrollDirection: 'vertical'
+      }
+    },
+    methods: {
+      onHalfTouchStart(_ : TouchEvent) {
+        this.halfNode?.style?.setProperty('transition-duration', 0);
+      },
+      onHalfTouchMove(e : TouchEvent) {
+        if (this.bAnimation) {//容错处理
+          return;
+        }
+        let top : number = this.scrollNode?.scrollTop ?? 0;
+        let p = e.touches[0];
+        this.lastY2 = this.lastY;
+        this.lastY = p.screenY;
+        if (top <= 0.01 || this.halfMove) {
+          if (this.halfScreenY == 0) {
+            this.halfScreenY = p.screenY;
+          }
+          let offset = p.screenY - this.halfScreenY;
+          if (offset > 0) {//向下滚动
+            this.halfMove = true;
+            // #ifdef APP
+            //this.scrollNode?.setAttribute('scroll-y', 'false');
+            this.scrollNode?.setAttribute('direction', 'none');
+            // #endif
+            // #ifdef WEB || MP
+            this.scrollDirection = 'none';
+            // #endif
+            this.halfNode?.style?.setProperty('transform', 'translateY(' + offset.toFixed(2) + 'px)');
+            this.halfOffset = offset;
+          } else if (this.halfOffset > 0) {//向上滚动
+            offset = this.halfScreenY - p.screenY;
+            if (offset > this.halfOffset) {
+              offset = 0;
+              this.halfMove = false;
+            }
+            // #ifdef APP
+            //this.scrollNode?.setAttribute('scroll-y', 'true');
+            this.scrollNode?.setAttribute('direction', 'vertical');
+            // #endif
+            // #ifdef WEB || MP
+            this.scrollDirection = 'vertical';
+            // #endif
+            this.halfNode?.style?.setProperty('transform', 'translateY(' + offset.toFixed(2) + 'px)');
+            this.halfOffset = offset;
+          }
+        }
+        // #ifdef WEB
+        e.preventDefault();
+        // #endif
+      },
+      onHalfTouchEnd(_ : TouchEvent) {
+        this.halfScreenY = 0;
+        if (this.bAnimation) {//容错处理
+          return;
+        }
+        let top : number = this.scrollNode?.scrollTop ?? 0;
+        let bHide = (this.halfHeight - this.halfOffset) < this.halfHeight / 4;
+        if (bHide) {
+          bHide = this.lastY2 > 0 && this.lastY2 <= this.lastY;
+        } else if (top <= 0.01) {
+          bHide = (this.lastY - this.lastY2) > 3;		//向下滑动计算加速度判断是否关闭，简单处理未考虑时间
+        }
+        if (bHide) {
+          this.switchHalfScreen(false);
+        } else if (this.halfOffset > 0) {
+          this.resumeHalfScreen();
+        }
+      },
+      switchHalfScreen(show : boolean) {
+        if (show && ('visible' == this.halfNode?.style?.getPropertyValue('visibility'))) {//容错处理
+          console.log('quick click button!!!');
+          return;
+        }
+        this.halfMove = false;
+        // #ifdef APP
+        //this.scrollNode?.setAttribute('scroll-y', 'true');
+        this.scrollNode?.setAttribute('direction', 'vertical');
+        // #endif
+        // #ifdef WEB || MP
+        this.scrollDirection = 'vertical';
+        // #endif
+        this.halfScreenY = 0;
+        this.halfOffset = 0;
+        let top = this.totalHeight;
+        let time = 300;
+        if (show) {
+          top = this.totalHeight * 30 / 100;	//计算显示的位置
+          this.halfNode?.style?.setProperty('visibility', 'visible');
+          this.halfNode?.style?.setProperty('transition-timing-function', 'ease-in-out');
+        } else {
+          this.halfNode?.style?.setProperty('transition-timing-function', 'linear');
+          time *= (this.halfHeight / this.totalHeight);		//计算关闭动画时间
+        }
+        this.halfNode?.style?.setProperty('transition-duration', time.toFixed(0)+'ms');
+        this.halfNode?.style?.setProperty('transition-property', 'top');
+        this.halfNode?.style?.setProperty('top', top.toFixed(2)+'px');
+        setTimeout(() => {
+          if (!show) {
+            this.halfNode?.style?.setProperty('visibility', 'hidden');
+            this.halfNode?.style?.setProperty('transition-duration', 0);
+            this.halfNode?.style?.setProperty('transform', '');
+          }
+          this.halfNode?.style?.setProperty('transition-property', 'none');
+          this.bAnimation = false;
+        }, time)
+        this.bAnimation = true;
+      },
+      resumeHalfScreen() {
+        let time = 300;//(500*this.halfOffset/this.halfHeight).toFixed(0); //回弹动画时间
+        this.halfNode?.style?.setProperty('transition-duration', time.toFixed(0)+'ms');
+        this.halfNode?.style?.setProperty('transition-timing-function', 'ease-in-out');
+        this.halfNode?.style?.setProperty('transition-property', 'transform');
+        this.halfNode?.style?.setProperty('transform', 'translateY(0px)');
+        this.halfMove = false;
+        // #ifdef APP
+        //this.scrollNode?.setAttribute('scroll-y', 'true');
+        this.scrollNode?.setAttribute('direction', 'vertical');
+        // #endif
+        // #ifdef WEB || MP
+        this.scrollDirection = 'vertical';
+        // #endif
+        this.halfScreenY = 0;
+        this.halfOffset = 0;
+        setTimeout(() => {
+          this.bAnimation = false;
+          this.halfNode?.style?.setProperty('transition-property', 'none');
+        }, time)
+        this.bAnimation = true;
+      }
+    },
+    onReady() {
+      this.halfNode = this.$refs['halfScreen'] as UniElement;//uni.getElementById('halfScreen');
+      this.scrollNode = this.$refs['halfScroll'] as UniElement;//uni.getElementById('halfScroll');
+      this.halfNode!.getBoundingClientRectAsync()!.then((rect: DOMRect) => {
+          this.halfHeight = rect.height
+      });
+      (this.$refs['page'] as UniElement).getBoundingClientRectAsync()!.then((rect: DOMRect) => {
+          this.totalHeight = rect.height
+          this.halfNode?.style?.setProperty('top', this.totalHeight.toFixed(2)+'px');
+      });
+    },
+    onResize() {
+      this.halfNode?.getBoundingClientRectAsync()!.then((rect: DOMRect) => {
+          this.halfHeight = rect.height
+      });
+      this.totalHeight = uni.getWindowInfo().windowHeight;
+      this.halfNode?.style?.setProperty('top', this.totalHeight.toFixed(2)+'px');
+      this.halfNode?.style?.setProperty('visibility', 'hidden');
+    },
+    onBackPress(): boolean {
+      // #ifndef MP
+      if('visible' == this.halfNode?.style?.getPropertyValue('visibility')){
+        this.switchHalfScreen(false);
+        return true;
+      }
+      return false;
+      // #endif
+    }
+  }
+</script>
+
+<style>
+  /* #ifdef MP */
+  page {
+    overflow: hidden
+  }
+  /* #endif */
+
+  .page {
+    flex: 1;
+    background-color: darkgrey;
+  }
+
+  .tip {
+    margin: 10px
+  }
+
+  .bottomButton {
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    /* #ifdef APP */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* #endif */
+  }
+
+  .halfScreen {
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    height: 70%;
+    transition-timing-function: ease-in-out;
+    /*ease ease-in ease-out ease-in-out linear step-start step-end*/
+    transition-property: top;
+    transition-duration: 0ms;
+    visibility: hidden;
+  }
+
+  .halfTitle {
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    background-color: ghostwhite;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .halfScroll {
+    background-color: white;
+    flex: 1;
+  }
+
+  .item {
+    height: 100px;
+  }
+</style>

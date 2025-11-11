@@ -1,0 +1,49 @@
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            title: 'scanCode',
+            result: ''
+        };
+    },
+    methods: {
+        scan() {
+            uni.scanCode({
+                success: (res: ScanCodeSuccess) => {
+                    console.log('res: ', res, " at pages/API/scan-code/scan-code.uvue:27");
+                    this.result = res.result;
+                },
+                fail: (err: ScanCodeFail) => {
+                    console.log('err: ', err, " at pages/API/scan-code/scan-code.uvue:31");
+                    // 需要注意的是小程序扫码不需要申请相机权限
+                }
+            });
+        }
+    }
+});
+export default __sfc__;
+function GenPagesAPIScanCodeScanCodeRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    const _component_page_head = resolveEasyComponent("page-head", _easycom_page_head);
+    return createElementVNode("view", null, [
+        createVNode(_component_page_head, utsMapOf({ title: _ctx.title }), null, 8 /* PROPS */, ["title"]),
+        createElementVNode("view", utsMapOf({ class: "uni-padding-wrap uni-common-mt" }), [
+            createElementVNode("view", utsMapOf({ class: "uni-title" }), "扫码结果："),
+            isTrue(_ctx.result)
+                ? createElementVNode("view", utsMapOf({
+                    key: 0,
+                    class: "scan-result"
+                }), toDisplayString(_ctx.result), 1 /* TEXT */)
+                : createCommentVNode("v-if", true),
+            createElementVNode("view", utsMapOf({ class: "uni-btn-v" }), [
+                createElementVNode("button", utsMapOf({
+                    type: "primary",
+                    onClick: _ctx.scan
+                }), "扫一扫", 8 /* PROPS */, ["onClick"])
+            ])
+        ])
+    ]);
+}
+const GenPagesAPIScanCodeScanCodeStyles = [utsMapOf([["scan-result", padStyleMapOf(utsMapOf([["minHeight", 25], ["lineHeight", "25px"]]))]])];
+import _easycom_page_head from '@/components/page-head/page-head.vue';
+//# sourceMappingURL=scan-code.uvue.map

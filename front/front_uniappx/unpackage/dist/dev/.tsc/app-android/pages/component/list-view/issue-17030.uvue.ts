@@ -1,0 +1,47 @@
+const __sfc__ = defineComponent({
+  __name: 'issue-17030',
+  setup(__props, { expose: __expose }: SetupContext): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+	const arr = ref<number[]>([1, 2, 3, 4, 5])
+	const addData = () => {
+		arr.value.push(arr.value.length + 1)
+	}
+
+	const getScrollHeight = () => {
+		const listViewElement = uni.getElementById("listView") as UniElement
+		const scrollHeight = listViewElement.scrollHeight
+		console.log(scrollHeight, " at pages/component/list-view/issue-17030.uvue:20")
+    return scrollHeight
+	}
+
+  __expose({
+    addData,
+    getScrollHeight
+  })
+
+
+return (): any | null => {
+
+  return createElementVNode("view", utsMapOf({
+    style: normalizeStyle(utsMapOf({"flex":"1"}))
+  }), [
+    createElementVNode("list-view", utsMapOf({
+      id: "listView",
+      style: normalizeStyle(utsMapOf({"width":"100%","background-color":"red"}))
+    }), [
+      createElementVNode(Fragment, null, RenderHelpers.renderList(unref(arr), (item, index, __index, _cached): any => {
+        return createElementVNode("list-item", utsMapOf({ key: index }), [
+          createElementVNode("text", utsMapOf({ class: "title" }), toDisplayString(item), 1 /* TEXT */)
+        ])
+      }), 128 /* KEYED_FRAGMENT */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */)
+}
+}
+
+})
+export default __sfc__
+const GenPagesComponentListViewIssue17030Styles = [utsMapOf([["title", padStyleMapOf(utsMapOf([["height", 30], ["fontSize", 18], ["color", "#000000"], ["textAlign", "center"]]))]])]

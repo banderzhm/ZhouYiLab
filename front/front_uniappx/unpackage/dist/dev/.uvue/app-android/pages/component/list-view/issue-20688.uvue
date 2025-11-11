@@ -1,0 +1,38 @@
+const __sfc__ = defineComponent({});
+export default __sfc__;
+function GenPagesComponentListViewIssue20688Render(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    return createElementVNode("view", utsMapOf({
+        style: normalizeStyle(utsMapOf({ "width": "100%", "flex": "1" }))
+    }), [
+        createElementVNode("list-view", utsMapOf({
+            style: normalizeStyle(utsMapOf({ "flex": "1" }))
+        }), [
+            createElementVNode("list-item", utsMapOf({
+                style: normalizeStyle(utsMapOf({ "background-color": "black", "flex-direction": "column" }))
+            }), [
+                createElementVNode("image", utsMapOf({
+                    mode: "widthFix",
+                    src: "/static/logo.png"
+                })),
+                createElementVNode("view", utsMapOf({
+                    style: normalizeStyle(utsMapOf({ "width": "100%", "height": "100px", "background-color": "rgba(170, 170, 255, 0.5)" }))
+                }), null, 4 /* STYLE */)
+            ], 4 /* STYLE */)
+        ], 4 /* STYLE */),
+        createElementVNode("view", utsMapOf({
+            style: normalizeStyle(utsMapOf({ "flex": "1", "background-color": "red", "flex-direction": "column" }))
+        }), [
+            createElementVNode("image", utsMapOf({
+                mode: "widthFix",
+                src: "/static/logo.png"
+            })),
+            createElementVNode("view", utsMapOf({
+                style: normalizeStyle(utsMapOf({ "width": "100%", "height": "100px", "background-color": "rgba(170, 170, 255, 0.5)" }))
+            }), null, 4 /* STYLE */)
+        ], 4 /* STYLE */)
+    ], 4 /* STYLE */);
+}
+const GenPagesComponentListViewIssue20688Styles = [];
+//# sourceMappingURL=issue-20688.uvue.map

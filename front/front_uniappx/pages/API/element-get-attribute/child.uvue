@@ -1,0 +1,21 @@
+<template>
+  <view class="child-view">
+    <text class="child-text">我是子组件child</text>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {}
+    },
+  }
+</script>
+
+<style>
+  .child-view {
+    margin-top: 15px;
+    height: 100px;
+    background-color: dodgerblue;
+  }
+</style>

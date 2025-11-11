@@ -1,0 +1,212 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex:1">
+  <!-- #endif -->
+    <view>
+      <page-head :title="title"></page-head>
+      <view class="uni-padding-wrap">
+        <view class="image-container">
+          <image class="image" :src="beforeCompressPath" mode="aspectFit"></image>
+          <image class="image" :src="afterCompressPath" mode="aspectFit"></image>
+        </view>
+        <view class="uni-title">
+          <text class="uni-subtitle-text">压缩前图片信息</text>
+        </view>
+        <text>{{beforeCompressImageInfo}}</text>
+        <view class="uni-title">
+          <text class="uni-subtitle-text">压缩后图片信息</text>
+        </view>
+        <text>{{afterCompressImageInfo}}</text>
+        <view class="uni-btn-v">
+          <button type="primary" @click="chooseImage">从相册中选取待压缩的图片</button>
+        </view>
+        <view class="uni-btn-v">
+          <button type="primary" @click="compressImage">压缩图片</button>
+        </view>
+      </view>
+      <input-data defaultValue="80" title="压缩质量，范围0～100，数值越小，质量越低，压缩率越高（仅对jpg有效）" type="number"
+        @confirm="onQualityConfirm"></input-data>
+      <input-data title="压缩后图片的宽度，单位px" type="string" @confirm="onCompressedWidthConfirm"></input-data>
+      <input-data title="压缩后图片的高度，单位px" type="string" @confirm="onCompressedHeightConfirm"></input-data>
+      <input-data defaultValue="0" title="旋转度数，范围0～360" type="number" @confirm="onRotateConfirm"></input-data>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  // #ifdef APP-ANDROID
+  import FileInputStream from 'java.io.FileInputStream';
+  // #endif
+  export default {
+    data() {
+      return {
+        title: "compressImage",
+        beforeCompressImageInfo: "",
+        afterCompressImageInfo: "",
+        beforeCompressPath: "",
+        afterCompressPath: "",
+        quality: 80,
+        compressedWidth: null as number | null,
+        compressedHeight: null as number | null,
+        rotate: 0,
+        // 自动化测试
+        imageInfoForTest: null as UTSJSONObject | null,
+        imageSrcForTest: '/static/test-image/logo.png'
+      }
+    },
+    methods: {
+      compressImage() {
+        if (this.beforeCompressPath == "") {
+          uni.showToast({
+            title: "请先选择图片",
+            icon: "error"
+          });
+          return;
+        }
+        uni.showLoading({
+          title: "图片压缩中"
+        });
+        uni.compressImage({
+          src: this.beforeCompressPath,
+          quality: this.quality,
+          compressedWidth: this.compressedWidth,
+          compressedHeight: this.compressedHeight,
+          rotate: this.rotate,
+          success: (res) => {
+            console.log("compressImage success", JSON.stringify(res));
+            this.afterCompressPath = res.tempFilePath;
+            uni.showToast({
+              title: "压缩成功",
+              icon: null
+            });
+            uni.getImageInfo({
+              src: res.tempFilePath,
+              success: (_res) => {
+                this.afterCompressImageInfo = `图片宽度: ${_res.width}\n图片高度: ${_res.height}\n`;
+                // #ifdef APP-ANDROID
+                const size = new FileInputStream(res.tempFilePath.substring("file://".length)).available() / 1024;
+                this.afterCompressImageInfo = this.afterCompressImageInfo.concat(`图片大小: ${size}KB`);
+                // #endif
+                // #ifdef APP-HARMONY
+                const fsm = uni.getFileSystemManager()
+                fsm.getFileInfo({
+                  filePath: res.tempFilePath,
+                  digestAlgorithm: null,
+                  success: (res) => {
+                    this.afterCompressImageInfo = this.afterCompressImageInfo.concat(`图片大小: ${res.size}KB`);
+                  }
+                })
+                // #endif
+              }
+            });
+          },
+          fail: (err) => {
+            uni.showModal({
+              title: "压缩图片失败",
+              content: JSON.stringify(err),
+              showCancel: false
+            });
+          },
+          complete: (_) => {
+            uni.hideLoading();
+          }
+        });
+      },
+      chooseImage() {
+        uni.chooseImage({
+          count: 1,
+          sizeType: ["original"],
+          sourceType: ["album"],
+          success: (res) => {
+            this.beforeCompressPath = res.tempFilePaths[0];
+            uni.getImageInfo({
+              src: res.tempFilePaths[0],
+              success: (_res) => {
+                this.beforeCompressImageInfo = `图片宽度: ${_res.width}\n图片高度: ${_res.height}\n`;
+                // #ifdef APP-ANDROID
+                const size = new FileInputStream(res.tempFilePaths[0].substring("file://".length)).available() / 1024;
+                this.beforeCompressImageInfo = this.beforeCompressImageInfo.concat(`图片大小: ${size}KB`);
+                // #endif
+                // #ifdef APP-HARMONY
+                const fsm = uni.getFileSystemManager()
+                fsm.getFileInfo({
+                  filePath: res.tempFilePaths[0],
+                  digestAlgorithm: null,
+                  success: (res) => {
+                    this.beforeCompressImageInfo = this.beforeCompressImageInfo.concat(`图片大小: ${res.size}KB`);
+                  },
+                  fail: (err) => {
+                    console.log(err);
+                  }
+                })
+                // #endif
+              }
+            });
+          }
+        });
+      },
+      onQualityConfirm(value : number) {
+        this.quality = value;
+      },
+      onCompressedWidthConfirm(value : string) {
+        this.compressedWidth = parseInt(value);
+      },
+      onCompressedHeightConfirm(value : string) {
+        this.compressedHeight = parseInt(value);
+      },
+      onRotateConfirm(value : number) {
+        this.rotate = value;
+      },
+      testCompressImage() {
+        uni.compressImage({
+          src: this.imageSrcForTest,
+          quality: 50,
+          compressedWidth: 100,
+          compressedHeight: 100,
+          success: (res) => {
+            uni.getImageInfo({
+              src: res.tempFilePath,
+              success: (_res) => {
+                // #ifdef APP-HARMONY || APP-ANDROID
+                const fsm = uni.getFileSystemManager()
+                fsm.getFileInfo({
+                  filePath: this.imageSrcForTest,
+                  digestAlgorithm: null,
+                  success: (imageInfo) => {
+                    fsm.getFileInfo({
+                      filePath: res.tempFilePath,
+                      digestAlgorithm: null,
+                      success: (res) => {
+                        this.imageInfoForTest = {
+                          "width": _res.width,
+                          "height": _res.height,
+                          "isSizeReduce": res.size < imageInfo.size
+                        };
+                      }
+                    })
+                  }
+                })
+                // #endif
+              }
+            });
+          },
+          fail: (_) => {
+            this.imageInfoForTest = null;
+          }
+        });
+      }
+    }
+  }
+</script>
+
+<style>
+  .image {
+    flex: 1;
+  }
+
+  .image-container {
+    flex-direction: row;
+  }
+</style>

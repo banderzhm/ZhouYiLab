@@ -1,0 +1,36 @@
+<template>
+  <view style="flex: 1;">
+    <button id="test-btn" @click="scrollTo()">滚动</button>
+    <scroll-view id="scroll" style="flex: 1;" direction="vertical" @scrollend="onScrollEnd">
+      <view style="border: dashed 10px black; height: 3000px;"></view>
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        scrollEndTriggeredTimes: 0,
+        scrollTop: 0
+      }
+    },
+    onLoad() {
+
+    },
+    methods: {
+      scrollTo() {
+        const scroll = uni.getElementById('scroll') as UniScrollViewElement
+        scroll.scrollTop = this.scrollTop
+        this.scrollTop += 20
+      },
+      onScrollEnd() {
+        console.log('scrollEnd触发了')
+        this.scrollEndTriggeredTimes++
+      }
+    }
+  }
+</script>
+
+<style>
+</style>

@@ -1,0 +1,39 @@
+<template>
+  <view>
+    <view @click="onclick"
+      style="transform: rotate(180deg); background-color: brown;width: 100px; height: 100px; margin: 8px auto;"
+      @longpress="onLongPress" id="event-transform"></view>
+  </view>
+  <text style="margin:0px auto;">点击上面view触发点击事件</text>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        clickTriger: false,
+        longClickTriger: false
+      }
+    },
+    methods: {
+      onclick(event : UniPointerEvent) {
+        this.clickTriger = true
+        uni.showToast({
+          title: "触发了点击事件"
+        })
+      },
+
+      onLongPress(event : UniTouchEvent) {
+        this.longClickTriger = true
+        uni.showToast({
+          title: "触发了长按事件"
+        })
+      }
+
+    }
+  }
+</script>
+
+<style>
+
+</style>

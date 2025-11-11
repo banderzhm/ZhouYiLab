@@ -1,0 +1,212 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view id="scroll-view" style="flex: 1;">
+  <!-- #endif -->
+    <view>
+      <text style="font-size: 15px;">overflow=visible 父view（绿色），子view（红色），点击超出父view区域的部分也可触发事件。</text>
+      <view class="backgroundview">
+        <view id="parent" class="box-visible-border-radius">
+          <view id="child" style="width: 50px; height: 150px; background-color: red;" @click="handleClickOverflowPart"
+            @touchmove="handleTouchMoveOverflowPart" @touchstart="handleTouchStartOverflowPart"
+            @touchend="handleTouchEndOverflowPart">
+          </view>
+        </view>
+      </view>
+      <text style="font-size: 15px;">overflow=visible组件的子view （绿色）被position:
+        absolute的view（红色）遮挡时，点击事件测试。</text>
+      <view style="width: 300px;height: 300px;background-color: white;">
+        <view style="overflow:visible;height: 100px;width: 100%;">
+          <view style="background-color: green;height: 100px;width: 100%;" @click="handleClick('green')">
+          </view>
+        </view>
+        <view id="absolute-view" style="position: absolute;background-color: red;width: 100px;height: 200px;right: 0px;"
+          @click="handleClick('red')">
+        </view>
+      </view>
+      <text style="font-size: 15px;">overflow=visible组件设置hover-class的测试</text>
+      <view class="backgroundview">
+        <view class="box-visible-border-radius" hover-class="hover-class">
+          <view style="background-color: red;height: 100px;width: 100px;margin-left: 20px;margin-top: 20px;">
+          </view>
+        </view>
+      </view>
+      <text style="font-size: 15px;">overflow=visible组件多层级设置测试</text>
+      <view class="backgroundview">
+        <view id="deep-overflow" style="overflow: visible;">
+          <view style="overflow: visible;background-color: red;width: 100px;height: 100px;" @click="handleClick('red')">
+          </view>
+        </view>
+        <view style="overflow: visible;">
+          <view style="overflow: visible;background-color: green;width: 100px;height: 100px;">
+          </view>
+        </view>
+      </view>
+      <text style="font-size: 15px;">同时设置overflow=visible、z-index的事件触发示例</text>
+      <view class="backgroundview">
+        <view id="zindex-overflow" style="width: 1px;height: 1px;overflow: visible;z-index: 100;" @click="handleClick('red')">
+        	<view style="width: 100px;height: 100px;background-color: red;"></view>
+        </view>
+        <view style="width: 1px;height: 1px;overflow: visible;">
+        	<view style="width: 100px;height: 100px;background-color: green;"></view>
+        </view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        jest_result: false,
+        jest_click_x: -1,
+        jest_click_y: -1,
+        jest_parent_top: -1.0,
+        startX: 0,
+        startY: 0,
+        moveX: 0,
+        moveY: 0,
+        oldX: 0,
+        oldY: 0,
+        moveEl: null as UniElement | null
+      }
+    },
+    onReady() {
+      this.moveEl = uni.getElementById('parent')
+    },
+    methods: {
+      handleClickOverflowPart() {
+        console.log("click");
+        this.jest_result = true;
+        uni.showToast({ "title": "点击红色区域" })
+      },
+      handleTouchStartOverflowPart(e : UniTouchEvent) {
+        this.startX = e.changedTouches[0].clientX
+        this.startY = e.changedTouches[0].clientY
+      },
+      handleTouchMoveOverflowPart(e : UniTouchEvent) {
+        console.log("touchmove:" + e.touches[0].clientX + "," + e.touches[0].clientY);
+        e.preventDefault()
+        e.stopPropagation()
+        const difX = e.changedTouches[0].clientX
+        const difY = e.changedTouches[0].clientY
+        this.moveX = difX - this.startX + this.oldX
+        this.moveY = difY - this.startY + this.oldY
+        this.moveEl?.style?.setProperty('transform', `translate(${this.moveX}px,${this.moveY}px)`)
+      },
+      handleTouchEndOverflowPart(_ : UniTouchEvent) {
+        this.oldX = this.moveX
+        this.oldY = this.moveY
+      },
+      handleClick(str : string) {
+        console.log(`点击了 ${str} view`);
+        if (str == 'red') {
+          this.jest_result = true;
+        }
+      },
+      async jest_getRect() {
+        const rect = await uni.getElementById('child')!.getBoundingClientRectAsync()!
+        let ratio = 1
+        if (uni.getSystemInfoSync().platform == 'android'){
+          ratio = uni.getSystemInfoSync().devicePixelRatio
+        }
+        this.jest_click_x = rect.x * ratio + 30
+        this.jest_click_y = rect.bottom * ratio - 30
+      },
+      jest_getParentRect() {
+        const transform = uni.getElementById('parent')?.style.getPropertyValue("transform")
+        if (transform != null) {
+          let value = transform as string
+          value = value.split(",")[1].slice(0, -3)
+          let ratio = 1
+          if (uni.getSystemInfoSync().platform == 'android'){
+            ratio = uni.getSystemInfoSync().devicePixelRatio
+          }
+          this.jest_parent_top = Math.round((parseFloat(value) * ratio))
+        }
+      },
+      async jest_getAbsoluteViewRect() {
+        const rect = await uni.getElementById('absolute-view')!.getBoundingClientRectAsync()!
+        const systemInfo = uni.getSystemInfoSync()
+        const titleBarHeight = systemInfo.screenHeight - systemInfo.windowHeight
+        let ratio = 1
+        if (uni.getSystemInfoSync().platform == 'android'){
+          ratio = uni.getSystemInfoSync().devicePixelRatio
+        }
+        this.jest_click_x = rect.x * ratio + 30
+        this.jest_click_y = (rect.top + titleBarHeight) * ratio + 30
+      },
+
+      async jest_restScorllView(){
+        const scrollView = uni.getElementById('scroll-view') as UniScrollViewElement
+        scrollView.scrollTo(0, 0)
+      },
+
+      async jest_scrollToDeepOverflow() {
+        const scrollView = uni.getElementById('scroll-view') as UniScrollViewElement
+        const rect = await uni.getElementById('deep-overflow')!.getBoundingClientRectAsync()!
+        scrollView.scrollTo(0, rect.top)
+        setTimeout(() => {
+          const systemInfo = uni.getSystemInfoSync()
+          let ratio = 1
+          if (uni.getSystemInfoSync().platform == 'android'){
+            ratio = uni.getSystemInfoSync().devicePixelRatio
+          }
+          const titleBarHeight = systemInfo.screenHeight - systemInfo.windowHeight
+          uni.getElementById('deep-overflow')!.getBoundingClientRectAsync()!.then((afterRect: DOMRect) => {
+            this.jest_click_x = afterRect.x * ratio + 30
+            this.jest_click_y = (afterRect.top + titleBarHeight) * ratio + 30
+          })
+        }, 200)
+      },
+      async jest_scrollToZIndexOverflow() {
+        const scrollView = uni.getElementById('scroll-view') as UniScrollViewElement
+        const rect = await uni.getElementById('zindex-overflow')!.getBoundingClientRectAsync()!
+        scrollView.scrollTo(0, rect.top)
+        setTimeout(() => {
+          const systemInfo = uni.getSystemInfoSync()
+          let ratio = 1
+          if (uni.getSystemInfoSync().platform == 'android'){
+            ratio = uni.getSystemInfoSync().devicePixelRatio
+          }
+          const titleBarHeight = systemInfo.screenHeight - systemInfo.windowHeight
+          uni.getElementById('zindex-overflow')!.getBoundingClientRectAsync()!.then((afterRect: DOMRect) => {
+            this.jest_click_x = afterRect.x * ratio + 30
+            this.jest_click_y = (afterRect.top + titleBarHeight) * ratio + 30
+          })
+        }, 200)
+      }
+    }
+  }
+</script>
+
+<style>
+  .backgroundview {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 20px;
+    background-color: white;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .box-visible-border-radius {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    overflow: visible;
+    background-color: green;
+  }
+
+  .hover-class {
+    background-color: aqua;
+  }
+
+  .box {
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+  }
+</style>

@@ -1,0 +1,186 @@
+<template>
+  <scroll-view @scroll="onScroll" class="page" show-scrollbar="false">
+    <view ref="seatbar" class="seatbar"></view>
+
+    <view class="content">
+      <view class="content-item">
+        <text class="text">1. 当前示例监听了 scroll-view 的 scroll 事件 ，滚动页面实时监听scrollTop。</text>
+        <text class="text">2. 使用 ref 直接获取元素的节点，并在 scroll 事件中通过节点的 setProperty
+          方法来修改搜索导航栏的高度、位置和背景颜色等样式，从而达到滚动折叠的效果。</text>
+        <text class="text">3. 请向上\向下滚动页面观察效果。</text>
+      </view>
+      <view class="content-item" v-for="(item,index) in 20" :key="index">
+        <text class="text">content-{{item}}</text>
+      </view>
+    </view>
+
+    <view ref="navigatorbar" class="navigatorbar">
+      <view class="titlebar">
+        <view class="backview" @tap="back">
+          <image class="back" src="/static/template/scroll-fold-nav/back.png" mode="widthFix"></image>
+        </view>
+        <text ref="title" class="title">DCloud 为开发者而生</text>
+      </view>
+      <view ref="searchbar" class="searchbar" @tap="search">
+        <image class="searchimg" src="/static/template/scroll-fold-nav/search.png" mode="widthFix"></image>
+        <text class="searchinput">请输入你要搜索的内容</text>
+        <text class="searchbutton">搜索</text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script>
+  //导航栏高度
+  const NAVIBARHEIGHT = 88;
+  //搜索栏高度
+  const SEARCHBARHEIGHT = 40;
+  //返回键按钮宽度
+  const BACKWIDTH = 32;
+  export default {
+    data() {
+      return {
+        statusBarHeight: 0,
+        nviBarHeight: 0,
+        naviElement: null as UniElement | null,
+        titleElement: null as UniElement | null,
+        searchElement: null as UniElement | null,
+        seatElement: null as UniElement | null
+      }
+    },
+    onLoad() {
+      // #ifdef APP || MP
+        this.statusBarHeight = uni.getWindowInfo().statusBarHeight;
+      // #endif
+
+      this.nviBarHeight = NAVIBARHEIGHT + this.statusBarHeight;
+    },
+    onReady() {
+      this.naviElement = this.$refs['navigatorbar'] as UniElement;
+      this.searchElement = this.$refs['searchbar'] as UniElement;
+      this.titleElement = this.$refs['title'] as UniElement;
+      this.seatElement = this.$refs['seatbar'] as UniElement;
+      this.setStyle();
+    },
+    onResize(_ : OnResizeOptions) {
+      // #ifdef APP-ANDROID
+      // 监听多窗口模式
+      this.statusBarHeight = uni.getWindowInfo().statusBarHeight;
+      this.nviBarHeight = NAVIBARHEIGHT + this.statusBarHeight;
+      this.setStyle();
+      // #endif
+    },
+    methods: {
+      onScroll(e : ScrollEvent) {
+        let offset = e.detail.scrollTop>SEARCHBARHEIGHT?SEARCHBARHEIGHT:e.detail.scrollTop;//(e.detail.scrollTop<0?0:e.detail.scrollTop)
+        this.naviElement?.style?.setProperty('height', (this.nviBarHeight -offset)+'px');
+        this.titleElement?.style?.setProperty('opacity', (1-offset/SEARCHBARHEIGHT).toString());
+        this.searchElement?.style?.setProperty('left', ((offset<0)?0:BACKWIDTH*offset/SEARCHBARHEIGHT)+'px');
+      },
+      back() {
+        uni.navigateBack();
+      },
+      search() {
+        uni.showToast({
+          title: '暂不支持',
+          icon: 'none'
+        });
+      },
+      setStyle() {
+        this.naviElement?.style?.setProperty('padding-top', this.statusBarHeight + 'px');
+        this.naviElement?.style?.setProperty('height', (NAVIBARHEIGHT + this.statusBarHeight) + 'px');
+        this.seatElement?.style?.setProperty('height', (NAVIBARHEIGHT + this.statusBarHeight) + 'px');
+      }
+    }
+  }
+</script>
+
+<style>
+.page {
+  flex: 1;
+  background-color: #f5f5f5;
+}
+.navigatorbar {
+  position: fixed;
+/* #ifdef APP */
+  padding-top: 35px;
+  height: 124px;
+/* #endif */
+/* #ifdef WEB */
+  height: 88px;
+/* #endif */
+  border-bottom: 1px solid #efefef;
+  width: 100%;
+  background-color: #f5f5f5;
+}
+.titlebar {
+  flex-direction: row;
+  align-items: center;
+  height: 44px;
+}
+.backview {
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  align-items: center;
+}
+.back {
+  width: 20px;
+}
+.title {
+  margin: 0px 2px;
+}
+.searchbar {
+  position: absolute;
+  bottom: 2px;
+  left: 0px;
+  right: 0px;
+  background-color: #FFFFFF;
+  border: 1px solid #fbdf0d;
+  height: 32px;
+  border-radius: 100px;
+  margin: 6px 12px;
+  padding: 8px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.searchimg {
+  width: 15px;
+}
+.searchinput {
+  flex-grow: 1;
+  font-size: 12px;
+  color: #666;
+}
+.searchbutton {
+  font-size: 12px;
+  background-color: #ff6900;
+  color: #FFF;
+  padding: 5px 8px;
+  border-radius: 100px;
+}
+.seatbar {
+/* #ifdef APP */
+  height: 124px;
+/* #endif */
+/* #ifdef WEB */
+  height: 88px;
+/* #endif */
+}
+.content {
+  padding: 5px 15px;
+}
+.content-item {
+  padding: 15px;
+  margin: 5px 0;
+  background-color: #fff;
+  border-radius: 5px;
+}
+.text {
+  font-size: 14px;
+  color: #666;
+  line-height: 20px;
+}
+
+</style>

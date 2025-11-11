@@ -1,0 +1,76 @@
+<template>
+  <scroll-view style="flex: 1;">
+    <view style="padding-bottom: 50px;">
+      <!-- #ifndef APP-HARMONY -->
+      <text class="tips">说明：如果本地无 uts 插件编译环境请提交打包自定义基座查看效果</text>
+      <!-- #endif -->
+      <!-- #ifdef APP-HARMONY -->
+      <text class="tips"> </text>
+      <!-- #endif -->
+      <button type="primary" @tap="testCallMethod">调用组件方法</button>
+      <!-- native-button 通过 native-view 绑定原生button 实现的UTS插件-标准模式组件 -->
+      <native-button id="helloView" class="native-button" style="width: 200px; height: 100px;" :text="buttonText" @buttonTap="ontap"
+        @load="onload"></native-button>
+      <native-button-container></native-button-container>
+      <!-- #ifndef APP-HARMONY -->
+      <button type="primary" @click="gotoTimePicker">调用native-time-picker</button>
+      <!-- #endif -->
+    </view>
+  </scroll-view>
+</template>
+
+<script>
+  import { createNativeButtonContext } from "@/uni_modules/native-button";
+  export default {
+    data() {
+      return {
+        title: 'Hello',
+        buttonText: "native-button",
+        isLoad: false,
+        clickCount: 0
+      }
+    },
+    onLoad() {
+
+    },
+    methods: {
+      ontap(e : UniNativeViewEvent) {
+        uni.showToast({
+          title: "按钮被点击了"
+        })
+        this.clickCount ++
+        this.buttonText = "native-button"+this.clickCount
+      },
+      onload() {
+        //标记已初始化 用于自动化测试
+        this.isLoad = true
+      },
+      testCallMethod: function () {
+      	let context = createNativeButtonContext("helloView")
+      	context?.updateText("test code")
+      },
+      gotoTimePicker() {
+        uni.openDialogPage({
+          url: "/pages/component/native-view/native-view-time-picker-dialog",
+          animationType: "fade-in"
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+
+  .tips {
+    font-size: 14px;
+    color: #BEBEBE;
+    margin: 25px auto 25px auto;
+    text-align: center;
+  }
+
+  .native-button {
+    height: 100px;
+    width: 100px;
+    margin: 25px auto 25px auto;
+  }
+</style>

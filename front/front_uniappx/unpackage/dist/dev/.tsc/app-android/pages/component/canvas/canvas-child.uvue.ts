@@ -1,0 +1,50 @@
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        // 仅测试
+        testCounter: 0,
+      }
+    },
+    mounted() {
+      uni.createCanvasContextAsync({
+        id: 'canvas1',
+        component: this,
+        success: (_ : CanvasContext) => {
+          this.testCounter++
+          this._dispatchEvent()
+        }
+      });
+      uni.createCanvasContextAsync({
+        id: 'canvas2',
+        component: this,
+        success: (_ : CanvasContext) => {
+          this.testCounter++
+          this._dispatchEvent()
+        }
+      });
+    },
+    methods: {
+      _dispatchEvent() {
+        if (this.testCounter == 2) {
+          uni.$emit('canvasChildReady')
+        }
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesComponentCanvasCanvasChildRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode(Fragment, null, [
+    createElementVNode("view", null, [
+      createElementVNode("canvas", utsMapOf({ id: "canvas1" }))
+    ]),
+    createElementVNode("view", null, [
+      createElementVNode("canvas", utsMapOf({ id: "canvas2" }))
+    ]),
+    createElementVNode("view", null, toDisplayString(_ctx.testCounter), 1 /* TEXT */)
+  ], 64 /* STABLE_FRAGMENT */)
+}
+const GenPagesComponentCanvasCanvasChildStyles = []

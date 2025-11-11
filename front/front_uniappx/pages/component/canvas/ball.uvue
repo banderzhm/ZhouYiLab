@@ -1,0 +1,184 @@
+<template>
+  <view class="page-body">
+    <canvas id="canvas" class="canvas"></canvas>
+  </view>
+</template>
+
+<script setup>
+  class Ball {
+    private width : number
+    private height : number
+    public x : number
+    public y : number
+    public vx : number
+    public vy : number
+    public radius : number = 5
+
+    constructor(w : number, h : number, x : number, y : number, vx : number, vy : number) {
+      this.width = w
+      this.height = h
+      this.x = x
+      this.y = y
+      this.vx = vx
+      this.vy = vy
+    }
+
+    move() {
+      this.x += this.vx
+      this.y += this.vy
+
+      // 边框反弹
+      if (this.x < this.radius) {
+        this.vx = Math.abs(this.vx)
+        return
+      }
+      if (this.x > this.width - this.radius) {
+        this.vx = -Math.abs(this.vx)
+      }
+      if (this.y < this.radius) {
+        this.vy = Math.abs(this.vy)
+        return
+      }
+      if (this.y > this.width - this.radius) {
+        this.vy = -Math.abs(this.vy)
+      }
+    }
+  }
+
+  class BallAnimation {
+    private ctx : CanvasRenderingContext2D
+    private ballList : Array<Ball> = []
+    private speed = 3
+    private layer = 3
+    private ballInlayer = 20
+    private interval : number = 0
+    private runningFlag : boolean = false
+
+    // #ifdef WEB
+    private _bindAnimate: Function = null
+    // #endif
+
+    constructor(ctx : CanvasRenderingContext2D) {
+      this.ctx = ctx
+      this.initBall()
+      this.ctx.fillStyle = '#007AFF'
+      // #ifdef WEB
+      this._bindAnimate = this.animate.bind(this)
+      // #endif
+    }
+
+    private getDistance(x : number, y : number) : number {
+      return Math.pow((Math.pow(x, 2) + Math.pow(y, 2)), 0.5)
+    }
+
+    private initBall() {
+      const canvasWidth = this.ctx.canvas.offsetWidth;
+      const canvasHeight = this.ctx.canvas.offsetHeight;
+      for (let i = 0; i < this.layer; i++) {
+        let radius = this.getDistance(canvasWidth / 2, canvasHeight / 2) / this.layer * i
+        for (let j = 0; j < this.ballInlayer; j++) {
+          let deg = j * 2 * Math.PI / this.ballInlayer,
+            sin = Math.sin(deg),
+            cos = Math.cos(deg),
+            x = radius * cos + canvasWidth / 2,
+            y = radius * sin + canvasHeight / 2,
+            vx = this.speed * cos,
+            vy = this.speed * sin
+          this.ballList.push(new Ball(canvasWidth, canvasHeight, x, y, vx, vy))
+        }
+      }
+    }
+
+    public animate() {
+      this.ctx.clearRect(0, 0, this.ctx.canvas.offsetWidth, this.ctx.canvas.offsetHeight)
+      this.ballList.forEach((item) => {
+        item.move()
+        this.ctx.beginPath()
+        this.ctx.arc(item.x, item.y, item.radius, 0, 2 * Math.PI)
+        // this.ctx.ellipse(item.x, item.y, item.radius, item.radius, 0, 0, Math.PI * 2)
+        this.ctx.fill()
+      })
+      // #ifdef APP
+      this.ctx.draw()
+      // #endif
+
+      // #ifdef WEB
+      if (!this.runningFlag) {
+        return
+      }
+      requestAnimationFrame(this._bindAnimate)
+      // #endif
+    }
+
+    start() {
+      // #ifdef WEB
+      cancelAnimationFrame(this._bindAnimate)
+      this.runningFlag = true
+      this.animate()
+      // #endif
+
+      // #ifdef APP
+      //Todo.. requestAnimationFrame
+      clearInterval(this.interval)
+      this.interval = setInterval(() => {
+        this.animate()
+      }, 17)
+      // #endif
+    }
+
+    stop() {
+      // #ifdef WEB
+      this.runningFlag = false
+      cancelAnimationFrame(this._bindAnimate)
+      // #endif
+
+      // #ifdef APP
+      //Todo.. requestAnimationFrame
+      clearInterval(this.interval)
+      // #endif
+    }
+  }
+
+  let animation : BallAnimation | null = null
+  onReady(() => {
+    let canvas = uni.getElementById("canvas") as UniCanvasElement
+    let canvasContext = canvas.getContext("2d");
+    if (canvasContext != null) {
+      const dpr = uni.getSystemInfoSync().pixelRatio
+      canvas.width = canvas.offsetWidth * dpr
+      canvas.height = canvas.offsetHeight * dpr
+      canvasContext.scale(dpr, dpr)
+
+      animation = new BallAnimation(canvasContext)
+      animation?.start()
+    } else {
+      console.log("canvas.getContext error!!")
+    }
+  })
+
+  onUnload(() => {
+    animation?.stop()
+    animation = null
+  })
+
+  onPageShow(() => {
+    animation?.start()
+  })
+
+  onPageHide(() => {
+    animation?.stop()
+  })
+</script>
+
+<style>
+  .page-body-wrapper {
+    text-align: center;
+  }
+
+  .canvas {
+    width: 300px;
+    height: 300px;
+    margin: auto;
+    background-color: #fff;
+  }
+</style>

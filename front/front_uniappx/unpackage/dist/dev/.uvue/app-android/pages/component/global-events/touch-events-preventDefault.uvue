@@ -1,0 +1,85 @@
+import _easycom_page_head from '@/components/page-head/page-head.vue';
+const __sfc__ = defineComponent({
+    __name: 'touch-events-preventDefault',
+    setup(__props, { expose: __expose }: SetupContext): any | null {
+        const __ins = getCurrentInstance()!;
+        const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+        const _cache = __ins.renderCache;
+        const scrollTop = reactive({
+            value: 0
+        });
+        __expose({
+            scrollTop
+        });
+        function getDirection(x: number, y: number): string {
+            if (x > y && x > 10) {
+                return 'horizontal';
+            }
+            if (y > x && y > 10) {
+                return 'vertical';
+            }
+            return '';
+        }
+        const startX = ref(0);
+        const startY = ref(0);
+        const direction = ref("");
+        function touchstart(e: UniTouchEvent) {
+            direction.value = "";
+            startX.value = e.touches[0].clientX;
+            startY.value = e.touches[0].clientY;
+        }
+        function touchend(e: UniTouchEvent) {
+            console.log('>>>>> touchend', " at pages/component/global-events/touch-events-preventDefault.uvue:44");
+            direction.value = "";
+        }
+        function touchmove(e: UniTouchEvent) {
+            const deltaX = e.touches[0].clientX - startX.value;
+            const deltaY = e.touches[0].clientY - startY.value;
+            if (direction.value == "") {
+                direction.value = getDirection(Math.abs(deltaX), Math.abs(deltaY));
+            }
+            //只有横向滑动时才阻止默认事件，即阻止页面滚动
+            if (direction.value != 'horizontal') {
+                return;
+            }
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+        }
+        function onScroll(e: UniScrollEvent) {
+            console.log('>>>>> onScroll', e.detail.scrollTop, " at pages/component/global-events/touch-events-preventDefault.uvue:68");
+            scrollTop["value"] = e.detail.scrollTop;
+        }
+        return (): any | null => {
+            const _component_page_head = resolveEasyComponent("page-head", _easycom_page_head);
+            return createElementVNode("view", utsMapOf({
+                style: normalizeStyle(utsMapOf({ "flex": "1" }))
+            }), [
+                createVNode(_component_page_head, utsMapOf({ title: "横向滑动时阻止默认事件，即阻止页面滚动" })),
+                createElementVNode("view", utsMapOf({
+                    class: "uni-padding-wrap uni-common-mt",
+                    style: normalizeStyle(utsMapOf({ "height": "40px", "align-items": "center" }))
+                }), [
+                    createElementVNode("text", null, "手势方向：" + toDisplayString(unref(direction)), 1 /* TEXT */)
+                ], 4 /* STYLE */),
+                createElementVNode("scroll-view", utsMapOf({
+                    style: normalizeStyle(utsMapOf({ "flex": "1" })),
+                    onScroll: onScroll
+                }), [
+                    createElementVNode(Fragment, null, RenderHelpers.renderList(120, (item, __key, __index, _cached): any => {
+                        return createElementVNode("view", utsMapOf({
+                            key: item,
+                            class: "box",
+                            onTouchstart: touchstart,
+                            onTouchmove: touchmove,
+                            onTouchend: touchend
+                        }), toDisplayString(item), 33 /* TEXT, NEED_HYDRATION */);
+                    }), 64 /* STABLE_FRAGMENT */)
+                ], 36 /* STYLE, NEED_HYDRATION */)
+            ], 4 /* STYLE */);
+        };
+    }
+});
+export default __sfc__;
+const GenPagesComponentGlobalEventsTouchEventsPreventDefaultStyles = [utsMapOf([["box", padStyleMapOf(utsMapOf([["borderBottomWidth", 1], ["borderBottomStyle", "solid"], ["borderBottomColor", "#c6d1c3"], ["paddingTop", 16], ["paddingRight", 10], ["paddingBottom", 16], ["paddingLeft", 10]]))]])];
+//# sourceMappingURL=touch-events-preventDefault.uvue.map

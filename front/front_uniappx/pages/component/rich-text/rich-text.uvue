@@ -1,0 +1,101 @@
+<template>
+  <view>
+    <page-head title="rich-text"></page-head>
+    <view class="uni-padding-wrap uni-common-mt">
+      <view class="uni-btn-v">
+        <navigator url="/pages/component/rich-text/rich-text-tags">
+          <button type="primary">rich-text渲染单个HTML标签示例</button>
+        </navigator>
+      </view>
+      <view class="uni-btn-v">
+        <navigator url="/pages/component/rich-text/rich-text-complex">
+          <button type="primary">rich-text渲染复杂HTML示例</button>
+        </navigator>
+      </view>
+      <view class="uni-title">
+        <button type="default" @click="changeText">修改文本内容</button>
+      </view>
+      <view class="text-box" id="rich-text-parent" @click="richTextParentClick">
+        <rich-text id="richtext" style="border: 1px; border-style: solid; border-color: red;" :nodes="text"></rich-text>
+        <view>
+          <text>rich-text-parent</text>
+          <text id='rich-text-str'>{{richTextStr}}</text>
+        </view>
+      </view>
+      <view class="uni-title">
+        <text class="uni-subtitle-text">selectable</text>
+      </view>
+      <view class="text-box2">
+        <rich-text style="height: 80px;" :selectable="true"
+          :nodes="text"></rich-text>
+      </view>
+    </view>
+  </view>
+  <rich-text v-if="autoTest" id="test-rich-text" :nodes="testNodes" :selectable="true" @itemclick="itemClickForTest" style="position: fixed;width: 100px;height: 100px;"></rich-text>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        text: "<span>hello uni-app x!</span><br/><span>uni-app x，终极跨平台方案</span>",
+        richTextHeight: 0,
+        richTextElement: null as UniElement | null,
+        // 自动化测试
+        autoTest: false,
+        testNodes: '<img src="https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/uni@2x.png"></img>',
+        isItemClickTrigger: false,
+        richTextStr: false
+      }
+    },
+    onReady() {
+      this.richTextElement = uni.getElementById('richtext') as UniElement
+      setTimeout(() => {
+        this.updateRichTextHeight()
+      }, 2500)
+    },
+    methods: {
+      changeText() {
+        if (this.text === "<span>hello uni-app x!</span><br/><span>uni-app x，终极跨平台方案</span>") {
+          this.text = "<h1>hello uni-app x!</h1><br/><h2>uni-app x，终极跨平台方案</h2>"
+        } else {
+          this.text = "<span>hello uni-app x!</span><br/><span>uni-app x，终极跨平台方案</span>"
+        }
+        setTimeout(() => {
+          this.updateRichTextHeight()
+        }, 200)
+      },
+      updateRichTextHeight() {
+        if (this.richTextElement != null) {
+          this.richTextElement!.getBoundingClientRectAsync()!.then((elRect: DOMRect) => {
+            this.richTextHeight = elRect.height
+            console.log('richTextHeight:', this.richTextHeight)
+          })
+        }
+      },
+      // 自动化测试
+      itemClickForTest(_ : UniRichTextItemClickEvent) {
+        this.isItemClickTrigger = true;
+      },
+      getBoundingClientRectForTest() : DOMRect {
+        return uni.getElementById('test-rich-text')?.getBoundingClientRect()!;
+      },
+      richTextParentClick() {
+        this.richTextStr = true;
+      }
+    }
+  }
+</script>
+
+<style>
+  .text-box {
+    padding: 20px 0;
+    background-color: white;
+  }
+
+  .text-box2 {
+    top: 20px;
+    background-color: white;
+  }
+
+</style>

@@ -1,0 +1,119 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex:1">
+  <!-- #endif -->
+    <page-head :title="title"></page-head>
+    <view class="uni-padding-wrap">
+      <view class="uni-title">
+        <text class="uni-subtitle-text">获取本地相对路径图片信息</text>
+      </view>
+      <image class="image" :src="relativeImagePath" mode="aspectFit"></image>
+      <text class="margin-top-10">{{absoluteImageInfo}}</text>
+      <view class="uni-title">
+        <text class="uni-subtitle-text">获取网络路径图片信息</text>
+      </view>
+      <image class="image" :src="remoteImagePath" mode="aspectFit"></image>
+      <text class="margin-top-10">{{remoteImageInfo}}</text>
+      <view class="uni-title">
+        <text class="uni-subtitle-text">获取本地绝对路径图片信息</text>
+      </view>
+      <image class="image" :src="absoluteImagePath" mode="aspectFit"></image>
+      <text class="margin-top-10">{{relativeImageInfo}}</text>
+      <view class="uni-btn-v">
+        <button type="primary" @click="chooseImage">拍摄照片或从相册中选择照片</button>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        title: "getImageInfo",
+        relativeImagePath: "/static/test-image/logo.png",
+        relativeImageInfo: "",
+        absoluteImagePath: "",
+        absoluteImageInfo: "",
+        remoteImagePath: "https://request.dcloud.net.cn/api/http/contentType/image/png",
+        remoteImageInfo: "",
+        // 自动化测试
+        imageInfoForTest: null as UTSJSONObject | null,
+      }
+    },
+    methods: {
+      chooseImage() {
+        uni.chooseImage({
+          count: 1,
+          success: (res) => {
+            this.absoluteImagePath = res.tempFilePaths[0];
+            uni.getImageInfo({
+              src: res.tempFilePaths[0],
+              success: (_res) => {
+                console.log("getImageInfo success", JSON.stringify(_res));
+                this.relativeImageInfo = `图片宽度: ${_res.width}\n图片高度: ${_res.height}\n图片路径: ${_res.path}\n图片方向: ${_res.orientation}\n图片格式: ${_res.type}`;
+              },
+              fail: (err) => {
+                uni.showModal({
+                  title: "获取图片信息失败",
+                  content: JSON.stringify(err),
+                  showCancel: false
+                });
+              }
+            });
+          }
+        });
+      }
+    },
+    onReady() {
+      uni.getImageInfo({
+        src: this.relativeImagePath,
+        success: (res) => {
+          console.log("getImageInfo success", JSON.stringify(res));
+          this.absoluteImageInfo = `图片宽度: ${res.width}\n图片高度: ${res.height}\n图片路径: ${res.path}\n图片方向: ${res.orientation}\n图片格式: ${res.type}`;
+          this.imageInfoForTest = {
+            "width": res.width,
+            "height": res.height,
+            "path": res.path.slice(res.path.indexOf('static/') + 'static/'.length),
+            "orientation": res.orientation,
+            "type": res.type
+          };
+        },
+        fail: (err) => {
+          uni.showModal({
+            title: "获取图片信息失败",
+            content: JSON.stringify(err),
+            showCancel: false
+          });
+          this.imageInfoForTest = null;
+        }
+      });
+      uni.getImageInfo({
+        src: this.remoteImagePath,
+        success: (res) => {
+          console.log("getImageInfo success", JSON.stringify(res));
+          this.remoteImageInfo = `图片宽度: ${res.width}\n图片高度: ${res.height}\n图片路径: ${res.path}\n图片方向: ${res.orientation}\n图片格式: ${res.type}`;
+        },
+        fail: (err) => {
+          uni.showModal({
+            title: "获取图片信息失败",
+            content: JSON.stringify(err),
+            showCancel: false
+          });
+        }
+      });
+    }
+  }
+</script>
+
+<style>
+  .image {
+    align-self: center;
+  }
+
+  .margin-top-10 {
+    margin-top: 10px;
+  }
+</style>

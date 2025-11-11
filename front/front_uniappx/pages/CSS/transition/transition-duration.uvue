@@ -1,0 +1,44 @@
+<template>
+  <view>
+    <view :class="class"></view>
+    <button @click="start">start</button>
+    <button @click="reset">reset</button>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        class: 'box',
+      }
+    },
+    methods: {
+      start() {
+        this.class = 'box ani'
+      },
+      reset() {
+        this.class = 'box'
+      },
+      jest_start(){
+        this.start()
+      },
+      jest_reset(){
+        this.reset()
+      },
+    }
+  }
+</script>
+
+<style>
+  .box {
+    width: 100px;
+    height: 100px;
+    background-color: blue;
+  }
+
+  .ani {
+    transition-duration: 5s;
+    width: 200px;
+  }
+</style>

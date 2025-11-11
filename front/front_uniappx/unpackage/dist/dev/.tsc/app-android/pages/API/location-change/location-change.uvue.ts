@@ -1,0 +1,324 @@
+
+  type LocationType = 'wgs84' | 'gcj02'
+  export type ItemType = { __$originalPosition?: UTSSourceMapPosition<"ItemType", "pages/API/location-change/location-change.uvue", 46, 15>; value : LocationType, name : LocationType }
+  export type LocationItem = { __$originalPosition?: UTSSourceMapPosition<"LocationItem", "pages/API/location-change/location-change.uvue", 47, 15>; id : string, name : string, provider ?: UniProvider }
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        log: "",
+        logAble: true,
+        providerList: [] as LocationItem[],
+        types: [
+          {
+            value: 'wgs84',
+            name: 'wgs84'
+          },
+          {
+            value: 'gcj02',
+            name: 'gcj02'
+          }
+        ] as ItemType[],
+        currentSelectedProvider: 0,
+        currentSelectedType: 0,
+        startSuccess: false,
+        stopSuccess: false,
+        errCode: 0
+      }
+    },
+    onLoad: function () {
+
+      this.getProvider()
+
+    },
+    onUnload() {
+      uni.stopLocationUpdate({})
+      uni.offLocationChange(null)
+      uni.offLocationChangeError(null)
+    },
+    methods: {
+      getProvider() {
+
+
+        let provider = uni.getProviderSync({
+          service: "location",
+        } as GetProviderSyncOptions)
+        console.log(provider, " at pages/API/location-change/location-change.uvue:89")
+        provider.providerObjects.forEach((value : UniProvider) => {
+          var currentProvider = value
+          this.providerList.push({
+            name: currentProvider.description,
+            id: currentProvider.id,
+            provider: currentProvider
+          } as LocationItem);
+        })
+
+        this.providerList.forEach((value, index) => {
+          if (value.id == "system") {
+            this.currentSelectedProvider = index
+          }
+        })
+
+      },
+      providerChange(e : UniRadioGroupChangeEvent) {
+        for (let i = 0; i < this.providerList.length; i++) {
+          if (this.providerList[i].id === e.detail.value) {
+            this.currentSelectedProvider = i;
+            break;
+          }
+        }
+
+        if (e.detail.value == "system") {
+          this.currentSelectedType = 0
+        } else if (e.detail.value == "tencent") {
+          this.currentSelectedType = 1
+        }
+      },
+      typeChange(e : UniRadioGroupChangeEvent) {
+        for (let i = 0; i < this.types.length; i++) {
+          if (this.types[i].value === e.detail.value) {
+            this.currentSelectedType = i;
+            break;
+          }
+        }
+      },
+      offLocationChangeError() {
+        if (this.logAble) {
+          this.log += "关闭offLocationChangeError监听" + '\n\n'
+        }
+        console.log("关闭onLocationChangeError监听", " at pages/API/location-change/location-change.uvue:132")
+        uni.offLocationChangeError(null)
+      },
+      onLocationChangeError() {
+        uni.offLocationChangeError(null)
+        if (this.logAble) {
+          this.log += "开启onLocationChangeError监听" + '\n\n'
+        }
+        console.log("开启onLocationChangeError监听", " at pages/API/location-change/location-change.uvue:140")
+        uni.onLocationChangeError((e) => {
+          console.log("onLocationChangeError回调: ", e, " at pages/API/location-change/location-change.uvue:142")
+          if (this.logAble) {
+            this.log += JSON.stringify(e) + '\n\n'
+          }
+        })
+      },
+      onLocationChange() {
+        uni.offLocationChange(null)
+        console.log("开启onLocationChange监听", " at pages/API/location-change/location-change.uvue:150")
+        if (this.logAble) {
+          this.log += "开启onLocationChange监听" + '\n\n'
+        }
+        uni.onLocationChange((e) => {
+          console.log("onLocationChange持续监听回调: ", e, " at pages/API/location-change/location-change.uvue:155")
+          if (this.logAble) {
+            this.log += "provider= " + this.providerList[this.currentSelectedProvider].id + '\n' + JSON.stringify(e) + '\n\n'
+          }
+        })
+      },
+      offLocationChange() {
+        if (this.logAble) {
+          this.log += "关闭offLocationChange监听" + '\n\n'
+        }
+        console.log("关闭offLocationChange监听", " at pages/API/location-change/location-change.uvue:165")
+        uni.offLocationChange(null)
+      },
+      startLocationUpdate() {
+
+        if (this.providerList.length == 0) {
+          uni.showToast({
+            title: '未获取到provider，请确定基座中包含location功能',
+            icon: "error"
+          })
+          console.log("未获取到provider，请确定基座中包含location功能", " at pages/API/location-change/location-change.uvue:175")
+          return
+        }
+
+
+        uni.startLocationUpdate({
+          provider: this.providerList[this.currentSelectedProvider].id,
+          type: this.types[this.currentSelectedType].value,
+          success: () => {
+            if (this.logAble) {
+              this.log += "开启startLocationUpdate成功, provider= " + this.providerList[this.currentSelectedProvider].id + '\n\n'
+            }
+            console.log("持续定位启动成功", " at pages/API/location-change/location-change.uvue:187")
+            this.startSuccess = true
+          },
+          fail: (err) => {
+            if (this.logAble) {
+              this.log += "启动startLocationUpdate失败：erroCode=" + err.errCode + '\n\n'
+            }
+
+            console.log("持续定位启动失败", " at pages/API/location-change/location-change.uvue:195")
+            this.startSuccess = false
+            this.errCode = err.errCode
+          }
+
+        })
+      },
+      startLocationUpdateBackground() {
+
+        if (this.providerList.length == 0) {
+          uni.showToast({
+            title: '未获取到provider，请确定基座中包含location功能',
+            icon: "error"
+          })
+          console.log("未获取到provider，请确定基座中包含location功能", " at pages/API/location-change/location-change.uvue:209")
+          return
+        }
+
+        uni.startLocationUpdateBackground({
+          provider: this.providerList[this.currentSelectedProvider].id,
+          type: this.types[this.currentSelectedType].value,
+          success: () => {
+            if (this.logAble) {
+              this.log += "开启startLocationUpdateBackground成功, provider= " + this.providerList[this.currentSelectedProvider].id + '\n\n'
+            }
+            console.log("后台持续定位api启动成功", " at pages/API/location-change/location-change.uvue:220")
+            this.startSuccess = true
+          }, fail: (err) => {
+            if (this.logAble) {
+              this.log += "启动startLocationUpdateBackground失败：erroCode=" + err.errCode + '\n\n'
+            }
+            console.log("后台持续定位启动失败", " at pages/API/location-change/location-change.uvue:226")
+            this.startSuccess = false
+            this.errCode = err.errCode
+          }
+
+        })
+      },
+      stopLocationUpdate() {
+        uni.stopLocationUpdate({
+          success: () => {
+            if (this.logAble) {
+              this.log += "成功关闭stopLocationUpdate定位" + '\n\n'
+            }
+            console.log("成功关闭stopLocationUpdate定位", " at pages/API/location-change/location-change.uvue:239")
+            this.stopSuccess = true
+          }
+        })
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesAPILocationChangeLocationChangeRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_radio = resolveComponent("radio")
+const _component_radio_group = resolveComponent("radio-group")
+
+  return createElementVNode(Fragment, null, [
+    createElementVNode("text", null, "显示简易操作日志(可滚动查看)"),
+    createElementVNode("button", utsMapOf({
+      size: "mini",
+      onClick: () => {_ctx.log=''}
+    }), "清空日志", 8 /* PROPS */, ["onClick"]),
+    createElementVNode("scroll-view", utsMapOf({
+      style: normalizeStyle(utsMapOf({"max-height":"300px"}))
+    }), [
+      createElementVNode("text", utsMapOf({
+        style: normalizeStyle(utsMapOf({"margin":"2px","padding":"2px","border":"1px solid #000000"}))
+      }), toDisplayString(_ctx.log), 5 /* TEXT, STYLE */)
+    ], 4 /* STYLE */),
+    createElementVNode("view", utsMapOf({ class: "uni-list" }), [
+      createElementVNode("text", utsMapOf({
+        style: normalizeStyle(utsMapOf({"margin-bottom":"4px"}))
+      }), " 请选择定位服务提供商：", 4 /* STYLE */),
+      createVNode(_component_radio_group, utsMapOf({
+        class: "uni-flex uni-row",
+        onChange: _ctx.providerChange,
+        style: normalizeStyle(utsMapOf({"flex-wrap":"wrap"}))
+      }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.providerList, (item, index, __index, _cached): any => {
+            return createVNode(_component_radio, utsMapOf({
+              class: "uni-list-cell",
+              style: normalizeStyle(utsMapOf({"margin-right":"15px"})),
+              key: item.id,
+              value: item.id,
+              checked: index === _ctx.currentSelectedProvider
+            }), utsMapOf({
+              default: withSlotCtx((): any[] => [toDisplayString(item.name)]),
+              _: 2 /* DYNAMIC */
+            }), 1032 /* PROPS, DYNAMIC_SLOTS */, ["style", "value", "checked"])
+          }), 128 /* KEYED_FRAGMENT */)
+        ]),
+        _: 1 /* STABLE */
+      }), 8 /* PROPS */, ["onChange", "style"])
+    ]),
+    createElementVNode("view", utsMapOf({ class: "uni-list" }), [
+      createElementVNode("text", utsMapOf({
+        style: normalizeStyle(utsMapOf({"margin-bottom":"4px"}))
+      }), " 请选择坐标系：", 4 /* STYLE */),
+      createVNode(_component_radio_group, utsMapOf({
+        class: "uni-flex uni-row",
+        onChange: _ctx.typeChange,
+        style: normalizeStyle(utsMapOf({"flex-wrap":"wrap"}))
+      }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode(Fragment, null, RenderHelpers.renderList(_ctx.types, (item, index, __index, _cached): any => {
+            return createVNode(_component_radio, utsMapOf({
+              class: "uni-list-cell",
+              style: normalizeStyle(utsMapOf({"margin-right":"15px"})),
+              key: item.value,
+              value: item.value,
+              checked: index === _ctx.currentSelectedType
+            }), utsMapOf({
+              default: withSlotCtx((): any[] => [toDisplayString(item.name)]),
+              _: 2 /* DYNAMIC */
+            }), 1032 /* PROPS, DYNAMIC_SLOTS */, ["style", "value", "checked"])
+          }), 128 /* KEYED_FRAGMENT */)
+        ]),
+        _: 1 /* STABLE */
+      }), 8 /* PROPS */, ["onChange", "style"])
+    ]),
+    createElementVNode("scroll-view", utsMapOf({
+      style: normalizeStyle(utsMapOf({"flex":"1"}))
+    }), [
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.startLocationUpdate,
+        id: "startLocationUpdate"
+      }), "点击连续定位", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.startLocationUpdateBackground,
+        id: "startLocationUpdateBackground"
+      }), "后台点击连续定位", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.stopLocationUpdate,
+        id: "stopLocationUpdate"
+      }), "点击关闭定位", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.onLocationChange,
+        id: "onLocationChange"
+      }), "onLocationChange", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.offLocationChange,
+        id: "offLocationChange"
+      }), "offLocationChange", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.onLocationChangeError,
+        id: "onLocationChangeError"
+      }), "onLocationChangeError", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        class: "btnstyle",
+        type: "primary",
+        onClick: _ctx.offLocationChangeError,
+        id: "offLocationChangeError"
+      }), "offLocationChangeError", 8 /* PROPS */, ["onClick"])
+    ], 4 /* STYLE */)
+  ], 64 /* STABLE_FRAGMENT */)
+}
+const GenPagesAPILocationChangeLocationChangeStyles = [utsMapOf([["uni-list", padStyleMapOf(utsMapOf([["borderBottomWidth", 0], ["borderBottomStyle", "none"], ["borderBottomColor", "#000000"], ["backgroundColor", "rgba(0,0,0,0)"], ["marginLeft", 10], ["marginRight", 10], ["marginTop", 4], ["marginBottom", 4]]))], ["uni-list-cell", padStyleMapOf(utsMapOf([["position", "relative"], ["display", "flex"], ["flexDirection", "row"], ["justifyContent", "space-between"], ["alignItems", "center"]]))], ["btnstyle", padStyleMapOf(utsMapOf([["marginTop", 4], ["marginRight", 4], ["marginBottom", 4], ["marginLeft", 4]]))]])]

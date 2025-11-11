@@ -1,0 +1,83 @@
+<template>
+  <page-head :title="title"></page-head>
+  <view class="uni-common-mt">
+    <view class="uni-list">
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">蓝牙的系统开关</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="bluetoothEnabled" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">地理位置的系统开关</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="locationEnabled" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">Wi-Fi 的系统开关</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="wifiEnabled" />
+        </view>
+      </view>
+      <view class="uni-list-cell">
+        <view class="uni-pd">
+          <view class="uni-label" style="width:180px;">设备方向</view>
+        </view>
+        <view class="uni-list-cell-db">
+          <input type="text" :disabled="true" placeholder="未获取" :value="deviceOrientation" />
+        </view>
+      </view>
+    </view>
+    <view class="uni-padding-wrap">
+      <view class="uni-btn-v">
+        <button type="primary" @tap="getSystemSetting">获取系统设置</button>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        title: 'getSystemSetting',
+        bluetoothEnabled: "",
+        locationEnabled: "",
+        wifiEnabled: "",
+        deviceOrientation: ""
+      }
+    },
+    onUnload: function () {
+    },
+    methods: {
+      getSystemSetting: function () {
+        const res = uni.getSystemSetting();
+        this.bluetoothEnabled = (res.bluetoothEnabled ?? false) ? "开启" : "关闭";
+        this.locationEnabled = res.locationEnabled ? "开启" : "关闭";
+        this.wifiEnabled = (res.wifiEnabled ?? false) ? "开启" : "关闭";
+        this.deviceOrientation = res.deviceOrientation
+
+        if (res.bluetoothError != null) {
+          this.bluetoothEnabled = "无蓝牙权限"
+        }
+
+        if (res.wifiError != null) {
+          this.wifiEnabled = "无WiFi权限"
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  .uni-pd {
+    padding-left: 15px;
+  }
+</style>

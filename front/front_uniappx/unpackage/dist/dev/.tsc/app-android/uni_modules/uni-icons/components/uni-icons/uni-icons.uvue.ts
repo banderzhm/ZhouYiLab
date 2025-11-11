@@ -1,0 +1,84 @@
+
+	import { fontData, IconsDataItem } from './uniicons_file'
+
+	/**
+	 * Icons 图标
+	 * @description 用于展示 icon 图标
+	 * @tutorial https://ext.dcloud.net.cn/plugin?id=28
+	 * @property {Number} size 图标大小
+	 * @property {String} type 图标图案，参考示例
+	 * @property {String} color 图标颜色
+	 * @property {String} customPrefix 自定义图标
+	 * @event {Function} click 点击 Icon 触发事件
+	 */
+	const __sfc__ = defineComponent({
+		name: "uni-icons",
+		props: {
+			type: {
+				type: String,
+				default: ''
+			},
+			color: {
+				type: String,
+				default: '#333333'
+			},
+			size: {
+				type: Number,
+				default: 16
+			},
+			fontFamily: {
+				type: String,
+				default: ''
+			}
+		},
+		data() {
+			return {};
+		},
+		computed: {
+			unicode() : string {
+				let codes = fontData.find((item : IconsDataItem) : boolean => { return item.font_class == this.type })
+				if (codes !== null) {
+					return codes.unicode
+				}
+				return ''
+			},
+			iconSize() : string {
+				const size = this.size
+				// if (typeof size == 'string') {
+				// 	const reg = /^[0-9]*$/g
+				// 	return reg.test(size as string) ? '' + size + 'px' : '' + size;
+				// 	// return '' + this.size
+				// }
+				return this.getFontSize(size as number)
+			},
+			styleObj() : UTSJSONObject {
+				if (this.fontFamily !== '') {
+					return { color: this.color, fontSize: this.iconSize, fontFamily: this.fontFamily }
+				}
+				return { color: this.color, fontSize: this.iconSize }
+			}
+		},
+		created() { },
+		methods: {
+			/**
+			 * 字体大小
+			 */
+			getFontSize(size : number) : string {
+				return size + 'px';
+			},
+		},
+	})
+
+export default __sfc__
+function GenUniModulesUniIconsComponentsUniIconsUniIconsRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode("text", utsMapOf({
+    class: "uni-icons",
+    style: normalizeStyle(_ctx.styleObj)
+  }), [
+    renderSlot(_ctx.$slots, "default", {}, (): any[] => [toDisplayString(_ctx.unicode)])
+  ], 4 /* STYLE */)
+}
+export type UniIconsComponentPublicInstance = InstanceType<typeof __sfc__>;
+const GenUniModulesUniIconsComponentsUniIconsUniIconsStyles = [utsMapOf([["uni-icons", padStyleMapOf(utsMapOf([["fontFamily", "UniIconsFontFamily"], ["fontSize", 18], ["fontStyle", "normal"], ["color", "#333333"]]))], ["@FONT-FACE", utsMapOf([["0", utsMapOf([["fontFamily", "UniIconsFontFamily"], ["src", "url('/assets/uniicons.32e978a5.ttf')"]])]])]])]

@@ -1,0 +1,8 @@
+// 仅测试 console.log 时机问题
+export class TestConsole {
+    constructor() {
+        __f__('log', 'at test-main-console.uts:4', 'test main.uts console.log');
+    }
+}
+export const ts = new TestConsole();
+//# sourceMappingURL=test-main-console.uts.map

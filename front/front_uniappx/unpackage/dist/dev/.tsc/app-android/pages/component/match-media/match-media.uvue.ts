@@ -1,0 +1,97 @@
+const __sfc__ = defineComponent({})
+export default __sfc__
+function GenPagesComponentMatchMediaMatchMediaRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_match_media = resolveComponent("match-media", true)
+
+  return createElementVNode("view", utsMapOf({ class: "container" }), [
+    createElementVNode("view", utsMapOf({ class: "section" }), [
+      createElementVNode("text", utsMapOf({ class: "subtitle" }), "基础条件匹配"),
+      createVNode(_component_match_media, utsMapOf({ "min-width": "400" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "屏幕宽度 ≥ 400px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ "max-width": "600" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "屏幕宽度 ≤ 600px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ width: "375" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "屏幕宽度 = 375px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ "min-height": "600" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "屏幕高度 ≥ 600px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ "max-height": "800" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "屏幕高度 ≤ 800px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ height: "667" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "屏幕高度 = 667px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ orientation: "portrait" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "竖屏 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({ orientation: "landscape" }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "横屏 时显示")
+        ]),
+        _: 1 /* STABLE */
+      }))
+    ]),
+    createElementVNode("view", utsMapOf({ class: "section" }), [
+      createElementVNode("text", utsMapOf({ class: "subtitle" }), "组合条件匹配"),
+      createVNode(_component_match_media, utsMapOf({
+        "min-width": "500",
+        "max-width": "1000",
+        orientation: "landscape"
+      }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "横屏 且宽度在 500px ~ 1000px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({
+        "min-height": "200",
+        "max-height": "800",
+        orientation: "portrait"
+      }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "竖屏 且高度在 200px ~ 800px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      })),
+      createVNode(_component_match_media, utsMapOf({
+        "min-width": "300",
+        "max-width": "900",
+        "min-height": "400",
+        "max-height": "800",
+        orientation: "portrait"
+      }), utsMapOf({
+        default: withSlotCtx((): any[] => [
+          createElementVNode("view", utsMapOf({ class: "demo-box" }), "竖屏 且宽度在 300px ~ 900px，高度在 400px ~ 800px 时显示")
+        ]),
+        _: 1 /* STABLE */
+      }))
+    ])
+  ])
+}
+const GenPagesComponentMatchMediaMatchMediaStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["paddingTop", 20], ["paddingRight", 20], ["paddingBottom", 20], ["paddingLeft", 20]]))], ["section", padStyleMapOf(utsMapOf([["paddingTop", 5]]))], ["subtitle", padStyleMapOf(utsMapOf([["fontSize", 20], ["fontWeight", "bold"], ["marginBottom", 5]]))], ["demo-box", padStyleMapOf(utsMapOf([["paddingTop", 5], ["paddingRight", 0], ["paddingBottom", 5], ["paddingLeft", 0]]))]])]

@@ -1,0 +1,233 @@
+<template>
+  <page-head title="websocket通讯示例"></page-head>
+  <view class="uni-padding-wrap">
+    <view class="uni-btn-v">
+      <text class="websocket-msg">{{ showMsg }}</text>
+      <button class="uni-btn-v" type="primary" @click="connect">
+        连接websocket服务
+      </button>
+      <button class="uni-btn-v" v-show="connected" type="primary" @click="send">
+        发送一条消息
+      </button>
+	  <button class="uni-btn-v" v-show="connected" type="primary" @click="sendArrayBuffer">
+	    发送一条ArrayBuffer消息,返回也是ArrayBuffer
+	  </button>
+      <button class="uni-btn-v" type="primary" @click="close">
+        断开websocket服务
+      </button>
+      <text class="websocket-tips">发送消息后会收到一条服务器返回的消息（与发送的消息内容一致）</text>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        connected: false,
+        connecting: false,
+        socketTask: null as SocketTask | null,
+        msg: '',
+        platform: '',
+        //自动化测试例专用
+        jest_result: 0,
+      }
+    },
+    computed: {
+      showMsg() : string {
+        if (this.connected) {
+          if (this.msg.length > 0) {
+            return '收到消息：' + this.msg
+          } else {
+            return '等待接收消息'
+          }
+        } else {
+          return '尚未连接'
+        }
+      },
+    },
+    onLoad() {
+      this.platform = uni.getDeviceInfo().platform as string
+    },
+    onUnload() {
+      uni.hideLoading()
+      let task = this.socketTask
+      if (task != null) {
+        task.close({
+          code: 1000,
+          reason: 'close reason from client',
+          success: (res : any) => {
+            console.log('uni.closeSocket success', res)
+          },
+          fail: (err : any) => {
+            console.log('uni.closeSocket fail', err)
+          },
+        } as CloseSocketOptions)
+      }
+    },
+    methods: {
+      connect() {
+        if (this.connected || this.connecting) {
+          uni.showModal({
+            content: '正在连接或者已经连接，请勿重复连接',
+            showCancel: false,
+          })
+          return
+        }
+        this.connecting = true
+        uni.showLoading({
+          title: '连接中...',
+        })
+        this.socketTask = uni.connectSocket({
+          url: 'wss://websocket.dcloud.net.cn',
+          success: (res : any) => {
+            // 这里是接口调用成功的回调，不是连接成功的回调，请注意
+            console.log('uni.connectSocket success', res)
+          },
+          fail: (err : any) => {
+            // 这里是接口调用失败的回调，不是连接失败的回调，请注意
+            console.log('uni.connectSocket fail', err)
+          },
+        })
+        this.socketTask?.onOpen((res : any) => {
+          this.connecting = false
+          this.connected = true
+          uni.hideLoading()
+          uni.showToast({
+            icon: 'none',
+            title: '连接成功',
+          })
+          console.log('onOpen', res)
+        })
+        this.socketTask?.onError((err : any) => {
+          this.connecting = false
+          this.connected = false
+          uni.hideLoading()
+          uni.showModal({
+            content: '连接失败，可能是websocket服务不可用，请稍后再试',
+            showCancel: false,
+          })
+          console.log('onError', err)
+        })
+        this.socketTask?.onMessage((res : OnSocketMessageCallbackResult) => {
+			if(res.data instanceof ArrayBuffer){
+				var int8 = new Int8Array(res.data)
+				this.msg = int8.toString()
+				console.log('onMessage', res)
+			}else{
+				this.msg = res.data as string
+				console.log('onMessage', res)
+			}
+         
+        })
+        this.socketTask?.onClose((res : any) => {
+          this.connected = false
+          this.socketTask = null
+          this.msg = ''
+          console.log('onClose', res)
+        })
+      },
+      send() {
+        const data =
+          'from ' +
+          this.platform +
+          ' : ' +
+          parseInt(Math.random() * 10000 + '').toString()
+        this.socketTask?.send({
+          data,
+          success: (res : any) => {
+            console.log(res)
+          },
+          fail: (err : any) => {
+            console.log(err)
+          },
+        } as SendSocketMessageOptions)
+      },
+	  sendArrayBuffer() {
+	    const data = new ArrayBuffer(2)
+		let int8= new Int8Array(data)
+		int8[0]=1
+		int8[1]=2
+		
+	    this.socketTask?.send({
+	      data,
+	      success: (res : any) => {
+	        console.log(res)
+	      },
+	      fail: (err : any) => {
+	        console.log(err)
+	      },
+	    } as SendSocketMessageOptions)
+	  },
+      close() {
+        this.socketTask?.close({
+          code: 1000,
+          reason: 'close reason from client',
+          success: (res : any) => {
+            console.log('uni.closeSocket success', res)
+          },
+          fail: (err : any) => {
+            console.log('uni.closeSocket fail', err)
+          },
+        } as CloseSocketOptions)
+      },
+      //自动化测试例专用
+      jest_connectSocket() {
+        this.socketTask = uni.connectSocket({
+          url: 'wss://websocket.dcloud.net.cn',
+          success: (_) => {
+            this.jest_result++
+          },
+          fail: (_) => {
+            this.jest_result = 0
+          },
+        })
+        this.socketTask?.onOpen((_) => {
+          const data =
+            'from ' +
+            this.platform +
+            ' : ' +
+            parseInt(Math.random() * 10000 + '').toString()
+          this.socketTask?.send({
+            data,
+            success: (_) => {
+              this.jest_result++
+            },
+            fail: (_) => {
+              this.jest_result = 0
+            },
+          } as SendSocketMessageOptions)
+        })
+        this.socketTask?.onError((_) => {
+          this.jest_result = 0;
+        })
+      }
+    },
+  }
+</script>
+
+<style>
+  .uni-btn-v {
+    padding: 5px 0;
+  }
+
+  .uni-btn-v {
+    margin: 10px 0;
+  }
+
+  .websocket-msg {
+    padding: 40px 0px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 40px;
+    color: #666666;
+  }
+
+  .websocket-tips {
+    padding: 40px 0px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 24px;
+    color: #666666;
+  }
+</style>

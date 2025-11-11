@@ -1,0 +1,122 @@
+<template>
+  <view style="flex:1">
+    <scroll-view :show-scrollbar="false" :scroll-with-animation="true" style="flex: 1;padding-bottom: 10px;">
+      <list-view ref="messageView" @scrolltoupper="clearData" @scrolltolower="loadData" :scroll-with-animation="true"
+        :show-scrollbar="false" style="flex: 1;transform: rotate(180deg)">
+        <list-item v-for="(item, index) in messageList" @longpress="listItemLongPress(index)" :key="`listItem${index}`"
+          :id="`listItem${item.id}`" style="transform: rotate(180deg);padding: 10px 12px;" type="0">
+          <view class="left-row">
+            <image :fade-show="true" :src="item.avatar"
+              :style="{width: `${avatarWidth}px`,height: `${avatarWidth}px`,borderRadius: `${avatarWidth}px`}"></image>
+            <view :id="`listItemContent${item.id}`" class="flex-row content"
+              style="padding: 9px 11px 9px 11px;border-radius: 7px;align-items: center;margin-left: 8px;background-color: #3c99ff;">
+              <text style="font-size: 13px;line-height: 20px;color:#fff;">
+                {{ item.content }}
+              </text>
+            </view>
+            <view style="flex: 1;">
+            </view>
+          </view>
+
+        </list-item>
+        <list-item slot="load-more" type="3" class="loading">
+          <uni-loading :loading="loading" color="#999"></uni-loading>
+        </list-item>
+      </list-view>
+    </scroll-view>
+  </view>
+</template>
+
+<script setup lang="uts">
+  type MessageItem = {
+    id : number;
+    avatar : string;
+    left : boolean;
+    content : string;
+    height : number;
+  }
+
+  const messageView = ref<UniElement | null>(null)
+  const bottom = ref<UniElement | null>(null)
+  const avatarWidth = ref(38)
+  const scrollTop = ref(0)
+  const message = ref('')
+  const showBottom = ref(false)
+  const isFocus = ref(false)
+  const loading = ref(false)
+  const audio = ref(false)
+  const recording = ref(false)
+  const messageList = ref<MessageItem[]>([])
+
+  const screenWidth = computed(() : number => {
+    return 1080
+  })
+  const clearData = () => {
+    if (messageList.value.length >= 40) {
+      messageList.value.splice(39, messageList.value.length - 1)
+    }
+  }
+
+  const listItemLongPress = (index : number) => {
+    uni.showToast({
+      title: '触发长按:' + index,
+      position: "bottom"
+    })
+  }
+
+  const loadData = () => {
+    loading.value = true
+    setTimeout(() => {
+      loading.value = false
+      let length = messageList.value.length
+      for (let i = 0; i < 20; i++) {
+        let item = {
+          id: length + i,
+          avatar: "/static/uni.png",
+          left: true,
+          content: '这是一些占位消息',
+          height: 0
+        } as MessageItem
+        messageList.value.push(item)
+      }
+    }, 800)
+  }
+  const getMessage = () => {
+    let idList : number[] = []
+    for (let index = 0; index < 20; index++) {
+      let item = {
+        id: index,
+        avatar: '/static/uni.png',
+        left: false,
+        content: `这是一条消息${index}`,
+        height: 0
+      } as MessageItem
+      messageList.value.push(item)
+      idList.push(item.id)
+    }
+  }
+  onReady(() => {
+    getMessage()
+  })
+</script>
+
+<style scoped>
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .left-row {
+    flex-direction: row-reverse;
+  }
+
+  .content {
+    margin: 0 8px;
+  }
+
+  .loading {
+    height: 60px;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

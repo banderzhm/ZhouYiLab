@@ -1,0 +1,65 @@
+<template>
+  <page-meta
+    :background-text-style="bgTextStyle"
+    :background-color="bgColor"
+    :background-color-top="bgColorTop"
+    :background-color-bottom="bgColorBottom"
+    :scroll-top="scrollTop"
+    :scroll-duration="2000"
+    @scroll="scroll"
+    @scrolldone="scrolldone"
+    page-style="color: green"
+    root-font-size="30px"
+  >
+    <navigation-bar
+      :title="nbTitle"
+      :loading="nbLoading"
+      :front-color="nbFrontColor"
+      :background-color="nbBackgroundColor"
+    />
+  </page-meta>
+  <view class="content">
+    <text class="title">页面内容</text>
+    <button @click="scrollTo">点击跳到 300px 处</button>
+    <view class="uni-list" v-for="(_, index) in 30" :key="index">
+      <view class="uni-list-cell">{{ index }}</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        bgTextStyle: 'dark',
+        scrollTop: '0px',
+        bgColor: '#ff0000',
+        bgColorTop: '#00ff00',
+        bgColorBottom: '#0000ff',
+        nbTitle: '标题',
+        nbLoading: false,
+        nbFrontColor: '#ffffff',
+        nbBackgroundColor: '#00aaff',
+        // 自动化测试
+        scrollType:null,
+        scrolldoneType:null,
+      }
+    },
+    onLoad() {
+      setTimeout(()=>{
+        this.nbLoading = true
+      },2000)
+    },
+    methods: {
+      scrollTo(){
+        this.scrollTop = '300px'
+      },
+      scroll(e){
+        this.scrollType=e.type
+      },
+      scrolldone(e){
+        this.scrolldoneType=e.type
+      }
+    }
+  }
+</script>

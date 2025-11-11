@@ -1,0 +1,20 @@
+const __sfc__ = defineComponent({
+    __name: 'detail',
+    setup(__props): any | null {
+        const __ins = getCurrentInstance()!;
+        const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+        const _cache = __ins.renderCache;
+        let name = ref("");
+        onLoad((options: OnLoadOptions) => {
+            name.value = (options["name"] as string | null) ?? "";
+        });
+        return (): any | null => {
+            return createElementVNode("view", utsMapOf({
+                style: normalizeStyle(utsMapOf({ "text-align": "center", "padding": "15px" }))
+            }), toDisplayString(unref(name)) + "的详情页面 ", 5 /* TEXT, STYLE */);
+        };
+    }
+});
+export default __sfc__;
+const GenPagesTemplateCustomLongListDetailStyles = [];
+//# sourceMappingURL=detail.uvue.map

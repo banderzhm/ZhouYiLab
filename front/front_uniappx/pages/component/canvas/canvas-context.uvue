@@ -1,0 +1,876 @@
+<template>
+  <view class="page" id="page-canvas">
+    <canvas id="canvas" class="canvas-element"></canvas>
+    <scroll-view class="scroll-view" scroll-y="true">
+      <view class="grid-view">
+        <view class="grid-item" v-for="(name, index) in names" :key="index">
+          <button class="canvas-drawing-button" @click="handleCanvasButton(name)">{{name}}</button>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+  function hidpi(canvas : UniCanvasElement) {
+    const context = canvas.getContext("2d")!;
+    const dpr = uni.getWindowInfo().pixelRatio;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    context.scale(dpr, dpr);
+  }
+
+  export default {
+    data() {
+      const API_PATH = ["arc", "arcTo", "bezierCurveTo", "quadraticCurve", "moveTo", "lineTo", "rect", "clip", "createPattern", "getSetImageData"]
+      const API_DRAW = ["stroke", "strokeRect", "strokeText", "fill", "fillRect", "fillText", "drawImage", "drawImageLocal", "clearRect"]
+      const API_STATE = ["beginPath", "closePath", "reset", "transform", "rotate", "resetTransform", "save", "restore", "scale", "translate", "fontTTF"]
+      const API_PROPERTIES = ["lineCap", "lineJoin", "lineWidth", "miterLimit", "fillStyle", "strokeStyle", "globalAlpha", "font", "setLineDash", "createLinearGradient", "createRadialGradient", "textAlign"]
+
+      return {
+        title: 'createCanvasContextAsync',
+        canvas: null as UniCanvasElement | null,
+        canvasContext: null as CanvasContext | null,
+        renderingContext: null as CanvasRenderingContext2D | null,
+        canvasWidth: 0,
+        canvasHeight: 0,
+        fontLoaded: false,
+        names: [...API_PATH, ...API_DRAW, ...API_STATE, ...API_PROPERTIES, "measureText", "path2D"].sort() as string[]
+      }
+    },
+    onReady() {
+      // HBuilderX 4.25+
+      // 异步调用方式, 跨平台写法
+      uni.createCanvasContextAsync({
+        id: 'canvas',
+        component: this,
+        success: (context : CanvasContext) => {
+          this.canvasContext = context;
+          this.renderingContext = context.getContext('2d')!;
+          this.canvas = this.renderingContext!.canvas;
+
+          hidpi(this.canvas!);
+          this.canvasWidth = this.canvas!.width;
+          this.canvasHeight = this.canvas!.height;
+        }
+      })
+
+      // 同步调用方式，仅支持 app/web
+      // let canvas = uni.getElementById("canvas") as UniCanvasElement
+      // this.renderingContext = canvas.getContext("2d")
+      // hidpi(canvas);
+      // this.canvas = canvas;
+      // this.canvasWidth = canvas.width;
+      // this.canvasHeight = canvas.height;
+    },
+    methods: {
+      handleCanvasButton(name : string) {
+        this.renderingContext!.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+        this.renderingContext!.save()
+        switch (name) {
+          case "arc":
+            this.arc();
+            break;
+          case "arcTo":
+            this.arcTo();
+            break;
+          case "beginPath":
+            this.beginPath();
+            break;
+          case "bezierCurveTo":
+            this.bezierCurveTo();
+            break;
+          case "clearRect":
+            this.clearRect();
+            break;
+          case "clip":
+            this.clip();
+            break;
+          case "closePath":
+            this.closePath();
+            break;
+          case "getSetImageData":
+            this.getSetImageData();
+            break;
+          case "createPattern":
+            this.pattern()
+            break;
+          case "createLinearGradient":
+            this.createLinearGradient();
+            break;
+          case "createRadialGradient":
+            this.createRadialGradient();
+            break;
+          case "fill":
+            this.fill();
+            break;
+          case "fillRect":
+            this.fillRect();
+            break;
+          case "fillText":
+            this.fillText();
+            break;
+          case "lineTo":
+            this.lineTo();
+            break;
+          case "moveTo":
+            this.moveTo();
+            break;
+          case "quadraticCurve":
+            this.quadraticCurveTo();
+            break;
+          case "rect":
+            this.rect();
+            break;
+          case "reset":
+            this.reset();
+            break;
+          case "resetTransform":
+            this.resetTransform();
+            break;
+          case "restore":
+            this.restore();
+            break;
+          case "rotate":
+            this.rotate();
+            break;
+          case "save":
+            this.save();
+            break;
+          case "scale":
+            this.scale();
+            break;
+          case "stroke":
+            this.stroke();
+            break;
+          case "strokeRect":
+            this.strokeRect();
+            break;
+          case "strokeText":
+            this.strokeText();
+            break;
+          case "transform":
+            this.transform();
+            break;
+          case "translate":
+            this.translate();
+            break;
+          case "drawImageLocal":
+            this.drawImageLocal()
+            break;
+          case "drawImage":
+            this.drawImage();
+            break;
+          case "measureText":
+            this.measureText();
+            break;
+          case "fillStyle":
+            this.setFillStyle();
+            break;
+          case "strokeStyle":
+            this.setStrokeStyle();
+            break;
+          case "globalAlpha":
+            this.setGlobalAlpha();
+            break;
+          case "font":
+            this.setFontSize();
+            break;
+          case "lineCap":
+            this.setLineCap();
+            break;
+          case "lineJoin":
+            this.setLineJoin();
+            break;
+          case "setLineDash":
+            this.lineDash();
+            break;
+          case "lineWidth":
+            this.setLineWidth();
+            break;
+          case "miterLimit":
+            this.setMiterLimit();
+            break;
+          case "textAlign":
+            this.textAlign();
+            break;
+          case "path2D":
+            this.path2DMethods();
+            break;
+          case "fontTTF":
+            this.fontTTF();
+            break;
+          default:
+            break;
+        }
+        this.renderingContext!.restore()
+      },
+      clearCanvasRect() {
+        this.renderingContext!.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+      },
+      arc() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.lineWidth = 2
+        context.arc(75, 75, 50, 0, Math.PI * 2, true)
+        context.moveTo(110, 75)
+        context.arc(75, 75, 35, 0, Math.PI, false)
+        context.moveTo(65, 65)
+        context.arc(60, 65, 5, 0, Math.PI * 2, true)
+        context.moveTo(95, 65)
+        context.arc(90, 65, 5, 0, Math.PI * 2, true)
+        context.stroke()
+      },
+      arcTo() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.moveTo(150, 20)
+        context.arcTo(150, 100, 50, 20, 30)
+        context.stroke()
+
+        context.fillStyle = "blue"
+        // base point
+        context.fillRect(150, 20, 10, 10)
+
+        context.fillStyle = "red"
+        // control point one
+        context.fillRect(150, 100, 10, 10)
+        // control point two
+        context.fillRect(50, 20, 10, 10)
+        //
+        context.setLineDash([5, 5])
+        context.moveTo(150, 20)
+        context.lineTo(150, 100)
+        context.lineTo(50, 20)
+        context.stroke()
+        context.beginPath()
+        context.arc(120, 38, 30, 0, 2 * Math.PI, true)
+        context.stroke()
+      },
+      beginPath() {
+        const context = this.renderingContext!
+
+        // First path
+        context.beginPath()
+        context.strokeStyle = "blue"
+        context.moveTo(20, 20)
+        context.lineTo(200, 20)
+        context.stroke()
+
+        // Second path
+        context.beginPath()
+        context.strokeStyle = "green"
+        context.moveTo(20, 20)
+        context.lineTo(120, 120)
+        context.stroke()
+      },
+      textAlign() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.moveTo(150, 0)
+        context.lineTo(150, 150)
+        context.stroke()
+
+        context.font = "30px serif"
+
+        context.textAlign = "left"
+        context.fillText("left-aligned", 150, 40)
+
+        context.textAlign = "center"
+        context.fillText("center-aligned", 150, 85)
+
+        context.textAlign = "right"
+        context.fillText("right-aligned", 150, 130)
+      },
+      getSetImageData() {
+        const context = this.renderingContext!
+        // Create path
+        context.moveTo(0, 70);
+        context.lineTo(80, 0);
+        context.lineTo(210, 110);
+        context.lineTo(30, 110);
+        context.lineTo(160, 0);
+        context.lineTo(240, 70);
+        context.closePath();
+
+        // Fill path
+        context.fillStyle = "green";
+        context.fill();
+
+        let imageData = context.getImageData(0, 0, context.canvas.width / 2, context.canvas.height / 2)
+        context.putImageData(imageData, context.canvas.width / 2, context.canvas.height / 2)
+      },
+      bezierCurveTo() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.moveTo(50, 20)
+        context.bezierCurveTo(230, 30, 150, 60, 50, 100)
+        context.stroke()
+
+        context.fillStyle = "blue"
+        // start point
+        context.fillRect(50, 20, 10, 10)
+        // end point
+        context.fillRect(50, 100, 10, 10)
+
+        context.fillStyle = "red"
+        // control point one
+        context.fillRect(230, 30, 10, 10)
+        // control point two
+        context.fillRect(150, 70, 10, 10)
+      },
+      clearRect() {
+        const context = this.renderingContext!
+
+        // 绘制黄色背景
+        context.beginPath()
+        context.fillStyle = "#ff6"
+        context.fillRect(0, 0, 300, 150)
+
+        // 绘制蓝色三角形
+        context.beginPath()
+        context.fillStyle = "blue"
+        context.moveTo(20, 20)
+        context.lineTo(180, 20)
+        context.lineTo(130, 130)
+        context.closePath()
+        context.fill()
+
+        // 清除一部分画布
+        context.clearRect(10, 10, 120, 100)
+      },
+      clip() {
+        const context = this.renderingContext!
+
+        // Create circular clipping region
+        context.beginPath();
+        context.arc(100, 75, 50, 0, Math.PI * 2, true)
+        context.clip()
+
+        // Draw stuff that gets clipped
+        context.fillStyle = "blue"
+        context.fillRect(0, 0, 300, 150)
+        context.fillStyle = "orange"
+        context.fillRect(0, 0, 100, 100)
+      },
+      closePath() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.lineWidth = 10
+        context.moveTo(20, 20)
+        context.lineTo(20, 100)
+        context.lineTo(70, 100)
+        context.closePath()
+        context.stroke()
+      },
+      pattern() {
+        const context = this.renderingContext!
+
+        const image = this.canvasContext!.createImage()
+        image.src = '/static/api.png';
+        image.onload = () => {
+          context.save()
+          this.clearCanvasRect()
+          const pattern = context.createPattern(image, "repeat")
+          context.fillStyle = pattern
+          context.fillRect(0, 0, 400, 400)
+          context.restore()
+        };
+      },
+      createLinearGradient() {
+        const context = this.renderingContext!
+
+        // Create a linear gradient
+        // The start gradient point is at x=20, y=0
+        // The end gradient point is at x=220, y=0
+        const gradient = context.createLinearGradient(20, 0, 220, 0)
+
+        // Add three color stops
+        gradient.addColorStop(0, "green")
+        gradient.addColorStop(0.5, "cyan")
+        gradient.addColorStop(1, "green")
+
+        // Set the fill style and draw a rectangle
+        context.fillStyle = gradient
+        context.fillRect(20, 20, 200, 100)
+      },
+      createRadialGradient() {
+        const context = this.renderingContext!
+
+        // Create a radial gradient
+        // The inner circle is at x=110, y=90, with radius=30
+        // The outer circle is at x=100, y=100, with radius=70
+        const gradient = context.createRadialGradient(110, 90, 30, 100, 100, 70)
+
+        // Add three color stops
+        gradient.addColorStop(0, "pink")
+        gradient.addColorStop(0.9, "white")
+        gradient.addColorStop(1, "green")
+
+        // Set the fill style and draw a rectangle
+        context.fillStyle = gradient
+        context.fillRect(20, 20, 160, 160)
+      },
+      fill() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.rect(20, 20, 150, 100)
+        context.strokeStyle = '#00ff00'
+        context.fill()
+      },
+      fillRect() {
+        const context = this.renderingContext!
+
+        context.fillStyle = "green"
+        context.fillRect(20, 10, 150, 100)
+      },
+      fillText() {
+        const context = this.renderingContext!
+
+        context.strokeStyle = '#ff0000'
+
+        context.beginPath()
+        context.moveTo(0, 10)
+        context.lineTo(300, 10)
+        context.stroke()
+        // context.save()
+        // context.scale(1.5, 1.5)
+        // context.translate(20, 20)
+        // context.setFontSize(10)
+        context.fillText('Hello World', 0, 30, 300)
+        // context.setFontSize(20)
+        context.fillText('Hello World', 100, 30, 300)
+
+        // context.restore()
+
+        context.beginPath()
+        context.moveTo(0, 30)
+        context.lineTo(300, 30)
+        context.stroke()
+      },
+      moveTo() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.moveTo(0, 0)
+        context.lineTo(300, 150)
+        context.stroke()
+      },
+      lineTo() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.moveTo(20, 20)
+        context.lineTo(20, 100)
+        context.lineTo(70, 100)
+        context.stroke()
+      },
+      stroke() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.moveTo(20, 20)
+        context.lineTo(20, 100)
+        context.lineTo(70, 100)
+        context.strokeStyle = '#00ff00'
+        context.stroke()
+      },
+      strokeRect() {
+        const context = this.renderingContext!
+
+        context.strokeStyle = "green"
+        context.strokeRect(20, 10, 160, 100)
+      },
+      strokeText() {
+        const context = this.renderingContext!
+
+        context.font = "10px serif"
+        context.strokeText("Hello world", 50, 90)
+
+        context.font = "30px serif"
+        context.strokeStyle = "blue"
+        context.strokeText("Hello world", 50, 100)
+      },
+      rotate() {
+        const context = this.renderingContext!
+
+        // Point of transform origin
+        context.arc(0, 0, 5, 0, 2 * Math.PI, true)
+        context.fillStyle = "blue"
+        context.fill()
+
+        // Non-rotated rectangle
+        context.fillStyle = "gray"
+        context.fillRect(100, 0, 80, 20)
+        // Rotated rectangle
+        context.rotate((45 * Math.PI) / 180)
+        context.fillStyle = "red"
+        context.fillRect(100, 0, 80, 20)
+
+        // Reset transformation matrix to the identity matrix
+        context.setTransform(1, 0, 0, 1, 0, 0)
+      },
+      scale() {
+        const context = this.renderingContext!
+
+        // Scaled rectangle
+        context.scale(9, 3)
+        context.fillStyle = "red"
+        context.fillRect(10, 10, 8, 20)
+
+        // Reset current transformation matrix to the identity matrix
+        context.setTransform(1, 0, 0, 1, 0, 0)
+
+        // Non-scaled rectangle
+        context.fillStyle = "gray"
+        context.fillRect(10, 10, 8, 20)
+      },
+      reset() {
+        const context = this.renderingContext!
+
+        // Set line width
+        context.lineWidth = 10
+        context.strokeStyle = '#00ff00'
+        // Stroke rect outline
+        context.strokeRect(50, 50, 150, 100)
+
+        // Create filled text
+        context.font = "50px serif";
+        context.fillText("Rect!", 70, 110)
+
+        context.lineWidth = 5
+
+        // Stroke out circle
+        context.beginPath();
+        context.arc(300, 100, 50, 0, 2 * Math.PI)
+        context.stroke();
+
+        // Create filled text
+        context.font = "25px sans-serif"
+        context.fillText("Circle!", 265, 100)
+        // context.reset()
+
+        hidpi(this.canvas!)
+      },
+      translate() {
+        const context = this.renderingContext!
+
+        // Moved square
+        context.translate(110, 30)
+        context.fillStyle = "red"
+        context.fillRect(0, 0, 80, 80)
+
+        // Reset current transformation matrix to the identity matrix
+        context.setTransform(1, 0, 0, 1, 0, 0)
+
+        // Unmoved square
+        context.fillStyle = "gray"
+        context.fillRect(0, 0, 80, 80)
+      },
+      save() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.strokeStyle = '#00ff00'
+        context.scale(2, 2)
+        context.strokeStyle = '#ff0000'
+        context.rect(0, 0, 100, 100)
+        context.stroke()
+        context.restore()
+
+        context.save()
+        context.rect(0, 0, 50, 50)
+        context.stroke()
+      },
+      restore() {
+        const context = this.renderingContext!;
+
+        [3, 2, 1].forEach((item) => {
+          context.save()
+          context.beginPath()
+          context.scale(item, item)
+          context.rect(10, 10, 100, 100)
+          context.stroke()
+          context.restore()
+        })
+      },
+      drawImageLocal() {
+        const context = this.renderingContext!
+        const image = this.canvasContext!.createImage();
+        image.src = '/static/uni.png'
+        image.onload = () => {
+          context.drawImage(image, 0, 0, 100, 100)
+        }
+      },
+      drawImage() {
+        const context = this.renderingContext!
+        const image = this.canvasContext!.createImage();
+        image.src = 'https://web-ext-storage.dcloud.net.cn/uni-app-x/hello-uniappx-qrcode.png'
+        image.onload = () => {
+          context.drawImage(image, 0, 0, 100, 100)
+        }
+      },
+      rect() {
+        const context = this.renderingContext!
+
+        context.beginPath()
+        context.rect(20, 20, 150, 100)
+        context.stroke()
+      },
+      quadraticCurveTo() {
+        const context = this.renderingContext!
+
+        // Quadratic Bézier curve
+        context.beginPath()
+        context.moveTo(50, 20)
+        context.quadraticCurveTo(230, 30, 50, 100)
+        context.stroke()
+
+        // Start and end points
+        context.fillStyle = "blue"
+        context.beginPath()
+        context.arc(50, 20, 5, 0, 2 * Math.PI, true) // Start point
+        context.arc(50, 100, 5, 0, 2 * Math.PI, true) // End point
+        context.fill();
+
+        // Control point
+        context.fillStyle = "red"
+        context.beginPath()
+        context.arc(230, 30, 5, 0, 2 * Math.PI, true)
+        context.fill()
+      },
+      resetTransform() {
+        const context = this.renderingContext!
+
+        // Draw a rotated rectangle
+        context.rotate((45 * Math.PI) / 180)
+        context.fillRect(60, 0, 100, 30)
+
+        // Reset transformation matrix to the identity matrix
+        context.resetTransform()
+        context.fillStyle = "red"
+        context.fillRect(60, 0, 100, 30)
+      },
+      transform() {
+        const context = this.renderingContext!
+
+        context.transform(1, 0.2, 0.8, 1, 0, 0)
+        context.fillRect(0, 0, 100, 100)
+      },
+      setFillStyle() {
+        const context = this.renderingContext!;
+        ['#fef957', 'rgb(242,159,63)', 'rgb(242,117,63)', '#e87e51'].forEach((item : string, index : number) => {
+          context.fillStyle = item
+          context.beginPath()
+          context.rect(0 + 75 * index, 0, 50, 50)
+          context.fill()
+        })
+      },
+      setStrokeStyle() {
+        const context = this.renderingContext!;
+
+        ['#fef957', 'rgb(242,159,63)', 'rgb(242,117,63)', '#e87e51'].forEach((item : string, index : number) => {
+          context.strokeStyle = item
+          context.beginPath()
+          context.rect(0 + 75 * index, 0, 50, 50)
+          context.stroke()
+        })
+      },
+      setGlobalAlpha() {
+        const context = this.renderingContext!
+
+        context.fillStyle = '#000000';
+        [1, 0.5, 0.1].forEach((item : number, index : number) => {
+          context.globalAlpha = item
+          context.beginPath()
+          context.rect(0 + 75 * index, 0, 50, 50)
+          context.fill()
+        })
+        context.globalAlpha = 1
+      },
+      setFontSize() {
+        const context = this.renderingContext!;
+
+        [10, 20, 30, 40].forEach((item : number, index : number) => {
+          context.font = item + 'px serif'
+          context.fillText('Hello, world', 20, 20 + 40 * index)
+        })
+      },
+      setLineCap() {
+        const context = this.renderingContext!
+
+        context.lineWidth = 10;
+        ['butt', 'round', 'square'].forEach((item : string, index : number) => {
+          context.beginPath()
+          context.lineCap = item as 'butt' | 'round' | 'square'
+          context.moveTo(20, 20 + 20 * index)
+          context.lineTo(100, 20 + 20 * index)
+          context.stroke()
+        })
+      },
+      setLineJoin() {
+        const context = this.renderingContext!
+
+        context.lineWidth = 10;
+        ['bevel', 'round', 'miter'].forEach((item : string, index : number) => {
+          context.beginPath()
+          context.lineJoin = item as 'bevel' | 'round' | 'miter'
+          context.moveTo(20 + 80 * index, 20)
+          context.lineTo(100 + 80 * index, 50)
+          context.lineTo(20 + 80 * index, 100)
+          context.stroke()
+        })
+      },
+      setLineWidth() {
+        const context = this.renderingContext!;
+
+        [2, 4, 6, 8, 10].forEach((item : number, index : number) => {
+          context.beginPath()
+          context.lineWidth = item
+          context.moveTo(20, 20 + 20 * index)
+          context.lineTo(100, 20 + 20 * index)
+          context.stroke()
+        })
+      },
+      lineDash() {
+        const context = this.renderingContext!
+
+        context.setLineDash([4, 16])
+
+        // Dashed line with no offset
+        context.beginPath()
+        context.moveTo(0, 50)
+        context.lineTo(300, 50)
+        context.stroke()
+
+        // Dashed line with offset of 4
+        context.beginPath()
+        context.strokeStyle = "red"
+        context.lineDashOffset = 4
+        context.moveTo(0, 100)
+        context.lineTo(300, 100)
+        context.stroke()
+      },
+      setMiterLimit() {
+        const context = this.renderingContext!
+
+        context.lineWidth = 4;
+        [2, 4, 6, 8, 10].forEach((item : number, index : number) => {
+          context.beginPath()
+          context.miterLimit = item
+          context.moveTo(20 + 80 * index, 20)
+          context.lineTo(100 + 80 * index, 50)
+          context.lineTo(20 + 80 * index, 100)
+          context.stroke()
+        })
+      },
+      measureText() {
+        const context = this.renderingContext!
+
+        const text = "uni-app x，是下一代 uni-app，是一个跨平台应用开发引擎"
+
+        context.font = "20px 宋体"
+
+        context.fillStyle = "red"
+        context.fillText(text, 0, 60)
+        const textMetrics = context.measureText(text)
+        context.strokeText(text, 40, 100)
+        context.fillText("measure text width:" + textMetrics.width, 40, 80)
+      },
+      path2DMethods() {
+        const context = this.renderingContext!
+        context.beginPath()
+        const path2D = this.canvasContext!.createPath2D();
+        const amplitude = 64;
+        const wavelength = 64;
+        for (let i = 0; i < 5; i++) {
+          const x1 = 0 + (i * wavelength);
+          const y1 = 128;
+          const x2 = x1 + wavelength / 4;
+          const y2 = y1 - amplitude;
+          const x3 = x1 + 3 * wavelength / 4;
+          const y3 = y1 + amplitude;
+          const x4 = x1 + wavelength;
+          const y4 = y1;
+          context.moveTo(x1, y1);
+          path2D.bezierCurveTo(x2, y2, x3, y3, x4, y4);
+        }
+        context.stroke(path2D);
+
+        const path2DRect = this.canvasContext!.createPath2D();
+        path2DRect.rect(10, 10, 100, 20);
+        context.fill(path2DRect);
+      },
+      fontTTF() {
+        const context = this.renderingContext!
+        const fontMap = new Map<string, UTSJSONObject>([
+          ["AlimamaDaoLiTiOTF", { path: "/static/font/AlimamaDaoLiTi.otf", text: "阿里妈妈刀隶体字体otf加载成功" } as UTSJSONObject],
+          ["AlimamaDaoLiTiWOFF", { path: "/static/font/AlimamaDaoLiTi.woff", text: "阿里妈妈刀隶体字体Woff加载成功" } as UTSJSONObject],
+          ["iconfont-star", { path: "/static/fonts/icon-star.ttf", text: "\ue879" } as UTSJSONObject],
+        ]);
+        var yOffset = 0
+
+        var drawFont = (key : string, value : UTSJSONObject) => {
+          console.log(`${key}字体加载成功`)
+          context.save()
+          const text = value["text"] as string
+          context.font = `20px ${key}`
+          context.fillStyle = "red"
+          yOffset += 25
+          context.fillText(text, 0, yOffset)
+          yOffset += 25
+          context.strokeText(text, 0, yOffset)
+          context.restore()
+        }
+        fontMap.forEach((value : UTSJSONObject, key : string) => {
+          console.log(`key:${key} value:${value["path"]}`)
+          if (this.fontLoaded) {
+            drawFont(key, value)
+          } else {
+            uni.loadFontFace({
+              family: key,
+              source: `url('${value["path"]}')`,
+              success: () => {
+                drawFont(key, value)
+              }
+            })
+          }
+        })
+        this.fontLoaded = true
+      }
+    }
+  }
+</script>
+
+<style>
+  .page {
+    flex: 1;
+  }
+
+  .scroll-view {
+    flex: 1;
+  }
+
+  .canvas-element {
+    width: 100%;
+    height: 250px;
+    background-color: #ffffff;
+  }
+
+  .grid-view {
+    padding: 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .grid-item {
+    width: 50%;
+    padding: 5px;
+  }
+</style>

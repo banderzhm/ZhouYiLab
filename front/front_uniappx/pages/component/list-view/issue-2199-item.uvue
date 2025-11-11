@@ -1,0 +1,22 @@
+<template>
+  <list-item>
+    <slot></slot>
+  </list-item>
+</template>
+
+<script>
+  export default {
+    name: 'Item',
+    data() {
+      return {
+
+      }
+    },
+    methods: {
+
+    }
+  }
+</script>
+
+<style>
+</style>

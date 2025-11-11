@@ -1,0 +1,71 @@
+<template>
+  <view>
+    <view class="uni-padding-wrap uni-common-mt">
+      <view class="uni-title">默认样式</view>
+      <view class="flex-row">
+        <switch class="switch-checked" :checked="checked" @change="switch1Change" />
+        <switch @change="switch2Change" />
+      </view>
+      <view class="uni-title">暗黑样式</view>
+      <view class="flex-row">
+        <switch id="darkChecked" background-color="#1f1f1f" activeBackgroundColor="#007aff" foreColor="#f0f0f0"
+          activeForeColor="#ffffff" :checked="checked" />
+        <switch id="dark" background-color="#1f1f1f" activeBackgroundColor="#007aff" foreColor="#f0f0f0"
+          activeForeColor="#ffffff" />
+      </view>
+      <view class="uni-title">禁用样式</view>
+      <view class="flex-row">
+        <switch class="switch-checked" :checked="checked" :disabled="true" />
+        <switch :disabled="true" />
+      </view>
+      <view class="uni-title">不同颜色和尺寸的switch</view>
+      <view class="flex-row">
+        <switch class="switch-color-checked" :color="color" style="transform:scale(0.7)" :checked="true" />
+        <switch class="switch-color" :color="color" style="transform:scale(0.7)" />
+      </view>
+      <view class="uni-title">推荐展示样式</view>
+    </view>
+    <view class="uni-list">
+      <view class="uni-list-cell uni-list-cell-padding">
+        <view class="uni-list-cell-db">开启中</view>
+        <switch :checked="true" />
+      </view>
+      <view class="uni-list-cell uni-list-cell-padding">
+        <view class="uni-list-cell-db">关闭</view>
+        <switch />
+      </view>
+    </view>
+  </view>
+</template>
+
+<script lang="uts">
+  export default {
+    data() {
+      return {
+        title: 'switch 开关',
+        checked: true,
+        color: '#FFCC33',
+        clickCheckedValue: true,
+        testVerifyEvent: false,
+      }
+    },
+    methods: {
+      switch1Change: function (e : UniSwitchChangeEvent) {
+        this.clickCheckedValue = e.detail.value
+        console.log('switch1 发生 change 事件，携带值为', e.detail.value)
+
+        // 仅测试
+        this.testVerifyEvent = (e.type == 'change' && (e.target?.tagName ?? '') == "SWITCH")
+      },
+      switch2Change: function (e : UniSwitchChangeEvent) {
+        console.log('switch2 发生 change 事件，携带值为', e.detail.value)
+      }
+    }
+  }
+</script>
+
+<style>
+  .flex-row {
+    flex-direction: row;
+  }
+</style>

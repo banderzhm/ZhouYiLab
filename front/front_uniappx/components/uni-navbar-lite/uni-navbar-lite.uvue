@@ -1,0 +1,140 @@
+<template>
+  <view class="uni-navbar">
+    <!-- #ifdef APP || WEB -->
+    <view v-if="statusBar" class="status-bar"></view>
+    <!-- #endif -->
+    <!-- #ifdef MP -->
+    <view v-if="statusBar" class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    <!-- #endif -->
+    <view class="uni-navbar-inner">
+      <view class="left-content" @click="back">
+        <!-- #ifdef MP-WEIXIN -->
+        <text :style="{ color: textColor }" class="uni-icons back-icon"></text>
+        <!-- #endif -->
+        <!-- #ifndef MP-WEIXIN -->
+        <text :style="{ color: textColor }" class="uni-icons">{{
+          unicode
+        }}</text>
+<!-- #endif -->
+      </view>
+      <view class="uni-navbar-content" :class="{ 'is-left': isLeft }">
+        <text :style="{ color: textColor }">
+          <slot>{{ title }}</slot>
+        </text>
+      </view>
+      <view class="right-content">
+        <slot name="right"></slot>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script lang="ts" setup>
+  // #ifndef MP-WEIXIN
+  import iconpath from "./uniicons.ttf";
+  // #endif
+  const props = defineProps({
+    title: { type: String, default: "" },
+    isLeft: { type: Boolean, default: false },
+    textColor: { type: String, default: "#000" },
+    statusBar: { type: Boolean, default: false },
+    stat: { type: Boolean, default: false }
+  })
+
+  let statusBarHeight = ref(0)
+
+  const unicode = computed(() : string => "\ue600")
+
+  onMounted(() => {
+    // #ifndef MP-WEIXIN
+    uni.loadFontFace({
+      global: false,
+      family: "UniIconsFontFamily",
+      source: `url("${iconpath}")`,
+      success() { },
+      fail(err) {
+        console.log(err);
+      },
+    });
+    // #endif
+
+    uni.setNavigationBarColor({
+      frontColor: "#000000",
+      backgroundColor: "#ffffff",
+    });
+    // #ifdef MP-WEIXIN
+    // TODO 部分小程序平台不支持getWindowInfo
+    statusBarHeight.value = uni.getWindowInfo().statusBarHeight
+    // #endif
+
+    if (props.stat && props.title != '') {
+      uni.report({
+        name: 'title',
+        options: props.title
+      })
+    }
+  })
+
+  const back = () => {
+    uni.navigateBack({});
+  }
+</script>
+
+<style>
+  /* #ifdef MP-WEIXIN */
+  @font-face {
+    font-family: UniIconsFontFamily;
+    src: url('./uniicons.ttf');
+  }
+
+  .back-icon:before {
+    content: "\e600";
+  }
+
+  /* #endif */
+  .uni-icons {
+    font-family: "UniIconsFontFamily" !important;
+    font-size: 26px;
+    font-style: normal;
+    color: #333;
+  }
+
+  .status-bar {
+    height: var(--status-bar-height);
+  }
+
+  .uni-navbar {
+    background-color: #007aff;
+  }
+
+  .uni-navbar-inner {
+    position: relative;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 45px;
+  }
+
+  .left-content,
+  .right-content {
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 100%;
+  }
+
+  .uni-navbar-content {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 45px;
+    right: 45px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .is-left {
+    justify-content: flex-start;
+  }
+</style>

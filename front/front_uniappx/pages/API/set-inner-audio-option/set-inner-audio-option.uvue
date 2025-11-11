@@ -1,0 +1,80 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex:1">
+  <!-- #endif -->
+    <page-head title="setInnerAudioOption"></page-head>
+    <text style="margin-left: 8px">是否允许与其他音频同时播放</text>
+    <radio-group class="uni-flex" style="margin:8px" @change="onMixChanged">
+      <radio value="1" :checked="true">是</radio>
+      <radio value="0" style="margin-left: 16px">否</radio>
+    </radio-group>
+    <view style="padding: 8px 8px;">
+      <button @click="playBackgroundMusic" type="primary">播放背景音频</button>
+      <button @click="playInnerMusic" style="margin-top: 8px">播放音频</button>
+    </view>
+    <view style="padding: 16px 8px;">
+      <view class="uni-row">
+        <view>1. </view>uni.setInnerAudioOption需要与uni.createInnerAudioContext搭配才会生效
+      </view>
+      <view class="uni-row">
+        <view>2. </view>设置mixWithOther为true时，会暂停其他App的音频和背景音频
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        backgroundManager: null as BackgroundAudioManager | null,
+        innerAudio: null as InnerAudioContext | null,
+        isBackgroundAudioPaused: false
+      }
+    },
+    onUnload() {
+      this.backgroundManager?.stop()
+      this.innerAudio?.stop()
+    },
+    methods: {
+      playBackgroundMusic() {
+        if (this.backgroundManager == null) {
+          this.backgroundManager = uni.getBackgroundAudioManager()
+          this.backgroundManager.onPause(() => {
+            this.isBackgroundAudioPaused = true
+          })
+        } else {
+          this.backgroundManager!.stop()
+        }
+        this.backgroundManager!.src = 'https://web-ext-storage.dcloud.net.cn/uni-app/ForElise.mp3'
+        this.backgroundManager!.coverImgUrl = 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/music-a.png';
+        this.backgroundManager!.play()
+      },
+      playInnerMusic() {
+        if (this.innerAudio == null)
+          this.innerAudio = uni.createInnerAudioContext()
+        else {
+          this.innerAudio!.stop()
+        }
+        this.innerAudio!.src = 'https://web-ext-storage.dcloud.net.cn/uni-app/ForElise.mp3'
+        this.innerAudio!.play()
+      },
+      onMixChanged(event : UniRadioGroupChangeEvent) {
+        uni.setInnerAudioOption({
+          mixWithOther: event.detail.value == "1"
+        })
+      },
+      testInnerAudioOption() {
+        uni.setInnerAudioOption({
+          mixWithOther: false
+        })
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>

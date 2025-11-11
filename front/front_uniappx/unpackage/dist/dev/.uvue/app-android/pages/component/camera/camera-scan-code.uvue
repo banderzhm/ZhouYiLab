@@ -1,0 +1,66 @@
+type CameraScanCodeResult = {
+    __$originalPosition?: UTSSourceMapPosition<"CameraScanCodeResult", "pages/component/camera/camera-scan-code.uvue", 31, 8>;
+    type: string | null;
+    result: string | null;
+};
+const __sfc__ = defineComponent({
+    data() {
+        return {
+            result: null as CameraScanCodeResult | null,
+        };
+    },
+    methods: {
+        navigateBack() {
+            uni.navigateBack();
+        },
+        handleScanCode(ev: UniCameraScanCodeEvent) {
+            const deatil = ev.detail;
+            this.result = {
+                type: deatil.type,
+                result: deatil.result
+            } as CameraScanCodeResult;
+        }
+    }
+});
+export default __sfc__;
+function GenPagesComponentCameraCameraScanCodeRender(this: InstanceType<typeof __sfc__>): any | null {
+    const _ctx = this;
+    const _cache = this.$.renderCache;
+    const _component_camera = resolveComponent("camera");
+    return createElementVNode("view", utsMapOf({
+        style: normalizeStyle(utsMapOf({ "flex": "1" }))
+    }), [
+        createVNode(_component_camera, utsMapOf({
+            style: normalizeStyle(utsMapOf({ "width": "100%", "height": "300px" })),
+            resolution: 'high',
+            mode: 'scanCode',
+            onScancode: _ctx.handleScanCode
+        }), null, 8 /* PROPS */, ["style", "onScancode"]),
+        createElementVNode("view", utsMapOf({ class: "camera-scan-code-back-wrap" }), [
+            createElementVNode("button", utsMapOf({
+                type: "default",
+                onClick: _ctx.navigateBack
+            }), "返回正常模式", 8 /* PROPS */, ["onClick"])
+        ]),
+        createElementVNode("view", utsMapOf({ class: "camera-scan-code-table" }), [
+            createElementVNode("view", utsMapOf({ class: "camera-scan-code-table-pair" }), [
+                createElementVNode("view", utsMapOf({ class: "camera-scan-code-table-pair-label" }), [
+                    createElementVNode("text", null, "类型")
+                ]),
+                createElementVNode("view", utsMapOf({ class: "camera-scan-code-table-pair-value" }), [
+                    createElementVNode("text", null, toDisplayString(_ctx.result?.type ?? ''), 1 /* TEXT */)
+                ])
+            ]),
+            createElementVNode("view", utsMapOf({ class: "camera-scan-code-table-pair camera-scan-code-table-top-line" }), [
+                createElementVNode("view", utsMapOf({ class: "camera-scan-code-table-pair-label" }), [
+                    createElementVNode("text", null, "结果")
+                ]),
+                createElementVNode("view", utsMapOf({ class: "camera-scan-code-table-pair-value" }), [
+                    createElementVNode("text", null, toDisplayString(_ctx.result?.result ?? ''), 1 /* TEXT */)
+                ])
+            ])
+        ])
+    ], 4 /* STYLE */);
+}
+const GenPagesComponentCameraCameraScanCodeStyles = [utsMapOf([["camera-scan-code-back-wrap", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "center"], ["alignItems", "center"]]))], ["camera-scan-code-table", padStyleMapOf(utsMapOf([["backgroundColor", "#FFFFFF"], ["marginTop", 20]]))], ["camera-scan-code-table-pair", padStyleMapOf(utsMapOf([["height", 50], ["flexDirection", "row"], ["justifyContent", "space-between"], ["alignItems", "center"]]))], ["camera-scan-code-table-pair-label", padStyleMapOf(utsMapOf([["flexGrow", 1], ["marginLeft", 15]]))], ["camera-scan-code-table-pair-value", padStyleMapOf(utsMapOf([["flexGrow", 2]]))], ["camera-scan-code-table-top-line", padStyleMapOf(utsMapOf([["borderTopWidth", 1], ["borderTopStyle", "solid"], ["borderTopColor", "#eeeeee"]]))]])];
+//# sourceMappingURL=camera-scan-code.uvue.map

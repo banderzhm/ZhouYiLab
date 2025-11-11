@@ -1,0 +1,211 @@
+<script>
+  import { ItemType } from '@/components/enum-data/enum-data-types'
+  export default {
+    data() {
+      return {
+        plain_boolean: false,
+        disabled_boolean: false,
+        default_style: false,
+        size_enum: [{ "value": 0, "name": "default" }, { "value": 1, "name": "mini" }] as ItemType[],
+        size_enum_current: 0,
+        type_enum: [{ "value": 0, "name": "default" }, { "value": 1, "name": "primary" }, { "value": 2, "name": "warn" }] as ItemType[],
+        type_enum_current: 0,
+        count: 0,
+        text: 'uni-app-x'
+      }
+    },
+    methods: {
+      button_click() {
+        console.log("组件被点击时触发")
+        this.count++
+      },
+      button_touchstart() { console.log("手指触摸动作开始") },
+      button_touchmove() { console.log("手指触摸后移动") },
+      button_touchcancel() { console.log("手指触摸动作被打断，如来电提醒，弹窗") },
+      button_touchend() { console.log("手指触摸动作结束") },
+      button_tap() { console.log("手指触摸后马上离开") },
+      button_longpress() { console.log("如果一个组件被绑定了 longpress 事件，那么当用户长按这个组件时，该事件将会被触发。") },
+      change_plain_boolean(checked : boolean) { this.plain_boolean = checked },
+      change_disabled_boolean(checked : boolean) { this.disabled_boolean = checked },
+      change_default_style(checked : boolean) { this.default_style = checked },
+      radio_change_size_enum(checked : number) { this.size_enum_current = checked },
+      radio_change_type_enum(checked : number) { this.type_enum_current = checked },
+      confirm_text_input(value : string) { this.text = value }
+    }
+  }
+</script>
+
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view direction="vertical" style="flex:1">
+  <!-- #endif -->
+    <view class="main">
+
+      <!--type-->
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          :type="type_enum[0].name" :plain="plain_boolean" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''">
+          type-default
+        </button>
+      </view>
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          :type="type_enum[1].name" :plain="plain_boolean" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''">
+          type-primary
+        </button>
+      </view>
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          :type="type_enum[2].name" :plain="plain_boolean" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''">
+          type-warn
+        </button>
+      </view>
+      <!--size-->
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[0].name"
+          :type="type_enum[type_enum_current].name" :plain="plain_boolean" @click="button_click"
+          @touchstart="button_touchstart" @touchmove="button_touchmove" @touchcancel="button_touchcancel"
+          @touchend="button_touchend" @tap="button_tap" @longpress="button_longpress" class="btn"
+          :class="default_style ? 'custom-btn' : ''" :hover-class="default_style ? 'is-hover' : 'button-hover'">
+          size-default
+        </button>
+      </view>
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[1].name"
+          :type="type_enum[type_enum_current].name" :plain="plain_boolean" @click="button_click"
+          @touchstart="button_touchstart" @touchmove="button_touchmove" @touchcancel="button_touchcancel"
+          @touchend="button_touchend" @tap="button_tap" @longpress="button_longpress" class="btn"
+          :class="default_style ? 'custom-btn' : ''" >
+          size-mini
+        </button>
+      </view>
+      <!--plain-->
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          :type="type_enum[type_enum_current].name" :plain="true" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''"
+          :hover-class="default_style ? 'is-hover' : 'button-hover'">
+          plain=true
+        </button>
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          type="primary" :plain="true" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''"
+          :hover-class="default_style ? 'is-hover' : 'button-hover'">
+          plain=true type=primary
+        </button>
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          type="warn" :plain="true" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''"
+          :hover-class="default_style ? 'is-hover' : 'button-hover'">
+          plain=true type=warn
+        </button>
+      </view>
+      <view class="container">
+        <button style="margin: 10px;" :disabled="disabled_boolean" :size="size_enum[size_enum_current].name"
+          :type="type_enum[type_enum_current].name" :plain="false" @click="button_click" @touchstart="button_touchstart"
+          @touchmove="button_touchmove" @touchcancel="button_touchcancel" @touchend="button_touchend" @tap="button_tap"
+          @longpress="button_longpress" class="btn" :class="default_style ? 'custom-btn' : ''"
+         >
+          plain-false
+        </button>
+      </view>
+
+    </view>
+    <view class="container">
+      <button style="margin: 10px;position: relative;text-align:left;padding:5px;color: #ffffff;background-color: #1AAD19;
+        font-size: 10px;line-height: 2;" :disabled="disabled_boolean" hover-class="is-hover">
+        custom-btn
+      </button>
+      <button style="margin: 10px;position: relative;text-align:left;padding:5px;color: #ffffff;background-color: #1AAD19;
+        font-size: 10px;line-height: 2;" :plain="true" :disabled="disabled_boolean" hover-class="is-hover">
+        custom-btn
+      </button>
+    </view>
+    <view class="container">
+      <button style="margin: 10px;
+           font-size: 15px;color: red;" type="warn" plain="true" :disabled="disabled_boolean">
+        custom-btn-plain-warn
+      </button>
+    </view>
+    <view class="content">
+      <button style="margin: 10px;" type="primary" size="default" :disabled="disabled_boolean"
+        hover-class="none">hover-class none</button>
+    </view>
+
+    <view class="content">
+      <button style="margin: 10px;" type="primary" size="default" :disabled="disabled_boolean">uni-app x</button>
+      <button style="margin: 10px;" type="primary"
+        @tap="change_disabled_boolean(!disabled_boolean)">修改disabled为{{!disabled_boolean}}</button>
+    </view>
+    <!--disable-->
+    <view class="container">
+      <button style="margin: 10px;" :disabled="false" :size="size_enum[size_enum_current].name"
+        :type="type_enum[type_enum_current].name" :plain="plain_boolean" @click="button_click"
+        @touchstart="button_touchstart" @touchmove="button_touchmove" @touchcancel="button_touchcancel"
+        @touchend="button_touchend" @tap="button_tap" @longpress="button_longpress" class="btn"
+        :class="default_style ? 'custom-btn' : ''" >
+        disable-false
+      </button>
+    </view>
+    <view class="container">
+      <button style="margin: 10px;" :disabled="true" :size="size_enum[size_enum_current].name"
+        :type="type_enum[type_enum_current].name" :plain="plain_boolean" @click="button_click"
+        @touchstart="button_touchstart" @touchmove="button_touchmove" @touchcancel="button_touchcancel"
+        @touchend="button_touchend" @tap="button_tap" @longpress="button_longpress" class="btn"
+        :class="default_style ? 'custom-btn' : ''" >
+        disable-true
+      </button>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<style>
+  .main {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .main .list-item {
+    width: 100%;
+    height: 100px;
+    border: 1px solid #666;
+  }
+
+  .custom-btn {
+    color: #ffffff;
+    background-color: #1AAD19;
+    border-color: #1AAD19;
+    border-radius: 5px;
+    border-width: 0.5px;
+    height: 53px;
+  }
+
+  .is-hover {
+    color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(26, 173, 25, 0.7);
+    border-color: rgba(26, 173, 25, 0.7);
+  }
+
+  .container {
+    width: 100%;
+  }
+
+  .is-hover {
+    color: rgba(255, 255, 255, 0.6);
+    background-color: #179b16;
+    border-color: #179b16;
+  }
+</style>

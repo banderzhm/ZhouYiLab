@@ -1,0 +1,110 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view style="flex: 1">
+  <!-- #endif -->
+    <view>
+      <view class="container1">
+        <text>控制父视图pointer-events打开时可以点击</text>
+        <switch :checked="true" @change="onChange1" />
+      </view>
+      <view class="container" :style="{ 'pointer-events': pointerEvents1 }">
+        <text class="text">点击修改宽度</text>
+        <view class="base-style transition-width" id="widthOrHeight" @click="changeWidthOrHeight"></view>
+      </view>
+      <view class="container1">
+        <text>控制遮罩层pointer-events关闭时可以点击</text>
+        <switch :checked="true" @change="onChange2" />
+      </view>
+      <view class="container">
+        <text class="text">点击修改宽度(递增)</text>
+        <view class="width-progress transition-width" id="widthProgress" @click="changeWidthProgress"></view>
+        <view class="mask" :style="{ 'pointer-events': pointerEvents2 }"></view>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        isTranstionWidthOrHeight: false,
+        widthOrHeight: null as UniElement | null,
+        widthProgress: null as UniElement | null,
+        progressWidth: 200,
+        pointerEvents1: 'auto',
+        pointerEvents2: 'auto',
+      }
+    },
+    onReady() {
+      this.widthOrHeight = uni.getElementById("widthOrHeight")
+      this.widthProgress = uni.getElementById("widthProgress")
+    },
+    methods: {
+      changeWidthOrHeight() {
+        this.widthOrHeight?.style?.setProperty("width", this.isTranstionWidthOrHeight
+          ? '200px'
+          : '300px')
+        this.isTranstionWidthOrHeight = !this.isTranstionWidthOrHeight
+      },
+      changeWidthProgress() {
+        this.progressWidth += 20
+        this.widthProgress?.style?.setProperty("width", this.progressWidth + 'px')
+      },
+      onChange1(e : UniSwitchChangeEvent) {
+        this.pointerEvents1 = e.detail.value ? 'auto' : 'none'
+      },
+      onChange2(e : UniSwitchChangeEvent) {
+        this.pointerEvents2 = e.detail.value ? 'auto' : 'none'
+      }
+    }
+  }
+</script>
+
+<style>
+  .container1 {
+    margin: 7px 0px 7px 7px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .container {
+    margin: 7px;
+    background-color: white;
+  }
+
+  .text {
+    margin-top: 10px;
+    margin-bottom: 16px;
+  }
+
+  .base-style {
+    width: 200px;
+    height: 200px;
+    background-color: brown;
+  }
+
+  .width-progress {
+    width: 200px;
+    height: 200px;
+    background-color: brown;
+  }
+
+  .transition-width {
+    transition-property: width;
+    transition-duration: 1s;
+  }
+
+  .mask {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+</style>

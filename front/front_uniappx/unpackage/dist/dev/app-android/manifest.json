@@ -1,0 +1,54 @@
+{
+  "id": "__UNI__740BA18",
+  "name": "front_uniappx",
+  "description": "",
+  "version": {
+    "name": "1.9.8",
+    "code": 10908
+  },
+  "uni-app-x": {
+    "compilerVersion": "4.66"
+  },
+  "app": {
+    "distribute": {
+      "modules": {
+        "uni-payment": {
+          "alipay": {},
+          "wxpay": {
+            "android": {},
+            "ios": {
+              "appid": "",
+              "universalLink": ""
+            }
+          }
+        },
+        "uni-location": {
+          "system": {},
+          "tencent": {}
+        },
+        "uni-ad": {
+          "gdt": {}
+        },
+        "uni-push": {},
+        "uni-map": {
+          "tencent": {}
+        }
+      },
+      "icons": {
+        "ios": {
+          "appstore": "package/icon1024.png"
+        },
+        "android": {
+          "xxhdpi": "package/icon144.png",
+          "xxxhdpi": "package/icon192.png"
+        }
+      },
+      "_uni-app-x_": {
+        "pageOrientation": "portrait"
+      },
+      "globalStyle": {
+        "pageOrientation": "portrait"
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+<template>
+  <!-- #ifdef APP -->
+  <scroll-view class="page-scroll-view">
+  <!-- #endif -->
+    <view class="page">
+      <page-head :title="title"></page-head>
+      <view>
+        <view class="item">
+          <text class="item-k">输入:</text>
+          <text class="item-v">{{rpxValue}}rpx</text>
+        </view>
+        <view class="item">
+          <text class="item-k">返回:</text>
+          <text class="item-v">{{pxValue}}px</text>
+        </view>
+      </view>
+      <view>
+        <button id="convert" @click="rpx2px">转换</button>
+      </view>
+    </view>
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+<script>
+  export default {
+    data() {
+      return {
+        title: 'rpx2px',
+        rpxValue: 750,
+        pxValue: 0,
+        result: false
+      }
+    },
+    methods: {
+      rpx2px: function () {
+        this.pxValue = uni.rpx2px(this.rpxValue);
+
+        // 仅限自动化测试
+        const windowInfo = uni.getWindowInfo();
+        if (windowInfo.windowWidth == this.pxValue) {
+          this.result = true
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  .page {
+    padding: 15px;
+  }
+
+  .item {
+    flex-direction: row;
+  }
+
+  .item-k {
+    width: 72px;
+    line-height: 2;
+  }
+
+  .item-v {
+    font-weight: bold;
+    line-height: 2;
+  }
+</style>

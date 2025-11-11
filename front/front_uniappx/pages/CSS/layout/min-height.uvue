@@ -1,0 +1,24 @@
+<template>
+  <view style="flex-grow: 1;">
+    <view>
+      <text>min-height: 250px</text>
+      <view class="common" style="min-height: 250px;">
+        <text>height: 50px</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+
+</script>
+
+<style>
+  .common {
+    width: 250px;
+    height: 50px;
+    background-color: red;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

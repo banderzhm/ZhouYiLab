@@ -1,0 +1,91 @@
+<template>
+  <web-view id="web-view" ref="web-view" class="web-view" src="/hybrid/html/local.html" @message="message"
+    @error="error" @loading="loading" @load="load" @download="download">
+  </web-view>
+  <button @click="evalJS">evalJS</button>
+  <!-- #ifdef APP-ANDROID || APP-IOS -->
+  <view class="safe-area-inset-bottom"></view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        loadError: false,
+        loadFinish: false,
+        // 自动化测试
+        autoTest: false,
+        eventMessage: null as UTSJSONObject | null,
+        eventDownload: null as UTSJSONObject | null
+      }
+    },
+    methods: {
+      evalJS() {
+        const webview = uni.getElementById('web-view') as UniWebViewElement
+        webview.evalJS('postMessage("evalJS")')
+      },
+      message(event : UniWebViewMessageEvent) {
+        console.log(JSON.stringify(event.detail));
+        let contentStr = JSON.stringify(event.detail);
+        // #ifdef APP-IOS
+        contentStr = JSON.stringify(event.detail.data[0]);
+        // #endif
+        uni.showModal({
+          content: contentStr,
+          showCancel: false
+        });
+        if (this.autoTest) {
+          this.eventMessage = {
+            "tagName": event.target?.tagName,
+            "type": event.type,
+            "data": event.detail.data
+          };
+        }
+      },
+      error(event : UniWebViewErrorEvent) {
+        // this.loadError = true
+        console.log(JSON.stringify(event.detail));
+      },
+      loading(event : UniWebViewLoadingEvent) {
+        console.log(JSON.stringify(event.detail));
+      },
+      load(event : UniWebViewLoadEvent) {
+        this.loadFinish = true;
+        console.log(JSON.stringify(event.detail));
+      },
+      download(event : UniWebViewDownloadEvent) {
+        console.log(JSON.stringify(event.detail));
+        if (this.autoTest) {
+          const arr = event.detail.userAgent.split(' ');
+          this.eventDownload = {
+            "tagName": event.target?.tagName,
+            "type": event.type,
+            "url": event.detail.url,
+            "userAgent": arr[arr.length - 1],
+            "contentDisposition": event.detail.contentDisposition,
+            "mimetype": event.detail.mimetype,
+            "isContentLengthValid": Math.trunc(event.detail.contentLength / 1024 / 1024) > 1
+          };
+        }
+      },
+      // 自动化测试
+      testEventDownload() {
+        uni.createWebviewContext('web-view')?.evalJS("document.getElementsByTagName('a')[0].click()");
+      },
+      testEventMessage() {
+        uni.createWebviewContext('web-view')?.evalJS("document.getElementById('postMessage').click()");
+      }
+    }
+  }
+</script>
+
+<style>
+  .web-view {
+    flex: 1;
+  }
+
+  .safe-area-inset-bottom {
+    height: var(--uni-safe-area-inset-bottom);
+  }
+</style>

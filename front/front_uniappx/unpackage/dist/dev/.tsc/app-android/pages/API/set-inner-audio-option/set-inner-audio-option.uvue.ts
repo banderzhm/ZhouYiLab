@@ -1,0 +1,116 @@
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        backgroundManager: null as BackgroundAudioManager | null,
+        innerAudio: null as InnerAudioContext | null,
+        isBackgroundAudioPaused: false
+      }
+    },
+    onUnload() {
+      this.backgroundManager?.stop()
+      this.innerAudio?.stop()
+    },
+    methods: {
+      playBackgroundMusic() {
+        if (this.backgroundManager == null) {
+          this.backgroundManager = uni.getBackgroundAudioManager()
+          this.backgroundManager.onPause(() => {
+            this.isBackgroundAudioPaused = true
+          })
+        } else {
+          this.backgroundManager!.stop()
+        }
+        this.backgroundManager!.src = 'https://web-ext-storage.dcloud.net.cn/uni-app/ForElise.mp3'
+        this.backgroundManager!.coverImgUrl = 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/music-a.png';
+        this.backgroundManager!.play()
+      },
+      playInnerMusic() {
+        if (this.innerAudio == null)
+          this.innerAudio = uni.createInnerAudioContext()
+        else {
+          this.innerAudio!.stop()
+        }
+        this.innerAudio!.src = 'https://web-ext-storage.dcloud.net.cn/uni-app/ForElise.mp3'
+        this.innerAudio!.play()
+      },
+      onMixChanged(event : UniRadioGroupChangeEvent) {
+        uni.setInnerAudioOption({
+          mixWithOther: event.detail.value == "1"
+        })
+      },
+      testInnerAudioOption() {
+        uni.setInnerAudioOption({
+          mixWithOther: false
+        })
+      }
+    }
+  })
+
+export default __sfc__
+function GenPagesAPISetInnerAudioOptionSetInnerAudioOptionRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+const _component_page_head = resolveEasyComponent("page-head",_easycom_page_head)
+const _component_radio = resolveComponent("radio")
+const _component_radio_group = resolveComponent("radio-group")
+
+  return createElementVNode("scroll-view", utsMapOf({
+    style: normalizeStyle(utsMapOf({"flex":"1"}))
+  }), [
+    createVNode(_component_page_head, utsMapOf({ title: "setInnerAudioOption" })),
+    createElementVNode("text", utsMapOf({
+      style: normalizeStyle(utsMapOf({"margin-left":"8px"}))
+    }), "是否允许与其他音频同时播放", 4 /* STYLE */),
+    createVNode(_component_radio_group, utsMapOf({
+      class: "uni-flex",
+      style: normalizeStyle(utsMapOf({"margin":"8px"})),
+      onChange: _ctx.onMixChanged
+    }), utsMapOf({
+      default: withSlotCtx((): any[] => [
+        createVNode(_component_radio, utsMapOf({
+          value: "1",
+          checked: true
+        }), utsMapOf({
+          default: withSlotCtx((): any[] => ["是"]),
+          _: 1 /* STABLE */
+        })),
+        createVNode(_component_radio, utsMapOf({
+          value: "0",
+          style: normalizeStyle(utsMapOf({"margin-left":"16px"}))
+        }), utsMapOf({
+          default: withSlotCtx((): any[] => ["否"]),
+          _: 1 /* STABLE */
+        }), 8 /* PROPS */, ["style"])
+      ]),
+      _: 1 /* STABLE */
+    }), 8 /* PROPS */, ["style", "onChange"]),
+    createElementVNode("view", utsMapOf({
+      style: normalizeStyle(utsMapOf({"padding":"8px 8px"}))
+    }), [
+      createElementVNode("button", utsMapOf({
+        onClick: _ctx.playBackgroundMusic,
+        type: "primary"
+      }), "播放背景音频", 8 /* PROPS */, ["onClick"]),
+      createElementVNode("button", utsMapOf({
+        onClick: _ctx.playInnerMusic,
+        style: normalizeStyle(utsMapOf({"margin-top":"8px"}))
+      }), "播放音频", 12 /* STYLE, PROPS */, ["onClick"])
+    ], 4 /* STYLE */),
+    createElementVNode("view", utsMapOf({
+      style: normalizeStyle(utsMapOf({"padding":"16px 8px"}))
+    }), [
+      createElementVNode("view", utsMapOf({ class: "uni-row" }), [
+        createElementVNode("view", null, "1. "),
+        "uni.setInnerAudioOption需要与uni.createInnerAudioContext搭配才会生效 "
+      ]),
+      createElementVNode("view", utsMapOf({ class: "uni-row" }), [
+        createElementVNode("view", null, "2. "),
+        "设置mixWithOther为true时，会暂停其他App的音频和背景音频 "
+      ])
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */)
+}
+const GenPagesAPISetInnerAudioOptionSetInnerAudioOptionStyles = []
+
+import _easycom_page_head from '@/components/page-head/page-head.vue'

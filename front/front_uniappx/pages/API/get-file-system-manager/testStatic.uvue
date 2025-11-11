@@ -1,0 +1,201 @@
+<template>
+  <!-- #ifdef APP -->
+  <text>查看通过uni.getFileSystemManager()直接处理Static目录的操作日志</text><button size="mini" @click="log=''">清空日志</button>
+  <scroll-view style="max-height: 300px;">
+    <text style="margin: 2px; padding: 2px; border: 1px solid #000000;">{{ log }}</text>
+  </scroll-view>
+
+  <scroll-view style="flex: 1;">
+  <!-- #endif -->
+    <button class="btnstyle" type="primary" @tap="testAccessFile" id="testAccessFile">判断Static中的文件是否存在</button>
+    <button class="btnstyle" type="primary" @tap="testAccessDir" id="testAccessDir">判断Static中的目录是否存在</button>
+    <button class="btnstyle" type="primary" @tap="testCopyFile" id="testCopyFile">复制Static中的文件</button>
+    <button class="btnstyle" type="primary" @tap="testReadFile" id="testReadFile">读取Static中的文件</button>
+    <button class="btnstyle" type="primary" @tap="testReadDir" id="testReadDir">读取Static中filemanager目录内文件列表</button>
+
+    <button class="btnstyle" type="primary" @tap="testFstatFile" id="testFstatFile">获取Static中的文件状态信息</button>
+    <button class="btnstyle" type="primary" @tap="testReadZipEntry" id="testReadZipEntry">获取Static中压缩包内的文件</button>
+
+  <!-- #ifdef APP -->
+  </scroll-view>
+  <!-- #endif -->
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        log: '',
+        logAble: true,
+        staticPath: `/static/filemanager/to.zip`,
+        isSuccess: false
+      }
+    },
+    methods: {
+      testReadZipEntry() {
+        const fileManager = uni.getFileSystemManager()
+        fileManager.readZipEntry({
+          filePath: this.staticPath,
+          encoding: 'utf-8',
+          success: (res : EntriesResult) => {
+            if (this.logAble) {
+              this.log += 'testReadZipEntry success' + '\n\n'
+            }
+            console.log("testReadZipEntry success", res)
+            this.isSuccess = true
+          },
+          fail: (res : IUniError) => {
+            if (this.logAble) {
+              this.log += 'testReadZipEntry fail:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testReadZipEntry fail', res)
+            this.isSuccess = false
+          }
+        })
+      },
+      openFileSyncTest(param : string) : string {
+        const fileManager = uni.getFileSystemManager()
+        let fd = fileManager.openSync({
+          filePath: this.staticPath,
+          flag: param,
+        } as OpenFileSyncOptions)
+        return fd
+      },
+      testFstatFile: function () {
+        const fileManager = uni.getFileSystemManager()
+        fileManager.fstat({
+          fd: this.openFileSyncTest('r'),
+          success: (res : FStatSuccessResult) => {
+            if (this.logAble) {
+              this.log += 'testFstatFile success:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log("testFstatFile success", res)
+            this.isSuccess = true
+          },
+          fail: (res : IUniError) => {
+            if (this.logAble) {
+              this.log += 'testFstatFile fail:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testFstatFile fail', res)
+            this.isSuccess = false
+          }
+        })
+      },
+      testAccessFile: function () {
+        const fileManager = uni.getFileSystemManager()
+        fileManager.access({
+          path: this.staticPath,
+          success: (res : FileManagerSuccessResult) => {
+            if (this.logAble) {
+              this.log += 'testAccessFile success:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('success', res)
+            this.isSuccess = true
+          },
+          fail: (res : IUniError) => {
+            if (this.logAble) {
+              this.log += 'testAccessFile fail:' + JSON.stringify(res) + '\n\n'
+            }
+            this.isSuccess = false
+          }
+        })
+      },
+
+      testAccessDir: function () {
+        const fileManager = uni.getFileSystemManager()
+        fileManager.access({
+          path: '/static/filemanager',
+          success: (res : FileManagerSuccessResult) => {
+            if (this.logAble) {
+              this.log += 'testAccessDir success:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('success', res)
+            this.isSuccess = true
+          },
+          fail: (res : IUniError) => {
+            if (this.logAble) {
+              this.log += 'testAccessDir fail:' + JSON.stringify(res) + '\n\n'
+            }
+            this.isSuccess = false
+          }
+        })
+      },
+
+      testReadFile: function () {
+        let fileManager = uni.getFileSystemManager()
+
+        fileManager.readFile({
+          filePath: this.staticPath,
+          encoding: "utf-8",
+          success: (res : ReadFileSuccessResult) => {
+            if (this.logAble) {
+              this.log += 'testReadFile success:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testReadFile success', res)
+            this.isSuccess = true
+          },
+          fail: (res : IUniError) => {
+            if (this.logAble) {
+              this.log += 'testReadFile fail:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testReadFile', res)
+            this.isSuccess = false
+          }
+        })
+      },
+
+      testReadDir: function () {
+        let fileManager = uni.getFileSystemManager()
+
+        fileManager.readdir({
+          dirPath: `/static/filemanager`,
+          success: (res : ReadDirSuccessResult) => {
+            if (this.logAble) {
+              this.log += 'testReadDir success:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testReadDir success', res)
+            this.isSuccess = true
+          },
+          fail: (res : IUniError) => {
+            if (this.logAble) {
+              this.log += 'testReadDir fail:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testReadDir', res)
+            this.isSuccess = false
+          }
+        })
+      },
+
+      testCopyFile: function () {
+        let fileManager = uni.getFileSystemManager()
+
+        fileManager.copyFile({
+          srcPath: this.staticPath,
+          destPath: `${uni.env.USER_DATA_PATH}/filemanager/to.zip`,
+          success: (res : FileManagerSuccessResult) => {
+            if (this.logAble) {
+              this.log += 'testCopyFile success:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testCopyFile success', res)
+            this.isSuccess = true
+          },
+          fail: (res : IFileSystemManagerFail) => {
+            if (this.logAble) {
+              this.log += 'testCopyFile fail:' + JSON.stringify(res) + '\n\n'
+            }
+            console.log('testCopyFile', res)
+            this.isSuccess = false
+          }
+        })
+      }
+
+    }
+  }
+</script>
+
+
+<style>
+  .btnstyle {
+    margin: 4px;
+  }
+</style>

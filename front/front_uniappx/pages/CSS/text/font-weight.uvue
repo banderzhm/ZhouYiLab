@@ -1,0 +1,20 @@
+<template>
+	<view style="flex-grow: 1;">
+		<view style="height: 250px;background-color: gray;justify-content: center;align-items: center;">
+			<text class="common" style="font-weight: normal;">font-weight: normal</text>
+			<text class="common" style="font-weight: bold;">font-weight: bold</text>
+			<text class="common" style="font-weight: 400;">font-weight: 400</text>
+			<text class="common" style="font-weight: 700;">font-weight: 700</text>
+		</view>
+	</view>
+</template>
+
+<script>
+
+</script>
+
+<style>
+	.common {
+		font-size: 20px;
+	}
+</style>

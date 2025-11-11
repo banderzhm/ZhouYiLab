@@ -1,0 +1,236 @@
+
+  const __sfc__ = defineComponent({
+    data() {
+      return {
+        res: '',
+        task: null as RequestTask | null,
+        host: "https://request.dcloud.net.cn",
+        url: "/api/http/contentType/eventStream?limit=10",
+        method: "POST" as RequestMethod,
+        onHeadersReceivedObseves: [] as number[],
+        onChunkReceivedObseves: [] as number[],
+        onHeadersReceived_returnid_1: -1,
+        onHeadersReceived_returnid_2: -1,
+        isAbort: false,
+      }
+    },
+    onLoad() {
+      this.onHeadersReceivedObseves.push(1)
+      this.onChunkReceivedObseves.push(1)
+    },
+    onUnload() {
+      uni.hideLoading();
+      this.task?.abort();
+    },
+    methods: {
+      onHeadersReceived_observe_1: function () {
+        this.onHeadersReceivedObseves.push(1)
+      },
+      onHeadersReceived_observe_2: function () {
+        this.onHeadersReceivedObseves.push(2)
+      },
+      offHeadersReceived_observe: function () {
+        this.onHeadersReceivedObseves = []
+      },
+      offHeadersReceived_id: function () {
+        this.onHeadersReceivedObseves = []
+        this.onHeadersReceivedObseves.push(1)
+      },
+      onChunkReceived_observe_1: function () {
+        this.onChunkReceivedObseves.push(1)
+      },
+      onChunkReceived_observe_2: function () {
+        this.onChunkReceivedObseves.push(2)
+      },
+      offChunkReceived_observe: function () {
+        this.onChunkReceivedObseves = []
+      },
+      checkRequestTask: function () {
+        this.isAbort = false
+        this.res = '发起post流式请求 \n\n'
+        this.task = uni.request({
+          url: "https://request.dcloud.net.cn/api/http/contentType/eventStream?limit=10",
+          timeout: 600000,
+          method: this.method,
+          enableChunked: true,
+          success: (res) => {
+            console.log('request success', JSON.stringify(res.data), " at pages/API/request/requestTask.uvue:97")
+            console.log('request success header is :', JSON.stringify(res.header), " at pages/API/request/requestTask.uvue:98")
+            this.res += '流式请求结束 \n\n'
+            console.log('请求结果 : ' + JSON.stringify(res), " at pages/API/request/requestTask.uvue:100")
+          },
+          fail: (err) => {
+            let content = err.errMsg
+            if (this.isAbort) {
+              content = "中断成功"
+            }
+            console.log('request fail', err, " at pages/API/request/requestTask.uvue:107");
+            uni.showModal({
+              content: content,
+              showCancel: false
+            });
+          },
+          complete: () => {
+            this.task = null
+          },
+        });
+
+        const onHeadersReceivedCallback1 = (res : RequestTaskOnHeadersReceivedListenerResult) => {
+          console.log("-------onHeadersReceived监听1------", res, " at pages/API/request/requestTask.uvue:119")
+          this.res += `onHeadersReceived监听1：\n ${JSON.stringify(res)} \n\n`
+        }
+        const onHeadersReceivedCallback2 = (res : RequestTaskOnHeadersReceivedListenerResult) => {
+          console.log("-------onHeadersReceived监听2------", res, " at pages/API/request/requestTask.uvue:123")
+          this.res += `onHeadersReceived监听2：\n ${JSON.stringify(res)}  \n\n`
+        }
+
+        if (this.onHeadersReceivedObseves.includes(1)) {
+          this.onHeadersReceived_returnid_1 = this.task?.onHeadersReceived(onHeadersReceivedCallback1) ?? -1
+        }
+
+        if (this.onHeadersReceivedObseves.length == 0) {
+          this.task?.offHeadersReceived(null)
+          this.res += "点击了 offHeadersReceived \n\n"
+        } else if (this.onHeadersReceivedObseves.length == 1) {
+          this.task?.offHeadersReceived(this.onHeadersReceived_returnid_2)
+        }
+
+        const onChunkReceivedCallback1 = (res : RequestTaskOnChunkReceivedListenerResult) => {
+          const chunkText : string = new TextDecoder().decode(res.data)
+          console.log("-------onChunkReceived监听1------", chunkText, " at pages/API/request/requestTask.uvue:140")
+          this.res += `onChunkReceived监听1：\n ${chunkText}`
+        }
+        const onChunkReceivedCallback2 = (res : RequestTaskOnChunkReceivedListenerResult) => {
+          const chunkText : string = new TextDecoder().decode(res.data)
+          console.log("-------onChunkReceived监听2------", chunkText, " at pages/API/request/requestTask.uvue:145")
+          this.res += `onChunkReceived监听2：\n ${chunkText}`
+        }
+
+        if (this.onHeadersReceivedObseves.includes(2)) {
+          this.onHeadersReceived_returnid_2 = this.task?.onHeadersReceived(onHeadersReceivedCallback2) ?? -1
+        }
+
+        if (this.onChunkReceivedObseves.includes(1)) {
+          this.task?.onChunkReceived(onChunkReceivedCallback1)
+        }
+
+        if (this.onChunkReceivedObseves.includes(2)) {
+          this.task?.onChunkReceived(onChunkReceivedCallback2)
+        }
+
+        if (this.onChunkReceivedObseves.length == 0) {
+          this.task?.offChunkReceived(null)
+          this.res += "点击了 offChunkReceived \n\n"
+        }
+      },
+      abort() {
+        this.isAbort = true
+        this.task?.abort()
+      }
+
+    }
+  })
+
+export default __sfc__
+function GenPagesAPIRequestRequestTaskRender(this: InstanceType<typeof __sfc__>): any | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return createElementVNode("view", utsMapOf({
+    style: normalizeStyle(utsMapOf({"flex":"1"}))
+  }), [
+    createElementVNode("view", utsMapOf({ class: "uni-padding-wrap uni-common-mt" }), [
+      createElementVNode("view", utsMapOf({
+        class: "uni-common-mt",
+        style: normalizeStyle(utsMapOf({"border-width":"2px","border-style":"solid","border-radius":"4px"}))
+      }), [
+        createElementVNode("textarea", utsMapOf({
+          value: _ctx.res,
+          class: "uni-textarea",
+          style: normalizeStyle(utsMapOf({"width":"100%"}))
+        }), null, 12 /* STYLE, PROPS */, ["value"])
+      ], 4 /* STYLE */),
+      createElementVNode("view", null, [
+        createElementVNode("text", null, "地址 : " + toDisplayString(_ctx.host + _ctx.url), 1 /* TEXT */),
+        createElementVNode("text", null, "请求方式 : " + toDisplayString(_ctx.method), 1 /* TEXT */)
+      ]),
+      createElementVNode("view", utsMapOf({ class: "uni-btn-v uni-common-mt" }), [
+        createElementVNode("button", utsMapOf({
+          type: "primary",
+          onClick: _ctx.checkRequestTask,
+          id: "checkRequestTask"
+        }), "发起流式请求（设置监听需重新点击、勿重复点击）", 8 /* PROPS */, ["onClick"]),
+        createElementVNode("view", utsMapOf({ class: "uni-common-pb" })),
+        createElementVNode("button", utsMapOf({
+          type: "primary",
+          onClick: _ctx.abort,
+          id: "abort"
+        }), "中断流式请求", 8 /* PROPS */, ["onClick"])
+      ])
+    ]),
+    createElementVNode("scroll-view", utsMapOf({
+      style: normalizeStyle(utsMapOf({"flex":"1"})),
+      "show-scrollbar": "true"
+    }), [
+      createElementVNode("view", utsMapOf({
+        style: normalizeStyle(utsMapOf({"padding":"20px"}))
+      }), [
+        createElementVNode("text", null, "添加或者移除流式监听"),
+        createElementVNode("view", utsMapOf({ class: "uni-common-pb" })),
+        createElementVNode("view", utsMapOf({
+          style: normalizeStyle(utsMapOf({"flex-direction":"row","flex-wrap":"wrap"}))
+        }), [
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.onHeadersReceived_observe_1,
+            id: "onHeadersReceived_observe_1"
+          }), "onHeadersReceived监听1", 12 /* STYLE, PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.onHeadersReceived_observe_2,
+            id: "onHeadersReceived_observe_2"
+          }), "onHeadersReceived监听2", 12 /* STYLE, PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.onChunkReceived_observe_1,
+            id: "onChunkReceived_observe_1"
+          }), "onChunkReceived监听1", 12 /* STYLE, PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.onChunkReceived_observe_2,
+            id: "onChunkReceived_observe_2"
+          }), "onChunkReceived监听2", 12 /* STYLE, PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.offHeadersReceived_id,
+            id: "offHeadersReceived_id"
+          }), "offHeadersReceived(id)", 12 /* STYLE, PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.offHeadersReceived_observe,
+            id: "offHeadersReceived_observe"
+          }), "offHeadersReceived移除所有", 12 /* STYLE, PROPS */, ["onClick"]),
+          createElementVNode("button", utsMapOf({
+            style: normalizeStyle(utsMapOf({"padding":"5px"})),
+            type: "primary",
+            size: "mini",
+            onClick: _ctx.offChunkReceived_observe,
+            id: "offChunkReceived_observe"
+          }), "offChunkReceived移除所有", 12 /* STYLE, PROPS */, ["onClick"])
+        ], 4 /* STYLE */)
+      ], 4 /* STYLE */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */)
+}
+const GenPagesAPIRequestRequestTaskStyles = [utsMapOf([["uni-textarea", padStyleMapOf(utsMapOf([["paddingTop", 9], ["paddingRight", 9], ["paddingBottom", 9], ["paddingLeft", 9], ["fontSize", 14]]))]])]
