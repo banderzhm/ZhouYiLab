@@ -76,3 +76,4 @@ vcpkg_installed/
 
 front/
 .cursor/
+.windsurf/

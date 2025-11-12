@@ -152,7 +152,7 @@ set(FMT_MODULE ON CACHE BOOL "Build fmt as a C++ module" FORCE)
 # 如果遇到问题，请在代码中使用 #include <nlohmann/json.hpp> 代替 import nlohmann.json
 set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" FORCE)
 
-# 在 CMakeLists.txt 中
+# 修复msvc的警告
 if(MSVC)
     # 启用异常处理机制
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
