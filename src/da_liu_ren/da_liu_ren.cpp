@@ -549,24 +549,58 @@ std::array<DiZhi, 3> SanChuan::fu_yin() {
 }
 
 // 返吟法取三传
+// 口诀：
+// 1. 无依卦：课中有贼克，初中末传相冲
+// 2. 无亲卦：课中无贼克，取支驿马发用，中传为支上神、末传为日上神
 std::array<DiZhi, 3> SanChuan::fan_yin() {
-    try {
-        return zei_ke();
-    } catch (const std::exception&) {
-        // 驿马计算
-        DiZhi branch = si_ke_.fourth.upper_zhi;
-        for (int i = 0; i < 3; ++i) {
-            if (branch == DiZhi::Yin || branch == DiZhi::Shen || 
-                branch == DiZhi::Si || branch == DiZhi::Hai) {
-                chu_chuan_ = branch + 6;
-                break;
+    // 1. 检查四课中是否有贼克
+    auto conquerors = have_conquerors(); // 下贼上
+    auto overcomes = have_overcomes();   // 上克下
+    bool has_ke = !conquerors.empty() || !overcomes.empty();
+    
+    if (has_ke) {
+        // 无依卦：课中有贼克，初中末传相冲
+        ke_shi_.push_back("无依卦");
+        
+        // 使用贼克法取三传
+        try {
+            return zei_ke();
+        } catch (const std::exception&) {
+            // 如果贼克法失败，使用默认逻辑
+            if (!conquerors.empty()) {
+                chu_chuan_ = conquerors[0].lower_zhi;
+            } else {
+                chu_chuan_ = overcomes[0].upper_zhi;
             }
-            branch = branch + 4;
+            // 中传和末传为初传的相冲
+            zhong_chuan_ = chu_chuan_ + 6;
+            mo_chuan_ = zhong_chuan_ + 6;
+            return {chu_chuan_, zhong_chuan_, mo_chuan_};
+        }
+    } else {
+        // 无亲卦：课中无贼克，取支驿马发用
+        ke_shi_.push_back("无亲卦");
+        
+        // 取支（第四课下神）的驿马
+        DiZhi zhi = si_ke_.fourth.lower_zhi;
+        
+        // 驿马计算：寅申巳亥为驿马
+        // 寅午戌马在申，申子辰马在寅，巳酉丑马在亥，亥卯未马在巳
+        DiZhi yi_ma;
+        if (zhi == DiZhi::Yin || zhi == DiZhi::Wu || zhi == DiZhi::Xu) {
+            yi_ma = DiZhi::Shen;  // 寅午戌马在申
+        } else if (zhi == DiZhi::Shen || zhi == DiZhi::Zi || zhi == DiZhi::Chen) {
+            yi_ma = DiZhi::Yin;   // 申子辰马在寅
+        } else if (zhi == DiZhi::Si || zhi == DiZhi::You || zhi == DiZhi::Chou) {
+            yi_ma = DiZhi::Hai;   // 巳酉丑马在亥
+        } else { // 亥卯未
+            yi_ma = DiZhi::Si;    // 亥卯未马在巳
         }
         
-        zhong_chuan_ = si_ke_.zhi_yang_shen;
-        mo_chuan_ = si_ke_.gan_yang_shen;
-        ke_shi_.push_back("无依卦");
+        chu_chuan_ = yi_ma;                    // 初传：支驿马
+        zhong_chuan_ = si_ke_.zhi_yang_shen;  // 中传：支上神
+        mo_chuan_ = si_ke_.gan_yang_shen;     // 末传：日上神
+        
         return {chu_chuan_, zhong_chuan_, mo_chuan_};
     }
 }
