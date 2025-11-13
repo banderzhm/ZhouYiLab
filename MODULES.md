@@ -12,6 +12,9 @@
 │  ┌──────────┬──────────┬──────┬──────────┐     │
 │  │ LiuYao   │ DaLiuRen │ BaZi │  ZiWei   │     │
 │  └──────────┴──────────┴──────┴──────────┘     │
+│  ┌──────────┐                                   │
+│  │  QiMen   │                                   │
+│  └──────────┘                                   │
 └─────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────┐
@@ -170,6 +173,110 @@ import std;         // 标准库
 
 ### 2. 功能模块 (Feature Layer)
 
+#### ZhouYi.BaZi
+**文件**: `src/ba_zi/ba_zi.cppm`
+
+**导出内容**:
+- `struct BaZiResult` - 八字排盘结果
+- `struct DaYun` - 大运信息
+- `struct LiuNian` - 流年信息
+- `struct LiuYue` - 流月信息
+- `pai_pan_solar()` - 公历排盘
+- `pai_pan_lunar()` - 农历排盘
+- `get_da_yun_list()` - 获取大运列表
+- `get_liu_nian()` - 获取流年
+- `get_liu_yue_list()` - 获取流月列表
+
+**依赖**:
+```cpp
+import ZhouYi.BaZiBase;        // 八字基础
+import ZhouYi.GanZhi;          // 干支系统
+import ZhouYi.Tyme;            // 农历历法
+import std;                    // 标准库
+```
+
+**使用示例**:
+```cpp
+import ZhouYi.BaZiController;
+
+using namespace ZhouYi::BaZiController;
+
+// 公历排盘
+auto result = pai_pan_solar(2000, 7, 15, 16, 30, true);
+const auto& ba_zi = result.ba_zi;
+std::println("年柱：{}", ba_zi.year.to_string());
+```
+
+---
+
+#### ZhouYi.DaLiuRen
+**文件**: `src/da_liu_ren/da_liu_ren.cppm`
+
+**导出内容**:
+- `struct DaLiuRenResult` - 大六壬排盘结果
+- `struct SiKe` - 四课信息
+- `struct SanChuan` - 三传信息
+- `struct TianDiPan` - 天地盘信息
+- `pai_pan()` - 公历排盘
+- `pai_pan_lunar()` - 农历排盘
+
+**依赖**:
+```cpp
+import ZhouYi.GanZhi;          // 干支系统
+import ZhouYi.Tyme;            // 农历历法
+import nlohmann.json;          // JSON 序列化
+import std;                    // 标准库
+```
+
+**使用示例**:
+```cpp
+import ZhouYi.DaLiuRen.Controller;
+
+using namespace ZhouYi::DaLiuRen;
+
+auto result = DaLiuRenEngine::pai_pan(2024, 10, 13, 14);
+std::println("月将: {}", result.yue_jiang);
+```
+
+---
+
+#### ZhouYi.QiMen
+**文件**: `src/qi_men/qi_men.cppm`, `src/qi_men/qi_men_pan.cppm`, `src/qi_men/qi_men_controller.cppm`
+
+**导出内容**:
+- `struct QiMenPan` - 奇门盘信息
+- `enum class Dun` - 阴阳遁枚举
+- `enum class Palace` - 九宫枚举
+- `enum class SolarTerm` - 二十四节气枚举
+- `pai_pan_solar()` - 公历排盘
+- `pai_pan_lunar()` - 农历排盘
+- `get_summary()` - 获取排盘摘要
+- `analyze_auspiciousness()` - 分析宫位吉凶
+
+**依赖**:
+```cpp
+import ZhouYi.GanZhi;          // 干支系统
+import ZhouYi.Tyme;            // 农历历法
+import std;                    // 标准库
+```
+
+**使用示例**:
+```cpp
+import ZhouYi.QiMen.Controller;
+
+using namespace ZhouYi::QiMen;
+
+// 公历排盘
+auto result = QiMenController::pai_pan_solar(2011, 6, 18, 3, 56);
+if (result) {
+    const auto& pan = result.value();
+    std::println("阴阳遁：{}", pan.dun == Dun::Yang ? "阳遁" : "阴遁");
+    std::println("局数：第{}局", pan.ju);
+}
+```
+
+---
+
 #### ZhouYi.LiuYao
 **文件**: `src/liu_yao/liu_yao.cppm`
 
@@ -206,6 +313,46 @@ auto [yaoList, json] = sixYaoDivination("111111", bazi, {1, 4});
 ---
 
 ## 模块依赖关系
+
+### BaZi 依赖树
+
+```
+ZhouYi.BaZi
+├── ZhouYi.BaZiBase
+│   ├── nlohmann.json
+│   └── std
+├── ZhouYi.GanZhi
+│   ├── magic_enum
+│   └── std
+├── ZhouYi.Tyme
+│   └── std
+└── std
+```
+
+### DaLiuRen 依赖树
+
+```
+ZhouYi.DaLiuRen
+├── ZhouYi.GanZhi
+│   ├── magic_enum
+│   └── std
+├── ZhouYi.Tyme
+│   └── std
+├── nlohmann.json
+└── std
+```
+
+### QiMen 依赖树
+
+```
+ZhouYi.QiMen
+├── ZhouYi.GanZhi
+│   ├── magic_enum
+│   └── std
+├── ZhouYi.Tyme
+│   └── std
+└── std
+```
 
 ### LiuYao 依赖树
 
@@ -338,14 +485,23 @@ target_sources(ZhouYiLab
 - ✅ 使用 `= default` 生成默认函数
 - ✅ 使用 `std::ranges` 进行范围操作
 
+## 已实现模块
+
+已完成的功能模块：
+
+1. ✅ **ZhouYi.BaZi** - 八字排盘系统（完整实现）
+2. ✅ **ZhouYi.DaLiuRen** - 大六壬排盘系统（完整实现）
+3. ✅ **ZhouYi.QiMen** - 奇门遁甲排盘系统（完整实现）
+4. ✅ **ZhouYi.LiuYao** - 六爻排盘系统（完整实现）
+5. ✅ **ZhouYi.ZiWei** - 紫微斗数排盘系统（完整实现）
+
 ## 未来扩展
 
 计划添加的模块：
 
-1. **ZhouYi.DaLiuRen** - 大六壬排盘系统
-2. **ZhouYi.BaZi** - 八字排盘系统
-3. **ZhouYi.ZiWei** - 紫微斗数排盘系统
-4. **ZhouYi.Feng Shui** - 风水计算系统
+1. **ZhouYi.FengShui** - 风水计算系统
+2. **ZhouYi.MeiHua** - 梅花易数系统
+3. **ZhouYi.TaiYi** - 太乙神数系统
 
 所有新模块都应该：
 - 遵循相同的命名和组织规范
