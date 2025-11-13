@@ -422,6 +422,11 @@ std::array<DiZhi, 3> SanChuan::ba_zhuan() {
 }
 
 // 伏吟法取三传
+// 口诀：
+// 1. 四课中有贼克 → 不虞卦
+// 2. 四课中无贼克，日干为阳（刚日） → 自任卦
+// 3. 四课中无贼克，日干为阴（柔日） → 自信卦
+// 4. 初传或中传为自刑神 → 杜传
 std::array<DiZhi, 3> SanChuan::fu_yin() {
     if (!si_ke_.first.is_gan_zhi) {
         throw std::runtime_error("第一课不是干支课，无法判断伏吟");
@@ -429,38 +434,44 @@ std::array<DiZhi, 3> SanChuan::fu_yin() {
     
     bool is_yang_ri = si_ke_.first.is_yang();
     
-    // 1. 优先检查四课中是否有克，有克取克发用
+    // 1. 检查四课中是否有贼克（下贼上或上克下）
     auto conquerors = have_conquerors(); // 下贼上
     auto overcomes = have_overcomes();   // 上克下
+    bool has_ke = !conquerors.empty() || !overcomes.empty();
     
-    if (!conquerors.empty()) {
-        // 有下贼上，取日干寄宫地支作为初传
-        TianGan day_gan = si_ke_.first.gan;
-        chu_chuan_ = get_ji_gong(day_gan);
+    if (has_ke) {
+        // 不虞卦：四课中有贼克
         ke_shi_.push_back("不虞卦");
-    } else if (!overcomes.empty()) {
-        // 有上克下，取上克的地支位置作为初传
-        chu_chuan_ = overcomes[0].upper_zhi;
-        ke_shi_.push_back("不虞卦");
+        
+        if (!conquerors.empty()) {
+            // 有下贼上，取日干寄宫地支作为初传
+            TianGan day_gan = si_ke_.first.gan;
+            chu_chuan_ = get_ji_gong(day_gan);
+        } else {
+            // 有上克下，取上克的地支位置作为初传
+            chu_chuan_ = overcomes[0].upper_zhi;
+        }
     } else {
-        // 2. 无克时按阴阳取发用
+        // 无贼克，按阴阳取发用
         if (is_yang_ri) {
-            // 阳日取干上神
+            // 自任卦：四课中无贼克，日干为阳（刚日）
             chu_chuan_ = si_ke_.gan_yang_shen;
             ke_shi_.push_back("自任卦");
         } else {
-            // 阴日取支上神
+            // 自信卦：四课中无贼克，日干为阴（柔日）
             chu_chuan_ = si_ke_.zhi_yang_shen;
             ke_shi_.push_back("自信卦");
         }
     }
     
-    // 3. 计算中传：取初传相刑的支为中传
+    // 2. 计算中传：取初传相刑的支为中传
     // 自刑之神：辰、午、酉、亥
     bool chu_zi_xing = (chu_chuan_ == DiZhi::Chen || chu_chuan_ == DiZhi::Wu || 
                         chu_chuan_ == DiZhi::You || chu_chuan_ == DiZhi::Hai);
     
     if (chu_zi_xing) {
+        // 杜传：初传自刑
+        ke_shi_.push_back("杜传");
         // 初传是自刑神，阳日取干上神，阴日取支上神
         if (is_yang_ri) {
             zhong_chuan_ = si_ke_.gan_yang_shen;
@@ -479,11 +490,15 @@ std::array<DiZhi, 3> SanChuan::fu_yin() {
         }
     }
     
-    // 4. 计算末传：取中传相刑的支为末传
+    // 3. 计算末传：取中传相刑的支为末传
     bool zhong_zi_xing = (zhong_chuan_ == DiZhi::Chen || zhong_chuan_ == DiZhi::Wu || 
                           zhong_chuan_ == DiZhi::You || zhong_chuan_ == DiZhi::Hai);
     
     if (zhong_zi_xing) {
+        // 杜传：中传自刑
+        if (!chu_zi_xing) {  // 如果初传不是自刑，才添加杜传标记
+            ke_shi_.push_back("杜传");
+        }
         // 中传是自刑神，取中传所冲为末传
         mo_chuan_ = zhong_chuan_ + 6;
     } else {
