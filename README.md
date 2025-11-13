@@ -103,8 +103,12 @@ cmake --build build --config Release
 #### Linux / macOS
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+# 使用 Ninja 构建（推荐，速度更快）
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
+
+# 或使用多核编译
+cmake --build build -j$(nproc)
 ```
 
 ### 3️⃣ 运行示例
