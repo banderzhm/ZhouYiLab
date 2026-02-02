@@ -24,15 +24,99 @@ export namespace ZhouYi::ZiWei {
     };
 
     /**
+     * @brief 安命主星（按命宫地支或年支）
+     * 
+     * 命主星映射表：
+     * - 子→贪狼, 丑→巨门, 寅→禄存, 卯→文曲, 辰→廉贞, 巳→武曲
+     * - 午→破军, 未→武曲, 申→廉贞, 酉→文曲, 戌→禄存, 亥→巨门
+     * 
+     * @param ming_gong_zhi 命宫地支（通用派）或年支（中州派）
+     * @return 命主星名称
+     */
+    string get_ming_zhu_xing(DiZhi ming_gong_zhi);
+
+    /**
+     * @brief 安身主星（按年支）
+     * 
+     * 身主星映射表：
+     * - 子/午→火星, 丑/未→天相, 寅/申→天梁
+     * - 卯/酉→天同, 辰/戌→文昌, 巳/亥→天机
+     * 
+     * @param year_zhi 年支
+     * @return 身主星名称
+     */
+    string get_shen_zhu_xing(DiZhi year_zhi);
+
+    /**
      * @brief 起紫微星诀算法
      */
     int get_zi_wei_index(int lunar_day, WuXingJu wu_xing_ju);
 
     /**
-     * @brief 获取天府星索引（与紫微星对宫）
+     * @brief 获取天府星索引
+     * 
+     * 紫微与天府的位置关系规则：
+     * - 寅/申：紫府同宫
+     * - 子/辰：互换（紫微子则天府辰，紫微辰则天府子）
+     * - 丑/卯：互换（紫微丑则天府卯，紫微卯则天府丑）
+     * - 巳/亥：对宫
+     * - 午/戌：互换（紫微午则天府戌，紫微戌则天府午）
+     * - 未/酉：互换（紫微未则天府酉，紫微酉则天府未）
+     * 
+     * 索引对应（以寅宫为0）：
+     * 寅0 卯1 辰2 巳3 午4 未5 申6 酉7 戌8 亥9 子10 丑11
      */
     constexpr int get_tian_fu_index(int zi_wei_index) {
-        return fix_index(zi_wei_index + 6);
+        // 紫微地支索引转换为地支序号（子=0的系统）
+        // 寅0→寅2, 卯1→卯3, 辰2→辰4, 巳3→巳5, 午4→午6, 未5→未7
+        // 申6→申8, 酉7→酉9, 戌8→戌10, 亥9→亥11, 子10→子0, 丑11→丑1
+        
+        // 先将宫位索引转为地支（寅=0的系统转为子=0的系统）
+        // 寅宫索引0 对应 地支寅(2), 卯宫索引1 对应 地支卯(3), ...
+        int zi_wei_zhi = (zi_wei_index + 2) % 12;  // 转换为子=0的地支索引
+        
+        int tian_fu_zhi;
+        switch (zi_wei_zhi) {
+            case 2:  // 寅
+            case 8:  // 申
+                tian_fu_zhi = zi_wei_zhi;  // 同宫
+                break;
+            case 0:  // 子
+                tian_fu_zhi = 4;  // 辰
+                break;
+            case 4:  // 辰
+                tian_fu_zhi = 0;  // 子
+                break;
+            case 1:  // 丑
+                tian_fu_zhi = 3;  // 卯
+                break;
+            case 3:  // 卯
+                tian_fu_zhi = 1;  // 丑
+                break;
+            case 5:  // 巳
+                tian_fu_zhi = 11; // 亥
+                break;
+            case 11: // 亥
+                tian_fu_zhi = 5;  // 巳
+                break;
+            case 6:  // 午
+                tian_fu_zhi = 10; // 戌
+                break;
+            case 10: // 戌
+                tian_fu_zhi = 6;  // 午
+                break;
+            case 7:  // 未
+                tian_fu_zhi = 9;  // 酉
+                break;
+            case 9:  // 酉
+                tian_fu_zhi = 7;  // 未
+                break;
+            default:
+                tian_fu_zhi = zi_wei_zhi;
+        }
+        
+        // 转换回宫位索引（寅=0的系统）
+        return (tian_fu_zhi + 10) % 12;  // (x - 2 + 12) % 12 = (x + 10) % 12
     }
 
     /**
@@ -199,8 +283,9 @@ export namespace ZhouYi::ZiWei {
 
     /**
      * @brief 安旬空（按年干支）
+     * 返回两个空亡地支的宫位索引
      */
-    int get_xun_kong_index(TianGan year_gan, DiZhi year_zhi);
+    pair<int, int> get_xun_kong_index(TianGan year_gan, DiZhi year_zhi);
 
     /**
      * @brief 安截路空亡（按年干）
@@ -221,6 +306,21 @@ export namespace ZhouYi::ZiWei {
      * @brief 安年解（按年支）
      */
     int get_nian_jie_index(DiZhi year_zhi);
+
+    /**
+     * @brief 安天马（按年支）
+     */
+    int get_tian_ma_index(DiZhi year_zhi);
+
+    /**
+     * @brief 安大耗和龙德（按年支，生年杂耀）
+     * 
+     * 口诀：
+     * 大耗在年支之对宫，前一位或后一位安星。
+     * 阳地支顺行前一位，阴地支逆行后一位。
+     * 龙德在大耗对宫。
+     */
+    pair<int, int> get_da_hao_long_de_index(DiZhi year_zhi);
 
     // ============= 长生12神和博士12神 =============
 

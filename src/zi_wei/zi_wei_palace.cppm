@@ -155,8 +155,8 @@ export namespace ZhouYi::ZiWei {
         string to_string() const {
             return fmt::format("{} ({}{})", 
                 string(to_zh(gong_wei)),
-                string(to_zh(tian_gan)),
-                string(to_zh(di_zhi))
+                string(GanZhi::Mapper::to_zh(tian_gan)),
+                string(GanZhi::Mapper::to_zh(di_zhi))
             );
         }
     };
@@ -179,6 +179,22 @@ export namespace ZhouYi::ZiWei {
         // 获取命宫和身宫索引
         auto [ming_index, shen_index] = get_ming_shen_index(lunar_month, hour_zhi);
         
+        // 获取寅宫天干（五虎遁）
+        // 甲己丙寅头，乙庚戊寅头，丙辛庚寅头，丁壬壬寅头，戊癸甲寅头
+        const TianGan yin_gan_table[] = {
+            TianGan::Bing,  // 甲年
+            TianGan::Wu,    // 乙年
+            TianGan::Geng,  // 丙年
+            TianGan::Ren,   // 丁年
+            TianGan::Jia,   // 戊年
+            TianGan::Bing,  // 己年
+            TianGan::Wu,    // 庚年
+            TianGan::Geng,  // 辛年
+            TianGan::Ren,   // 壬年
+            TianGan::Jia    // 癸年
+        };
+        TianGan yin_gan = yin_gan_table[static_cast<int>(year_gan)];
+        
         // 获取命宫天干地支
         TianGan ming_gan = get_ming_gan(year_gan, ming_index);
         DiZhi ming_zhi = get_ming_zhi(ming_index);
@@ -187,12 +203,13 @@ export namespace ZhouYi::ZiWei {
         WuXingJu wu_xing_ju = get_wu_xing_ju(ming_gan, ming_zhi);
         
         // 填充十二宫数据
-        // 宫位名称从命宫开始顺时针排列
+        // 宫位名称从命宫开始逆时针排列（紫微斗数标准顺序）
+        // 命宫 → 父母 → 福德 → 田宅 → 官禄 → 奴仆 → 迁移 → 疾厄 → 财帛 → 子女 → 夫妻 → 兄弟
         const GongWei gong_wei_order[] = {
-            GongWei::MingGong, GongWei::XiongDiGong, GongWei::FuQiGong,
-            GongWei::ZiNvGong, GongWei::CaiBoGong, GongWei::JiBingGong,
-            GongWei::QianYiGong, GongWei::NuPuGong, GongWei::GuanLuGong,
-            GongWei::TianZhaiGong, GongWei::FuDeGong, GongWei::FuMuGong
+            GongWei::MingGong, GongWei::FuMuGong, GongWei::FuDeGong,
+            GongWei::TianZhaiGong, GongWei::GuanLuGong, GongWei::NuPuGong,
+            GongWei::QianYiGong, GongWei::JiBingGong, GongWei::CaiBoGong,
+            GongWei::ZiNvGong, GongWei::FuQiGong, GongWei::XiongDiGong
         };
         
         for (int i = 0; i < 12; ++i) {
@@ -202,9 +219,10 @@ export namespace ZhouYi::ZiWei {
             // 该宫位相对于命宫的偏移
             int offset_from_ming = fix_index(i - ming_index);
             
-            // 该宫位的天干（从命宫天干顺数）
+            // 该宫位的天干（从寅宫天干顺数）
+            // 每个宫位的天干 = 寅宫天干 + 宫位索引
             TianGan palace_gan = static_cast<TianGan>(
-                (static_cast<int>(ming_gan) + offset_from_ming) % 10
+                (static_cast<int>(yin_gan) + i) % 10
             );
             
             // 该宫位的地支（从寅宫开始）

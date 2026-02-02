@@ -8,7 +8,7 @@ import ZhouYi.ZiWei.Constants;
 import ZhouYi.ZiWei.SiHua;
 import ZhouYi.ZiWei.SanFang;
 import ZhouYi.ZiWei.GeJu;
-import ZhouYi.ZiWei.StarDescription;
+import ZhouYi.ZiWei.StarDocument;
 
 export namespace ZhouYi::ZiWei {
     using namespace std;

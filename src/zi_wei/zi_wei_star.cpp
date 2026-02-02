@@ -166,10 +166,68 @@ namespace ZhouYi::ZiWei {
         }
     }
 
-    // ============= 辅星和煞星定位算法 =============
+    // ============= 命主星和身主星算法 =============
 
     /**
-     * @brief 安左辅右弼诀
+     * @brief 安命主星（按命宫地支或年支）
+     * 
+     * 命主星映射表：
+     * - 子→贪狼, 丑→巨门, 寅→禄存, 卯→文曲, 辰→廉贞, 巳→武曲
+     * - 午→破军, 未→武曲, 申→廉贞, 酉→文曲, 戌→禄存, 亥→巨门
+     */
+    string get_ming_zhu_xing(DiZhi ming_gong_zhi) {
+        // 按地支顺序：子丑寅卯辰巳午未申酉戌亥
+        static const array<string, 12> ming_zhu_stars = {
+            "贪狼",  // 子0
+            "巨门",  // 丑1
+            "禄存",  // 寅2
+            "文曲",  // 卯3
+            "廉贞",  // 辰4
+            "武曲",  // 巳5
+            "破军",  // 午6
+            "武曲",  // 未7
+            "廉贞",  // 申8
+            "文曲",  // 酉9
+            "禄存",  // 戌10
+            "巨门"   // 亥11
+        };
+        
+        int zhi_idx = static_cast<int>(ming_gong_zhi);
+        return ming_zhu_stars[zhi_idx];
+    }
+
+    /**
+     * @brief 安身主星（按年支）
+     * 
+     * 身主星映射表：
+     * - 子/午→火星, 丑/未→天相, 寅/申→天梁
+     * - 卯/酉→天同, 辰/戌→文昌, 巳/亥→天机
+     */
+    string get_shen_zhu_xing(DiZhi year_zhi) {
+        // 按地支顺序：子丑寅卯辰巳午未申酉戌亥
+        static const array<string, 12> shen_zhu_stars = {
+            "火星",  // 子0
+            "天相",  // 丑1
+            "天梁",  // 寅2
+            "天同",  // 卯3
+            "文昌",  // 辰4
+            "天机",  // 巳5
+            "火星",  // 午6
+            "天相",  // 未7
+            "天梁",  // 申8
+            "天同",  // 酉9
+            "文昌",  // 戌10
+            "天机"   // 亥11
+        };
+        
+        int zhi_idx = static_cast<int>(year_zhi);
+        return shen_zhu_stars[zhi_idx];
+    }
+
+    // ============= 辅星和煢星定位算法 =============
+
+    /**
+     * @brief 安左辅右彼诀
      * 
      * 口诀：
      * 辰上顺正寻左辅，
@@ -727,31 +785,77 @@ namespace ZhouYi::ZiWei {
      * 
      * 口诀：
      * 生年支顺数的前一位就是。
+     * 子年天空在丑，丑年天空在寅，以此类推
      */
     int get_tian_kong_index(DiZhi year_zhi) {
-        // 天空：生年支顺数前一位
-        return fix_index(static_cast<int>(year_zhi) + 1);
+        // 天空：生年支的下一位（子起索引）
+        int zhi_idx = static_cast<int>(year_zhi);
+        int tian_kong_dizhi = (zhi_idx + 1) % 12;  // 子起索引
+        
+        // 转换为寅起索引
+        return fix_index(tian_kong_dizhi - 2, 12);
     }
 
     /**
      * @brief 安旬空诀
      * 
      * 算法：
-     * 从生年地支顺数，加上（9-年干序号）再加1
-     * 若阴阳属性不同，再加1
+     * 根据年柱天干找出所在旬，空亡的两个地支即是旬空
+     * 甲子旬：戌亥空，甲戌旬：申酉空，甲申旬：午未空
+     * 甲午旬：辰巳空，甲辰旬：寅卯空，甲寅旬：子丑空
+     * 
+     * 返回两个旬空的宫位索引（寅起）
      */
-    int get_xun_kong_index(TianGan year_gan, DiZhi year_zhi) {
-        // 旬空计算
+    pair<int, int> get_xun_kong_index(TianGan year_gan, DiZhi year_zhi) {
+        // 天干：甲0 乙1 丙2 丁3 戊4 巵5 庆6 辛7 壬8 相9
+        // 地支：子0 丑1 寅2 卯3 辰4 巳5 午6 未7 申8 酉 9 戌10 亥11
         int gan_idx = static_cast<int>(year_gan);
-        int zhi_idx = static_cast<int>(year_zhi);
-        int xun_kong_idx = fix_index(zhi_idx + (9 - gan_idx) + 1);
         
-        // 阴阳属性检查
-        if ((zhi_idx % 2) != (xun_kong_idx % 2)) {
-            xun_kong_idx = fix_index(xun_kong_idx + 1);
-        }
+        // 旬空地支映射表（按天干查旬空）
+        // 甲(0): 甲子旬/甲午旬 -> 戌亥(10,11) / 辰巳(4,5)
+        // 乙(1): 乙丑旬/乙未旬 -> 戌亥(10,11) / 辰巳(4,5) [no, 这不对]
+        // 
+        // 正确的旬空算法：
+        // 天干的旬空是固定的，与地支无关
+        // 甲干旬空: 戌亥
+        // 乙干旬空: 申酉  (甲戌旬中的乙亥, 旬空申酉)
+        // 丙干旬空: 午未  (甲申旬中的丙子, 旬空午未)
+        // 丁干旬空: 辰巳  (甲午旬中的丁丑, 旬空辰巳)
+        // 戊干旬空: 寅卯  (甲辰旬中的戊寅, 旬空寅卯)
+        // 巵干旬空: 子丑  (甲寅旬中的巵卯, 旬空子丑)
+        // 庚干旬空: 申酉  (甲戌旬中的庚辰, 旬空申酉)
+        // 辛干旬空: 午未  (甲申旬中的辛巳, 旬空午未)
+        // 壬干旬空: 辰巳  (甲午旬中的壬午, 旬空辰巳)
+        // 癸干旬空: 寅卯  (甲辰旬中的癸未, 旬空寅卯)
         
-        return xun_kong_idx;
+        // 规律：旬空第一个地支 = 10 - (gan_idx % 5) * 2 (mod 12)
+        // 甲(0): 10 - 0*2 = 10 (戌)
+        // 乙(1): 10 - 1*2 = 8  (申)
+        // 丙(2): 10 - 2*2 = 6  (午)
+        // 丁(3): 10 - 3*2 = 4  (辰)
+        // 戊(4): 10 - 4*2 = 2  (寅)
+        // 巵(5)=0: 10 - 0*2 = 10 (戌) -> 应该是子丑，不对
+        
+        // 重新分析：
+        // 甲巵(0,5): 旬空戌亥/子丑
+        // 乙庚(1,6): 旬空申酉
+        // 丙辛(2,7): 旬空午未
+        // 丁壬(3,8): 旬空辰巳
+        // 戊癸(4,9): 旬空寅卯
+        
+        // 旬空第一个地支（子起索引）
+        constexpr array<int, 10> xun_kong_table = {
+            10, 8, 6, 4, 2, 0, 8, 6, 4, 2  // 甲乙丙丁戊巵庚辛壬癸
+        };
+        
+        int kong1_dizhi = xun_kong_table[gan_idx];  // 第一个空亡地支（子起索引）
+        int kong2_dizhi = (kong1_dizhi + 1) % 12;   // 第二个空亡地支
+        
+        // 转换为寅起索引：寅=0, 子=10, 丑=11
+        int xun_kong1_idx = fix_index(kong1_dizhi - 2, 12);
+        int xun_kong2_idx = fix_index(kong2_dizhi - 2, 12);
+        
+        return {xun_kong1_idx, xun_kong2_idx};
     }
 
     /**
@@ -800,25 +904,37 @@ namespace ZhouYi::ZiWei {
      * 凡阳男阴女，皆依此诀，但若为阴男阳女，
      * 则改为天伤居疾厄、天使居奴仆。
      * 
-     * 说明：夹迁移宫，阳男阴女天伤在迁移后一位、天使在迁移前一位
+     * 说明：
+     * - 奴仆宫在迁移宫的后一位（顺时针）
+     * - 疾厄宫在迁移宫的前一位（逺时针）
+     * - 阳男阴女：天伤在奴仆，天使在疾厄
+     * - 阴男阳女：天伤在疾厄，天使在奴仆
      */
     pair<int, int> get_tian_shi_tian_shang_index(int ming_index, bool is_male, DiZhi year_zhi) {
-        // 天使天伤：夹迁移宫
-        int qian_yi_index = fix_index(ming_index + 6); // 迁移宫在命宫对宫
+        // 迁移宫在命宫对宫
+        int qian_yi_index = fix_index(ming_index + 6);
         
-        // 阳男阴女：天伤在奴仆(迁移后一位)，天使在疾厄(迁移前一位)
-        // 阴男阳女：相反
+        // 奴仆宫在迁移后一位（顺时针/逆数），疾厄宫在迁移前一位（逺时针/顺数）
+        // 注意：宫位顺序是逺时针（命宫-父母-福德-田宅-官禄-奴仆-迁移-疾厄...）
+        // 所以奴仆=迁移-1，疾厄=迁移+1
+        int nu_pu_index = fix_index(qian_yi_index - 1);  // 奴仆宫
+        int ji_e_index = fix_index(qian_yi_index + 1);   // 疾厄宫
+        
+        // 阳男阴女：天伤在奴仆，天使在疾厄
+        // 阴男阳女：天伤在疾厄，天使在奴仆
         int zhi_idx = static_cast<int>(year_zhi);
-        bool yang_zhi = (zhi_idx % 2 == 0);
-        bool same_yin_yang = (is_male == yang_zhi);
+        bool yang_zhi = (zhi_idx % 2 == 0);  // 子寅辰午申戌为阳
+        bool yang_nan_yin_nv = (is_male == yang_zhi);  // 阳男或阴女
         
         int tian_shi_index, tian_shang_index;
-        if (same_yin_yang) {
-            tian_shang_index = fix_index(qian_yi_index + 1);
-            tian_shi_index = fix_index(qian_yi_index - 1);
+        if (yang_nan_yin_nv) {
+            // 阳男阴女：天伤在奴仆，天使在疾厄
+            tian_shang_index = nu_pu_index;
+            tian_shi_index = ji_e_index;
         } else {
-            tian_shi_index = fix_index(qian_yi_index + 1);
-            tian_shang_index = fix_index(qian_yi_index - 1);
+            // 阴男阳女：天伤在疾厄，天使在奴仆
+            tian_shang_index = ji_e_index;
+            tian_shi_index = nu_pu_index;
         }
         
         return {tian_shi_index, tian_shang_index};
@@ -834,6 +950,61 @@ namespace ZhouYi::ZiWei {
         // 年解：从戌起子，逆数至当生年太岁
         constexpr array<int, 12> mapping = {8, 7, 6, 5, 4, 3, 2, 1, 0, 11, 10, 9};
         return mapping[static_cast<int>(year_zhi)];
+    }
+
+    /**
+     * @brief 安天马诀
+     * 
+     * 口诀：
+     * 申子辰年马在寅，寅午戌年马在申，
+     * 巳酉丑年马在亥，亥卯未年马在巳。
+     */
+    int get_tian_ma_index(DiZhi year_zhi) {
+        // 天马：申子辰年在寅，寅午戌年在申，巳酉丑年在亥，亥卯未年在巳
+        if (year_zhi == DiZhi::Shen || year_zhi == DiZhi::Zi || year_zhi == DiZhi::Chen) {
+            return 0; // 寅
+        } else if (year_zhi == DiZhi::Yin || year_zhi == DiZhi::Wu || year_zhi == DiZhi::Xu) {
+            return 6; // 申
+        } else if (year_zhi == DiZhi::Si || year_zhi == DiZhi::You || year_zhi == DiZhi::Chou) {
+            return 9; // 亥
+        } else { // 亥卯未
+            return 3; // 巳
+        }
+    }
+
+    /**
+     * @brief 安大耗和龙德（生年杂耀）
+     * 
+     * 口诀：
+     * 鼠忌羊头上，牛嘶马不耕，虎嫌鸡嘴短，
+     * 兔怨猴不声，龙憎猪面黑，蛇惊犬卧回，
+     * 有人犯此煞，财食散伶仐。
+     * 
+     * 子年在未，丑年在午，寅年在酉，卯年在申，
+     * 辰年在亥，巳年在戌，午年在丑，未年在子，
+     * 申年在卯，酉年在寅，戌年在巳，亥年在辰。
+     * 
+     * 龙德在大耗对宫。
+     */
+    pair<int, int> get_da_hao_long_de_index(DiZhi year_zhi) {
+        // 大耗安星表（子=0系统）
+        // 子年在未(7)，丑年在午(6)，寅年在酉(9)，卯年在申(8)
+        // 辰年在亥(11)，巳年在戌(10)，午年在丑(1)，未年在子(0)
+        // 申年在卯(3)，酉年在寅(2)，戌年在巳(5)，亥年在辰(4)
+        constexpr array<int, 12> da_hao_table = {
+            7, 6, 9, 8, 11, 10, 1, 0, 3, 2, 5, 4
+        };  // 子丑寅卯辰巳午未申酉戌亥
+        
+        int zhi_idx = static_cast<int>(year_zhi);
+        int da_hao_zhi = da_hao_table[zhi_idx];
+        
+        // 转换为寅起索引：寅=0, 子=10, 丑=11
+        int da_hao_idx = fix_index(da_hao_zhi - 2, 12);
+        
+        // 龙德在大耗对宫
+        int long_de_idx = fix_index(da_hao_idx + 6);
+        
+        return {da_hao_idx, long_de_idx};
     }
 
     // ============= 长生12神和博士12神 =============

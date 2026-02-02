@@ -6,7 +6,7 @@ import ZhouYi.ZiWei;
 import ZhouYi.ZiWei.SiHua;
 import ZhouYi.ZiWei.SanFang;
 import ZhouYi.ZiWei.GeJu;
-import ZhouYi.ZiWei.StarDescription;
+import ZhouYi.ZiWei.StarDocument;
 import ZhouYi.ZiWei.Horoscope;
 import ZhouYi.ZhMapper;
 import ZhouYi.tyme;
@@ -97,8 +97,8 @@ namespace ZhouYi::ZiWei {
             json p;
             p["name"] = string(to_zh(palace.gong_data.gong_wei));
             p["gan_zhi"] = fmt::format("{}{}",
-                string(to_zh(palace.gong_data.tian_gan)),
-                string(to_zh(palace.gong_data.di_zhi)));
+                string(GanZhi::Mapper::to_zh(palace.gong_data.tian_gan)),
+                string(GanZhi::Mapper::to_zh(palace.gong_data.di_zhi)));
             p["is_ming_palace"] = palace.gong_data.is_ming_palace;
             p["is_body_palace"] = palace.gong_data.is_body_palace;
             
@@ -341,17 +341,23 @@ namespace ZhouYi::ZiWei {
     // ============= 星耀特性查询功能实现 =============
     
     void display_star_info(const string& star_name) {
-        auto info = get_xing_yao_info(star_name);
-        fmt::print("\n{}\n", info.to_string());
+        auto doc = get_star_document(star_name);
+        if (doc.has_value()) {
+            fmt::print("\n{}\n", doc->to_string());
+        } else {
+            fmt::print("\n未找到星曜「{}」的详细信息\n", star_name);
+        }
     }
     
     void display_tao_hua_xing() {
-        auto tao_hua_list = get_all_tao_hua_xing();
+        // 交际类杂耀包含桃花星
+        auto tao_hua_list = StarDoc::get_za_yao_by_category(ZaYaoCategory::JiaoJi);
         fmt::print("\n【桃花星列表】：{}\n", fmt::join(tao_hua_list, "、"));
     }
     
     void display_cai_xing() {
-        auto cai_xing_list = get_all_cai_xing();
+        // 财星主要是禄存、天马（二助星）
+        auto cai_xing_list = StarDoc::get_fu_xing_by_category(FuXingCategory::ErZhu);
         fmt::print("\n【财星列表】：{}\n", fmt::join(cai_xing_list, "、"));
     }
 
@@ -408,8 +414,8 @@ namespace ZhouYi::ZiWei {
         auto liu_nian_data = get_liu_nian(target_year, tian_gan, di_zhi, result.ming_gong_index);
         
         fmt::print("流年干支：{}{} ({}年)\n", 
-            string(to_zh(liu_nian_data.tian_gan)),
-            string(to_zh(liu_nian_data.di_zhi)),
+            string(GanZhi::Mapper::to_zh(liu_nian_data.tian_gan)),
+            string(GanZhi::Mapper::to_zh(liu_nian_data.di_zhi)),
             target_year);
         fmt::print("流年宫位：第{}宫 {}\n",
             liu_nian_data.gong_index,
@@ -452,8 +458,8 @@ namespace ZhouYi::ZiWei {
         auto liu_yue_data = get_liu_yue(lunar_month, birth_month, month_gan, month_zhi, year_zhi, result.ming_gong_index);
         
         fmt::print("流月干支：{}{} (农历{}月)\n", 
-            string(to_zh(liu_yue_data.tian_gan)),
-            string(to_zh(liu_yue_data.di_zhi)),
+            string(GanZhi::Mapper::to_zh(liu_yue_data.tian_gan)),
+            string(GanZhi::Mapper::to_zh(liu_yue_data.di_zhi)),
             liu_yue_data.month);
         fmt::print("流月宫位：第{}宫 {}\n",
             liu_yue_data.gong_index,
@@ -509,8 +515,8 @@ namespace ZhouYi::ZiWei {
         auto liu_ri_data = get_liu_ri(lunar_day_num, day_gan, day_zhi, liu_yue_data.gong_index);
         
         fmt::print("流日干支：{}{} (农历{}日)\n", 
-            string(to_zh(liu_ri_data.tian_gan)),
-            string(to_zh(liu_ri_data.di_zhi)),
+            string(GanZhi::Mapper::to_zh(liu_ri_data.tian_gan)),
+            string(GanZhi::Mapper::to_zh(liu_ri_data.di_zhi)),
             liu_ri_data.day);
         fmt::print("流日宫位：第{}宫 {}\n",
             liu_ri_data.gong_index,
@@ -577,8 +583,8 @@ namespace ZhouYi::ZiWei {
         auto liu_shi_data = get_liu_shi(target_hour, hour_gan, liu_ri_data.gong_index);
         
         fmt::print("流时干支：{}{}\n", 
-            string(to_zh(liu_shi_data.tian_gan)),
-            string(to_zh(liu_shi_data.di_zhi)));
+            string(GanZhi::Mapper::to_zh(liu_shi_data.tian_gan)),
+            string(GanZhi::Mapper::to_zh(liu_shi_data.di_zhi)));
         fmt::print("流时宫位：第{}宫 {}\n",
             liu_shi_data.gong_index,
             string(to_zh(result.palaces[liu_shi_data.gong_index].gong_data.gong_wei)));
@@ -603,7 +609,7 @@ namespace ZhouYi::ZiWei {
         fmt::print("              完整运限分析报告                              \n");
         fmt::print("       {}年{}月{}日 {} （{}岁）            \n",
             target_year, target_month, target_day,
-            string(to_zh(target_hour)),
+            string(GanZhi::Mapper::to_zh(target_hour)),
             current_age);
         fmt::print("\n");
         

@@ -148,6 +148,7 @@ export namespace ZhouYi::ZiWei {
         TianGuan,        // 天官
         TianFu2,         // 天福
         TianChu,         // 天厨
+        TianMa,          // 天马
         
         // 吉星
         SanTai,          // 三台
@@ -181,6 +182,8 @@ export namespace ZhouYi::ZiWei {
         TianShi,         // 天使
         TianShang,       // 天伤
         NianJie,         // 年解
+        DaHao,           // 大耗（生年）
+        LongDe2,         // 龙德（生年）
         
         COUNT
     };
@@ -368,13 +371,13 @@ namespace ZhouYi::Mapper {
         static constexpr auto get_map() {
             return std::array{
                 "红鸾"sv, "天喜"sv, "天姚"sv, "咸池"sv,
-                "解神"sv, "天巫"sv, "天官"sv, "天福"sv, "天厨"sv,
+                "解神"sv, "天巫"sv, "天官"sv, "天福"sv, "天厨"sv, "天马"sv,
                 "三台"sv, "八座"sv, "恩光"sv, "天贵"sv, "龙池"sv, "凤阁"sv,
-                "天才"sv, "天寿"sv, "台辅"sv, "封诰"sv, "华盖"sv, "天月"sv,
+                "天才"sv, "天寿"sv, "台辅"sv, "封讼"sv, "华盖"sv, "天月"sv,
                 "天德"sv, "月德"sv,
                 "孤辰"sv, "寡宿"sv, "蜚廉"sv, "破碎"sv, "天刑"sv, "阴煞"sv,
                 "天空"sv, "旬空"sv, "截路"sv, "空亡"sv, "天哭"sv, "天虚"sv,
-                "天使"sv, "天伤"sv, "年解"sv
+                "天使"sv, "天伤"sv, "年解"sv, "大耗"sv, "龙德"sv
             };
         }
     };
@@ -423,4 +426,3 @@ namespace ZhouYi::Mapper {
     };
 
 } // namespace ZhouYi::Mapper
-

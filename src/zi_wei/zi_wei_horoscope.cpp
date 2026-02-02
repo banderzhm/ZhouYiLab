@@ -18,8 +18,8 @@ namespace ZhouYi::ZiWei {
     string DaXianData::to_string() const {
         return fmt::format("大限 {}~{} 岁 [{}-{}宫] 四化: {}",
             start_age, end_age,
-            string(to_zh(tian_gan)),
-            string(to_zh(di_zhi)),
+            string(GanZhi::Mapper::to_zh(tian_gan)),
+            string(GanZhi::Mapper::to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
@@ -30,32 +30,32 @@ namespace ZhouYi::ZiWei {
     string LiuNianData::to_string() const {
         return fmt::format("流年 {} 年 [{}-{}宫] 四化: {}",
             year,
-            string(to_zh(tian_gan)),
-            string(to_zh(di_zhi)),
+            string(GanZhi::Mapper::to_zh(tian_gan)),
+            string(GanZhi::Mapper::to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
     string LiuYueData::to_string() const {
         return fmt::format("流月 {} 月 [{}-{}宫] 四化: {}",
             month,
-            string(to_zh(tian_gan)),
-            string(to_zh(di_zhi)),
+            string(GanZhi::Mapper::to_zh(tian_gan)),
+            string(GanZhi::Mapper::to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
     string LiuRiData::to_string() const {
         return fmt::format("流日 {} 日 [{}-{}宫] 四化: {}",
             day,
-            string(to_zh(tian_gan)),
-            string(to_zh(di_zhi)),
+            string(GanZhi::Mapper::to_zh(tian_gan)),
+            string(GanZhi::Mapper::to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
     string LiuShiData::to_string() const {
         return fmt::format("流时 {}时 [{}-{}宫] 四化: {}",
-            string(to_zh(shi_chen)),
-            string(to_zh(tian_gan)),
-            string(to_zh(di_zhi)),
+            string(GanZhi::Mapper::to_zh(shi_chen)),
+            string(GanZhi::Mapper::to_zh(tian_gan)),
+            string(GanZhi::Mapper::to_zh(di_zhi)),
             fmt::join(si_hua, " "));
     }
 
