@@ -1,4 +1,4 @@
-// 紫微斗数核心排盘模块
+﻿// 紫微斗数核心排盘模块
 export module ZhouYi.ZiWei;
 
 import std;
@@ -128,9 +128,9 @@ export namespace ZhouYi::ZiWei {
          * @brief 格式化输出命盘
          */
         string to_string() const {
-            string result = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            string result = "\n";
             result += "           紫微斗数命盘\n";
-            result += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+            result += "\n\n";
             
             result += fmt::format("阳历：{}\n", solar_day.to_string());
             result += fmt::format("农历：{} {}\n", lunar_day.to_string(), 
@@ -150,9 +150,9 @@ export namespace ZhouYi::ZiWei {
                                 string(to_zh(palaces[shen_gong_index].gong_data.tian_gan)),
                                 string(to_zh(palaces[shen_gong_index].gong_data.di_zhi)));
             
-            result += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            result += "\n";
             result += "           十二宫详情\n";
-            result += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+            result += "\n\n";
             
             for (int i = 0; i < 12; ++i) {
                 result += palaces[i].to_string() + "\n\n";

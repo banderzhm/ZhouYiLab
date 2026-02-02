@@ -111,6 +111,16 @@ void display_liu_nian(const BaZiResult& result, int start_year, int count = 10);
 void display_liu_yue(const BaZiResult& result, int year);
 
 /**
+ * @brief 显示流日信息
+ * 
+ * @param result 排盘结果
+ * @param year 年份
+ * @param month 月份
+ * @param day_count 显示的天数（默认30天）
+ */
+void display_liu_ri(const BaZiResult& result, int year, int month, int day_count = 30);
+
+/**
  * @brief 显示童限详细信息
  * 
  * @param result 排盘结果

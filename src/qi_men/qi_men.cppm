@@ -5,6 +5,8 @@ export module ZhouYi.QiMen;
 
 import ZhouYi.GanZhi;
 import ZhouYi.tyme;
+import ZhouYi.BaZiBase;
+import nlohmann.json;
 import fmt;
 import std;
 
@@ -182,6 +184,19 @@ struct QiMenPan {
     Star zhi_fu_star;        // 直符星
     Gate zhi_shi_gate;       // 直使门
     Palace zhi_fu_palace;    // 直符所在宫
+    
+    // 日期信息
+    int solar_year = 0;      // 阳历年
+    int solar_month = 0;     // 阳历月
+    int solar_day = 0;       // 阳历日
+    int hour = 0;            // 时辰
+    int lunar_year = 0;      // 农历年
+    int lunar_month = 0;     // 农历月
+    int lunar_day = 0;       // 农历日
+    bool is_leap_month = false;  // 是否闰月
+    
+    // 八字信息
+    std::optional<BaZiBase::BaZi> ba_zi;  // 八字（年月日时四柱）
 };
 
 // ==================== 工具函数 ====================
@@ -455,6 +470,68 @@ constexpr Yuan get_yuan_from_di_zhi(std::uint8_t di_zhi) noexcept {
 // ==================== 排盘算法 ====================
 
 /**
+ * @brief 洛书九宫顺序（顺时针，不含中宫）
+ * 
+ * 用于转盘时的宫位转动
+ * 顺序：1(坎) -> 8(艮) -> 3(震) -> 4(巽) -> 9(离) -> 2(坤) -> 7(兑) -> 6(乾)
+ */
+constexpr std::array<std::uint8_t, 8> get_luo_shu_order() noexcept {
+    return {1, 8, 3, 4, 9, 2, 7, 6};
+}
+
+/**
+ * @brief 洛书九宫逆序（逆时针，不含中宫）
+ * 
+ * 用于阴遁转盘
+ * 顺序：1(坎) -> 6(乾) -> 7(兑) -> 2(坤) -> 9(离) -> 4(巽) -> 3(震) -> 8(艮)
+ */
+constexpr std::array<std::uint8_t, 8> get_luo_shu_reverse_order() noexcept {
+    return {1, 6, 7, 2, 9, 4, 3, 8};
+}
+
+/**
+ * @brief 旬首与六仪的映射关系
+ * 
+ * 甲子旬→戊，甲戌旬→己，甲申旬→庚，甲午旬→辛，甲辰旬→壬，甲寅旬→癸
+ */
+constexpr std::uint8_t get_liu_yi_from_jia_xun(JiaXun xun) noexcept {
+    switch (xun) {
+        case JiaXun::JiaZi:   return 4;  // 戊
+        case JiaXun::JiaXu:   return 5;  // 己
+        case JiaXun::JiaShen: return 6;  // 庚
+        case JiaXun::JiaWu:   return 7;  // 辛
+        case JiaXun::JiaChen: return 8;  // 壬
+        case JiaXun::JiaYin:  return 9;  // 癸
+        default: return 4;
+    }
+}
+
+/**
+ * @brief 根据宫位数字获取宫位枚举
+ */
+constexpr Palace get_palace_from_number(std::uint8_t num) noexcept {
+    switch (num) {
+        case 1: return Palace::North;
+        case 2: return Palace::SouthWest;
+        case 3: return Palace::East;
+        case 4: return Palace::SouthEast;
+        case 5: return Palace::Center;
+        case 6: return Palace::NorthWest;
+        case 7: return Palace::West;
+        case 8: return Palace::NorthEast;
+        case 9: return Palace::South;
+        default: return Palace::Center;
+    }
+}
+
+/**
+ * @brief 根据宫位枚举获取宫位数字
+ */
+constexpr std::uint8_t get_number_from_palace(Palace p) noexcept {
+    return static_cast<std::uint8_t>(p);
+}
+
+/**
  * @brief 获取九宫对应的九星（固定排列）
  */
 constexpr Star get_star_at_palace(Palace p) noexcept {
@@ -518,6 +595,80 @@ constexpr std::array<Palace, 9> get_palace_sequence(bool reverse = false) noexce
  */
 constexpr std::array<std::uint8_t, 9> get_tian_gan_sequence() noexcept {
     return {4, 5, 6, 7, 8, 9, 3, 2, 1};  // 戊己庚辛壬癸丁丙乙
+}
+
+// ==================== JSON 序列化 ====================
+
+/**
+ * @brief 奇门盘 JSON 序列化
+ */
+inline void to_json(nlohmann::json& j, const QiMenPan& pan) {
+    using namespace ZhouYi::GanZhi;
+    
+    // 按照顺序添加字段（JSON 会保持插入顺序）
+    
+    // 1. 日期信息（阳历和农历）
+    nlohmann::json solar_date = nlohmann::json::object();
+    solar_date["year"] = pan.solar_year;
+    solar_date["month"] = pan.solar_month;
+    solar_date["day"] = pan.solar_day;
+    solar_date["hour"] = pan.hour;
+    j["solar_date"] = solar_date;
+    
+    nlohmann::json lunar_date = nlohmann::json::object();
+    lunar_date["year"] = pan.lunar_year;
+    lunar_date["month"] = pan.lunar_month;
+    lunar_date["day"] = pan.lunar_day;
+    lunar_date["is_leap_month"] = pan.is_leap_month;
+    j["lunar_date"] = lunar_date;
+    
+    // 2. 八字信息
+    if (pan.ba_zi.has_value()) {
+        j["ba_zi"] = pan.ba_zi.value();
+    }
+    
+    // 3. 阴阳遁信息
+    j["dun"] = pan.dun == Dun::Yang ? "yang" : "yin";
+    j["dun_zh"] = pan.dun == Dun::Yang ? "阳遁" : "阴遁";
+    
+    // 4. 三元信息
+    std::string yuan_str;
+    std::string yuan_zh;
+    switch (pan.yuan) {
+        case Yuan::Shang: yuan_str = "shang"; yuan_zh = "上元"; break;
+        case Yuan::Zhong: yuan_str = "zhong"; yuan_zh = "中元"; break;
+        case Yuan::Xia: yuan_str = "xia"; yuan_zh = "下元"; break;
+    }
+    j["yuan"] = yuan_str;
+    j["yuan_zh"] = yuan_zh;
+    
+    // 5. 局数和节气
+    j["ju"] = pan.ju;
+    j["solar_term"] = std::string(solar_term_name(pan.solar_term));
+    
+    // 6. 直符直使信息
+    j["zhi_fu_star"] = std::string(star_name(pan.zhi_fu_star));
+    j["zhi_shi_gate"] = std::string(gate_name(pan.zhi_shi_gate));
+    j["zhi_fu_palace"] = std::string(palace_name(pan.zhi_fu_palace));
+    
+    // 7. 九宫信息（最后）
+    nlohmann::json palaces_json = nlohmann::json::array();
+    for (std::size_t i = 0; i < pan.palaces.size(); ++i) {
+        const auto& p = pan.palaces[i];
+        // 使用有序 JSON 对象，palace_num 在最前面
+        nlohmann::json palace_json = nlohmann::json::object();
+        
+        palace_json["palace_num"] = get_number_from_palace(p.palace);
+        palace_json["palace_name"] = std::string(palace_name(p.palace));
+        palace_json["star"] = std::string(star_name(p.star));
+        palace_json["gate"] = std::string(gate_name(p.gate));
+        palace_json["spirit"] = std::string(spirit_name(p.spirit));
+        palace_json["di_gan"] = std::string(Mapper::to_zh(static_cast<TianGan>(p.di_gan)));
+        palace_json["tian_gan"] = std::string(Mapper::to_zh(static_cast<TianGan>(p.tian_gan)));
+        
+        palaces_json.push_back(palace_json);
+    }
+    j["palaces"] = palaces_json;
 }
 
 }  // namespace ZhouYi::QiMen

@@ -1,4 +1,4 @@
-// 大六壬控制器实现文件
+﻿// 大六壬控制器实现文件
 module ZhouYi.DaLiuRen.Controller;
 
 import std;
@@ -11,9 +11,9 @@ void DaLiuRenController::interactive_pai_pan() {
     int year, month, day, hour;
     bool is_lunar;
     
-    fmt::print("\n╔════════════════════════════════════╗\n");
-    fmt::print("║       大六壬自动排盘系统           ║\n");
-    fmt::print("╚════════════════════════════════════╝\n\n");
+    fmt::print("\n\n");
+    fmt::print("       大六壬自动排盘系统           \n");
+    fmt::print("\n\n");
     
     get_date_input(year, month, day, hour, is_lunar);
     
@@ -41,9 +41,9 @@ void DaLiuRenController::display_result(const DaLiuRenResult& result) {
 
 // 显示排盘结果（详细版）
 void DaLiuRenController::display_result_detailed(const DaLiuRenResult& result) {
-    fmt::print("\n╔════════════════════════════════════╗\n");
-    fmt::print("║         大六壬排盘结果             ║\n");
-    fmt::print("╚════════════════════════════════════╝\n\n");
+    fmt::print("\n\n");
+    fmt::print("         大六壬排盘结果             \n");
+    fmt::print("\n\n");
     
     // 显示八字
     fmt::print("【八字信息】\n");
@@ -101,10 +101,10 @@ void DaLiuRenController::display_tian_di_pan(const TianDiPan& tian_di_pan, TianG
         "天空", "白虎", "太常", "玄武", "太阴", "天后"
     };
     
-    fmt::print("  ┌───────┬───────┬────────┬────────┐\n");
-    fmt::print("  │ 位置  │ 天盘  │  遁干  │  神将  │\n");
-    fmt::print("  │       │ 地盘  │        │        │\n");
-    fmt::print("  ├───────┼───────┼────────┼────────┤\n");
+    fmt::print("  \n");
+    fmt::print("   位置   天盘    遁干    神将  \n");
+    fmt::print("          地盘                  \n");
+    fmt::print("  \n");
     
     for (int i = 0; i < 12; ++i) {
         DiZhi di = di_pan[i];
@@ -148,26 +148,26 @@ void DaLiuRenController::display_tian_di_pan(const TianDiPan& tian_di_pan, TianG
         
         // 第一行：显示地盘位置、天盘、天盘遁干、天盘神将
         // 中文字符显示宽度为2，需要手动对齐
-        fmt::print("  │  {}   │  {}   │   {}   │  {}  │\n",
+        fmt::print("    {}     {}      {}     {}  \n",
             di_str, tian_str, tian_dun_gan_str, tian_shen_jiang_name);
         // 第二行：显示地盘、地盘遁干、地盘神将
-        fmt::print("  │       │  {}   │   {}   │  {}  │\n", 
+        fmt::print("           {}      {}     {}  \n", 
             di_str, di_dun_gan_str, di_shen_jiang_name);
         
         // 每个位置结束后加一条分隔线
         if (i < 11) {
             if ((i + 1) % 4 == 0) {
                 // 每4个位置加双分隔线（更明显）
-                fmt::print("  ├───────┼───────┼────────┼────────┤\n");
-                fmt::print("  ├───────┼───────┼────────┼────────┤\n");
+                fmt::print("  \n");
+                fmt::print("  \n");
             } else {
                 // 每个位置加单分隔线
-                fmt::print("  ├───────┼───────┼────────┼────────┤\n");
+                fmt::print("  \n");
             }
         }
     }
     
-    fmt::print("  └───────┴───────┴────────┴────────┘\n\n");
+    fmt::print("  \n\n");
 }
 
 // 显示四课（增强版，包含阴阳属性）

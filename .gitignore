@@ -1,3 +1,13 @@
+# Ignore all dotfiles and dotfolders
+.*
+
+# Except git-related files
+!.git
+!.gitignore
+!.gitattributes
+!.gitmodules
+!.github
+
 # Build directories
 build/
 cmake-build-*/
@@ -29,20 +39,13 @@ cmake-build-*
 *.lib
 *.o
 *.obj
-*.wasm
-*.js.mem
 
 # IDE specific files
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
-.DS_Store
-.claude
 
 # Visual Studio
-.vs/
 *.user
 *.suo
 *.userosscache
@@ -52,10 +55,6 @@ cmake-build-*
 *.sln
 *.ilk
 *.pdb
-
-# Emscripten
-*.js
-*.wasm
 
 # Testing
 Testing/
@@ -71,9 +70,5 @@ vcpkg_installed/
 *.bak
 *.cache
 
-# History
-.history/
-
+# Other
 front/
-.cursor/
-.windsurf/

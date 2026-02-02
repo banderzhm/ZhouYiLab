@@ -1,4 +1,4 @@
-// 测试 tyme 模块
+﻿// 测试 tyme 模块
 
 // 导入 tyme 模块
 import ZhouYi.tyme;
@@ -23,7 +23,7 @@ int main() {
     fmt::print("农历日期: {}\n", lunar.to_string());
     
     fmt::print("\n");
-    fmt::print(fg(fmt::color::cyan), "✅ Tyme 模块测试成功！\n");
+    fmt::print(fg(fmt::color::cyan), " Tyme 模块测试成功！\n");
     
     return 0;
 }

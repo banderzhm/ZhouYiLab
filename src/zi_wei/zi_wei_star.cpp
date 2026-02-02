@@ -1,4 +1,4 @@
-// 紫微斗数星耀定位模块（实现）
+﻿// 紫微斗数星耀定位模块（实现）
 module ZhouYi.ZiWei.Star;
 
 import ZhouYi.GanZhi;
@@ -73,8 +73,8 @@ namespace ZhouYi::ZiWei {
      * 紫微逆去天机星，隔一太阳武曲辰，
      * 连接天同空二宫，廉贞居处方是真。
      * 
-     * 排列：紫微 → 天机(逆1) → 空 → 太阳(逆3) → 武曲(逆4) → 
-     *       天同(逆5) → 空 → 空 → 廉贞(逆8)
+     * 排列：紫微  天机(逆1)  空  太阳(逆3)  武曲(逆4)  
+     *       天同(逆5)  空  空  廉贞(逆8)
      */
     map<ZhuXing, int> arrange_zi_wei_group(int zi_wei_index) {
         map<ZhuXing, int> positions;
@@ -96,8 +96,8 @@ namespace ZhouYi::ZiWei {
      * 天府顺行有太阴，贪狼而后巨门临，
      * 随来天相天梁继，七杀空三是破军。
      * 
-     * 排列：天府 → 太阴(顺1) → 贪狼(顺2) → 巨门(顺3) → 天相(顺4) → 
-     *       天梁(顺5) → 七杀(顺6) → 空 → 空 → 空 → 破军(顺10)
+     * 排列：天府  太阴(顺1)  贪狼(顺2)  巨门(顺3)  天相(顺4)  
+     *       天梁(顺5)  七杀(顺6)  空  空  空  破军(顺10)
      */
     map<ZhuXing, int> arrange_tian_fu_group(int tian_fu_index) {
         map<ZhuXing, int> positions;

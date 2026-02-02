@@ -1,4 +1,4 @@
-// Asio TCP Echo 服务器示例 - C++20 协程版本
+﻿// Asio TCP Echo 服务器示例 - C++20 协程版本
 // 演示如何使用 C++20 协程和 asio 库创建回环 echo 服务
 
 import fmt;
@@ -151,15 +151,15 @@ awaitable<void> udp_echo_client(std::string host, std::string port, std::vector<
 // ============= 示例函数 =============
 
 void simple_tcp_echo_example() {
-    std::println("\n╔═══════════════════════════════════════════╗");
-    std::println("║   示例 1: TCP Echo (C++20 协程版本)     ║");
-    std::println("╚═══════════════════════════════════════════╝\n");
+    std::println("\n");
+    std::println("   示例 1: TCP Echo (C++20 协程版本)     ");
+    std::println("\n");
     
     try {
         asio::io_context io_context;
         
         // 启动服务器协程
-        std::println("✓ 启动 Echo 服务器，监听端口 8888...");
+        std::println(" 启动 Echo 服务器，监听端口 8888...");
         co_spawn(io_context, echo_server(8888), detached);
         
         // 在单独的线程中运行 io_context
@@ -171,7 +171,7 @@ void simple_tcp_echo_example() {
         std::this_thread::sleep_for(100ms);
         
         // 启动客户端协程
-        std::println("\n✓ 启动客户端...");
+        std::println("\n 启动客户端...");
         asio::io_context client_io;
         
         co_spawn(client_io, 
@@ -186,27 +186,27 @@ void simple_tcp_echo_example() {
         // 运行客户端
         client_io.run();
         
-        std::println("\n✅ TCP Echo 测试完成！");
+        std::println("\n TCP Echo 测试完成！");
         
         // 停止服务器
         io_context.stop();
         server_thread.join();
         
     } catch (const std::exception& e) {
-        std::println("❌ 错误: {}", e.what());
+        std::println(" 错误: {}", e.what());
     }
 }
 
 void multiple_clients_example() {
-    std::println("\n╔═══════════════════════════════════════════╗");
-    std::println("║   示例 2: 多客户端并发 (协程版本)       ║");
-    std::println("╚═══════════════════════════════════════════╝\n");
+    std::println("\n");
+    std::println("   示例 2: 多客户端并发 (协程版本)       ");
+    std::println("\n");
     
     try {
         asio::io_context io_context;
         
         // 启动服务器
-        std::println("✓ 启动 Echo 服务器，监听端口 8889...");
+        std::println(" 启动 Echo 服务器，监听端口 8889...");
         co_spawn(io_context, echo_server(8889), detached);
         
         std::thread server_thread([&io_context]() {
@@ -233,26 +233,26 @@ void multiple_clients_example() {
         // 运行所有客户端协程
         client_io.run();
         
-        std::println("\n✅ 多客户端测试完成！");
+        std::println("\n 多客户端测试完成！");
         
         io_context.stop();
         server_thread.join();
         
     } catch (const std::exception& e) {
-        std::println("❌ 错误: {}", e.what());
+        std::println(" 错误: {}", e.what());
     }
 }
 
 void udp_echo_example() {
-    std::println("\n╔═══════════════════════════════════════════╗");
-    std::println("║   示例 3: UDP Echo (C++20 协程版本)     ║");
-    std::println("╚═══════════════════════════════════════════╝\n");
+    std::println("\n");
+    std::println("   示例 3: UDP Echo (C++20 协程版本)     ");
+    std::println("\n");
     
     try {
         asio::io_context io_context;
         
         // 启动 UDP 服务器
-        std::println("✓ 启动 UDP Echo 服务器，监听端口 8890...");
+        std::println(" 启动 UDP Echo 服务器，监听端口 8890...");
         co_spawn(io_context, udp_echo_server(8890), detached);
         
         std::thread server_thread([&io_context]() {
@@ -262,7 +262,7 @@ void udp_echo_example() {
         std::this_thread::sleep_for(100ms);
         
         // 启动 UDP 客户端
-        std::println("\n✓ 发送 UDP 消息...");
+        std::println("\n 发送 UDP 消息...");
         asio::io_context client_io;
         
         co_spawn(client_io,
@@ -276,13 +276,13 @@ void udp_echo_example() {
         
         client_io.run();
         
-        std::println("\n✅ UDP Echo 测试完成！");
+        std::println("\n UDP Echo 测试完成！");
         
         io_context.stop();
         server_thread.join();
         
     } catch (const std::exception& e) {
-        std::println("❌ 错误: {}", e.what());
+        std::println(" 错误: {}", e.what());
     }
 }
 
@@ -300,9 +300,9 @@ awaitable<void> timeout_example_client() {
 }
 
 void timeout_example() {
-    std::println("\n╔═══════════════════════════════════════════╗");
-    std::println("║   示例 4: 协程超时控制                  ║");
-    std::println("╚═══════════════════════════════════════════╝\n");
+    std::println("\n");
+    std::println("   示例 4: 协程超时控制                  ");
+    std::println("\n");
     
     try {
         asio::io_context io_context;
@@ -311,10 +311,10 @@ void timeout_example() {
         
         io_context.run();
         
-        std::println("\n✅ 超时示例完成！");
+        std::println("\n 超时示例完成！");
         
     } catch (const std::exception& e) {
-        std::println("❌ 错误: {}", e.what());
+        std::println(" 错误: {}", e.what());
     }
 }
 
@@ -332,14 +332,14 @@ awaitable<void> concurrent_task(int id, int delay_ms) {
 }
 
 void concurrent_coroutines_example() {
-    std::println("\n╔═══════════════════════════════════════════╗");
-    std::println("║   示例 5: 并发协程任务                  ║");
-    std::println("╚═══════════════════════════════════════════╝\n");
+    std::println("\n");
+    std::println("   示例 5: 并发协程任务                  ");
+    std::println("\n");
     
     try {
         asio::io_context io_context;
         
-        std::println("✓ 启动 5 个并发协程任务...\n");
+        std::println(" 启动 5 个并发协程任务...\n");
         
         // 启动多个协程，它们会并发执行
         co_spawn(io_context, concurrent_task(1, 500), detached);
@@ -350,20 +350,20 @@ void concurrent_coroutines_example() {
         
         io_context.run();
         
-        std::println("\n✅ 所有协程任务完成！");
+        std::println("\n 所有协程任务完成！");
         
     } catch (const std::exception& e) {
-        std::println("❌ 错误: {}", e.what());
+        std::println(" 错误: {}", e.what());
     }
 }
 
 // ============= 主函数 =============
 
 int main() {
-    std::println("╔═══════════════════════════════════════════════════╗");
-    std::println("║   Asio Echo 服务 - C++20 协程版本               ║");
-    std::println("║   Modern Async I/O with Coroutines              ║");
-    std::println("╚═══════════════════════════════════════════════════╝");
+    std::println("");
+    std::println("   Asio Echo 服务 - C++20 协程版本               ");
+    std::println("   Modern Async I/O with Coroutines              ");
+    std::println("");
     
     try {
         // 运行所有示例
@@ -382,11 +382,11 @@ int main() {
         concurrent_coroutines_example();
         
         std::println("\n==================================================");
-        std::println("✅ 所有示例完成！C++20 协程让异步代码更简洁！");
+        std::println(" 所有示例完成！C++20 协程让异步代码更简洁！");
         std::println("==================================================\n");
         
     } catch (const std::exception& e) {
-        std::println("\n❌ 程序错误: {}", e.what());
+        std::println("\n 程序错误: {}", e.what());
         return 1;
     }
     

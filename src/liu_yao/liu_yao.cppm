@@ -1,4 +1,4 @@
-// C++23 Module - 六爻排盘系统
+﻿// C++23 Module - 六爻排盘系统
 export module ZhouYi.LiuYao;
 
 // 导入第三方库模块（优先）
@@ -371,12 +371,12 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
         {"巳", "子"}, {"亥", "子"}, {"午", "寅"}, {"子", "寅"}, {"未", "辰"}, {"丑", "辰"}};
 
     // 谋星 (日支查 - 按三合局)
-    // 寅午戌(火局)→辰, 申子辰(水局)→酉, 巳酉丑(金局)→未, 亥卯未(木局)→丑
+    // 寅午戌(火局)辰, 申子辰(水局)酉, 巳酉丑(金局)未, 亥卯未(木局)丑
     static const std::unordered_map<std::string, std::string> mouXingMap = {
-        {"寅", "辰"}, {"午", "辰"}, {"戌", "辰"},  // 火局 → 辰
-        {"申", "酉"}, {"子", "酉"}, {"辰", "酉"},  // 水局 → 酉
-        {"巳", "未"}, {"酉", "未"}, {"丑", "未"},  // 金局 → 未
-        {"亥", "丑"}, {"卯", "丑"}, {"未", "丑"}   // 木局 → 丑
+        {"寅", "辰"}, {"午", "辰"}, {"戌", "辰"},  // 火局  辰
+        {"申", "酉"}, {"子", "酉"}, {"辰", "酉"},  // 水局  酉
+        {"巳", "未"}, {"酉", "未"}, {"丑", "未"},  // 金局  未
+        {"亥", "丑"}, {"卯", "丑"}, {"未", "丑"}   // 木局  丑
     };
 
     // 日德 (日干查 - 所有天干)
@@ -468,7 +468,7 @@ inline std::map<std::string, std::vector<std::string>> buildShenShaMap(const BaZ
 // 格式化爻象线条 (用于表格输出)
 inline std::string formatYaoLine(char mainYaoType, std::string changeMark)
 {
-    std::string line = (mainYaoType == '1') ? "▅▅▅▅▅" : "▅▅ ▅▅";
+    std::string line = (mainYaoType == '1') ? "" : " ";
     std::string marker = std::string(changeMark); // Convert string_view to string if needed
     if (marker == " ")
     {
@@ -764,7 +764,7 @@ inline std::pair<std::vector<YaoDetails>, nlohmann::json> sixYaoDivination(const
     
     // 打印爻象表格
     auto get_yao_line_shape = [](char yaoType) -> std::string { 
-        return (yaoType == '1') ? "▅▅▅▅▅" : "▅▅ ▅▅"; 
+        return (yaoType == '1') ? "" : " "; 
     };
 
     const int spirit_width = 4;

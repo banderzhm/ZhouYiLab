@@ -32,7 +32,6 @@ CMakeLists.txt text eol=crlf
 *.jpeg binary
 *.gif binary
 *.ico binary
-*.wasm binary
 *.a binary
 *.so binary
 *.dll binary

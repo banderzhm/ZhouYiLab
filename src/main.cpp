@@ -1,4 +1,4 @@
-// 主程序入口 - 唯一允许的 .cpp 文件
+﻿// 主程序入口 - 唯一允许的 .cpp 文件
 
 // 导入第三方库模块（优先）
 import fmt;
@@ -48,7 +48,7 @@ int main() {
     for (auto value : tian_gan_values) {
         auto en_name = magic_enum::enum_name(value);
         auto zh_name = ZhouYi::GanZhi::Mapper::to_zh(value);
-        fmt::print("  {} → {}\n", en_name, zh_name);
+        fmt::print("  {}  {}\n", en_name, zh_name);
     }
     
     fmt::print("\n");
@@ -60,7 +60,7 @@ int main() {
         auto en_name = magic_enum::enum_name(value);
         auto zh_name = ZhouYi::GanZhi::Mapper::to_zh(value);
         auto sheng_xiao = ZhouYi::GanZhi::Mapper::sheng_xiao_zh(value);
-        fmt::print("  {} → {} ({})\n", en_name, zh_name, sheng_xiao);
+        fmt::print("  {}  {} ({})\n", en_name, zh_name, sheng_xiao);
     }
     
     fmt::print("\n");
@@ -236,10 +236,10 @@ int main() {
         // 测试3: 公历农历转换
         fmt::print(fg(fmt::color::yellow), "\n测试3: 公历农历互转\n");
         ZhouYi::BaZiBase::SolarDate solar{2025, 10, 13};
-        fmt::print("公历 2025-10-13 → 农历: {}\n", solar.to_lunar_string());
+        fmt::print("公历 2025-10-13  农历: {}\n", solar.to_lunar_string());
         
         ZhouYi::BaZiBase::LunarDate lunar{2025, 9, 11};
-        fmt::print("农历 2025年九月十一 → 公历: {}\n", lunar.to_solar_string());
+        fmt::print("农历 2025年九月十一  公历: {}\n", lunar.to_solar_string());
         
         // 测试4: 旬空说明
         fmt::print(fg(fmt::color::yellow), "\n测试4: 旬空（空亡）说明\n");
@@ -248,10 +248,10 @@ int main() {
         fmt::print("日柱 {} 的旬空: {} {}\n", 
                    bazi1.day.to_string(), bazi1.xun_kong_1, bazi1.xun_kong_2);
         
-        fmt::print(fg(fmt::color::green), "\n✅ 八字计算功能正常！旬空计算正确！\n");
+        fmt::print(fg(fmt::color::green), "\n 八字计算功能正常！旬空计算正确！\n");
         
     } catch (const std::exception& e) {
-        fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
+        fmt::print(fg(fmt::color::red), " 错误: {}\n", e.what());
     }
     
     // ==================== 十二长生演示 ====================
@@ -281,7 +281,7 @@ int main() {
             auto cs_state = ZhouYi::GanZhi::get_shi_er_chang_sheng(ZhouYi::GanZhi::TianGan::Jia, zhi_val);
             auto cs_name2 = ZhouYi::GanZhi::ShiErChangShengMapper::to_zh(cs_state);
             auto zhi_name = ZhouYi::GanZhi::Mapper::to_zh(zhi_val);
-            fmt::print("  {} → {}\n", zhi_name, cs_name2);
+            fmt::print("  {}  {}\n", zhi_name, cs_name2);
         }
         
         // 测试3: 展示乙木在十二地支的完整十二长生
@@ -292,7 +292,7 @@ int main() {
             auto cs_state = ZhouYi::GanZhi::get_shi_er_chang_sheng(ZhouYi::GanZhi::TianGan::Yi, zhi_val);
             auto cs_name3 = ZhouYi::GanZhi::ShiErChangShengMapper::to_zh(cs_state);
             auto zhi_name = ZhouYi::GanZhi::Mapper::to_zh(zhi_val);
-            fmt::print("  {} → {}\n", zhi_name, cs_name3);
+            fmt::print("  {}  {}\n", zhi_name, cs_name3);
         }
         
         // 测试4: 获取关键地支
@@ -322,10 +322,10 @@ int main() {
         fmt::print("甲木在申是否绝地: {}\n", 
                    ZhouYi::GanZhi::is_jue_di(ZhouYi::GanZhi::TianGan::Jia, ZhouYi::GanZhi::DiZhi::Shen) ? "是" : "否");
         
-        fmt::print(fg(fmt::color::green), "\n✅ 十二长生功能正常！\n");
+        fmt::print(fg(fmt::color::green), "\n 十二长生功能正常！\n");
         
     } catch (const std::exception& e) {
-        fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
+        fmt::print(fg(fmt::color::red), " 错误: {}\n", e.what());
     }
     
     // ==================== 大六壬排盘演示 ====================
@@ -358,17 +358,17 @@ int main() {
             fmt::print("课式: {}\n", fmt::join(ke_shi, ", "));
         }
         
-        fmt::print(fg(fmt::color::green), "\n✅ 大六壬排盘功能正常！\n");
+        fmt::print(fg(fmt::color::green), "\n 大六壬排盘功能正常！\n");
         
     } catch (const std::exception& e) {
-        fmt::print(fg(fmt::color::red), "❌ 错误: {}\n", e.what());
+        fmt::print(fg(fmt::color::red), " 错误: {}\n", e.what());
     }
     
     fmt::print("\n");
     fmt::print(fg(fmt::color::magenta) | fmt::emphasis::italic, 
-               "✨ 所有功能演示完成！\n");
+               " 所有功能演示完成！\n");
     fmt::print(fg(fmt::color::green), 
-               "🎉 C++23 Modules + 反射 + 中文映射 + 农历日历 + 八字计算 + 十二长生 + 大六壬完美运行！\n");
+               " C++23 Modules + 反射 + 中文映射 + 农历日历 + 八字计算 + 十二长生 + 大六壬完美运行！\n");
     
     return 0;
 }

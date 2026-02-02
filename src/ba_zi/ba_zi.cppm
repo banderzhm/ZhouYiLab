@@ -600,18 +600,23 @@ inline LiuShi create_liu_shi(int year, int month, int day, int hour, TianGan day
 struct BaZiResult {
     BaZiBase::BaZi ba_zi;           // 四柱八字
     bool is_male;                   // 性别
-    int birth_year;                 // 出生年份
-    int birth_month;                // 出生月份
-    int birth_day;                  // 出生日
+    int birth_year;                 // 出生年份（公历）
+    int birth_month;                // 出生月份（公历）
+    int birth_day;                  // 出生日（公历）
     int birth_hour;                 // 出生时辰
     int birth_minute;               // 出生分钟
     int birth_second;               // 出生秒
+    // 农历日期信息
+    int lunar_year;                 // 农历年份
+    int lunar_month;                // 农历月份
+    int lunar_day;                  // 农历日
     DaYunSystem da_yun_system;      // 大运系统
     
     BaZiResult(const BaZiBase::BaZi& bz, bool male, int by, int bm, int bd, int bh, 
-               int bmin = 0, int bsec = 0)
+               int bmin = 0, int bsec = 0, int ly = 0, int lm = 0, int ld = 0)
         : ba_zi(bz), is_male(male), birth_year(by), birth_month(bm), 
           birth_day(bd), birth_hour(bh), birth_minute(bmin), birth_second(bsec),
+          lunar_year(ly), lunar_month(lm), lunar_day(ld),
           da_yun_system(bz, male, by, bm, bd, bh, bmin, bsec) {}
     
     /**

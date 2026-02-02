@@ -1,4 +1,4 @@
-// 紫微斗数四化系统模块（实现）
+﻿// 紫微斗数四化系统模块（实现）
 module ZhouYi.ZiWei.SiHua;
 
 import ZhouYi.GanZhi;
@@ -51,11 +51,11 @@ namespace ZhouYi::ZiWei {
     string FeiHuaChain::to_string() const {
         string result = "飞化链：";
         for (size_t i = 0; i < chain.size(); ++i) {
-            if (i > 0) result += " → ";
+            if (i > 0) result += "  ";
             result += fmt::format("第{}宫", chain[i].from_gong);
         }
         if (!chain.empty()) {
-            result += fmt::format(" → 第{}宫", chain.back().to_gong);
+            result += fmt::format("  第{}宫", chain.back().to_gong);
         }
         if (is_hui_ben) {
             result += " (回本宫)";

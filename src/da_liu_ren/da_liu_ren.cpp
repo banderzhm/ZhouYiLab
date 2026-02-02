@@ -1,4 +1,4 @@
-// 大六壬实现文件
+﻿// 大六壬实现文件
 module ZhouYi.DaLiuRen;
 
 import std;
@@ -423,10 +423,10 @@ std::array<DiZhi, 3> SanChuan::ba_zhuan() {
 
 // 伏吟法取三传
 // 口诀：
-// 1. 四课中有贼克 → 不虞卦
-// 2. 四课中无贼克，日干为阳（刚日） → 自任卦
-// 3. 四课中无贼克，日干为阴（柔日） → 自信卦
-// 4. 初传或中传为自刑神 → 杜传
+// 1. 四课中有贼克  不虞卦
+// 2. 四课中无贼克，日干为阳（刚日）  自任卦
+// 3. 四课中无贼克，日干为阴（柔日）  自信卦
+// 4. 初传或中传为自刑神  杜传
 std::array<DiZhi, 3> SanChuan::fu_yin() {
     if (!si_ke_.first.is_gan_zhi) {
         throw std::runtime_error("第一课不是干支课，无法判断伏吟");

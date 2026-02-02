@@ -1,4 +1,4 @@
-// example_stacktrace.cpp - std::stacktrace 功能测试示例
+﻿// example_stacktrace.cpp - std::stacktrace 功能测试示例
 // 展示 C++23 std::stacktrace 的各种用法
 // 注意：std::stacktrace 目前主要在 MSVC (Windows) 上完整支持
 
@@ -28,7 +28,7 @@ public:
 // 递归函数，用于生成深层调用栈
 auto recursive_function(int depth) -> void {
     if (depth <= 0) {
-        std::println("📍 深度为 0，捕获当前调用栈:");
+        std::println(" 深度为 0，捕获当前调用栈:");
         auto trace = std::stacktrace::current();
         std::println("  调用栈深度: {}", trace.size());
         
@@ -46,7 +46,7 @@ auto recursive_function(int depth) -> void {
 
 // 打印详细的 stacktrace 信息（包括源文件、函数名、行号）
 auto print_detailed_stacktrace(std::stacktrace const& trace, std::string_view title = "详细调用栈") -> void {
-    std::println("\n📋 {}:", title);
+    std::println("\n {}:", title);
     std::println("{:=<60}", "");
     
     if (trace.empty()) {
@@ -58,28 +58,28 @@ auto print_detailed_stacktrace(std::stacktrace const& trace, std::string_view ti
         auto const& entry = trace[i];
         
         std::println("\n  帧 #{}", i);
-        std::println("  {:─<58}", "");
+        std::println("  {:<58}", "");
         
         // 获取源文件路径
         auto const source_file = entry.source_file();
         if (not source_file.empty()) {
-            std::println("  📄 源文件: {}", source_file);
+            std::println("   源文件: {}", source_file);
             
             // 获取行号
             auto const line_num = entry.source_line();
             if (line_num != 0) {
-                std::println("  📍 行号: {}", line_num);
+                std::println("   行号: {}", line_num);
             }
         }
         
         // 获取函数描述（包含函数名、符号等）
         auto const description = entry.description();
         if (not description.empty()) {
-            std::println("  🔧 函数: {}", description);
+            std::println("   函数: {}", description);
         }
         
         // 完整的 stacktrace_entry 信息
-        std::println("  📊 完整信息: {}", entry);
+        std::println("   完整信息: {}", entry);
         
         // 如果只显示前几帧
         if (i >= 9) {
@@ -122,7 +122,7 @@ auto risky_operation(bool should_fail) -> std::expected<int, error_with_trace> {
 
 // 测试 stacktrace 的各种操作
 auto test_stacktrace_operations() -> void {
-    std::println("\n🔬 测试 stacktrace 基本操作:");
+    std::println("\n 测试 stacktrace 基本操作:");
     
     auto trace = std::stacktrace::current();
     
@@ -144,7 +144,7 @@ auto test_stacktrace_operations() -> void {
 
 // 测试 stacktrace 分配器
 auto test_stacktrace_with_allocator() -> void {
-    std::println("\n🎯 测试带自定义分配器的 stacktrace:");
+    std::println("\n 测试带自定义分配器的 stacktrace:");
     
     // 使用默认分配器
     auto trace = std::stacktrace::current(std::allocator<std::stacktrace_entry>{});
@@ -153,7 +153,7 @@ auto test_stacktrace_with_allocator() -> void {
 
 // 比较两个 stacktrace
 auto test_stacktrace_comparison() -> void {
-    std::println("\n⚖️  测试 stacktrace 比较:");
+    std::println("\n  测试 stacktrace 比较:");
     
     auto trace1 = std::stacktrace::current();
     auto trace2 = std::stacktrace::current();
@@ -164,7 +164,7 @@ auto test_stacktrace_comparison() -> void {
 
 // 测试 stacktrace 迭代器
 auto test_stacktrace_iteration() -> void {
-    std::println("\n🔄 测试 stacktrace 迭代:");
+    std::println("\n 测试 stacktrace 迭代:");
     
     auto trace = std::stacktrace::current();
     
@@ -178,7 +178,7 @@ auto test_stacktrace_iteration() -> void {
 
 // 测试 stacktrace 的 hash 支持
 auto test_stacktrace_hash() -> void {
-    std::println("\n#️⃣  测试 stacktrace 哈希:");
+    std::println("\n#  测试 stacktrace 哈希:");
     
     auto trace1 = std::stacktrace::current();
     auto trace2 = std::stacktrace::current();
@@ -194,7 +194,7 @@ auto test_stacktrace_hash() -> void {
 
 // 在 unordered_map 中使用 stacktrace
 auto test_stacktrace_in_map() -> void {
-    std::println("\n🗺️  测试在 unordered_map 中使用 stacktrace:");
+    std::println("\n  测试在 unordered_map 中使用 stacktrace:");
     
     std::unordered_map<std::stacktrace, int> trace_map;
     
@@ -209,28 +209,28 @@ auto test_stacktrace_in_map() -> void {
 }
 
 auto main() -> int {
-    std::println("════════════════════════════════════════");
-    std::println("   🔍 C++23 std::stacktrace 功能测试");
-    std::println("════════════════════════════════════════\n");
+    std::println("");
+    std::println("    C++23 std::stacktrace 功能测试");
+    std::println("\n");
     
     try {
         // 1. 测试基本的 stacktrace 捕获
-        std::println("1️⃣  测试基本 stacktrace 捕获:");
+        std::println("1  测试基本 stacktrace 捕获:");
         auto current_trace = std::stacktrace::current();
-        std::println("  ✓ 成功捕获当前调用栈，深度: {}\n", current_trace.size());
+        std::println("   成功捕获当前调用栈，深度: {}\n", current_trace.size());
         
         // 2. 测试递归调用栈
-        std::println("2️⃣  测试递归调用栈:");
+        std::println("2  测试递归调用栈:");
         recursive_function(5);
-        std::println("  ✓ 递归调用栈测试完成\n");
+        std::println("   递归调用栈测试完成\n");
         
         // 3. 测试异常中的 stacktrace
-        std::println("3️⃣  测试异常中的 stacktrace:");
+        std::println("3  测试异常中的 stacktrace:");
         try {
             caller_function();
         } catch (traced_error const& e) {
-            std::println("  ✓ 捕获到异常: {}", e.what());
-            std::println("  ✓ 异常抛出时的调用栈深度: {}", e.trace().size());
+            std::println("   捕获到异常: {}", e.what());
+            std::println("   异常抛出时的调用栈深度: {}", e.trace().size());
             
             // 打印异常调用栈的前 5 帧（简单格式）
             std::println("\n  简单格式输出（前5帧）:");
@@ -245,15 +245,15 @@ auto main() -> int {
         std::println();
         
         // 4. 测试 std::expected 与 stacktrace
-        std::println("4️⃣  测试 std::expected 与 stacktrace:");
+        std::println("4  测试 std::expected 与 stacktrace:");
         auto result = risky_operation(true);
         
         if (result.has_value()) {
-            std::println("  ✓ 操作成功，值: {}", result.value());
+            std::println("   操作成功，值: {}", result.value());
         } else {
             auto const& err = result.error();
-            std::println("  ✓ 捕获到错误: {}", err.message);
-            std::println("  ✓ 错误发生时的调用栈深度: {}", err.trace.size());
+            std::println("   捕获到错误: {}", err.message);
+            std::println("   错误发生时的调用栈深度: {}", err.trace.size());
         }
         std::println();
         
@@ -275,18 +275,18 @@ auto main() -> int {
         // 10. 测试在容器中使用 stacktrace
         test_stacktrace_in_map();
         
-        std::println("\n════════════════════════════════════════");
-        std::println("   ✅ 所有测试完成!");
-        std::println("════════════════════════════════════════");
+        std::println("\n");
+        std::println("    所有测试完成!");
+        std::println("");
         
         return 0;
         
     } catch (std::exception const& e) {
-        std::println("\n❌ 发生异常: {}", e.what());
+        std::println("\n 发生异常: {}", e.what());
         
         // 捕获当前位置的 stacktrace
         auto crash_trace = std::stacktrace::current();
-        std::println("❌ 崩溃时的调用栈（简单格式）:");
+        std::println(" 崩溃时的调用栈（简单格式）:");
         auto const max_frames = std::min(std::size_t{10}, crash_trace.size());
         for (std::size_t i = 0z; i < max_frames; ++i) {
             std::println("  [{}] {}", i, crash_trace[i]);
@@ -297,10 +297,10 @@ auto main() -> int {
         
         return 1;
     } catch (...) {
-        std::println("\n❌ 发生未知异常!");
+        std::println("\n 发生未知异常!");
         
         auto crash_trace = std::stacktrace::current();
-        std::println("❌ 崩溃时的调用栈（简单格式，前10帧）:");
+        std::println(" 崩溃时的调用栈（简单格式，前10帧）:");
         auto const max_frames = std::min(std::size_t{10}, crash_trace.size());
         for (std::size_t i = 0z; i < max_frames; ++i) {
             std::println("  [{}] {}", i, crash_trace[i]);
@@ -318,9 +318,9 @@ auto main() -> int {
 import std;
 
 auto main() -> int {
-    std::println("════════════════════════════════════════");
-    std::println("   ⚠️  std::stacktrace 测试跳过");
-    std::println("════════════════════════════════════════\n");
+    std::println("");
+    std::println("     std::stacktrace 测试跳过");
+    std::println("\n");
     
     std::println("std::stacktrace 目前主要在 Windows (MSVC) 上完整支持。");
     std::println("Linux/Unix 平台的支持仍在发展中。");
@@ -329,7 +329,7 @@ auto main() -> int {
     std::println("  - boost::stacktrace");
     std::println("  - 或等待 libc++/libstdc++ 的完整实现");
     
-    std::println("\n════════════════════════════════════════");
+    std::println("\n");
     
     return 0;
 }

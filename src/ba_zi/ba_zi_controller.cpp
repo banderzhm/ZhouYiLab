@@ -42,12 +42,13 @@ BaZiResult pai_pan_lunar(int year, int month, int day, int hour,
     auto lunar_hour = tyme::LunarHour::from_ymd_hms(year, month, day, hour, minute, 0);
     auto solar_time = lunar_hour.get_solar_time();
     
-    // 使用公历日期创建结果
+    // 使用公历日期创建结果，同时保存农历日期
     return BaZiResult(bazi, is_male, 
                      solar_time.get_year(), 
                      solar_time.get_month(), 
                      solar_time.get_day(), 
-                     hour, minute, 0);
+                     hour, minute, 0,
+                     year, month, day);  // 保存原始农历日期
 }
 
 /**
@@ -60,30 +61,96 @@ void display_result(const BaZiResult& result) {
     // 基本信息
     fmt::println("【基本信息】");
     fmt::println("性别: {}", result.is_male ? "男" : "女");
-    fmt::println("出生: {}年{}月{}日 {}时", 
-                 result.birth_year, result.birth_month, 
-                 result.birth_day, result.birth_hour);
+    
+    // 根据是否有农历日期信息来判断显示方式
+    if (result.lunar_year > 0) {
+        // 农历排盘
+        fmt::println("出生: 农历{}年{}月{}日 {}时{}分", 
+                     result.lunar_year, result.lunar_month, 
+                     result.lunar_day, result.birth_hour, result.birth_minute);
+        fmt::println("对应公历: {}年{}月{}日", 
+                     result.birth_year, result.birth_month, result.birth_day);
+    } else {
+        // 阳历排盘
+        fmt::println("出生: 阳历{}年{}月{}日 {}时{}分", 
+                     result.birth_year, result.birth_month, 
+                     result.birth_day, result.birth_hour, result.birth_minute);
+    }
     fmt::println("");
     
     // 四柱八字
     fmt::println("【四柱八字】");
     const auto& bazi = result.ba_zi;
     
-    // 打印表头
-    fmt::println("{:>8} {:>8} {:>8} {:>8}", "年柱", "月柱", "日柱", "时柱");
-    fmt::println("{:>8} {:>8} {:>8} {:>8}", 
+    // 四柱干支
+    fmt::println("年柱: {}  月柱: {}  日柱: {}  时柱: {}", 
                  bazi.year.to_string(),
                  bazi.month.to_string(),
                  bazi.day.to_string(),
                  bazi.hour.to_string());
     
-    // 十神
+    // 天干十神
     auto shi_shen_arr = result.get_si_zhu_shi_shen();
-    fmt::println("{:>8} {:>8} {:>8} {:>8}",
-                 shi_shen_to_zh(shi_shen_arr[0]),
-                 shi_shen_to_zh(shi_shen_arr[1]),
-                 shi_shen_to_zh(shi_shen_arr[2]),
-                 shi_shen_to_zh(shi_shen_arr[3]));
+    fmt::println("天干十神: {}({})  {}({})  {}({})  {}({})",
+                 std::string(Mapper::to_zh(bazi.year.gan)), shi_shen_to_zh(shi_shen_arr[0]),
+                 std::string(Mapper::to_zh(bazi.month.gan)), shi_shen_to_zh(shi_shen_arr[1]),
+                 std::string(Mapper::to_zh(bazi.day.gan)), shi_shen_to_zh(shi_shen_arr[2]),
+                 std::string(Mapper::to_zh(bazi.hour.gan)), shi_shen_to_zh(shi_shen_arr[3]));
+    
+    // 地支十神（使用地支藏干的主气）
+    auto year_cang_gan = get_cang_gan(bazi.year.zhi);
+    auto month_cang_gan = get_cang_gan(bazi.month.zhi);
+    auto day_cang_gan = get_cang_gan(bazi.day.zhi);
+    auto hour_cang_gan = get_cang_gan(bazi.hour.zhi);
+    
+    fmt::println("地支十神: {}({})  {}({})  {}({})  {}({})",
+                 std::string(Mapper::to_zh(bazi.year.zhi)), shi_shen_to_zh(get_shi_shen(bazi.day.gan, year_cang_gan[0])),
+                 std::string(Mapper::to_zh(bazi.month.zhi)), shi_shen_to_zh(get_shi_shen(bazi.day.gan, month_cang_gan[0])),
+                 std::string(Mapper::to_zh(bazi.day.zhi)), shi_shen_to_zh(get_shi_shen(bazi.day.gan, day_cang_gan[0])),
+                 std::string(Mapper::to_zh(bazi.hour.zhi)), shi_shen_to_zh(get_shi_shen(bazi.day.gan, hour_cang_gan[0])));
+    
+    // 藏干详情
+    fmt::println("\n【藏干详情】");
+    
+    // 年支藏干
+    fmt::print("年支藏干: ");
+    for (std::size_t i = 0; i < year_cang_gan.size(); ++i) {
+        if (i > 0) fmt::print(" ");
+        fmt::print("{}({})", 
+                   std::string(Mapper::to_zh(year_cang_gan[i])), 
+                   shi_shen_to_zh(get_shi_shen(bazi.day.gan, year_cang_gan[i])));
+    }
+    fmt::println("");
+    
+    // 月支藏干
+    fmt::print("月支藏干: ");
+    for (std::size_t i = 0; i < month_cang_gan.size(); ++i) {
+        if (i > 0) fmt::print(" ");
+        fmt::print("{}({})", 
+                   std::string(Mapper::to_zh(month_cang_gan[i])), 
+                   shi_shen_to_zh(get_shi_shen(bazi.day.gan, month_cang_gan[i])));
+    }
+    fmt::println("");
+    
+    // 日支藏干
+    fmt::print("日支藏干: ");
+    for (std::size_t i = 0; i < day_cang_gan.size(); ++i) {
+        if (i > 0) fmt::print(" ");
+        fmt::print("{}({})", 
+                   std::string(Mapper::to_zh(day_cang_gan[i])), 
+                   shi_shen_to_zh(get_shi_shen(bazi.day.gan, day_cang_gan[i])));
+    }
+    fmt::println("");
+    
+    // 时支藏干
+    fmt::print("时支藏干: ");
+    for (std::size_t i = 0; i < hour_cang_gan.size(); ++i) {
+        if (i > 0) fmt::print(" ");
+        fmt::print("{}({})", 
+                   std::string(Mapper::to_zh(hour_cang_gan[i])), 
+                   shi_shen_to_zh(get_shi_shen(bazi.day.gan, hour_cang_gan[i])));
+    }
+    fmt::println("");
     
     // 旬空
     if (!bazi.xun_kong_1.empty()) {
@@ -190,6 +257,43 @@ void display_liu_yue(const BaZiResult& result, int year) {
     
     fmt::println("");
     fmt::println("========================================================");
+}
+
+/**
+ * @brief 显示流日信息（实现）
+ */
+void display_liu_ri(const BaZiResult& result, int year, int month, int day_count) {
+    fmt::println("==================== {}年{}月流日信息（公历）====================", year, month);
+    fmt::println("");
+    
+    fmt::println("{:<14} {:<8} {:<8} {:<8}", 
+                 "公历日期", "干支", "天干十神", "地支十神");
+    fmt::println("{:-<46}", "");
+    
+    // 获取该月的天数
+    int days_in_month = 31;
+    if (month == 2) {
+        // 判断闰年
+        bool is_leap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        days_in_month = is_leap ? 29 : 28;
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+        days_in_month = 30;
+    }
+    
+    // 限制显示天数
+    int actual_count = std::min(day_count, days_in_month);
+    
+    for (int day = 1; day <= actual_count; ++day) {
+        auto liu_ri = result.get_liu_ri(year, month, day);
+        fmt::println("{:<14} {:<8} {:<8} {:<8}",
+                     fmt::format("{}月{}日", month, day),
+                     liu_ri.pillar.to_string(),
+                     shi_shen_to_zh(liu_ri.gan_shi_shen),
+                     shi_shen_to_zh(liu_ri.zhi_shi_shen));
+    }
+    
+    fmt::println("");
+    fmt::println("============================================================");
 }
 
 /**

@@ -1,4 +1,4 @@
-// 六爻系统示例
+﻿// 六爻系统示例
 import ZhouYi.LiuYaoController;
 import ZhouYi.BaZiBase;
 import ZhouYi.GanZhi;
@@ -12,9 +12,9 @@ using namespace std;
 
 int main() {
     fmt::print("\n");
-    fmt::print("╔════════════════════════════════════════════════════════════╗\n");
-    fmt::print("║                  六爻系统示例演示                          ║\n");
-    fmt::print("╚════════════════════════════════════════════════════════════╝\n");
+    fmt::print("\n");
+    fmt::print("                  六爻系统示例演示                          \n");
+    fmt::print("\n");
     fmt::print("\n");
 
     try {
@@ -23,7 +23,7 @@ int main() {
         
         // 示例1：基本六爻排盘（无动爻）
         fmt::print("【示例1】基本六爻排盘（乾卦，无动爻）\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
         fmt::print("主卦代码：111111（六爻皆阳）\n\n");
         
         auto result1 = calculate_liu_yao("111111", bazi);
@@ -36,15 +36,15 @@ int main() {
 
         // 示例2：带动爻的六爻排盘
         fmt::print("【示例2】带动爻的六爻排盘（第1爻动）\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
         fmt::print("主卦代码：110001\n");
         fmt::print("动爻位置：第1爻\n\n");
         
         auto result2 = calculate_liu_yao("110001", bazi, {1}, true);  // 启用 AI 可读 JSON
         
         // 完整输出六爻信息
-        fmt::print("📊 六爻详细信息（从下到上）：\n");
-        fmt::print("{:─<60}\n", "");
+        fmt::print(" 六爻详细信息（从下到上）：\n");
+        fmt::print("{:<60}\n", "");
         for (std::size_t i = 0z; i < result2.yao_list.size(); ++i) {
             auto const& yao = result2.yao_list[i];
             fmt::print("\n第{}爻 {}：\n", yao.position, yao.shiYingMark);
@@ -56,7 +56,7 @@ int main() {
             
             // 如果是动爻
             if (yao.isChanging) {
-                fmt::print("  • 是否动爻：是 ⚡ {}\n", yao.changeMark);
+                fmt::print("  • 是否动爻：是  {}\n", yao.changeMark);
                 fmt::print("  • 变卦干支：{}\n", yao.changedPillar.to_string());
                 fmt::print("  • 变卦五行：{}\n", yao.changedElement);
                 fmt::print("  • 变卦六亲：{}\n", yao.changedRelative);
@@ -75,17 +75,17 @@ int main() {
                 fmt::print("  {:-<56}\n", "");
             }
         }
-        fmt::print("\n{:─<60}\n\n", "");
+        fmt::print("\n{:<60}\n\n", "");
         
         // 输出 AI 可读的 JSON 数据（中文 key）
-        fmt::print("🤖 AI 可读 JSON 数据（中文 key）：\n");
-        fmt::print("{:─<60}\n", "");
+        fmt::print(" AI 可读 JSON 数据（中文 key）：\n");
+        fmt::print("{:<60}\n", "");
         fmt::print("{}\n", result2.ai_read_json_data.dump(4));
-        fmt::print("{:─<60}\n\n", "");
+        fmt::print("{:<60}\n\n", "");
 
         // 示例3：从爻辞生成卦象
         fmt::print("【示例3】从爻辞生成卦象\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
         
         vector<int> yao_ci = {7, 8, 6, 9, 7, 8};  // 从下到上：少阳、少阴、老阴（动）、老阳（动）、少阳、少阴
         vector<int> changing_lines;
@@ -105,16 +105,16 @@ int main() {
         
         // 输出 AI JSON
         if (not result3.ai_read_json_data.empty()) {
-            fmt::print("\n🤖 AI 可读 JSON：\n");
-            fmt::print("{:─<60}\n", "");
+            fmt::print("\n AI 可读 JSON：\n");
+            fmt::print("{:<60}\n", "");
             fmt::print("{}\n", result3.ai_read_json_data.dump(4));
-            fmt::print("{:─<60}\n", "");
+            fmt::print("{:<60}\n", "");
         }
         fmt::print("\n");
 
         // 示例4：获取卦象信息
         fmt::print("【示例4】获取卦象信息\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
         
         auto hexagram_info = get_hexagram_info("111111");
         fmt::print("卦象代码：111111\n");
@@ -129,7 +129,7 @@ int main() {
 
         // 示例5：导出JSON
         fmt::print("【示例5】导出JSON格式\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
         auto json_str = result1.json_data.dump(2);
         fmt::print("{}\n", json_str.substr(0, min(size_t(300), json_str.size())));
         if (json_str.size() > 300) {
@@ -138,10 +138,10 @@ int main() {
         fmt::print("\n");
 
     } catch (const exception& e) {
-        fmt::print("❌ 错误：{}\n", e.what());
+        fmt::print(" 错误：{}\n", e.what());
         return 1;
     }
 
-    fmt::print("✅ 六爻系统示例演示完成！\n\n");
+    fmt::print(" 六爻系统示例演示完成！\n\n");
     return 0;
 }

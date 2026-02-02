@@ -7,6 +7,7 @@ import ZhouYi.GanZhi;
 import ZhouYi.QiMen;
 import ZhouYi.QiMen.Pan;
 import ZhouYi.tyme;
+import nlohmann.json;
 import fmt;
 import std;
 
@@ -102,13 +103,47 @@ public:
         auto [tian_gan_hour, di_zhi_hour] = calculate_hour_gan_zhi(hour);
         
         // 调用排盘生成器
-        return QiMenPanGenerator::generate_pan(
+        auto result = QiMenPanGenerator::generate_pan(
             solar_term,
             tian_gan_day,
             di_zhi_day,
             tian_gan_hour,
             di_zhi_hour
         );
+        
+        // 设置日期信息
+        if (result) {
+            auto& pan = result.value();
+            
+            // 阳历日期
+            pan.solar_year = year;
+            pan.solar_month = month;
+            pan.solar_day = day;
+            pan.hour = hour;
+            
+            // 农历日期
+            try {
+                auto solar_time = tyme::SolarTime::from_ymd_hms(year, month, day, hour, minute, 0);
+                auto lunar_day = solar_time.get_lunar_hour().get_lunar_day();
+                auto lunar_month = lunar_day.get_lunar_month();
+                
+                pan.lunar_year = lunar_day.get_year();
+                pan.lunar_month = lunar_day.get_month();
+                pan.lunar_day = lunar_day.get_day();
+                pan.is_leap_month = lunar_month.is_leap();
+            } catch (...) {
+                // 如果获取农历失败，保持默认值
+            }
+            
+            // 八字信息
+            try {
+                pan.ba_zi = BaZiBase::BaZi::from_solar(year, month, day, hour, minute, 0);
+            } catch (...) {
+                // 如果获取八字失败，保持为 nullopt
+            }
+        }
+        
+        return result;
     }
     
     /**
@@ -188,13 +223,47 @@ public:
         auto [tian_gan_hour, di_zhi_hour] = calculate_hour_gan_zhi(hour);
         
         // 调用排盘生成器
-        return QiMenPanGenerator::generate_pan(
+        auto result = QiMenPanGenerator::generate_pan(
             solar_term,
             tian_gan_day,
             di_zhi_day,
             tian_gan_hour,
             di_zhi_hour
         );
+        
+        // 设置日期信息
+        if (result) {
+            auto& pan = result.value();
+            
+            // 农历日期（输入）
+            pan.lunar_year = year;
+            pan.lunar_month = month < 0 ? -month : month;  // 负数表示闰月
+            pan.lunar_day = day;
+            pan.is_leap_month = month < 0;
+            pan.hour = hour;
+            
+            // 阳历日期（转换）
+            try {
+                auto lunar_hour = tyme::LunarHour::from_ymd_hms(year, month, day, hour, minute, 0);
+                auto solar_time = lunar_hour.get_solar_time();
+                auto solar_day = solar_time.get_solar_day();
+                
+                pan.solar_year = solar_day.get_year();
+                pan.solar_month = solar_day.get_month();
+                pan.solar_day = solar_day.get_day();
+            } catch (...) {
+                // 如果获取阳历失败，保持默认值
+            }
+            
+            // 八字信息
+            try {
+                pan.ba_zi = BaZiBase::BaZi::from_lunar(year, month, day, hour, minute, 0);
+            } catch (...) {
+                // 如果获取八字失败，保持为 nullopt
+            }
+        }
+        
+        return result;
     }
     
     /**
@@ -221,6 +290,53 @@ public:
     }
     
     /**
+     * @brief 获取奇门盘的 JSON 格式输出（按字母顺序）
+     * 
+     * @param pan 奇门盘
+     * @return JSON 字符串
+     * 
+     * @example
+     * auto result = QiMenController::pai_pan_solar(2011, 6, 18, 3, 56);
+     * if (result) {
+     *     std::string json_str = QiMenController::get_pan_json(result.value());
+     *     std::println("{}", json_str);
+     * }
+     */
+    [[nodiscard]] static auto get_pan_json(const QiMenPan& pan) -> std::string {
+        nlohmann::json j = pan;
+        return j.dump(2);  // 缩进2个空格
+    }
+    
+    /**
+     * @brief 获取奇门盘的 JSON 格式输出（保持插入顺序）
+     * 
+     * @param pan 奇门盘
+     * @return JSON 字符串，字段按照逻辑顺序排列
+     * 
+     * @example
+     * auto result = QiMenController::pai_pan_solar(2011, 6, 18, 3, 56);
+     * if (result) {
+     *     std::string json_str = QiMenController::get_pan_json_ordered(result.value());
+     *     std::println("{}", json_str);
+     * }
+     */
+    [[nodiscard]] static auto get_pan_json_ordered(const QiMenPan& pan) -> std::string {
+        nlohmann::ordered_json j = build_ordered_json(pan);
+        return j.dump(2);  // 缩进2个空格
+    }
+    
+    /**
+     * @brief 获取奇门盘的 JSON 对象
+     * 
+     * @param pan 奇门盘
+     * @return JSON 对象
+     */
+    [[nodiscard]] static auto get_pan_json_object(const QiMenPan& pan) -> nlohmann::json {
+        nlohmann::json j = pan;
+        return j;
+    }
+    
+    /**
      * @brief 判断两个奇门盘是否相同
      */
     [[nodiscard]] static constexpr bool is_same_pan(
@@ -234,6 +350,106 @@ public:
     }
 
 private:
+    /**
+     * @brief 构建 ordered_json 对象，保持字段插入顺序
+     */
+    [[nodiscard]] static auto build_ordered_json(const QiMenPan& pan) -> nlohmann::ordered_json {
+        using namespace ZhouYi::GanZhi;
+        
+        nlohmann::ordered_json j;
+        
+        // 1. 日期信息（阳历和农历）
+        nlohmann::ordered_json solar_date;
+        solar_date["year"] = pan.solar_year;
+        solar_date["month"] = pan.solar_month;
+        solar_date["day"] = pan.solar_day;
+        solar_date["hour"] = pan.hour;
+        j["solar_date"] = solar_date;
+        
+        nlohmann::ordered_json lunar_date;
+        lunar_date["year"] = pan.lunar_year;
+        lunar_date["month"] = pan.lunar_month;
+        lunar_date["day"] = pan.lunar_day;
+        lunar_date["is_leap_month"] = pan.is_leap_month;
+        j["lunar_date"] = lunar_date;
+        
+        // 2. 八字信息
+        if (pan.ba_zi.has_value()) {
+            const auto& bazi = pan.ba_zi.value();
+            nlohmann::ordered_json bazi_json;
+            
+            // 年柱
+            nlohmann::ordered_json year_json;
+            year_json["stem"] = bazi.year.stem();
+            year_json["branch"] = bazi.year.branch();
+            bazi_json["year"] = year_json;
+            
+            // 月柱
+            nlohmann::ordered_json month_json;
+            month_json["stem"] = bazi.month.stem();
+            month_json["branch"] = bazi.month.branch();
+            bazi_json["month"] = month_json;
+            
+            // 日柱
+            nlohmann::ordered_json day_json;
+            day_json["stem"] = bazi.day.stem();
+            day_json["branch"] = bazi.day.branch();
+            bazi_json["day"] = day_json;
+            
+            // 时柱
+            nlohmann::ordered_json hour_json;
+            hour_json["stem"] = bazi.hour.stem();
+            hour_json["branch"] = bazi.hour.branch();
+            bazi_json["hour"] = hour_json;
+            
+            // 旬空
+            bazi_json["xun_kong"] = bazi.xun_kong_1 + bazi.xun_kong_2;
+            
+            j["ba_zi"] = bazi_json;
+        }
+        
+        // 3. 阴阳遁信息
+        j["dun"] = pan.dun == Dun::Yang ? "阳遁" : "阴遁";
+        
+        // 4. 三元信息
+        std::string yuan_zh;
+        switch (pan.yuan) {
+            case Yuan::Shang: yuan_zh = "上元"; break;
+            case Yuan::Zhong: yuan_zh = "中元"; break;
+            case Yuan::Xia: yuan_zh = "下元"; break;
+        }
+        j["yuan"] = yuan_zh;
+        
+        // 5. 局数和节气
+        j["ju"] = fmt::format("第{}局", pan.ju);
+        j["solar_term"] = std::string(solar_term_name(pan.solar_term));
+        
+        // 6. 直符直使信息
+        j["zhi_fu_star"] = std::string(star_name(pan.zhi_fu_star));
+        j["zhi_shi_gate"] = std::string(gate_name(pan.zhi_shi_gate));
+        j["zhi_fu_palace"] = std::string(palace_name(pan.zhi_fu_palace));
+        
+        // 7. 九宫信息（最后）
+        nlohmann::ordered_json palaces_json = nlohmann::ordered_json::array();
+        for (std::size_t i = 0; i < pan.palaces.size(); ++i) {
+            const auto& p = pan.palaces[i];
+            nlohmann::ordered_json palace_json;
+            
+            palace_json["palace_num"] = get_number_from_palace(p.palace);
+            palace_json["palace_name"] = std::string(palace_name(p.palace));
+            palace_json["star"] = std::string(star_name(p.star));
+            palace_json["gate"] = std::string(gate_name(p.gate));
+            palace_json["spirit"] = std::string(spirit_name(p.spirit));
+            palace_json["di_gan"] = std::string(Mapper::to_zh(static_cast<TianGan>(p.di_gan)));
+            palace_json["tian_gan"] = std::string(Mapper::to_zh(static_cast<TianGan>(p.tian_gan)));
+            
+            palaces_json.push_back(palace_json);
+        }
+        j["palaces"] = palaces_json;
+        
+        return j;
+    }
+    
     /**
      * @brief 将 tyme 的节气转换为奇门的节气枚举
      */

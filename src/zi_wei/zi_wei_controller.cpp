@@ -1,4 +1,4 @@
-// 紫微斗数控制器实现
+﻿// 紫微斗数控制器实现
 module ZhouYi.ZiWei.Controller;
 
 import ZhouYi.GanZhi;
@@ -50,9 +50,9 @@ namespace ZhouYi::ZiWei {
     }
 
     void display_ming_gong_san_fang_si_zheng(const ZiWeiResult& result) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       命宫三方四正\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         // 命宫
         fmt::print("【命宫】\n");
@@ -177,9 +177,9 @@ namespace ZhouYi::ZiWei {
     // ============= 四化分析功能实现 =============
     
     void display_gong_gan_si_hua(const ZiWeiResult& result) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       宫干四化分析\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         auto gong_gan_zhi = prepare_gong_gan_zhi(result);
         auto stars_in_gong = prepare_stars_in_gong(result);
@@ -192,9 +192,9 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_zi_hua_analysis(const ZiWeiResult& result) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       自化分析\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         auto gong_gan_zhi = prepare_gong_gan_zhi(result);
         auto stars_in_gong = prepare_stars_in_gong(result);
@@ -212,9 +212,9 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_fei_hua_analysis(const ZiWeiResult& result, int from_gong, SiHua si_hua_type) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       第{}宫 {} 飞化链分析\n", from_gong, string(to_zh(si_hua_type)));
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         auto gong_gan_zhi = prepare_gong_gan_zhi(result);
         auto stars_in_gong = prepare_stars_in_gong(result);
@@ -234,9 +234,9 @@ namespace ZhouYi::ZiWei {
     // ============= 格局分析功能实现 =============
     
     void display_ge_ju_analysis(const ZiWeiResult& result) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       格局分析\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         auto stars_in_gong = prepare_stars_in_gong(result);
         auto gong_di_zhi = prepare_gong_di_zhi(result);
@@ -310,9 +310,9 @@ namespace ZhouYi::ZiWei {
         int gong_index = result.get_palace(gong_wei).gong_data.index;
         auto san_fang = get_san_fang_si_zheng(gong_index);
         
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       {} 三方四正\n", string(to_zh(gong_wei)));
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         fmt::print("{}\n\n", san_fang.to_string());
         
@@ -358,9 +358,9 @@ namespace ZhouYi::ZiWei {
     // ============= 运限分析功能实现 =============
     
     void display_da_xian_analysis(const ZiWeiResult& result) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       大限分析\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         for (int i = 0; i < 12; ++i) {
             const auto& da_xian = result.da_xian_data[i];
@@ -374,9 +374,9 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_xiao_xian_analysis(const ZiWeiResult& result, int current_age) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       小限分析（{}岁）\n", current_age);
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         auto xiao_xian_data = get_xiao_xian(current_age, result.is_male, result.year_pillar.zhi);
         
@@ -388,9 +388,9 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_liu_nian_analysis(const ZiWeiResult& result, int target_year, int current_age) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       {}年流年分析（{}岁）\n", target_year, current_age);
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         // 使用tyme库获取流年天干地支
         auto solar_day = tyme::SolarDay::from_ymd(target_year, 1, 1);
@@ -430,9 +430,9 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_liu_yue_analysis(const ZiWeiResult& result, int target_year, int target_month, int current_age) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       {}年{}月流月分析（{}岁）\n", target_year, target_month, current_age);
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         // 使用tyme库获取流月天干地支
         auto solar_day = tyme::SolarDay::from_ymd(target_year, target_month, 15); // 使用月中作为参考日
@@ -474,9 +474,9 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_liu_ri_analysis(const ZiWeiResult& result, int target_year, int target_month, int target_day, int current_age) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       {}年{}月{}日流日分析（{}岁）\n", target_year, target_month, target_day, current_age);
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         // 使用tyme库获取流日天干地支
         auto solar_day = tyme::SolarDay::from_ymd(target_year, target_month, target_day);
@@ -531,12 +531,12 @@ namespace ZhouYi::ZiWei {
     }
     
     void display_liu_shi_analysis(const ZiWeiResult& result, int target_year, int target_month, int target_day, DiZhi target_hour, int current_age) {
-        fmt::print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n\n");
         fmt::print("       {}年{}月{}日 {} 流时分析（{}岁）\n", 
             target_year, target_month, target_day, 
             string(to_zh(target_hour)), 
             current_age);
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+        fmt::print("\n\n");
         
         // 使用tyme库获取流时天干
         auto solar_day = tyme::SolarDay::from_ymd(target_year, target_month, target_day);
@@ -599,13 +599,13 @@ namespace ZhouYi::ZiWei {
     
     void display_yun_xian_full_analysis(const ZiWeiResult& result, int target_year, int target_month, int target_day, DiZhi target_hour, int current_age) {
         fmt::print("\n");
-        fmt::print("╔════════════════════════════════════════════════════════════╗\n");
-        fmt::print("║              完整运限分析报告                              ║\n");
-        fmt::print("║       {}年{}月{}日 {} （{}岁）            ║\n",
+        fmt::print("\n");
+        fmt::print("              完整运限分析报告                              \n");
+        fmt::print("       {}年{}月{}日 {} （{}岁）            \n",
             target_year, target_month, target_day,
             string(to_zh(target_hour)),
             current_age);
-        fmt::print("╚════════════════════════════════════════════════════════════╝\n");
+        fmt::print("\n");
         
         // 大限
         display_da_xian_analysis(result);
@@ -626,18 +626,18 @@ namespace ZhouYi::ZiWei {
         display_liu_shi_analysis(result, target_year, target_month, target_day, target_hour, current_age);
         
         fmt::print("\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
         fmt::print("       运限分析完成\n");
-        fmt::print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        fmt::print("\n");
     }
 
     // ============= 综合分析功能实现 =============
     
     void display_full_analysis(const ZiWeiResult& result) {
         fmt::print("\n");
-        fmt::print("╔════════════════════════════════════════════════════════════╗\n");
-        fmt::print("║              紫微斗数完整命盘分析报告                      ║\n");
-        fmt::print("╚════════════════════════════════════════════════════════════╝\n");
+        fmt::print("\n");
+        fmt::print("              紫微斗数完整命盘分析报告                      \n");
+        fmt::print("\n");
         
         // 基本信息
         fmt::print("\n【基本信息】\n");

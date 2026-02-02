@@ -1,44 +1,44 @@
-# ZhouYiLab 模块架构文档
+﻿# ZhouYiLab 模块架构文档
 
 ## 模块层次结构
 
 ```
-┌─────────────────────────────────────────────────┐
-│                应用层 (main.cpp)                 │
-└─────────────────────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────┐
-│              功能模块层                          │
-│  ┌──────────┬──────────┬──────┬──────────┐     │
-│  │ LiuYao   │ DaLiuRen │ BaZi │  ZiWei   │     │
-│  └──────────┴──────────┴──────┴──────────┘     │
-│  ┌──────────┐                                   │
-│  │  QiMen   │                                   │
-│  └──────────┘                                   │
-└─────────────────────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────┐
-│              通用模块层                          │
-│  ┌───────────┬──────────────┬──────────────┐   │
-│  │ BaZiBase  │ WuXingUtils  │DiZhiRelations│   │
-│  └───────────┴──────────────┴──────────────┘   │
-│  ┌───────────┬──────────────┬──────────────┐   │
-│  │  TianGan  │    DiZhi     │    GanZhi    │   │
-│  └───────────┴──────────────┴──────────────┘   │
-│  ┌───────────┬──────────────┐                  │
-│  │ ZhMapper  │     Tyme     │                  │
-│  └───────────┴──────────────┘                  │
-└─────────────────────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────┐
-│            第三方库 & 标准库层                   │
-│  ┌──────┬──────────────┬─────────────────┐    │
-│  │ fmt  │nlohmann.json │  magic_enum     │    │
-│  └──────┴──────────────┴─────────────────┘    │
-│  ┌──────────────┐                              │
-│  │  import std  │                              │
-│  └──────────────┘                              │
-└─────────────────────────────────────────────────┘
+
+                应用层 (main.cpp)                 
+
+                        
+
+              功能模块层                          
+       
+   LiuYao    DaLiuRen  BaZi   ZiWei        
+       
+                                     
+    QiMen                                      
+                                     
+
+                        
+
+              通用模块层                          
+     
+   BaZiBase   WuXingUtils  DiZhiRelations   
+     
+     
+    TianGan      DiZhi         GanZhi       
+     
+                    
+   ZhMapper       Tyme                       
+                    
+
+                        
+
+            第三方库 & 标准库层                   
+      
+   fmt  nlohmann.json   magic_enum         
+      
+                                
+    import std                                
+                                
+
 ```
 
 ## 模块详细说明
@@ -318,86 +318,86 @@ auto [yaoList, json] = sixYaoDivination("111111", bazi, {1, 4});
 
 ```
 ZhouYi.BaZi
-├── ZhouYi.BaZiBase
-│   ├── nlohmann.json
-│   └── std
-├── ZhouYi.GanZhi
-│   ├── magic_enum
-│   └── std
-├── ZhouYi.Tyme
-│   └── std
-└── std
+ ZhouYi.BaZiBase
+    nlohmann.json
+    std
+ ZhouYi.GanZhi
+    magic_enum
+    std
+ ZhouYi.Tyme
+    std
+ std
 ```
 
 ### DaLiuRen 依赖树
 
 ```
 ZhouYi.DaLiuRen
-├── ZhouYi.GanZhi
-│   ├── magic_enum
-│   └── std
-├── ZhouYi.Tyme
-│   └── std
-├── nlohmann.json
-└── std
+ ZhouYi.GanZhi
+    magic_enum
+    std
+ ZhouYi.Tyme
+    std
+ nlohmann.json
+ std
 ```
 
 ### QiMen 依赖树
 
 ```
 ZhouYi.QiMen
-├── ZhouYi.GanZhi
-│   ├── magic_enum
-│   └── std
-├── ZhouYi.Tyme
-│   └── std
-└── std
+ ZhouYi.GanZhi
+    magic_enum
+    std
+ ZhouYi.Tyme
+    std
+ std
 ```
 
 ### LiuYao 依赖树
 
 ```
 ZhouYi.LiuYao
-├── ZhouYi.BaZiBase
-│   ├── nlohmann.json
-│   └── std
-├── ZhouYi.WuXingUtils
-│   └── std
-├── ZhouYi.DiZhiRelations
-│   └── std
-├── fmt
-├── nlohmann.json
-└── std
+ ZhouYi.BaZiBase
+    nlohmann.json
+    std
+ ZhouYi.WuXingUtils
+    std
+ ZhouYi.DiZhiRelations
+    std
+ fmt
+ nlohmann.json
+ std
 ```
 
 ### 通用模块依赖树
 
 ```
 ZhouYi.BaZiBase
-├── nlohmann.json
-└── std
+ nlohmann.json
+ std
 
 ZhouYi.WuXingUtils
-└── std
+ std
 
 ZhouYi.DiZhiRelations
-└── std
+ std
 
 ZhouYi.GanZhi
-├── magic_enum
-└── std
+ magic_enum
+ std
 
 ZhouYi.TianGan
-├── magic_enum
-└── std
+ magic_enum
+ std
 
 ZhouYi.DiZhi
-├── magic_enum
-└── std
+ magic_enum
+ std
 
 ZhouYi.ZhMapper
-├── magic_enum
-└── std
+ magic_enum
+ std
 ```
 
 ## 模块使用原则
@@ -468,32 +468,32 @@ target_sources(ZhouYiLab
 ## 最佳实践
 
 ### 1. 模块设计
-- ✅ 单一职责：每个模块只负责一个明确的功能领域
-- ✅ 高内聚：相关功能放在同一个模块中
-- ✅ 低耦合：模块之间依赖关系清晰简单
-- ✅ 可复用：通用功能抽取到 common 层
+-  单一职责：每个模块只负责一个明确的功能领域
+-  高内聚：相关功能放在同一个模块中
+-  低耦合：模块之间依赖关系清晰简单
+-  可复用：通用功能抽取到 common 层
 
 ### 2. 性能优化
-- ✅ 使用 `inline const` 替代 `static const` 全局变量
-- ✅ 使用 `constexpr` 标记编译期常量
-- ✅ 使用 `std::string_view` 传递字符串参数
-- ✅ 使用 `auto` 和 `decltype` 简化代码
+-  使用 `inline const` 替代 `static const` 全局变量
+-  使用 `constexpr` 标记编译期常量
+-  使用 `std::string_view` 传递字符串参数
+-  使用 `auto` 和 `decltype` 简化代码
 
 ### 3. C++23 特性
-- ✅ 使用 `import std` 替代传统头文件
-- ✅ 使用 `<=>` 三路比较运算符
-- ✅ 使用 `= default` 生成默认函数
-- ✅ 使用 `std::ranges` 进行范围操作
+-  使用 `import std` 替代传统头文件
+-  使用 `<=>` 三路比较运算符
+-  使用 `= default` 生成默认函数
+-  使用 `std::ranges` 进行范围操作
 
 ## 已实现模块
 
 已完成的功能模块：
 
-1. ✅ **ZhouYi.BaZi** - 八字排盘系统（完整实现）
-2. ✅ **ZhouYi.DaLiuRen** - 大六壬排盘系统（完整实现）
-3. ✅ **ZhouYi.QiMen** - 奇门遁甲排盘系统（完整实现）
-4. ✅ **ZhouYi.LiuYao** - 六爻排盘系统（完整实现）
-5. ✅ **ZhouYi.ZiWei** - 紫微斗数排盘系统（完整实现）
+1.  **ZhouYi.BaZi** - 八字排盘系统（完整实现）
+2.  **ZhouYi.DaLiuRen** - 大六壬排盘系统（完整实现）
+3.  **ZhouYi.QiMen** - 奇门遁甲排盘系统（完整实现）
+4.  **ZhouYi.LiuYao** - 六爻排盘系统（完整实现）
+5.  **ZhouYi.ZiWei** - 紫微斗数排盘系统（完整实现）
 
 ## 未来扩展
 
