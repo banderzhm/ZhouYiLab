@@ -3,6 +3,7 @@
 export module ZhouYi.ZiWei.StarDoc.ShenSha;
 
 import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZhMapper;
 import std;
 
 export namespace ZhouYi::ZiWei::StarDoc {

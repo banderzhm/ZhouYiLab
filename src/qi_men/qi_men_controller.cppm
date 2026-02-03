@@ -4,6 +4,7 @@
 export module ZhouYi.QiMen.Controller;
 
 import ZhouYi.GanZhi;
+import ZhouYi.BaZiBase;
 import ZhouYi.QiMen;
 import ZhouYi.QiMen.Pan;
 import ZhouYi.tyme;
