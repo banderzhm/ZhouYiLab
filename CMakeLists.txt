@@ -30,12 +30,30 @@ endif()
 # ==============================================================================
 
 if(UNIX)
-    # Linux/Unix: 自动检测 libc++ 标准库模块路径
+    # Linux/Unix/macOS: 自动检测 libc++ 标准库模块路径
+    
+    # macOS 特殊处理：检测 Homebrew LLVM 路径
+    if(APPLE)
+        # Apple Silicon (arm64) Homebrew 路径
+        set(HOMEBREW_LLVM_PREFIX_ARM64 "/opt/homebrew/opt/llvm")
+        # Intel Mac (x86_64) Homebrew 路径
+        set(HOMEBREW_LLVM_PREFIX_X64 "/usr/local/opt/llvm")
+        
+        # 根据架构选择 Homebrew 路径
+        if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+            set(HOMEBREW_LLVM_PREFIX ${HOMEBREW_LLVM_PREFIX_ARM64})
+        else()
+            set(HOMEBREW_LLVM_PREFIX ${HOMEBREW_LLVM_PREFIX_X64})
+        endif()
+        
+        message(STATUS "macOS 检测: 架构=${CMAKE_HOST_SYSTEM_PROCESSOR}, Homebrew LLVM 路径=${HOMEBREW_LLVM_PREFIX}")
+    endif()
     
     # 尝试查找 libc++ 模块目录 (LLVM 19-21)
     find_path(LIBCXX_MODULE_DIRS
         NAMES std.cppm
         PATHS
+            # Linux 路径
             /usr/lib/llvm-21/share/libc++/v1
             /usr/lib/llvm-20/share/libc++/v1
             /usr/lib/llvm-19/share/libc++/v1
@@ -43,6 +61,9 @@ if(UNIX)
             /usr/local/lib/llvm-20/share/libc++/v1
             /usr/local/lib/llvm-19/share/libc++/v1
             /opt/llvm/share/libc++/v1
+            # macOS Homebrew 路径 (Apple Silicon & Intel)
+            /opt/homebrew/opt/llvm/share/libc++/v1
+            /usr/local/opt/llvm/share/libc++/v1
         DOC "Path to libc++ standard library modules"
     )
     
@@ -50,6 +71,7 @@ if(UNIX)
     find_path(LIBCXX_INCLUDE_DIRS
         NAMES __config
         PATHS
+            # Linux 路径
             /usr/lib/llvm-21/include/c++/v1
             /usr/lib/llvm-20/include/c++/v1
             /usr/lib/llvm-19/include/c++/v1
@@ -58,6 +80,9 @@ if(UNIX)
             /usr/local/lib/llvm-19/include/c++/v1
             /opt/llvm/include/c++/v1
             /usr/include/c++/v1
+            # macOS Homebrew 路径 (Apple Silicon & Intel)
+            /opt/homebrew/opt/llvm/include/c++/v1
+            /usr/local/opt/llvm/include/c++/v1
         DOC "Path to libc++ headers"
     )
     
@@ -67,11 +92,41 @@ if(UNIX)
         message(STATUS "  头文件目录: ${LIBCXX_INCLUDE_DIRS}")
         
         # 强制所有目标使用 libc++ (必须在添加第三方库之前设置)
-        add_compile_options(
-            -nostdinc++
-            -isystem ${LIBCXX_INCLUDE_DIRS}
-        )
-        add_link_options(-stdlib=libc++ -lc++ -lc++abi)
+        if(APPLE)
+            # macOS: 需要指定 sysroot 和 LLVM libc++ 库路径
+            # 获取 macOS SDK 路径
+            execute_process(
+                COMMAND xcrun --show-sdk-path
+                OUTPUT_VARIABLE MACOS_SDK_PATH
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+            message(STATUS "macOS SDK 路径: ${MACOS_SDK_PATH}")
+            
+            # 从模块目录推断 LLVM 安装路径
+            get_filename_component(LLVM_LIB_PATH "${LIBCXX_MODULE_DIRS}/../../../lib/c++" ABSOLUTE)
+            message(STATUS "LLVM libc++ 库路径: ${LLVM_LIB_PATH}")
+            
+            add_compile_options(
+                -nostdinc++
+                -isystem ${LIBCXX_INCLUDE_DIRS}
+                -isysroot ${MACOS_SDK_PATH}
+            )
+            # macOS 链接选项：指定 LLVM libc++ 路径避免与系统 libc++ 冲突
+            add_link_options(
+                -stdlib=libc++
+                -L${LLVM_LIB_PATH}
+                -Wl,-rpath,${LLVM_LIB_PATH}
+                -lc++
+                -lc++abi
+            )
+        else()
+            # Linux
+            add_compile_options(
+                -nostdinc++
+                -isystem ${LIBCXX_INCLUDE_DIRS}
+            )
+            add_link_options(-stdlib=libc++ -lc++ -lc++abi)
+        endif()
     else()
         message(WARNING "无法自动检测 libc++ 路径。请手动设置:")
         message(WARNING "  cmake -DLIBCXX_MODULE_DIRS=<path> -DLIBCXX_INCLUDE_DIRS=<path> ..")
