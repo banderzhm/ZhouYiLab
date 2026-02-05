@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, macos-13]  # macos-14 = Apple Silicon (M1), macos-13 = Intel
+        os: [macos-14, macos-15]  # Apple Silicon (M1/M2)
         build_type: [Release, Debug]
 
     steps:
