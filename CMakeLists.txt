@@ -283,14 +283,14 @@ target_compile_definitions(ZhouYiLabCore PUBLIC
 
 # 平台特定的模块配置
 if(UNIX AND LIBCXX_MODULE_DIRS AND LIBCXX_INCLUDE_DIRS)
-    # Linux/Unix: 使用 libc++ 标准库模块
+    # Linux/Unix/macOS: 使用 libc++ 标准库模块
     
     # 添加 libc++ 头文件路径（系统级，不会覆盖其他路径）
     target_include_directories(ZhouYiLabCore SYSTEM PUBLIC
         ${LIBCXX_INCLUDE_DIRS}
     )
     
-    # 添加所有模块到 FILE_SET（避免覆盖）
+    # 添加所有模块到 FILE_SET（包括项目模块和标准库模块）
     target_sources(ZhouYiLabCore PUBLIC
         FILE_SET cxx_modules TYPE CXX_MODULES 
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${LIBCXX_MODULE_DIRS}
@@ -304,7 +304,7 @@ if(UNIX AND LIBCXX_MODULE_DIRS AND LIBCXX_INCLUDE_DIRS)
 elseif(WIN32 AND LIBCXX_MODULE_DIRS)
     # Windows: 使用 MSVC 标准库模块
     
-    # 添加所有模块到 FILE_SET（避免覆盖）
+    # 添加所有模块到 FILE_SET（包括项目模块和标准库模块）
     target_sources(ZhouYiLabCore PUBLIC
         FILE_SET cxx_modules TYPE CXX_MODULES 
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${LIBCXX_MODULE_DIRS}
@@ -316,7 +316,19 @@ elseif(WIN32 AND LIBCXX_MODULE_DIRS)
     )
     
 else()
-    message(WARNING "标准库模块未配置。模块支持可能受限。")
+    # 后备方案：至少添加项目模块到 FILE_SET（无标准库模块支持）
+    message(WARNING "标准库模块未配置。尝试仅添加项目模块...")
+    message(WARNING "LIBCXX_MODULE_DIRS=${LIBCXX_MODULE_DIRS}")
+    message(WARNING "LIBCXX_INCLUDE_DIRS=${LIBCXX_INCLUDE_DIRS}")
+    
+    # 仍然需要添加项目模块到 FILE_SET，否则编译会失败
+    target_sources(ZhouYiLabCore PUBLIC
+        FILE_SET cxx_modules TYPE CXX_MODULES 
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+        FILES 
+            ${MODULE_INTERFACE_FILES}
+            ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/module/magic_enum.cppm
+    )
 endif()
 
 # 链接第三方库到核心库

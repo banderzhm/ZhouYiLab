@@ -48,8 +48,30 @@ jobs:
         echo "LLVM_PREFIX=${LLVM_PREFIX}" >> $GITHUB_OUTPUT
         echo "Detected LLVM prefix: ${LLVM_PREFIX}"
         
-        # 查找 libc++ 模块路径
-        LIBCXX_MODULES=$(find ${LLVM_PREFIX} -name "std.cppm" -exec dirname {} \; 2>/dev/null | head -1)
+        # 显示 LLVM 目录结构
+        echo "LLVM directory structure:"
+        ls -la "${LLVM_PREFIX}/" || true
+        ls -la "${LLVM_PREFIX}/share/" || true
+        ls -la "${LLVM_PREFIX}/share/libc++/" 2>/dev/null || echo "No share/libc++/ directory"
+        
+        # 查找 libc++ 模块路径 - 尝试多个可能的位置
+        LIBCXX_MODULES=""
+        for path in \
+          "${LLVM_PREFIX}/share/libc++/v1" \
+          "${LLVM_PREFIX}/lib/c++/v1" \
+          "${LLVM_PREFIX}/share/libc++" \
+          ; do
+          if [ -f "${path}/std.cppm" ]; then
+            LIBCXX_MODULES="${path}"
+            break
+          fi
+        done
+        
+        # 如果仍未找到，使用 find 命令
+        if [ -z "${LIBCXX_MODULES}" ]; then
+          LIBCXX_MODULES=$(find ${LLVM_PREFIX} -name "std.cppm" -exec dirname {} \; 2>/dev/null | head -1)
+        fi
+        
         echo "LIBCXX_MODULES=${LIBCXX_MODULES}" >> $GITHUB_OUTPUT
         echo "libc++ modules path: ${LIBCXX_MODULES}"
         
@@ -58,12 +80,22 @@ jobs:
         echo "LIBCXX_INCLUDE=${LIBCXX_INCLUDE}" >> $GITHUB_OUTPUT
         echo "libc++ include path: ${LIBCXX_INCLUDE}"
         
-        # 显示模块文件
-        if [ -n "${LIBCXX_MODULES}" ]; then
+        # 验证路径存在
+        echo "=== Path Validation ==="
+        if [ -n "${LIBCXX_MODULES}" ] && [ -d "${LIBCXX_MODULES}" ]; then
           echo "libc++ modules found:"
           ls -la "${LIBCXX_MODULES}/"
         else
-          echo "Warning: libc++ modules not found"
+          echo "WARNING: libc++ modules NOT found at expected location"
+          echo "Searching entire LLVM prefix for .cppm files:"
+          find ${LLVM_PREFIX} -name "*.cppm" 2>/dev/null || echo "No .cppm files found"
+        fi
+        
+        if [ -d "${LIBCXX_INCLUDE}" ]; then
+          echo "libc++ headers found at: ${LIBCXX_INCLUDE}"
+          ls "${LIBCXX_INCLUDE}/__config" 2>/dev/null && echo "__config exists" || echo "WARNING: __config not found"
+        else
+          echo "WARNING: libc++ headers NOT found at: ${LIBCXX_INCLUDE}"
         fi
 
     - name: Get macOS SDK path
