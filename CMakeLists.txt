@@ -15,6 +15,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Module build strategy:
+#   AUTO   - use SHARED when prebuilt dir is provided and valid, otherwise LOCAL
+#   LOCAL  - build std/json modules in this project
+#   SHARED - consume prebuilt modules from ZHOUYILAB_PREBUILT_MODULES_DIR
+set(ZHOUYILAB_MODULE_MODE "AUTO" CACHE STRING "AUTO|LOCAL|SHARED")
+set_property(CACHE ZHOUYILAB_MODULE_MODE PROPERTY STRINGS AUTO LOCAL SHARED)
+set(ZHOUYILAB_PREBUILT_MODULES_DIR "" CACHE PATH
+    "Path to prebuilt module directory (std/nlohmann)")
+set(ZHOUYILAB_SHARED_REQUIRED_MODULE_SPECS
+    "std=std.*,std-*.pcm;std.compat=std.compat.*,std.compat-*.pcm;nlohmann.json=nlohmann.json.*,nlohmann_json.*,json.*"
+    CACHE STRING "SHARED mode required modules: name=glob1,glob2;name2=glob1,glob2")
+
 # ==============================================================================
 # 平台特定编译标志（MSVC）
 # ==============================================================================
@@ -28,167 +40,14 @@ endif()
 # ==============================================================================
 # 自动检测平台特定的标准库模块路径
 # ==============================================================================
-
-if(UNIX)
-    # Linux/Unix/macOS: 自动检测 libc++ 标准库模块路径
-    
-    # macOS 特殊处理：检测 Homebrew LLVM 路径
-    if(APPLE)
-        # Apple Silicon (arm64) Homebrew 路径
-        set(HOMEBREW_LLVM_PREFIX_ARM64 "/opt/homebrew/opt/llvm")
-        # Intel Mac (x86_64) Homebrew 路径
-        set(HOMEBREW_LLVM_PREFIX_X64 "/usr/local/opt/llvm")
-        
-        # 根据架构选择 Homebrew 路径
-        if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-            set(HOMEBREW_LLVM_PREFIX ${HOMEBREW_LLVM_PREFIX_ARM64})
-        else()
-            set(HOMEBREW_LLVM_PREFIX ${HOMEBREW_LLVM_PREFIX_X64})
-        endif()
-        
-        message(STATUS "macOS 检测: 架构=${CMAKE_HOST_SYSTEM_PROCESSOR}, Homebrew LLVM 路径=${HOMEBREW_LLVM_PREFIX}")
-    endif()
-    
-    # 尝试查找 libc++ 模块目录 (LLVM 19-21)
-    find_path(LIBCXX_MODULE_DIRS
-        NAMES std.cppm
-        PATHS
-            # Linux 路径
-            /usr/lib/llvm-21/share/libc++/v1
-            /usr/lib/llvm-20/share/libc++/v1
-            /usr/lib/llvm-19/share/libc++/v1
-            /usr/local/lib/llvm-21/share/libc++/v1
-            /usr/local/lib/llvm-20/share/libc++/v1
-            /usr/local/lib/llvm-19/share/libc++/v1
-            /opt/llvm/share/libc++/v1
-            # macOS Homebrew 路径 (Apple Silicon & Intel)
-            /opt/homebrew/opt/llvm/share/libc++/v1
-            /usr/local/opt/llvm/share/libc++/v1
-        DOC "Path to libc++ standard library modules"
-    )
-    
-    # 尝试查找 libc++ 头文件目录 (LLVM 19-21)
-    find_path(LIBCXX_INCLUDE_DIRS
-        NAMES __config
-        PATHS
-            # Linux 路径
-            /usr/lib/llvm-21/include/c++/v1
-            /usr/lib/llvm-20/include/c++/v1
-            /usr/lib/llvm-19/include/c++/v1
-            /usr/local/lib/llvm-21/include/c++/v1
-            /usr/local/lib/llvm-20/include/c++/v1
-            /usr/local/lib/llvm-19/include/c++/v1
-            /opt/llvm/include/c++/v1
-            /usr/include/c++/v1
-            # macOS Homebrew 路径 (Apple Silicon & Intel)
-            /opt/homebrew/opt/llvm/include/c++/v1
-            /usr/local/opt/llvm/include/c++/v1
-        DOC "Path to libc++ headers"
-    )
-    
-    if(LIBCXX_MODULE_DIRS AND LIBCXX_INCLUDE_DIRS)
-        message(STATUS "自动检测到 libc++ 路径:")
-        message(STATUS "  模块目录: ${LIBCXX_MODULE_DIRS}")
-        message(STATUS "  头文件目录: ${LIBCXX_INCLUDE_DIRS}")
-        
-        # 强制所有目标使用 libc++ (必须在添加第三方库之前设置)
-        if(APPLE)
-            # macOS: 需要指定 sysroot 和 LLVM libc++ 库路径
-            # 获取 macOS SDK 路径
-            execute_process(
-                COMMAND xcrun --show-sdk-path
-                OUTPUT_VARIABLE MACOS_SDK_PATH
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-            )
-            message(STATUS "macOS SDK 路径: ${MACOS_SDK_PATH}")
-            
-            # 从模块目录推断 LLVM 安装路径
-            get_filename_component(LLVM_LIB_PATH "${LIBCXX_MODULE_DIRS}/../../../lib/c++" ABSOLUTE)
-            message(STATUS "LLVM libc++ 库路径: ${LLVM_LIB_PATH}")
-            
-            add_compile_options(
-                -nostdinc++
-                -isystem ${LIBCXX_INCLUDE_DIRS}
-                -isysroot ${MACOS_SDK_PATH}
-            )
-            # macOS 链接选项：指定 LLVM libc++ 路径避免与系统 libc++ 冲突
-            add_link_options(
-                -stdlib=libc++
-                -L${LLVM_LIB_PATH}
-                -Wl,-rpath,${LLVM_LIB_PATH}
-                -lc++
-                -lc++abi
-            )
-        else()
-            # Linux
-            add_compile_options(
-                -nostdinc++
-                -isystem ${LIBCXX_INCLUDE_DIRS}
-            )
-            add_link_options(-stdlib=libc++ -lc++ -lc++abi)
-        endif()
-    else()
-        message(WARNING "无法自动检测 libc++ 路径。请手动设置:")
-        message(WARNING "  cmake -DLIBCXX_MODULE_DIRS=<path> -DLIBCXX_INCLUDE_DIRS=<path> ..")
-    endif()
-    
-elseif(WIN32)
-    # Windows: 自动检测 MSVC 标准库模块路径
-    
-    # 优先级1: 尝试从 VCToolsInstallDir 环境变量获取
-    if(DEFINED ENV{VCToolsInstallDir})
-        set(LIBCXX_MODULE_DIRS "$ENV{VCToolsInstallDir}/modules" CACHE PATH "Path to MSVC modules")
-        if(EXISTS "${LIBCXX_MODULE_DIRS}/std.ixx")
-            message(STATUS "从 VCToolsInstallDir 环境变量检测到 MSVC 模块目录: ${LIBCXX_MODULE_DIRS}")
-        else()
-            message(WARNING "找到 VCToolsInstallDir 但 std.ixx 不存在于: ${LIBCXX_MODULE_DIRS}")
-            unset(LIBCXX_MODULE_DIRS CACHE)
-        endif()
-    endif()
-    
-    # 优先级2: 如果环境变量未找到或无效，尝试从编译器路径检测
-    if(NOT LIBCXX_MODULE_DIRS)
-        # 从编译器路径提取 MSVC 版本目录
-        # cl.exe 位于: VC/Tools/MSVC/{version}/bin/Hostx64/x64/cl.exe
-        # modules 位于: VC/Tools/MSVC/{version}/modules/
-        # 所以需要从 cl.exe 目录向上3级
-        get_filename_component(COMPILER_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        get_filename_component(COMPILER_HOST_DIR "${COMPILER_DIR}" DIRECTORY)
-        get_filename_component(COMPILER_BIN_DIR "${COMPILER_HOST_DIR}" DIRECTORY)
-        get_filename_component(MSVC_VERSION_DIR "${COMPILER_BIN_DIR}" DIRECTORY)
-        
-        # 首先尝试从编译器路径提取的路径
-        set(DETECTED_MODULE_PATH "${MSVC_VERSION_DIR}/modules")
-        
-        if(EXISTS "${DETECTED_MODULE_PATH}/std.ixx")
-            set(LIBCXX_MODULE_DIRS "${DETECTED_MODULE_PATH}" CACHE PATH "Path to MSVC modules")
-            message(STATUS "从编译器路径自动检测到 MSVC 模块目录: ${LIBCXX_MODULE_DIRS}")
-        else()
-            # 后备方案: 在常见的 Visual Studio 安装位置搜索
-            message(STATUS "无法从编译器路径检测，搜索常见安装位置...")
-            find_path(LIBCXX_MODULE_DIRS
-                NAMES std.ixx
-                PATHS
-                    "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC"
-                    "C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC"
-                    "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC"
-                    "F:/program/visul_studio/idea/VC/Tools/MSVC"
-                PATH_SUFFIXES
-                    "14.44.35207/modules"
-                    "14.43.34601/modules"
-                    "14.42.34433/modules"
-                DOC "Path to MSVC standard library modules"
-            )
-            
-            if(LIBCXX_MODULE_DIRS)
-                message(STATUS "在常见位置找到 MSVC 模块目录: ${LIBCXX_MODULE_DIRS}")
-            else()
-                message(WARNING "无法自动检测 MSVC 模块路径。请手动设置:")
-                message(WARNING "  cmake -DLIBCXX_MODULE_DIRS=<path> ..")
-            endif()
-        endif()
-    endif()
-endif()
+#[[
+  Load helper functions from 3rdparty/cmake:
+    1) detect_stdlib_module_paths
+    2) configure_cxx_modules
+]]
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DetectStdLibModulePaths.cmake)
+detect_stdlib_module_paths()
+resolve_module_mode()
 
 
 # ==============================================================================
@@ -202,10 +61,13 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 # 配置第三方库的 C++ modules 支持
 # 启用 fmt 的 module 模式（稳定支持）
 set(FMT_MODULE ON CACHE BOOL "Build fmt as a C++ module" FORCE)
-# 启用 nlohmann_json 的 module 支持
-# 注意：在 MSVC 上，nlohmann_json 模块可能存在兼容性问题
-# 如果遇到问题，请在代码中使用 #include <nlohmann/json.hpp> 代替 import nlohmann.json
-set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" FORCE)
+if(ZHOUYILAB_EFFECTIVE_MODULE_MODE STREQUAL "SHARED")
+    # Shared mode: skip building nlohmann_json module (reuse external pcm).
+    set(NLOHMANN_JSON_BUILD_MODULES OFF CACHE BOOL "" FORCE)
+else()
+    # 启用 nlohmann_json 的 module 支持
+    set(NLOHMANN_JSON_BUILD_MODULES ON CACHE BOOL "Build nlohmann_json C++ module" FORCE)
+endif()
 
 # 修复msvc的警告
 if(MSVC)
@@ -225,7 +87,16 @@ endif()
 
 # 添加第三方库
 add_subdirectory(3rdparty/fmt)
-add_subdirectory(3rdparty/nlohmann_json)
+if(ZHOUYILAB_EFFECTIVE_MODULE_MODE STREQUAL "SHARED")
+    # Shared mode: nlohmann_json module comes from -fprebuilt-module-path.
+    # Still add_subdirectory for headers, but create stub for module target.
+    add_subdirectory(3rdparty/nlohmann_json)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/_stub.cpp" "")
+    add_library(nlohmann_json_modules STATIC "${CMAKE_CURRENT_BINARY_DIR}/_stub.cpp")
+    target_link_libraries(nlohmann_json_modules PUBLIC nlohmann_json::nlohmann_json)
+else()
+    add_subdirectory(3rdparty/nlohmann_json)
+endif()
 add_subdirectory(3rdparty/asio)
 
 # 恢复模块扫描
@@ -281,55 +152,20 @@ target_compile_definitions(ZhouYiLabCore PUBLIC
     MAGIC_ENUM_USE_STD_MODULE
 )
 
-# 平台特定的模块配置
-if(UNIX AND LIBCXX_MODULE_DIRS AND LIBCXX_INCLUDE_DIRS)
-    # Linux/Unix/macOS: 使用 libc++ 标准库模块
-    
-    # 添加 libc++ 头文件路径（系统级，不会覆盖其他路径）
-    target_include_directories(ZhouYiLabCore SYSTEM PUBLIC
-        ${LIBCXX_INCLUDE_DIRS}
-    )
-    
-    # 添加所有模块到 FILE_SET（包括项目模块和标准库模块）
-    target_sources(ZhouYiLabCore PUBLIC
-        FILE_SET cxx_modules TYPE CXX_MODULES 
-        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${LIBCXX_MODULE_DIRS}
-        FILES 
-            ${MODULE_INTERFACE_FILES}
-            ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/module/magic_enum.cppm
-            ${LIBCXX_MODULE_DIRS}/std.cppm 
-            ${LIBCXX_MODULE_DIRS}/std.compat.cppm
-    )
-    
-elseif(WIN32 AND LIBCXX_MODULE_DIRS)
-    # Windows: 使用 MSVC 标准库模块
-    
-    # 添加所有模块到 FILE_SET（包括项目模块和标准库模块）
-    target_sources(ZhouYiLabCore PUBLIC
-        FILE_SET cxx_modules TYPE CXX_MODULES 
-        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${LIBCXX_MODULE_DIRS}
-        FILES 
-            ${MODULE_INTERFACE_FILES}
-            ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/module/magic_enum.cppm
-            ${LIBCXX_MODULE_DIRS}/std.ixx 
-            ${LIBCXX_MODULE_DIRS}/std.compat.ixx
-    )
-    
-else()
-    # 后备方案：至少添加项目模块到 FILE_SET（无标准库模块支持）
-    message(WARNING "标准库模块未配置。尝试仅添加项目模块...")
-    message(WARNING "LIBCXX_MODULE_DIRS=${LIBCXX_MODULE_DIRS}")
-    message(WARNING "LIBCXX_INCLUDE_DIRS=${LIBCXX_INCLUDE_DIRS}")
-    
-    # 仍然需要添加项目模块到 FILE_SET，否则编译会失败
-    target_sources(ZhouYiLabCore PUBLIC
-        FILE_SET cxx_modules TYPE CXX_MODULES 
-        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-        FILES 
-            ${MODULE_INTERFACE_FILES}
-            ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/module/magic_enum.cppm
-    )
-endif()
+#[[
+  Configure C++ modules for ZhouYiLabCore:
+    - project modules
+    - magic_enum module
+    - std modules (when detected)
+    - shared prebuilt mode (when ZHOUYILAB_EFFECTIVE_MODULE_MODE=SHARED)
+]]
+configure_cxx_modules(
+    TARGET ZhouYiLabCore
+    MODULE_INTERFACE_FILES ${MODULE_INTERFACE_FILES}
+    EXTRA_MODULE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/module/magic_enum.cppm
+    EFFECTIVE_MODE ${ZHOUYILAB_EFFECTIVE_MODULE_MODE}
+    PREBUILT_MODULES_DIR ${ZHOUYILAB_PREBUILT_MODULES_DIR}
+)
 
 # 链接第三方库到核心库
 target_link_libraries(ZhouYiLabCore PUBLIC
@@ -373,13 +209,17 @@ message(STATUS "项目: ${PROJECT_NAME} v${PROJECT_VERSION}")
 message(STATUS "C++ 标准: C++${CMAKE_CXX_STANDARD}")
 message(STATUS "编译器: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "构建类型: ${CMAKE_BUILD_TYPE}")
+message(STATUS "模块模式: ${ZHOUYILAB_EFFECTIVE_MODULE_MODE} (configured: ${ZHOUYILAB_MODULE_MODE})")
+if(ZHOUYILAB_EFFECTIVE_MODULE_MODE STREQUAL "SHARED")
+    message(STATUS "预编译模块目录: ${ZHOUYILAB_PREBUILT_MODULES_DIR}")
+endif()
 if(UNIX)
-    if(LIBCXX_MODULE_DIRS)
-        message(STATUS "libc++ 模块: ${LIBCXX_MODULE_DIRS}")
+    if(STDLIB_MODULE_DIRS)
+        message(STATUS "libc++ 模块: ${STDLIB_MODULE_DIRS}")
     endif()
 elseif(WIN32)
-    if(LIBCXX_MODULE_DIRS)
-        message(STATUS "MSVC 模块: ${LIBCXX_MODULE_DIRS}")
+    if(STDLIB_MODULE_DIRS)
+        message(STATUS "MSVC 模块: ${STDLIB_MODULE_DIRS}")
     endif()
 endif()
 message(STATUS "==========================================")
