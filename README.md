@@ -1,6 +1,6 @@
 ﻿# ZhouYiLab - 周易实验室
 ## 商务合作微信-备注周易实验室: 17306666568
-## 基于当前算法实现的项目
+## 基于当前算法java版本实现的项目
 https://www.mingtugps.cn/discover
 
 <img width="1920" height="869" alt="image" src="https://github.com/user-attachments/assets/76b4de36-445d-42ac-860b-69457fb01c88" />
