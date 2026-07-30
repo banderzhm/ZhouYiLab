@@ -23,6 +23,10 @@ function(detect_stdlib_module_paths)
         find_path(STDLIB_MODULE_DIRS
             NAMES std.cppm
             PATHS
+                # Debian/Ubuntu libc++ packages (including LLVM 22) install
+                # the standard library module interfaces independently of the
+                # LLVM versioned prefix.
+                /usr/share/libc++/v1
                 /usr/lib/llvm-22/share/libc++/v1
                 /usr/lib/llvm-21/share/libc++/v1
                 /usr/lib/llvm-20/share/libc++/v1

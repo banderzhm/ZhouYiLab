@@ -143,8 +143,7 @@ list(REMOVE_ITEM CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 # 创建静态库，包含所有核心模块和实现（除了 main.cpp）
 add_library(ZhouYiLabCore STATIC 
-    ${CPP_SOURCES} 
-    ${MODULE_INTERFACE_FILES}
+    ${CPP_SOURCES}
 )
 
 # 定义 MAGIC_ENUM_USE_STD_MODULE 以使用 import std

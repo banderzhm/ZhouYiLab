@@ -235,11 +235,9 @@ namespace ZhouYi::ZiWei {
      * 
      * 解释：从辰宫起正月顺数为左辅，从戌宫起正月逆数为右弼
      */
-    constexpr pair<int, int> get_zuo_you_index(int lunar_month) {
-        // 辰宫索引为2（寅0卯1辰2）
-        int zuo_index = fix_index(2 + lunar_month - 1);
-        // 戌宫索引为8
-        int you_index = fix_index(8 - (lunar_month - 1));
+    pair<int, int> get_zuo_you_index(int lunar_month) {
+        const int zuo_index = fix_index(2 + lunar_month - 1);
+        const int you_index = fix_index(8 - (lunar_month - 1));
         return {zuo_index, you_index};
     }
 
@@ -252,12 +250,10 @@ namespace ZhouYi::ZiWei {
      * 
      * 解释：从戌宫起子时逆数为文昌，从辰宫起子时顺数为文曲
      */
-    constexpr pair<int, int> get_chang_qu_index(DiZhi hour_zhi) {
-        int hour_index = static_cast<int>(hour_zhi);
-        // 戌宫索引为8，逆数时辰得文昌
-        int chang_index = fix_index(8 - hour_index);
-        // 辰宫索引为2，顺数时辰得文曲
-        int qu_index = fix_index(2 + hour_index);
+    pair<int, int> get_chang_qu_index(DiZhi hour_zhi) {
+        const int hour_index = static_cast<int>(hour_zhi);
+        const int chang_index = fix_index(8 - hour_index);
+        const int qu_index = fix_index(2 + hour_index);
         return {chang_index, qu_index};
     }
 
@@ -305,18 +301,18 @@ namespace ZhouYi::ZiWei {
      * 庚禄定居申，辛禄酉上补。
      * 壬禄亥中藏，癸禄居子户。
      */
-    constexpr int get_lu_cun_index(TianGan year_gan) {
+    int get_lu_cun_index(TianGan year_gan) {
         switch (year_gan) {
-            case TianGan::Jia: return 0;  // 寅
-            case TianGan::Yi: return 1;   // 卯
+            case TianGan::Jia: return 0;
+            case TianGan::Yi: return 1;
             case TianGan::Bing:
-            case TianGan::Wu: return 3;   // 巳
+            case TianGan::Wu: return 3;
             case TianGan::Ding:
-            case TianGan::Ji: return 4;   // 午
-            case TianGan::Geng: return 6; // 申
-            case TianGan::Xin: return 7;  // 酉
-            case TianGan::Ren: return 9;  // 亥
-            case TianGan::Gui: return 10; // 子
+            case TianGan::Ji: return 4;
+            case TianGan::Geng: return 6;
+            case TianGan::Xin: return 7;
+            case TianGan::Ren: return 9;
+            case TianGan::Gui: return 10;
             default: return 0;
         }
     }

@@ -137,12 +137,12 @@ export namespace ZhouYi::ZiWei {
     /**
      * @brief 安左辅右弼（按农历月份）
      */
-    constexpr pair<int, int> get_zuo_you_index(int lunar_month);
+    pair<int, int> get_zuo_you_index(int lunar_month);
 
     /**
      * @brief 安文昌文曲（按时辰）
      */
-    constexpr pair<int, int> get_chang_qu_index(DiZhi hour_zhi);
+    pair<int, int> get_chang_qu_index(DiZhi hour_zhi);
 
     /**
      * @brief 安天魁天钺（按年干）
@@ -152,7 +152,7 @@ export namespace ZhouYi::ZiWei {
     /**
      * @brief 安禄存（按年干）
      */
-    constexpr int get_lu_cun_index(TianGan year_gan);
+    int get_lu_cun_index(TianGan year_gan);
 
     /**
      * @brief 安擎羊陀罗（禄前擎羊，禄后陀罗）
