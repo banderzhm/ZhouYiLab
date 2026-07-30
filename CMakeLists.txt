@@ -79,10 +79,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # 禁用保留模块标识符警告（libc++ 标准库需要）fix warning: 'std' is a reserved name for a module [-Wreserved-module-identifier]
     add_compile_options(-Wno-reserved-module-identifier)
 
-    # 禁用模块包含警告（第三方库 ASIO 引起）
-    # fix warning: '#include <***>' attaches the declarations to the named module 'asio', which is not usually intended;
-    # consider moving that directive before the module declaration [-Winclude-angled-in-module-purview]
-    add_compile_options(-Wno-include-angled-in-module-purview)
 endif()
 
 # 添加第三方库
@@ -97,7 +93,6 @@ if(ZHOUYILAB_EFFECTIVE_MODULE_MODE STREQUAL "SHARED")
 else()
     add_subdirectory(3rdparty/nlohmann_json)
 endif()
-add_subdirectory(3rdparty/asio)
 
 # 恢复模块扫描
 set(CMAKE_CXX_SCAN_FOR_MODULES ${CMAKE_CXX_SCAN_FOR_MODULES_BACKUP})
@@ -170,7 +165,6 @@ configure_cxx_modules(
 target_link_libraries(ZhouYiLabCore PUBLIC
     fmt::fmt
     nlohmann_json_modules
-    asio::asio
 )
 
 # Windows 平台需要链接网络库

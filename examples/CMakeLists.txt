@@ -32,7 +32,6 @@ option(BUILD_EXAMPLES "Build example programs" OFF)
 
 # 示例程序列表及描述
 set(EXAMPLES
-    example_asio        # "Asio 异步网络示例"
     example_ba_zi       # "八字排盘示例"
     example_da_liu_ren  # "大六壬起课示例"
     example_liu_yao     # "六爻起卦示例"
@@ -107,7 +106,6 @@ else()
 endif()
 message(STATUS "")
 message(STATUS "  可用示例:")
-message(STATUS "    - example_asio         : Asio 异步网络示例")
 message(STATUS "    - example_ba_zi        : 八字排盘示例")
 message(STATUS "    - example_da_liu_ren   : 大六壬起课示例")
 message(STATUS "    - example_liu_yao      : 六爻起卦示例")
