@@ -70,7 +70,7 @@ std::vector<GanZhiKe> SanChuan::have_conquerors() const {
         WuXing upper_wx = ZhouYi::GanZhi::get_wu_xing(lesson.upper_zhi);
         WuXing lesson_wx = lesson.get_wu_xing();
         
-        if (wu_xing_ke(upper_wx, lesson_wx)) {
+        if (wu_xing_ke(lesson_wx, upper_wx)) {
             result.push_back(lesson);
         }
     }
@@ -89,7 +89,7 @@ std::vector<GanZhiKe> SanChuan::have_overcomes() const {
         WuXing upper_wx = ZhouYi::GanZhi::get_wu_xing(lesson.upper_zhi);
         WuXing lesson_wx = lesson.get_wu_xing();
         
-        if (wu_xing_ke(lesson_wx, upper_wx)) {
+        if (wu_xing_ke(upper_wx, lesson_wx)) {
             result.push_back(lesson);
         }
     }
@@ -194,7 +194,7 @@ std::array<DiZhi, 3> SanChuan::she_hai(const std::vector<GanZhiKe>& lessons) {
             WuXing upper_wx = ZhouYi::GanZhi::get_wu_xing(lesson.upper_zhi);
             
             // 判断是贼克还是克
-            if (wu_xing_ke(upper_wx, lesson_wx)) {
+            if (wu_xing_ke(lesson_wx, upper_wx)) {
                 // 贼克：数沿途克我的地支和天干
                 if (wu_xing_ke(b_wx, lesson_wx)) {
                     count++;
