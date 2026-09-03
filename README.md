@@ -132,6 +132,9 @@ cmake --build build -j$(nproc)
 # 运行八字示例
 ./build/bin/example_ba_zi
 
+# 运行盲派八字分析示例
+./build/bin/example_ba_zi_mangpai
+
 # 运行大六壬示例
 ./build/bin/example_da_liu_ren
 
@@ -151,6 +154,28 @@ cmake --build build -j$(nproc)
 - 六十甲子表
 - 纳音五行计算
 - 各术数系统的完整排盘演示
+
+### 八字统一分析入口
+
+八字排盘和分析通过同一个控制器入口完成。调用方只需切换分析方法，
+不需要感知子平或盲派的内部模块：
+
+```cpp
+import ZhouYi.BaZiController;
+
+using namespace ZhouYi::BaZiController;
+
+auto chart = pai_pan_lunar(2000, 6, 15, 16, 30, true);
+
+AnalysisRequest request;
+request.method = AnalysisMethod::BlindSchool; // 或 AnalysisMethod::Ziping
+auto analysis = analyze_ba_zi(chart, request);
+display_analysis(analysis);
+```
+
+`AnalysisResult` 会保留四柱、旬空、纳音、出生时刻等基础排盘数据；
+子平结果写入强弱、格局、用神和岁运字段，盲派结果写入
+`blind_analysis`，两套结果互不覆盖。
 
 ---
 
@@ -181,6 +206,19 @@ ZhouYiLab/
        ba_zi.cppm                 # 八字核心算法
        ba_zi_controller.cppm      # 八字控制器接口
        ba_zi_controller.cpp       # 八字控制器实现
+       analysis/                  # 八字分析流派
+          ziping/                 # 子平法分析（接口与实现分离）
+             ba_zi_analysis.cppm/.cpp
+             ba_zi_analysis_relations.cppm/.cpp
+             ba_zi_analysis_fortune.cppm/.cpp
+             ba_zi_analysis_presenter.cppm/.cpp
+          mangpai/                # 盲派分析（宾主、体用、做功）
+             mangpai_analysis.cppm/.cpp
+             mangpai_bing_zhu.cppm/.cpp
+             mangpai_zuo_gong.cppm/.cpp
+             mangpai_muku.cppm/.cpp
+             mangpai_structure.cppm/.cpp
+             mangpai_transit.cppm/.cpp
     da_liu_ren/            # 大六壬模块
     liu_yao/               # 六爻模块
     qi_men/                # 奇门遁甲模块

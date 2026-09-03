@@ -1,0 +1,1981 @@
+纳音 + 八字分析引擎：完整实现步骤
+
+你已经完成了排盘基础层（Step 0~9），下面从 Step 10 纳音 开始，一直到完整的分析引擎，逐步拆解。
+
+总则：统一评分、证据和输出契约
+
+本算法所有分数均使用明确量纲，所有结论都必须能追溯到规则和原始位置。五行“占比”只表示原局力量，不等同于用神概率；喜神也不能机械地定义为“生用神的五行”。本文各步骤的规则、伪代码和输出契约必须保持一致。
+
+```python
+@dataclass
+class Evidence:
+    rule: str                 # 规则编号，如 strength.de_ling
+    subject: str              # 作用对象，如 月令寅、年支申
+    relation: str             # 比劫/印/财/官/冲/合等
+    points: float             # 本条加减分
+    reason: str
+
+@dataclass
+class ElementStat:
+    raw: float                # 未归一化力量
+    percent: float             # raw / 五行总和 * 100
+    sources: list[Evidence]
+
+@dataclass
+class ShenCandidate:
+    stem: str
+    element: str
+    role: str                 # 用神/喜神/忌神/仇神/闲神
+    raw_score: float          # 格局、调候、扶抑、病药等理论分合计
+    effective_score: float    # 经透藏根气、合冲空亡、承载能力修正后的有效分
+    percent: float             # 同一角色候选总分中的相对支持度
+    effects: list
+    reasons: list[Evidence]
+    conflicts: list[Evidence]
+
+@dataclass
+class CarryingCapacity:
+    """日主把“理论有利”转化为实际作用的能力；不是另一个五行占比。"""
+    overall: float             # 0..100，只用于需要日主参与的候选
+    root_stability: float      # 日主及印比根气，已扣除冲、合化等失效部分
+    climate_workability: float # 日主能否在寒暖燥湿环境中发挥
+    circulation: float         # 生扶、泄耗、克制是否通畅
+    penalties: list[Evidence]
+    evidence: list[Evidence]
+
+@dataclass
+class AnalysisResult:
+    schema_version: str
+    rule_set: str
+    analysis_config: dict      # 本次实际使用的权重与阈值快照
+    birth_context: dict         # 公历时刻、节气交接时刻、距节气时长、性别等
+    input_pillars: list[str]   # 年、月、日、时四柱快照
+    day_master: str
+    nayin: list[dict]
+    strength: dict              # score_100、level、components、evidence
+    carrying_capacity: CarryingCapacity
+    element_balance: dict[str, ElementStat]
+    climate: dict
+    pattern: dict
+    special_patterns: list[dict]
+    relations: list[dict]
+    kong_wang: dict             # 旬空及受影响的柱、根气与十神
+    ten_god_combos: list[dict]
+    useful_gods: dict
+    sheng_ke_chain: dict
+    fortune_impacts: list[dict]
+    warnings: list[str]
+
+def percent(value, denominator):
+    return 0 if denominator == 0 else round(value / denominator * 100, 2)
+```
+
+五行力量默认按“天干 1.0、地支本气 1.0、中气 0.6、余气 0.3”计，月令藏干乘可配置季节系数（默认 1.5）。合化只有满足得令、有根、无争合、无克破等条件时才增加化神力量，否则只记录“存在合”。强弱五项先分别归一化到 0~100，再按得令 40%、得地 30%、得势 15%、季节 10%、关系 5% 合成并 clamp 到 0~100；等级阈值统一为极弱<25、身弱<40、中和<60、身强<75、极旺≥75。
+
+取用不再采用“调候五行固定加满分”的单线排序。先确认特殊格局，再以月令格局的病、药、相神为主线，同时把调候分成“未见、已见不足、已足、偏多”四态；只有未见或不足时才增加调候候选分，已足只记录为“调候已备”，偏多还要防止继续增印比。喜神是能辅助用神、制约忌神且不使原局更偏的候选；忌神是直接破坏平衡、格局或用神者；仇神是助忌神者。用、喜、忌、仇、闲五种角色必须互斥，同一天干或同一五行不得同时承担两个角色；闲神取确定性的剩余五行，禁止使用 `set.pop()`。
+
+取用体系默认采用**子平法**：月令为纲，先由月令本气建立格局候选，再以相神、成格/破格、调候和日主承载能力交叉校验。必须区分“格局用神”“调候用神”和“扶抑用神”，三者可以同向，也可以并存但主次不同；调候不得绕过格局而直接覆盖所有候选，已经在原局透根且足用的调候字不得再次按缺失状态加满分。特殊格局条件未齐时只输出候选或人工复核。
+
+还必须计算“承载能力”：它回答“某五行理论上有利时，日主和环境是否能让这份作用真正发生”。例如丁火在亥月遇甲木，甲木作为印星有生火方向，但火弱、寒湿、火根受冲时，甲木的“生火”效力会被折减；不能仅凭 `木生火` 就列为高优先级喜神。承载能力只折减**需要日主主动承接、驾驭或转化**的作用（如以木生火、身强任财、食伤泄秀）；调候火的直接温局效果不应被同一系数机械压低。
+
+候选分数必须同时保存 `raw_score`（理论方向分）和 `effective_score`（经过承载条件后的实际分），并在输出中说明折减原因。`percent` 仍只在同角色候选集合内计算，不能把它解释成传统命理的客观概率。
+
+```python
+def calc_element_balance(chart, relations, config):
+    raw = {e: 0.0 for e in FIVE_ELEMENTS}; sources = {e: [] for e in FIVE_ELEMENTS}
+    add_stems(raw, sources, chart.stems, weight=config.stem_weight)
+    add_hidden_stems(raw, sources, chart.branches,
+                     weights=(1.0, 0.6, 0.3),
+                     month_multiplier=config.month_multiplier)
+    for relation in relations.values():
+        for item in relation:
+            if item.get("effective") and item.get("element"):
+                raw[item["element"]] += item.get("power", 0)
+                sources[item["element"]].append(item.get("evidence", []))
+    total = sum(raw.values())
+    return {e: {"raw": raw[e], "percent": percent(raw[e], total),
+                "sources": sources[e]} for e in FIVE_ELEMENTS}
+
+def determine_useful_gods(chart, strength, climate, pattern, combos, balance, capacity):
+    # 候选精确到天干，壬与癸分别计分；percent 的分母是同一角色候选有效分之和。
+    candidates = collect_stem_candidates(chart, strength, climate, pattern, combos, balance)
+    candidates = [apply_carrying_capacity(c, capacity) for c in candidates]
+    yong = choose_highest_candidate(candidates, tie_breakers=["格局", "调候", "扶抑", "通关"])
+    used_elements = {yong.element}
+    xi = rank_xi_shen([c for c in candidates if c.element not in used_elements],
+                      yong, chart, balance)
+    used_elements.add(xi.element)
+    ji = rank_ji_shen([c for c in candidates if c.element not in used_elements],
+                      chart, strength, balance)
+    used_elements.add(ji.element)
+    chou = rank_chou_shen([c for c in candidates if c.element not in used_elements], ji, chart)
+    used_elements.add(chou.element)
+    xian_element = sorted(set(FIVE_ELEMENTS) - used_elements)[0]
+    return {"candidates": candidates,
+            "selected": {"yong_shen": yong, "xi_shen": xi, "ji_shen": ji,
+                         "chou_shen": chou, "xian_shen": xian_element},
+            "verification": verify_useful_gods(chart, yong, xi, ji, chou)}
+```
+
+Step 10: 纳音五行
+
+10.1 数据结构
+
+60甲子纳音表，按干支序号(0~59)索引
+每两个干支共享一个纳音，共30组
+NAYIN_PAIRS = [
+    ("甲子", "乙丑", "海中金"),
+    ("丙寅", "丁卯", "炉中火"),
+    ("戊辰", "己巳", "大林木"),
+    ("庚午", "辛未", "路旁土"),
+    ("壬申", "癸酉", "剑锋金"),
+    ("甲戌", "乙亥", "山头火"),
+    ("丙子", "丁丑", "涧下水"),
+    ("戊寅", "己卯", "城头土"),
+    ("庚辰", "辛巳", "白蜡金"),
+    ("壬午", "癸未", "杨柳木"),
+    ("甲申", "乙酉", "泉中水"),
+    ("丙戌", "丁亥", "屋上土"),
+    ("戊子", "己丑", "霹雳火"),
+    ("庚寅", "辛卯", "松柏木"),
+    ("壬辰", "癸巳", "长流水"),
+    ("甲午", "乙未", "沙中金"),
+    ("丙申", "丁酉", "山下火"),
+    ("戊戌", "己亥", "平地木"),
+    ("庚子", "辛丑", "壁上土"),
+    ("壬寅", "癸卯", "金箔金"),
+    ("甲辰", "乙巳", "覆灯火"),
+    ("丙午", "丁未", "天河水"),
+    ("戊申", "己酉", "大驿土"),
+    ("庚戌", "辛亥", "钗钏金"),
+    ("壬子", "癸丑", "桑柘木"),
+    ("甲寅", "乙卯", "大溪水"),
+    ("丙辰", "丁巳", "沙中土"),
+    ("戊午", "己未", "天上火"),
+    ("庚申", "辛酉", "石榴木"),
+    ("壬戌", "癸亥", "大海水"),
+]
+
+构建查找字典
+NAYIN_MAP = {}
+for gz1, gz2, ny in NAYIN_PAIRS:
+    NAYIN_MAP[gz1] = ny
+    NAYIN_MAP[gz2] = ny
+
+纳音→五行映射
+NAYIN_ELEMENT = {
+    "海中金": "金", "剑锋金": "金", "白蜡金": "金",
+    "沙中金": "金", "金箔金": "金", "钗钏金": "金",
+    "炉中火": "火", "山头火": "火", "霹雳火": "火",
+    "覆灯火": "火", "天上火": "火", "山下火": "火",
+    "大林木": "木", "杨柳木": "木", "松柏木": "木",
+    "平地木": "木", "桑柘木": "木", "石榴木": "木",
+    "路旁土": "土", "城头土": "土", "屋上土": "土",
+    "壁上土": "土", "大驿土": "土", "沙中土": "土",
+    "涧下水": "水", "泉中水": "水", "长流水": "水",
+    "天河水": "水", "大溪水": "水", "大海水": "水",
+}
+
+10.2 接口设计
+
+def get_nayin(gz: str) -> str:
+    """返回纳音名称，如 '海中金'"""
+    return NAYIN_MAP.get(gz, "")
+
+def get_nayin_element(gz: str) -> str:
+    """返回纳音五行，如 '金'"""
+    ny = get_nayin(gz)
+    return NAYIN_ELEMENT.get(ny, "")
+
+def get_all_nayin(year, month, day, hour):
+    """四柱纳音"""
+    return {
+        "year":  {"gz": year,  "nayin": get_nayin(year),  "element": get_nayin_element(year)},
+        "month": {"gz": month, "nayin": get_nayin(month), "element": get_nayin_element(month)},
+        "day":   {"gz": day,   "nayin": get_nayin(day),   "element": get_nayin_element(day)},
+        "hour":  {"gz": hour,  "nayin": get_nayin(hour),  "element": get_nayin_element(hour)},
+    }
+
+10.3 验证用例
+输入   期望输出
+甲子   海中金
+
+乙丑   海中金
+
+壬戌   大海水
+
+癸亥   大海水
+
+Step 11: 日主强弱判定引擎
+
+这是整个分析引擎的第一块基石，所有后续判断都依赖它。
+
+说明：本节的 `judge_*` 函数只负责采集原始证据；不得把它们返回的分值直接相加。由 `assess_strength()` 将每项归一化到 0~100 后按总则中的五项权重合成，最终分数强制限制在 0~100。
+
+11.1 数据结构设计
+
+from dataclasses import dataclass
+from enum import Enum
+from typing import List, Dict, Optional
+
+class Strength(Enum):
+    EXTREME_STRONG = "极旺"   # ≥75
+    STRONG = "身强"           # 60~74
+    NEUTRAL = "中和"          # 40~59
+    WEAK = "身弱"             # 25~39
+    EXTREME_WEAK = "极弱"     # ≤24
+
+@dataclass
+class StrengthResult:
+    score: float              # 总分
+    level: Strength           # 等级
+    de_ling: bool             # 得令
+    de_di_score: float        # 得地得分
+    de_shi_score: float       # 得势得分
+    components: dict          # 五个0..100分量及各自权重
+    evidence: List[Evidence]
+
+11.2 得令判定（权重40%）
+
+def score_de_ling(chart: dict, relations: dict, config) -> ComponentScore:
+    """
+    月令藏干按本气/中气/余气权重计算对日主的生扶与克泄耗，
+    再映射到0..100。50代表月令对日主生克大致相当，不再返回 +40/-40 与总分直接相加。
+    """
+    month_branch = chart["month_branch"]
+    weights = config.hidden_weights       # 默认 [1.0, 0.6, 0.3]
+    support, oppose, evidence = 0.0, 0.0, []
+    for hidden, weight in zip(HIDDEN_STEMS[month_branch], weights):
+        ten_god = get_shi_shen(chart["day_stem"], hidden)
+        effective = weight * relation_multiplier(month_branch, hidden, relations)
+        if ten_god in ("比肩", "劫财", "正印", "偏印"):
+            support += effective
+        else:
+            oppose += effective
+        evidence.append(Evidence("strength.de_ling", month_branch, ten_god,
+                                 effective, f"月令藏干{hidden}"))
+
+    value = clamp(50 + 50 * safe_ratio(support - oppose, support + oppose), 0, 100)
+    tomb = detect_tomb_trigger(month_branch, chart["branches"], relations)
+    if tomb.triggered:
+        evidence.append(Evidence(
+            "strength.tomb_trigger", month_branch, tomb.cause, 0,
+            f"墓库受{tomb.cause}引动；是吉是凶另看库中何物透藏及喜忌，不自动加分"
+        ))
+    return ComponentScore(value=round(value, 2), evidence=evidence,
+                          meta={"tomb": tomb})
+
+@dataclass
+class TombTrigger:
+    triggered: bool
+    cause: str | None          # "冲" / "刑" / "冲刑" / None
+    relations: list
+
+def detect_tomb_trigger(tomb_branch, four_branches, relations) -> TombTrigger:
+    clash_items = find_relations(relations, kind="冲", target=tomb_branch)
+    punishment_items = find_relations(relations, kind="刑", target=tomb_branch)
+    cause = ("冲刑" if clash_items and punishment_items else
+             "冲" if clash_items else "刑" if punishment_items else None)
+    return TombTrigger(bool(cause), cause, [*clash_items, *punishment_items])
+
+11.3 得地判定（权重30%）
+
+def score_de_di(chart: dict, relations: dict, kong_wang: dict, config) -> ComponentScore:
+    """
+    逐一计算日主真根和印星生扶，只计一次藏干力量。
+    十二长生仅作语义证据，不再在同一藏干根气上重复加分。
+    """
+    roots = score_effective_roots(
+        chart["day_stem"], chart["branches"], relations, kong_wang,
+        hidden_weights=config.hidden_weights,
+        root_multiplier=1.0,
+        resource_multiplier=config.resource_root_multiplier,
+        arching_multiplier=config.arching_root_multiplier,
+    )
+    value = percent(clamp(roots.total, 0, roots.maximum), roots.maximum)
+    return ComponentScore(value=value, evidence=roots.evidence,
+                          meta={"real_roots": roots.real,
+                                "virtual_roots": roots.arching,
+                                "twelve_life": roots.twelve_life_labels})
+
+11.4 得势判定（权重15%）
+
+def score_de_shi(chart: dict, relations: dict) -> ComponentScore:
+    """
+    天干帮扶/克泄耗均先计算透干的有效力量，再映射到0..100。
+    合而不化、合化成功、争合、克制不能都按同一个天干满分计。
+    """
+    support, oppose, evidence = 0.0, 0.0, []
+    for position, stem in enumerate(chart["stems"]):
+        if position == 2:                 # 跳过日干自身
+            continue
+        ten_god = get_shi_shen(chart["day_stem"], stem)
+        p = effective_exposed_stem_power(stem, position, chart, relations)
+        if ten_god in ("比肩", "劫财", "正印", "偏印"):
+            support += p
+        else:
+            oppose += p
+        evidence.append(Evidence("strength.de_shi", stem, ten_god, p,
+                                 f"天干位置={position}"))
+    value = clamp(50 + 50 * safe_ratio(support - oppose, support + oppose), 0, 100)
+    return ComponentScore(value=round(value, 2), evidence=evidence)
+
+11.5 综合打分与等级判定
+
+def assess_strength(chart: dict, relations: dict, kong_wang: dict, config) -> StrengthResult:
+    """各组件先归一化到0~100，再按统一权重合成。"""
+    ling = score_de_ling(chart, relations, config)                 # 0..100
+    di = score_de_di(chart, relations, kong_wang, config)          # 0..100
+    shi = score_de_shi(chart, relations)                           # 0..100
+    season = score_season_adjustment(chart, config)                # 0..100
+    flow = score_relation_adjustment(chart, relations, kong_wang)  # 0..100
+    total = clamp(0.40*ling.value + 0.30*di.value + 0.15*shi.value
+                  + 0.10*season.value + 0.05*flow.value, 0, 100)
+    level = classify_strength(total)
+    
+    return StrengthResult(
+        score=round(total, 2), level=level,
+        de_ling=(ling.value >= 50),
+        de_di_score=di.value,
+        de_shi_score=shi.value,
+        components={"de_ling": ling, "de_di": di, "de_shi": shi,
+                    "season": season, "relations": flow},
+        evidence=flatten_evidence(ling, di, shi, season, flow)
+    )
+
+Step 12: 调候需求判定
+
+12.1 核心数据
+
+调候必须采用“日主 × 月令”的具体天干表，不能只凭季节把所有巳午未月统一判成壬癸水，也不能把壬、癸视为可互换。表内天干有先后顺序，例如乙木未月以癸水雨露滋润为先，壬水为次；具体表未录入时只允许输出“调候候选”，不得锁定用神。
+
+调候结果必须返回四态：
+
+- `missing`：所需调候字未见，可按完整调候分进入候选；
+- `insufficient`：仅见余气、受冲、落空或受合化，按不足程度折减加分；
+- `satisfied`：所需字透干有根且未受损，只记录“调候已备”，不得再次固定加满分；
+- `excessive`：同类已偏多或继续生扶会加重格局之病，对同类候选扣分。
+
+调候用神表：必须优先查 `(day_stem, month_branch)`；下面的月令表只作为缺表时的环境提示。
+CLIMATE_TABLE = {
+    # 冬月（亥子丑）→ 急需火
+    "亥": {"need": "火", "stems": ["丙", "丁"], "reason": "水旺金寒，急需丙丁暖局"},
+    "子": {"need": "火", "stems": ["丙", "丁"], "reason": "寒冬极冷，急需丙丁暖局"},
+    "丑": {"need": "火", "stems": ["丙", "丁"], "reason": "余寒未尽，需火暖局"},
+    # 夏月（巳午未）→ 急需水
+    "巳": {"need": "水", "stems": ["壬", "癸"], "reason": "火炎土燥，急需壬癸润局"},
+    "午": {"need": "水", "stems": ["壬", "癸"], "reason": "盛夏极热，急需壬癸润局"},
+    "未": {"need": "水", "stems": ["壬", "癸"], "reason": "燥土当令，需水润局"},
+    # 春月（寅卯）→ 余寒需丙
+    "寅": {"need": "火", "stems": ["丙"], "reason": "初春余寒，需丙火暖局", "priority": "secondary"},
+    "卯": {"need": "火", "stems": ["丙"], "reason": "仲春微寒，丙火为辅", "priority": "secondary"},
+    # 秋月（申酉）→ 视情况
+    "申": {"need": None, "reason": "金旺，视寒暖定"},
+    "酉": {"need": None, "reason": "金旺，视寒暖定"},
+    # 四季月（辰戌丑未）→ 视具体
+    "辰": {"need": None, "reason": "湿土，视全局"},
+    "戌": {"need": None, "reason": "燥土，视全局"},
+}
+
+DAY_MASTER_CLIMATE_TABLE = {
+    # 示例：六月乙木，癸先壬后；实际实现须补齐十干十二月表及来源版本。
+    ("乙", "未"): {
+        "need": "水",
+        "stems": ["癸", "壬"],
+        "priority": "urgent",
+        "reason": "六月乙木先取癸水滋润，壬水次用",
+    },
+}
+
+12.2 调候判定函数
+
+def judge_climate(day_stem: str, month_branch: str, four_stems: List[str],
+                  four_branches: List[str], relations: list,
+                  kong_wang: dict, balance: dict) -> dict:
+    """
+    返回: {
+        "needed": bool,         # 是否需要调候
+        "element": str,         # 急需五行
+        "stems": list,          # 具体调候天干
+        "state": str,           # missing / insufficient / satisfied / excessive
+        "present_stems": list,  # 必须记录具体是壬还是癸，不得只记“水”
+        "urgency": str,         # "urgent" / "secondary" / "none"
+        "reason": str
+    }
+    """
+    info = DAY_MASTER_CLIMATE_TABLE.get((day_stem, month_branch),
+                                         CLIMATE_TABLE.get(month_branch, {}))
+    
+    if info.get("need") is None:
+        return {
+            "needed": False,
+            "element": None,
+            "stems": [],
+            "state": "not_applicable",
+            "present_stems": [],
+            "occurrences": [],
+            "urgency": "none",
+            "reason": info.get("reason", ""),
+        }
+    
+    need_element = info["need"]
+    need_stems = info["stems"]
+    
+    occurrences = []
+    for wanted in need_stems:
+        occurrences.extend(find_exact_stem_occurrences(
+            wanted, four_stems, four_branches, relations, kong_wang
+        ))
+
+    # 精确到具体天干：癸透不能证明壬透；壬有根也不能替代癸的透干。
+    usable_power = sum(o.effective_power for o in occurrences)
+    same_element_percent = balance[STEM_ELEMENT[need_stems[0]]]["percent"]
+    if not occurrences:
+        state = "missing"
+    elif usable_power < CLIMATE_SUFFICIENT_THRESHOLD:
+        state = "insufficient"
+    elif same_element_percent > CLIMATE_EXCESSIVE_PERCENT:
+        state = "excessive"
+    else:
+        state = "satisfied"
+    
+    urgency = info.get("priority", "urgent")  # 默认urgent
+    
+    return {
+        "needed": True,
+        "element": need_element,
+        "stems": need_stems,
+        "state": state,
+        "present_stems": sorted({o.stem for o in occurrences}),
+        "occurrences": occurrences,
+        "urgency": urgency,
+        "reason": info["reason"],
+        "score_policy": {
+            "missing": "完整调候分",
+            "insufficient": "按有效力量折算",
+            "satisfied": "0分，只记录调候已备",
+            "excessive": "同类候选扣分"
+        }
+    }
+
+Step 13: 格局判定引擎
+
+13.0 月令本气与人元司令必须分开
+
+“月支本气取格”不等于“该本气正在分日司令”。若分析器只有四柱、没有出生公历时刻及节气交接时刻，只能输出“未月本气己土，立偏财格候选”，不得写“财星司令”。只有 `birth_context` 包含精确公历时刻、前后节气时刻及选定的人元司令表版本时，才计算分日司令：
+
+```python
+def determine_month_command_hidden_stem(birth_context, month_branch, command_table):
+    if not birth_context.has_exact_solar_time or not birth_context.has_jieqi_boundary:
+        return {"status": "unknown", "reason": "缺少节气交接时刻，不判分日司令"}
+    elapsed = birth_context.solar_time - birth_context.previous_jieqi_time
+    return command_table.lookup(month_branch, elapsed)
+```
+
+结果中同时保留：
+
+- `pattern_basis="month_main_qi"`：按月令本气立格；
+- `human_command.status="known/unknown"`：分日司令是否可判；
+- `human_command.stem`：已知时才填写司令藏干；
+- `command_table_version`：所采用的司令分日表版本，避免不同门派表格混用。
+
+13.1 取格逻辑
+
+def determine_pattern(chart: dict, combos: list, occurrences: list,
+                      relations: dict, human_command: dict) -> dict:
+    """
+    返回: {
+        "pattern": str,         # 格局名称
+        "pattern_type": str,    # "正格" / "建禄" / "羊刃" / "特殊"
+        "cheng_ge": bool,       # 成格/破格
+        "supports": list,       # 成格依据、相神与救应
+        "conflicts": list,      # 破格原因（如有）
+        "pattern_basis": str,   # month_main_qi / exposed_hidden / human_command
+        "human_command": dict,
+    }
+    """
+    day_stem = chart["day_stem"]
+    month_branch = chart["month_branch"]
+    four_stems = chart["stems"]
+    four_branches = chart["branches"]
+
+    # 1. 取月令本气，但保留中气、余气及分日司令证据
+    ben_qi = HIDDEN_STEMS[month_branch][0]
+    
+    # 2. 判断是否建禄/羊刃
+    # 建禄必须按十干临官位精确判断，不能“与日主同五行就算建禄”。
+    JIAN_LU = {"甲":"寅", "乙":"卯", "丙":"巳", "丁":"午", "戊":"巳",
+                "己":"午", "庚":"申", "辛":"酉", "壬":"亥", "癸":"子"}
+    if month_branch == JIAN_LU[day_stem]:
+        return {
+            "pattern": "建禄格", "pattern_type": "建禄", "cheng_ge": True,
+            "supports": [f"{day_stem}日主临官在{month_branch}"], "conflicts": [],
+            "pattern_basis": "month_lu", "human_command": human_command,
+            "competing_patterns": [],
+        }
+    
+    if is_yang_blade(day_stem, month_branch):
+        return {
+            "pattern": "羊刃格", "pattern_type": "羊刃", "cheng_ge": True,
+            "supports": [f"{day_stem}日主羊刃在{month_branch}"], "conflicts": [],
+            "pattern_basis": "month_blade", "human_command": human_command,
+            "competing_patterns": [],
+        }
+    
+    # 3. 正八格：月令本气透干取格
+    # 先检查本气是否透干
+    ben_qi_shi_shen = get_shi_shen(day_stem, ben_qi)
+    
+    # 检查月令藏干是否“同一天干”透出；同五行异阴阳不得冒充透干。
+    # 同时透出多个藏干时不能只取数组第一个，须全部保留为争格候选。
+    hidden_stems = HIDDEN_STEMS[month_branch]
+    exposed_hidden = [h for h in hidden_stems
+                      if exact_stem_is_exposed(h, chart, exclude_day_stem=True)]
+    pattern_stem = select_pattern_stem(
+        exposed_hidden=exposed_hidden,
+        hidden_stems=hidden_stems,
+        human_command=human_command,
+        chart=chart,
+    )
+    shi_shen = get_shi_shen(day_stem, pattern_stem)
+    
+    PATTERN_MAP = {
+        "正官": "正官格", "七杀": "七杀格",
+        "正印": "正印格", "偏印": "偏印格",
+        "正财": "正财格", "偏财": "偏财格",
+        "食神": "食神格", "伤官": "伤官格",
+    }
+    
+    pattern_name = PATTERN_MAP.get(shi_shen, "月劫格" if shi_shen == "劫财" else f"{shi_shen}格")
+    
+    # 4. 判成格/破格，必须使用带位置、透藏、力量、空亡和合冲状态的十神出现项
+    integrity = check_pattern_integrity(
+        pattern_name, pattern_stem, occurrences, combos, relations
+    )
+    basis = "exposed_hidden" if pattern_stem in exposed_hidden else "month_main_qi"
+    competing = [PATTERN_MAP.get(get_shi_shen(day_stem, h), f"{get_shi_shen(day_stem, h)}格")
+                 for h in exposed_hidden if h != pattern_stem]
+    
+    return {
+        "pattern": pattern_name,
+        "pattern_type": "正格",
+        "pattern_stem": pattern_stem,
+        "cheng_ge": integrity["cheng_ge"],
+        "supports": integrity["supports"],
+        "conflicts": integrity["conflicts"],
+        "pattern_basis": basis,
+        "human_command": human_command,
+        "competing_patterns": competing,
+    }
+
+13.2 成格/破格检验
+
+def check_pattern_integrity(pattern: str, pattern_stem: str,
+                            occurrences: list, combos: list,
+                            stem_relations: list) -> dict:
+    """
+    返回成格与破格的双向证据。不得只根据“某十神在四柱出现过”就判定；
+    必须检查是否透干、是否贴近、力量是否达阈值、是否空亡或受制。
+    """
+    supports = []
+    conflicts = []
+
+    def effective(ten_gods, min_power=COMBO_MIN_POWER):
+        return [o for o in occurrences
+                if o.ten_god in ten_gods and o.effective_power >= min_power]
+    
+    if pattern == "正官格":
+        # 破格条件：伤官见官、官被合化、官杀混杂无制
+        guan = effective({"正官"})
+        shang = effective({"伤官"})
+        yin = effective({"正印", "偏印"})
+        cai = effective({"正财", "偏财"})
+        sha = effective({"七杀"})
+        if guan:
+            supports.append("正官有效得用")
+        if any_combo(shang, guan) and not (yin or cai):
+            conflicts.append("伤官见官无通关")
+        if guan and sha and not check_guan_sha_resolution(occurrences, stem_relations):
+            conflicts.append("官杀混杂无制")
+    
+    elif pattern == "七杀格":
+        # 成格条件：有食神制杀或印化杀
+        sha = effective({"七杀"})
+        shi = effective({"食神"})
+        yin = effective({"正印", "偏印"})
+        if any_combo(shi, sha):
+            supports.append("食神制杀有效")
+        elif any_combo(sha, yin):
+            supports.append("杀印相生有效")
+        else:
+            conflicts.append("杀无制无化")
+    
+    elif pattern == "食神格":
+        # 破格：枭印夺食
+        shi = effective({"食神"})
+        xiao = effective({"偏印"})
+        cai = effective({"正财", "偏财"})
+        if any_combo(xiao, shi) and not any_combo(cai, xiao):
+            conflicts.append("枭印夺食")
+        elif shi:
+            supports.append("食神有效且未受枭印破坏")
+    
+    elif pattern == "伤官格":
+        # 成格：伤官配印或伤官生财
+        # 破格：伤官见官无通关
+        shang = effective({"伤官"})
+        guan = effective({"正官"})
+        yin = effective({"正印", "偏印"})
+        cai = effective({"正财", "偏财"})
+        if any_combo(shang, yin):
+            supports.append("伤官配印")
+        if any_combo(shang, cai):
+            supports.append("伤官生财")
+        if any_combo(shang, guan) and not (yin or cai):
+            conflicts.append("伤官见官无通关")
+    
+    elif pattern == "正财格" or pattern == "偏财格":
+        # 破格：比劫夺财
+        wealth = effective({"正财", "偏财"})
+        peers = effective({"比肩", "劫财"})
+        officer = effective({"正官", "七杀"})
+        if wealth:
+            supports.append("财星有效得用")
+        if sum(o.effective_power for o in peers) >= ROB_WEALTH_POWER_THRESHOLD:
+            if officer:
+                supports.append("官杀制比护财")
+            else:
+                conflicts.append("比劫夺财无官杀制")
+
+    return {
+        "cheng_ge": len(conflicts) == 0,
+        "supports": supports,
+        "conflicts": conflicts,
+    }
+
+Step 14: 特殊格局判定
+
+特殊格局必须返回 `status`（`confirmed`、`needs_review` 或 `excluded`）及支持/排除证据。条件不完整时只能标记待复核，不能直接改变用神；从格临界分数 24~30 统一标记为 `needs_review`。
+
+14.1 从格判定
+
+def check_cong_ge(chart: dict, strength: StrengthResult,
+                  occurrences: list, relations: list,
+                  kong_wang: dict) -> dict:
+    """
+    从格不能只用“日主分低 + 某五行最多”判定。先验日主是否真能弃命，
+    再在从财、从杀、从儿三种势中逐格检查。
+    """
+    day_stem = chart["day_stem"]
+    support = effective_power(occurrences, {"比肩", "劫财", "正印", "偏印"})
+    real_roots = find_day_master_roots(chart, relations, kong_wang,
+                                       include_arching=False)
+    unbroken_roots = [r for r in real_roots if r.effective_power >= ROOT_BREAK_THRESHOLD]
+
+    base_evidence = [
+        f"日主强弱分={strength.score}",
+        f"印比有效力量={support}",
+        f"未破真根数={len(unbroken_roots)}",
+    ]
+    if strength.score > 30 or support > CONG_SUPPORT_MAX or unbroken_roots:
+        return {
+            "type": "从格", "sub_type": None, "status": "excluded",
+            "evidence": base_evidence,
+            "conflicts": ["日主未到极弱弃命条件或仍有有效印比根援"],
+        }
+
+    family_power = {
+        "从财格": effective_power(occurrences, {"正财", "偏财"}),
+        "从杀格": effective_power(occurrences, {"正官", "七杀"}),
+        "从儿格": effective_power(occurrences, {"食神", "伤官"}),
+    }
+    subtype = max(family_power, key=family_power.get)
+    dominant_power = family_power[subtype]
+    second_power = sorted(family_power.values(), reverse=True)[1]
+
+    conflicts = []
+    supports = [f"{subtype}主势有效力量={dominant_power}"]
+    if dominant_power < CONG_DOMINANT_MIN:
+        conflicts.append("所从之势不足")
+    if dominant_power - second_power < CONG_DOMINANCE_GAP:
+        conflicts.append("财、官杀、食伤多势并见，不能专从")
+
+    if subtype == "从财格":
+        # 食伤生财可为顺势；有力官杀泄财过甚则须降级复核。
+        if effective_power(occurrences, {"食神", "伤官"}) >= FLOW_MIN:
+            supports.append("食伤生财，气势顺行")
+        if effective_power(occurrences, {"正官", "七杀"}) > CONG_SIDE_FORCE_MAX:
+            conflicts.append("官杀分泄财势过重")
+    elif subtype == "从杀格":
+        # 财生杀可为顺势；有力食伤制杀即逆势。
+        if effective_power(occurrences, {"正财", "偏财"}) >= FLOW_MIN:
+            supports.append("财星生杀，气势顺行")
+        if any_combo(effective_occurrences(occurrences, {"食神", "伤官"}),
+                     effective_occurrences(occurrences, {"七杀"})):
+            conflicts.append("有力食伤制杀，逆所从之势")
+    elif subtype == "从儿格":
+        # 从儿以食伤为主，生财可顺泄；强印夺食、强官杀制身为逆势。
+        if effective_power(occurrences, {"正财", "偏财"}) >= FLOW_MIN:
+            supports.append("食伤生财，儿又生儿")
+        if effective_power(occurrences, {"正印", "偏印"}) > CONG_OPPOSING_MAX:
+            conflicts.append("印星有力夺食，不从儿")
+        if effective_power(occurrences, {"正官", "七杀"}) > CONG_OPPOSING_MAX:
+            conflicts.append("官杀有力，气势不纯")
+
+    if conflicts:
+        status = "excluded"
+    elif 24 < strength.score <= 30 or support > CONG_STRICT_SUPPORT_MAX:
+        status = "needs_review"   # 假从/从格临界，不直接改写喜忌
+    else:
+        status = "confirmed"
+
+    return {
+        "type": "从格", "sub_type": subtype, "status": status,
+        "dominant_power": dominant_power,
+        "is_fake": status == "needs_review",
+        "supports": supports,
+        "conflicts": conflicts,
+        "evidence": base_evidence + [f"{k}={v}" for k, v in family_power.items()],
+    }
+
+14.2 专旺格判定
+
+def check_zhuan_wang(chart: dict, strength: StrengthResult,
+                     element_stats: dict, occurrences: list,
+                     relations: list, kong_wang: dict) -> dict:
+    """
+    五类专旺格分别验证：曲直、炎上、稼穑、从革、润下。
+    “日主极旺”只是入口条件，还须得月令或三会/三合之势、日主同五行成主势，
+    并无有力官杀逆克。不得见身旺就直接返回专旺格。
+    """
+    day_stem = chart["day_stem"]
+    day_element = STEM_ELEMENT[day_stem]
+    month_branch = chart["month_branch"]
+    config = {
+        "木": {"name": "曲直格", "season": {"寅", "卯", "辰"}, "meeting": {"寅", "卯", "辰"}},
+        "火": {"name": "炎上格", "season": {"巳", "午", "未"}, "meeting": {"巳", "午", "未"}},
+        "土": {"name": "稼穑格", "season": {"辰", "戌", "丑", "未"}, "meeting": {"辰", "戌", "丑", "未"}},
+        "金": {"name": "从革格", "season": {"申", "酉", "戌"}, "meeting": {"申", "酉", "戌"}},
+        "水": {"name": "润下格", "season": {"亥", "子", "丑"}, "meeting": {"亥", "子", "丑"}},
+    }
+    rule = config[day_element]
+    same_percent = element_stats[day_element]["percent"]
+    resource_element = SHENG_ME_MAP[day_element]
+    support_percent = same_percent + element_stats[resource_element]["percent"]
+    officer_power = effective_power(occurrences, {"正官", "七杀"})
+    branches = set(chart["branches"])
+    seasonal_support = month_branch in rule["season"]
+    meeting_support = rule["meeting"].issubset(branches) or has_effective_combination(
+        relations, target_element=day_element, kinds={"三会", "三合"}
+    )
+
+    supports = []
+    conflicts = []
+    if strength.score >= ZHUAN_WANG_SCORE_MIN:
+        supports.append(f"日主极旺，强弱分={strength.score}")
+    else:
+        conflicts.append("日主未达专旺阈值")
+    if seasonal_support or meeting_support:
+        supports.append("得月令或成三会/三合之势")
+    else:
+        conflicts.append("不得月令，亦无三会/三合成势")
+    if support_percent >= ZHUAN_WANG_DOMINANCE_PERCENT:
+        supports.append(f"同党与印星占比={support_percent}%")
+    else:
+        conflicts.append("日主同党与印星未成压倒性主势")
+    if officer_power > ZHUAN_WANG_OFFICER_MAX:
+        conflicts.append(f"官杀有力逆克，有效力量={officer_power}")
+
+    if conflicts:
+        status = "excluded"
+    elif (strength.score < ZHUAN_WANG_STRICT_SCORE or
+          support_percent < ZHUAN_WANG_STRICT_PERCENT):
+        status = "needs_review"
+    else:
+        status = "confirmed"
+
+    return {
+        "type": "专旺格",
+        "sub_type": rule["name"],
+        "element": day_element,
+        "status": status,
+        "supports": supports,
+        "conflicts": conflicts,
+        "evidence": [
+            f"月支={month_branch}", f"同印占比={support_percent}%",
+            f"官杀有效力量={officer_power}",
+        ],
+    }
+
+14.3 化气格判定
+
+def check_hua_qi(chart: dict, relations: dict, kong_wang: dict) -> Optional[dict]:
+    """
+    五合化气判定：
+    甲己→土, 乙庚→金, 丙辛→水, 丁壬→木, 戊癸→火
+    """
+    day_stem = chart["day_stem"]
+    four_stems = chart["stems"]
+    four_branches = chart["branches"]
+    month_branch = chart["month_branch"]
+    HUA_MAP = {
+        ("甲","己"): ("土", "辰戌丑未"),
+        ("乙","庚"): ("金", "申酉"),
+        ("丙","辛"): ("水", "亥子"),
+        ("丁","壬"): ("木", "寅卯"),
+        ("戊","癸"): ("火", "巳午"),
+    }
+    
+    # 日干只与紧贴的月干或时干先论化气，年干隔位不直接作为化气伴侣。
+    for partner, (hua_element, hua_month) in HUA_MAP.items():
+        if day_stem in partner:
+            other = partner[0] if day_stem == partner[1] else partner[1]
+            adjacent_positions = [i for i in (1, 3) if four_stems[i] == other]
+            if adjacent_positions:
+                # 条件1：月令是否为化神旺地
+                month_ok = month_branch in hua_month or \
+                           HIDDEN_STEMS[month_branch][0] in ELEMENT_STEMS[hua_element]
+                
+                # 条件2：地支是否有化神之根/局
+                has_root = check_effective_element_root(
+                    hua_element, four_branches, relations, kong_wang
+                )
+                
+                # 条件3：无争合
+                no_zheng_he = count_stem(four_stems, day_stem) == 1 and \
+                              count_stem(four_stems, other) == 1
+                
+                # 条件4：无克破化神
+                no_ke = not has_effective_counter_force(
+                    hua_element, chart, relations, exclude_stems=partner
+                )
+
+                checks = {
+                    "日干与化合干紧贴": True,
+                    "月令引化": month_ok,
+                    "化神有根或成局": has_root,
+                    "无争合妒合": no_zheng_he,
+                    "无有力克破化神": no_ke,
+                }
+                failed = [name for name, ok in checks.items() if not ok]
+                return {
+                    "type": "化气格",
+                    "sub_type": f"{day_stem}{other}化{hua_element}格",
+                    "hua_element": hua_element,
+                    "pair": f"{day_stem}{other}合",
+                    "status": "confirmed" if not failed else "excluded",
+                    "is_true": not failed,
+                    "supports": [name for name, ok in checks.items() if ok],
+                    "conflicts": failed,
+                    "note": "合而不化" if failed else "化气条件齐备",
+                }
+    
+    return None
+
+14.4 特殊格统一入口
+
+```python
+def evaluate_special_patterns(chart, strength, capacity, balance,
+                              occurrences, relations, kong_wang):
+    results = [
+        check_cong_ge(chart, strength, occurrences, relations, kong_wang),
+        check_zhuan_wang(chart, strength, balance, occurrences, relations, kong_wang),
+    ]
+    hua_qi = check_hua_qi(chart, relations, kong_wang)
+    if hua_qi:
+        results.append(hua_qi)
+
+    # 同一命局若出现多个 confirmed，不得按数组顺序任取一个；
+    # 应全部降为 needs_review，并输出格局冲突证据。
+    confirmed = [r for r in results if r and r["status"] == "confirmed"]
+    if len(confirmed) > 1:
+        for r in confirmed:
+            r["status"] = "needs_review"
+            r.setdefault("conflicts", []).append("多特殊格同时通过，规则冲突待复核")
+    return [r for r in results if r]
+```
+
+Step 15: 合冲刑害检测引擎
+
+所有关系结果统一包含 `a`、`b`、`positions`、`symmetric`、`effective`、`impact` 和 `evidence` 字段。合、冲、刑、害本身只描述结构；是否改变五行力量，必须另行依据得令、得根、成化条件和作用对象判定，不能检测到关系后统一加减分。刑要额外记录方向（如寅→巳），自刑记录同一地支的两次出现。
+
+15.1 六合检测
+
+LIU_HE = [("子","丑"), ("寅","亥"), ("卯","戌"), ("辰","酉"), ("巳","申"), ("午","未")]
+
+def detect_liu_he(four_branches: List[str]) -> List[dict]:
+    """检测四柱中的六合"""
+    results = []
+    for i in range(4):
+        for j in range(i+1, 4):
+            pair = (four_branches[i], four_branches[j])
+            if pair in LIU_HE or (pair[1], pair[0]) in LIU_HE:
+                # 判断是否紧贴（相邻柱）
+                adjacent = abs(i - j) == 1
+                results.append({
+                    "type": "六合",
+                    "branches": pair,
+                    "positions": [i, j],
+                    "adjacent": adjacent,
+                    "strength": "strong" if adjacent else "weak"
+                })
+    return results
+
+15.2 三合局检测
+
+SAN_HE = {
+    ("申","子","辰"): "水",
+    ("亥","卯","未"): "木",
+    ("寅","午","戌"): "火",
+    ("巳","酉","丑"): "金",
+}
+
+def detect_san_he(four_branches: List[str]) -> List[dict]:
+    """检测三合局（全合/半合）"""
+    results = []
+    branch_set = set(four_branches)
+    
+    for trio, element in SAN_HE.items():
+        present = [b for b in trio if b in branch_set]
+        if len(present) == 3:
+            results.append({
+                "type": "三合局",
+                "branches": trio,
+                "element": element,
+                "complete": True,
+                "strength": "extreme"
+            })
+        elif len(present) == 2:
+            # 半合：需含中神（子午卯酉）
+            zhong_shen = trio[1]  # 子/卯/午/酉为中神
+            if zhong_shen in present:
+                results.append({
+                    "type": "半合",
+                    "branches": tuple(present),
+                    "element": element,
+                    "complete": False,
+                    "strength": "medium"
+                })
+    
+    return results
+
+15.2.1 拱合（缺中神）检测
+
+三合只见生支与墓支而缺中神时，不叫半合，另记为“拱合候选”。例如亥未缺卯为“亥未拱卯”。拱出的虚支不得当作实有地支满额计根，只能按邻贴、是否受冲破、拱神是否透干、月令是否同气进行折算。
+
+```python
+def detect_arching(four_branches: List[str], relations: list) -> List[dict]:
+    results = []
+    for (sheng, middle, tomb), element in SAN_HE.items():
+        if sheng in four_branches and tomb in four_branches and middle not in four_branches:
+            positions = [four_branches.index(sheng), four_branches.index(tomb)]
+            adjacent = abs(positions[0] - positions[1]) == 1
+            broken = any(r.breaks_member(sheng) or r.breaks_member(tomb) for r in relations)
+            results.append({
+                "type": "拱合",
+                "branches": [sheng, tomb],
+                "virtual_branch": middle,
+                "element": element,
+                "effective": adjacent and not broken,
+                "power_multiplier": 0.25 if adjacent and not broken else 0.0,
+                "impact": "只作暗助/拱禄证据，不等同实支，不直接成三合局"
+            })
+    return results
+```
+
+15.3 三会局检测
+
+SAN_HUI = {
+    ("寅","卯","辰"): "木",
+    ("巳","午","未"): "火",
+    ("申","酉","戌"): "金",
+    ("亥","子","丑"): "水",
+}
+
+def detect_san_hui(four_branches: List[str]) -> List[dict]:
+    branch_set = set(four_branches)
+    results = []
+    for trio, element in SAN_HUI.items():
+        if all(b in branch_set for b in trio):
+            results.append({
+                "type": "三会局",
+                "branches": trio,
+                "element": element,
+                "strength": "extreme"  # 三会 > 三合
+            })
+    return results
+
+15.4 六冲检测
+
+LIU_CHONG = [("子","午"), ("丑","未"), ("寅","申"), ("卯","酉"), ("辰","戌"), ("巳","亥")]
+
+def detect_liu_chong(four_branches: List[str]) -> List[dict]:
+    results = []
+    for i in range(4):
+        for j in range(i+1, 4):
+            pair = (four_branches[i], four_branches[j])
+            if pair in LIU_CHONG or (pair[1], pair[0]) in LIU_CHONG:
+                results.append({
+                    "type": "六冲",
+                    "branches": pair,
+                    "positions": [i, j],  # 0年1月2日3时
+                    "adjacent": abs(i-j) == 1
+                })
+    return results
+
+15.5 三刑检测
+
+def detect_san_xing(four_branches: List[str]) -> List[dict]:
+    results = []
+    bs = set(four_branches)
+    
+    # 寅巳申 - 无恩之刑
+    if {"寅","巳","申"}.issubset(bs):
+        results.append({"type": "三刑", "sub": "无恩之刑", "branches": ("寅","巳","申")})
+    # 丑戌未 - 恃势之刑
+    elif {"丑","戌","未"}.issubset(bs):
+        results.append({"type": "三刑", "sub": "恃势之刑", "branches": ("丑","戌","未")})
+    
+    # 子卯 - 无礼之刑（两支即可）
+    if "子" in bs and "卯" in bs:
+        results.append({"type": "二刑", "sub": "无礼之刑", "branches": ("子","卯")})
+    
+    # 自刑：辰辰、午午、酉酉、亥亥
+    for b in ["辰","午","酉","亥"]:
+        if four_branches.count(b) >= 2:
+            results.append({"type": "自刑", "branches": (b, b)})
+    
+    return results
+
+15.6 天干五合检测
+
+TIAN_GAN_HE = [("甲","己"), ("乙","庚"), ("丙","辛"), ("丁","壬"), ("戊","癸")]
+
+def detect_tian_gan_he(four_stems: List[str]) -> List[dict]:
+    results = []
+    for i in range(4):
+        for j in range(i+1, 4):
+            pair = (four_stems[i], four_stems[j])
+            if pair in TIAN_GAN_HE or (pair[1], pair[0]) in TIAN_GAN_HE:
+                results.append({
+                    "type": "天干五合",
+                    "stems": pair,
+                    "positions": [i, j],
+                    "adjacent": abs(i-j) == 1
+                })
+    return results
+
+15.7 旬空进入分析层
+
+旬空不能只在排盘页展示。分析结果必须列出空亡地支、所在柱、其中藏干和被削弱的根气/十神。空亡采用“减力而非删除”原则，并与冲、合、填实分别记录；不得把一个空亡地支中的藏干影响扩大成同十神所有位置全部失效。
+
+```python
+def analyze_kong_wang(chart, config):
+    empty = get_kong_wang(chart.day_stem, chart.day_branch)
+    affected = []
+    for pos, branch in enumerate(chart.branches):
+        if branch not in empty:
+            continue
+        affected.append({
+            "position": pos,
+            "branch": branch,
+            "hidden_stems": HIDDEN_STEMS[branch],
+            "root_multiplier": config.kong_wang_root_multiplier,  # 默认0.5，不归零
+            "note": "仅折减此支承载的根与十神"
+        })
+    return {"branches": empty, "affected": affected}
+```
+
+例如乙木日主见庚辰年、甲申时而申空：应写“庚官透年干；申中庚禄根落空，官根折减”，不得写成“庚官整体坐空或完全无效”。
+
+Step 16: 十神组合关系检测
+
+十神组合不能用“只要在任意藏干中出现就成立”的布尔判断。每个十神出现项必须保留具体天干、透藏层级、柱位、根气、是否空亡、是否受冲合以及有效力量；日干自身是参照物，不得重复算成一个“比肩出现”。
+
+```python
+@dataclass
+class TenGodOccurrence:
+    stem: str
+    ten_god: str
+    position: str              # 年干/月干/日支本气等
+    exposed: bool
+    hidden_level: str | None   # 本气/中气/余气
+    raw_power: float
+    effective_power: float      # 已经计入月令、透藏、空亡、合冲损益
+    kong_wang: bool
+    damaged: bool
+
+def can_form_combo(a, b):
+    # 至少一方透干；双方均深藏且无引动时只记录潜在结构，不成立组合。
+    return ((a.exposed or b.exposed)
+            and a.effective_power >= COMBO_MIN_POWER
+            and b.effective_power >= COMBO_MIN_POWER
+            and not (a.damaged and b.damaged)
+            and positions_can_interact(a.position, b.position))
+
+def any_combo(group_a, group_b):
+    return any(can_form_combo(a, b) for a in group_a for b in group_b)
+```
+
+16.1 核心组合检测
+
+def detect_shi_shen_combos(chart: dict, strength: StrengthResult,
+                           relations: dict, kong_wang: dict) -> List[dict]:
+    """检测所有重要十神组合"""
+    results = []
+    
+    occurrences = build_ten_god_occurrences(chart, relations, kong_wang)
+    def items(*names):
+        return [o for o in occurrences
+                if o.ten_god in names and o.effective_power >= MIN_EFFECTIVE_TEN_GOD_POWER]
+
+    guan, sha = items("正官"), items("七杀")
+    shang, food = items("伤官"), items("食神")
+    yin, xiao = items("正印", "偏印"), items("偏印")
+    wealth = items("正财", "偏财")
+    
+    # 1. 官杀混杂
+    if guan and sha and not check_guan_sha_resolution(occurrences, relations):
+        results.append({"combo": "官杀混杂", "severity": "warn",
+                        "evidence": occurrence_evidence(guan + sha)})
+    
+    # 2. 伤官见官
+    if any(can_form_combo(a, b) for a in shang for b in guan):
+        rescued = (any(can_form_combo(a, b) for a in shang for b in yin) or
+                   any(can_form_combo(a, b) for a in shang for b in wealth))
+        if not rescued:
+            results.append({"combo": "伤官见官", "severity": "bad", "note": "无通关"})
+        else:
+            results.append({"combo": "伤官见官", "severity": "neutral", "note": "有通关"})
+    
+    # 3. 枭印夺食
+    if any(can_form_combo(py, f) for py in xiao for f in food):
+        has_cai_zhi = any(can_form_combo(c, py) for c in wealth for py in xiao)
+        if not has_cai_zhi:
+            results.append({"combo": "枭印夺食", "severity": "bad"})
+        else:
+            results.append({"combo": "枭印夺食", "severity": "neutral", "note": "有财制枭"})
+    
+    # 4. 杀印相生
+    if any(can_form_combo(a, b) for a in sha for b in yin):
+        results.append({"combo": "杀印相生", "severity": "good"})
+    
+    # 5. 食神制杀
+    if any(can_form_combo(a, b) for a in food for b in sha):
+        results.append({"combo": "食神制杀", "severity": "good"})
+    
+    # 6. 伤官配印
+    if any(can_form_combo(a, b) for a in shang for b in yin):
+        results.append({"combo": "伤官配印", "severity": "good"})
+    
+    # 7. 比劫夺财
+    bi_power = sum(o.effective_power for o in items("比肩", "劫财"))
+    cai_power = sum(o.effective_power for o in wealth)
+    guan_power = sum(o.effective_power for o in guan + sha)
+    if bi_power >= BI_ROB_WEALTH_THRESHOLD and cai_power > 0:
+        results.append({
+            "combo": "比劫夺财",
+            "severity": "neutral" if guan_power >= CONTROL_PEER_THRESHOLD else "warn",
+            "note": "见官杀制比，财格有救" if guan_power >= CONTROL_PEER_THRESHOLD else "未见有力官杀制比"
+        })
+    
+    # 8. 财多身弱（需结合日主强弱，外部传入）
+    if cai_power >= WEALTH_HEAVY_THRESHOLD:
+        results.append({"combo": "财星偏多", "severity": "warn" if strength.score < 40 else "neutral",
+                        "note": "必须与日主强弱、根气和官杀护财共同判断"})
+    
+    return results
+
+Step 17: 用神判定引擎（核心）
+
+17.1 主决策流程
+
+def determine_yong_shen(
+    chart: dict,
+    strength: StrengthResult,
+    climate: dict,
+    pattern: dict,
+    special_patterns: List[dict],
+    combos: List[dict],       # 十神组合
+    balance: dict,
+    capacity: CarryingCapacity
+) -> dict:
+    """
+    返回: {
+        "yong_shen": str,      # 用神五行
+        "xi_shen": str,        # 喜神五行
+        "ji_shen": str,        # 忌神五行
+        "chou_shen": str,      # 仇神五行
+        "xian_shen": str,      # 闲神五行
+        "method": str,         # 取用方法
+        "reason": str,         # 理由
+        "verification": dict   # 验证结果
+    }
+    """
+    day_stem = chart["day_stem"]
+    four_stems = chart["stems"]
+    four_branches = chart["branches"]
+    day_element = STEM_ELEMENT[day_stem]
+    
+    # ═══ 第一优先：仅已确认的特殊格局可锁定结论 ═══
+    confirmed_special = select_confirmed_special_pattern(special_patterns)
+    if confirmed_special:
+        return _yong_shen_special(confirmed_special, day_element)
+    
+    # ═══ 第二优先：格局病药与相神 ═══
+    disease = _find_disease(pattern, combos)
+    candidates = collect_pattern_candidates(pattern, disease, chart)
+
+    # ═══ 第三优先：调候约束（不是无条件覆盖格局） ═══
+    if climate["needed"]:
+        if climate["state"] == "missing":
+            add_climate_candidates(candidates, climate, score=40)
+        elif climate["state"] == "insufficient":
+            add_climate_candidates(candidates, climate,
+                                   score=interpolate_climate_score(climate, 5, 25))
+        elif climate["state"] == "satisfied":
+            add_evidence(candidates, "调候已备，不重复加分")
+        elif climate["state"] == "excessive":
+            penalize_same_element_candidates(candidates, climate["element"])
+    
+    # ═══ 第四优先：扶抑 ═══
+    if strength.level in (Strength.EXTREME_STRONG, Strength.STRONG):
+        yong = _yong_shen_strong(day_stem, strength, four_stems, four_branches)
+    elif strength.level in (Strength.EXTREME_WEAK, Strength.WEAK):
+        yong = _yong_shen_weak(day_stem, strength, four_stems, four_branches)
+    else:
+        # 中和 → 看格局与流通
+        yong = _yong_shen_neutral(pattern, combos)
+    
+    # ═══ 第五优先：通关检查 ═══
+    conflict = _check_two_element_conflict(four_stems, four_branches)
+    if conflict:
+        tong_guan = conflict["bridge_element"]
+        # 通关优先于扶抑（若冲突严重）
+        if conflict["severity"] == "high":
+            yong = tong_guan
+    
+    candidates.extend(collect_fuyi_tongguan_candidates(
+        yong, chart, strength, balance, capacity
+    ))
+    return _build_result_from_candidates(candidates, chart, pattern, climate,
+                                         balance, capacity)
+
+17.2 日主承载能力修正（候选天干级）
+
+承载能力不是“再算一次身强身弱”，而是将日主强弱、根气稳定性、寒暖燥湿和流通情况合成一个仅供候选取用阶段使用的 0~100 指标。它的目的，是把“理论生克方向”变成“在此局里可否兑现”的有效分数。
+
+```python
+@dataclass
+class CapacityConfig:
+    clash_root_multiplier: float = 0.50
+    low_capacity_threshold: float = 40.0
+    review_score_gap: float = 5.0
+
+def assess_carrying_capacity(chart, strength, climate, relations, balance, config):
+    day = chart.day_gan
+    day_element = get_wu_xing(day)
+
+    # 根气按位置和有效性计分；被冲或被有效合化的根不按满分算。
+    roots = score_effective_roots(
+        day_element, chart.branches, relations,
+        main_root=1.0, middle_root=0.6, residual_root=0.3,
+        clash_multiplier=config.clash_root_multiplier  # 默认 0.5，不直接归零
+    )  # 0..100
+    climate_workability = score_day_master_workability(
+        day_element, chart.month_branch, climate, balance
+    )  # 0..100
+    circulation = score_day_master_circulation(day_element, balance, relations)  # 0..100
+
+    overall = clamp(
+        0.40 * strength.score + 0.30 * roots.value
+        + 0.20 * climate_workability.value + 0.10 * circulation.value,
+        0, 100
+    )
+    return CarryingCapacity(
+        overall=round(overall, 2), root_stability=roots.value,
+        climate_workability=climate_workability.value,
+        circulation=circulation.value,
+        penalties=[*roots.penalties, *climate_workability.penalties,
+                   *circulation.penalties],
+        evidence=[*roots.evidence, *climate_workability.evidence,
+                  *circulation.evidence]
+    )
+```
+
+当 `capacity.overall < 40`，或首、次候选的 `effective_score` 差距小于 5 分时，输出 `status="needs_review"`，而不是输出“没有用神”。此时仍返回完整候选列表、折减证据和调候候选，供人工判断。
+
+候选先根据“天干 + 作用类型”计算理论分，再决定是否需要承载修正；不要对所有候选统一乘系数：
+
+```python
+class CandidateEffect(Enum):
+    CLIMATE_WARMTH = auto()       # 冬月丙火暖局：直接环境收益
+    CLIMATE_MOISTURE = auto()     # 夏月壬水润局：直接环境收益
+    RESOURCE_ACTIVATION = auto()  # 印星生身，需日主与环境能承接
+    PEER_SUPPORT = auto()         # 比劫助身
+    CONTROL_WEALTH = auto()       # 身强任财，需日主有驾驭能力
+    OUTPUT_DRAIN = auto()         # 食伤泄秀，需日主有可泄之力
+
+def apply_carrying_capacity(candidate, capacity):
+    direct = sum(e.score for e in candidate.effects
+                 if e.kind in (CLIMATE_WARMTH, CLIMATE_MOISTURE))
+    active = sum(e.score for e in candidate.effects
+                 if e.kind not in (CLIMATE_WARMTH, CLIMATE_MOISTURE))
+    factor = clamp(capacity.overall / 100.0, 0.20, 1.00)
+    candidate.raw_score = direct + active
+    candidate.effective_score = direct + active * factor
+    if active and factor < 1.0:
+        candidate.conflicts.append(Evidence(
+            rule="useful_god.carrying_capacity",
+            subject=candidate.stem,
+            relation="承载不足",
+            points=candidate.effective_score - candidate.raw_score,
+            reason=f"日主承载能力 {capacity.overall:.1f}/100，需日主参与的作用按 {factor:.2f} 折算"
+        ))
+    return candidate
+```
+
+调候直接分在进入承载修正前必须先按四态处理，禁止只要处于夏月/冬月就无条件增加 40 分：
+
+```python
+def climate_direct_score(climate, candidate_stem):
+    if candidate_stem not in climate["stems"]:
+        return 0
+    if climate["state"] == "missing":
+        return 40
+    if climate["state"] == "insufficient":
+        return score_insufficiency(climate)       # 5..25
+    if climate["state"] == "satisfied":
+        return 0                                  # 已备，不重复补药
+    if climate["state"] == "excessive":
+        return -score_excess(climate)
+    return 0
+```
+
+丁火、亥月、双巳受冲这一类局面应得到如下可解释结果：
+
+```python
+# 仅示意评分方向；具体分值由配置和证据决定
+score_stem("丙", effects=[CLIMATE_WARMTH(+40), PEER_SUPPORT(+12)])
+score_stem("丁", effects=[PEER_SUPPORT(+20)])
+score_stem("乙", effects=[RESOURCE_ACTIVATION(+18)])
+score_stem("甲", effects=[RESOURCE_ACTIVATION(+18)])
+
+# 亥月寒湿、巳亥冲使 capacity 降低：
+# 丙的“暖局 +40”保留；甲、乙的“生火”部分按 capacity 折减。
+# 甲与乙另叠加透干、藏干层级、距日主位置、湿燥、根与受克情况。
+```
+
+“甲木像大树、丁火像小火”只是帮助理解的比喻，代码不得硬编码成“丁火必不喜甲木”。应将它拆成可验证条件：甲木是否透干且有根（资源量）、是否寒湿或受金克（可燃性）、丁火是否得根且根是否被冲（火力）、是否另有丙火暖局（启动条件）。条件不足时降低甲木的有效分，而非把甲木永久列为忌神。
+
+17.3 扶抑取用细化
+
+def _yong_shen_strong(day_stem, strength, four_stems, four_branches):
+    """身强取用：克泄耗"""
+    day_element = STEM_ELEMENT[day_stem]
+    
+    # 判断强的原因
+    yin_count = count_shi_shen(four_stems, four_branches, day_stem, ["正印","偏印"])
+    bi_count = count_shi_shen(four_stems, four_branches, day_stem, ["比肩","劫财"])
+    
+    if yin_count > bi_count:
+        # 印旺身强 → 财破印为首选
+        return KE_MAP[day_element]  # 财 = 克我者所克 → 实际是"我克"
+        # 修正：财 = 日主所克之五行
+    elif bi_count > yin_count:
+        # 比劫旺 → 官杀制比劫
+        return KE_ME_MAP[day_element]  # 官杀 = 克日主者
+    else:
+        # 均旺 → 食伤泄秀
+        return SHENG_MAP[day_element]  # 食伤 = 日主所生
+
+五行生克映射
+SHENG_MAP = {"木":"火", "火":"土", "土":"金", "金":"水", "水":"木"}  # 我生
+KE_MAP  = {"木":"土", "火":"金", "土":"水", "金":"木", "水":"火"}  # 我克（财）
+KE_ME_MAP = {"木":"金", "火":"水", "土":"木", "金":"火", "水":"土"}  # 克我（官杀）
+SHENG_ME_MAP = {"木":"水", "火":"木", "土":"火", "金":"土", "水":"金"}  # 生我（印）
+
+17.4 喜忌推导（应用承载能力后排序）
+
+新实现必须由 `score_stem_candidate(stem, ...)` 产生天干级候选；壬、癸虽然同属水，但调候次序、透藏根气和实际效力分开计算。最终排序使用 `effective_score`，并以 `raw_score`、规则优先级、证据数量作为同分决胜依据。
+
+def _build_result_from_candidates(candidates: list, chart: dict, pattern: dict,
+                                  climate: dict, balance: dict,
+                                  capacity: CarryingCapacity) -> dict:
+    """分角色重新评分，并强制五行角色互斥；喜神不等于“生用神者”。"""
+    yong = choose_highest_candidate(candidates, key="effective_score")
+    used_elements = {yong.element}
+
+    xi_candidates = [score_candidate_for_role(c, "喜神", yong=yong,
+                                               chart=chart, pattern=pattern,
+                                               climate=climate, balance=balance)
+                     for c in candidates if c.element not in used_elements]
+    xi = choose_highest_candidate(xi_candidates, key="effective_score")
+    used_elements.add(xi.element)
+
+    ji_candidates = [score_candidate_for_role(c, "忌神", yong=yong,
+                                               chart=chart, pattern=pattern,
+                                               climate=climate, balance=balance)
+                     for c in candidates if c.element not in used_elements]
+    ji = choose_highest_candidate(ji_candidates, key="effective_score")
+    used_elements.add(ji.element)
+
+    chou_candidates = [score_candidate_for_role(c, "仇神", yong=yong, ji=ji,
+                                                 chart=chart, pattern=pattern,
+                                                 climate=climate, balance=balance)
+                       for c in candidates if c.element not in used_elements]
+    chou = choose_highest_candidate(chou_candidates, key="effective_score")
+    used_elements.add(chou.element)
+    xian_elements = sorted(set(FIVE_ELEMENTS) - used_elements)
+
+    # 每个角色内的 percent = 该候选有效分 / 本角色所有正分候选总和。
+    normalize_role_percent(candidates, role="用神")
+    normalize_role_percent(xi_candidates, role="喜神")
+    normalize_role_percent(ji_candidates, role="忌神")
+    normalize_role_percent(chou_candidates, role="仇神")
+
+    selected = {
+        "yong_shen": yong,
+        "xi_shen": xi,
+        "ji_shen": ji,
+        "chou_shen": chou,
+        "xian_shen": xian_elements[0] if xian_elements else None,
+    }
+    assert len({yong.element, xi.element, ji.element, chou.element}) == 4
+    return {
+        "selected": selected,
+        "candidates": candidates,
+        "status": "needs_review" if (
+            capacity.overall < LOW_CAPACITY_THRESHOLD or
+            score_gap(candidates) < REVIEW_SCORE_GAP
+        ) else "confirmed",
+        "evidence": [*yong.reasons, *xi.reasons, *ji.reasons, *chou.reasons],
+    }
+
+17.5 用神验证（根气、关系、承载能力）
+
+def verify_yong_shen(yong_stem: str, four_stems: List[str],
+                     four_branches: List[str], clashes: List,
+                     capacity: CarryingCapacity, kong_wang: dict) -> dict:
+    """
+    ① 是否有根  ② 是否被冲  ③ 是否被合化 ④ 是否有承载能力
+    """
+    # ① 有根检查
+    yong_element = STEM_ELEMENT[yong_stem]
+    exact_root_level = "无根"
+    same_element_support = []
+    for b in four_branches:
+        for idx, h in enumerate(HIDDEN_STEMS[b]):
+            if h == yong_stem:
+                if idx == 0:
+                    exact_root_level = "本气强根"
+                elif idx == 1:
+                    exact_root_level = "中气中根"
+                else:
+                    exact_root_level = "余气弱根"
+            elif STEM_ELEMENT[h] == yong_element:
+                same_element_support.append({"branch": b, "stem": h, "note": "同五行助力，不冒充本干根"})
+    
+    # 透干检查
+    tou_gan = yong_stem in four_stems
+    
+    # ② 被冲检查
+    is_chonged = False
+    for b in four_branches:
+        for h in HIDDEN_STEMS[b]:
+            if h == yong_stem:
+                if any(b in pair for pair in clashes):
+                    is_chonged = True
+    
+    # ③ 被合检查
+    is_he = False
+    # 检查用神对应天干是否被五合
+    for ys in [s for s in four_stems if s == yong_stem]:
+        for pair in TIAN_GAN_HE:
+            if ys in pair:
+                other = pair[0] if ys == pair[1] else pair[1]
+                if other in four_stems:
+                    is_he = True
+    
+    return {
+        "stem": yong_stem,
+        "element": yong_element,
+        "exact_root": exact_root_level,
+        "same_element_support": same_element_support,
+        "tou_gan": tou_gan,
+        "is_chonged": is_chonged,
+        "is_he": is_he,
+        "kong_wang_affected": exact_root_is_kong_wang(yong_stem, four_branches, kong_wang),
+        "effective": exact_root_level != "无根" and not is_chonged,
+        "power": _calc_power(exact_root_level, tou_gan, is_chonged, is_he, kong_wang),
+        "carrying_capacity": capacity.overall,
+        "capacity_evidence": capacity.evidence
+    }
+
+Step 18: 生克链连贯性分析
+
+def analyze_sheng_ke_chain(four_stems, four_branches, day_stem) -> dict:
+    """
+    检查五行流通路径是否连贯
+    印→身→食伤→财→官→印
+    """
+    day_element = STEM_ELEMENT[day_stem]
+    
+    # 构建五行力量表
+    power = calc_five_element_power(four_stems, four_branches)
+    
+    # 定义链条：印→身→食伤→财→官→(印)
+    chain = [
+        SHENG_ME_MAP[day_element],  # 印
+        day_element,                 # 身
+        SHENG_MAP[day_element],      # 食伤
+        KE_MAP[day_element],         # 财
+        KE_ME_MAP[day_element],      # 官
+    ]
+    
+    breaks = []
+    for i in range(len(chain) - 1):
+        current = chain[i]
+        next_el = chain[i + 1]
+        
+        # 检查current是否有力
+        if power.get(current, 0) < 5:  # 阈值可调
+            breaks.append({
+                "position": f"{current}→{next_el}",
+                "reason": f"{current}太弱(力量{power.get(current,0)})，链断",
+                "severity": "high"
+            })
+    
+    return {
+        "chain": chain,
+        "power": power,
+        "breaks": breaks,
+        "is_smooth": len(breaks) == 0,
+        "disease_point": breaks[0]["position"] if breaks else None
+    }
+
+Step 19: 大运、流年、流月联合预判
+
+【算法口径：先逐层评价具体干支，再评价岁运层之间的组合；十神、承载、刑冲合害、空亡和制化均保留证据，不以单一总分代替命理判断】
+
+class TransitContext:
+    dayun: Optional[Pillar]
+    liunian: Optional[Pillar]
+    liuyue: Optional[Pillar]
+
+class TransitAnalysis:
+    context: TransitContext
+    layer_impacts: list[FortuneImpact]       # 每一层自身对原局的作用
+    interactions: list[TransitInteraction]   # 层间及岁运与原局的组合
+    projected_strength: float                # 岁运加入后的强弱估计，0～100
+    requires_reselection: bool               # 是否跨强弱阈值而须重新取用
+    total_score: float                       # 仅作结构排序，不是吉凶概率
+    risk: str                                # 平稳、留意、预警、重点预警
+    review_notes: list[str]
+
+def analyze_transit(context: TransitContext, original: AnalysisResult) -> TransitAnalysis:
+    layers = compact([
+        ("大运", context.dayun, 1.00),
+        ("流年", context.liunian, 0.65),
+        ("流月", context.liuyue, 0.35),
+    ])
+
+    # 一、逐层评价：必须按具体天干和运支本气的具体十神分论。
+    # 庚正官与辛七杀、癸偏印与壬正印、丁食神与丙伤官不得因同五行而共用一分。
+    for label, pillar, time_weight in layers:
+        main_stem = hidden_stems(pillar.branch)[0]
+        strength = stem_branch_capacity(pillar.stem, pillar.branch)
+        # 承载修正同时看通根、十二长生和盖头截脚：
+        # 临官/帝旺1.25，长生/冠带1.15，墓库1.05，衰/病0.80，死/绝0.60；
+        # 其余再按坐支本气对运干的生克泄耗修正。
+        # 因此甲申处绝地须折减，丙戌处墓库为有根而闭藏，不能都按普通火土处理。
+        impact = score_exact_stem_and_ten_god(
+            arriving_stem=pillar.stem,
+            branch_main_stem=main_stem,
+            selected_roles=original.useful_gods,
+            route=original.useful_gods.route,
+            stem_strength=strength,
+        )
+
+        # 七杀先论攻身，再查食神制杀、印化杀；“有救”不得抹去“先伤”。
+        if impact.has("七杀"):
+            impact += score_killer_rescue(
+                food_power=effective_power("食神", original, pillar),
+                seal_power=effective_power({"正印", "偏印"}, original, pillar),
+            )
+
+        # 空亡必须以原局旬空为参照。岁运值原局空支称“填实”，只标应期，
+        # 吉凶沿用该支本气十神与制化结果，不重复计分。
+        if pillar.branch in original.kong_wang.branches:
+            impact.add_marker(classify_filled_kong_wang(main_stem))
+        # “某干支相对自己的旬为空”在定义上不成立，禁止据此机械减半。
+
+        # 冲按宫位分层，月令提纲与日支不能降格为普通根气。
+        for position, natal_pillar in enumerate(original.input_pillars):
+            if is_clash(pillar.branch, natal_pillar.branch):
+                if position == MONTH:
+                    impact.add("冲提纲", -12, no_duplicate_root_score=True)
+                elif position == DAY:
+                    impact.add("冲日支", -6, no_duplicate_ji_root_bonus=True)
+                elif contains_root(natal_pillar.branch, original.useful_gods.yong_shen):
+                    impact.add("冲用神根", -12)
+                    if original.kong_wang.affects(position):
+                        impact.review("冲空有冲起、冲实等异说；当前从严折减")
+                elif contains_root(natal_pillar.branch, original.useful_gods.ji_shen):
+                    impact.add("冲忌神根", +8)
+
+        # 天干五合按“合住谁”判作用，不能只有“合用神”一条。
+        for natal_pillar in original.input_pillars:
+            if is_stem_combine(pillar.stem, natal_pillar.stem):
+                impact += score_stem_combine_target(
+                    target=natal_pillar.stem,
+                    yong=-6, xi=-5, ji=+6, chou=+4, climate=-8,
+                )
+                if other_stem_also_combines(natal_pillar.stem):
+                    impact.add("争合", -6)
+                # 是否化气必须另验月令、透根和受冲，不因相合直接认化。
+
+        # 运支补齐三合、三会时按成局后五行评价，并复核成化条件。
+        impact += score_completed_branch_groups(original.branches, pillar.branch)
+
+        # 地支六合由基础层统一返回合化方向；“相合”不等于“已经合化”。
+        for position, natal_branch in enumerate(original.branches):
+            if combine_element := branch_combine_element(pillar.branch, natal_branch):
+                interactions.add(
+                    "地支六合",
+                    score_combine_direction(combine_element,
+                                            yong=+4, xi=+2.5, ji=-4, chou=-3),
+                    note="只按合势归向评价，仍须验证月令、透干及冲刑破害",
+                )
+                if position == MONTH:
+                    interactions.add("六合提纲", -4,
+                                     note="提纲受牵绊、事情胶着，不被归向吉分完全抵销")
+                if natal_branch.contains_exact_root(original.yong_stem):
+                    interactions.add("合绊用神根", -6,
+                                     note="候选本干根气受牵绊，合化是否成立另验")
+                if pillar.branch in original.kong_wang.branches:
+                    interactions.note("参与六合的岁运支同时填实原局旬空，不重复计分")
+
+        # 伤官直犯正官用神为组合级风险，地支喜神不得完全抵销。
+        if ten_god(pillar.stem) == "伤官" and ten_god(original.yong_stem) == "正官":
+            impact.add("伤官见官", -10)
+
+        layer_impacts.append(impact)
+
+    # 二、岁运与原局、岁运层之间的柱级组合。
+    for layer in layers:
+        for natal_pillar in original.input_pillars:
+            if layer.pillar == natal_pillar:
+                interactions.add("伏吟", -8)
+            if stems_mutually_control(layer.pillar, natal_pillar) and \
+               branches_clash(layer.pillar, natal_pillar):
+                interactions.add("天克地冲（反吟级结构）", -14)
+
+    for left, right in combinations(layers, 2):
+        if left.pillar == right.pillar:
+            interactions.add("岁运并临", -10)
+        if stems_mutually_control(left.pillar, right.pillar) and \
+           branches_clash(left.pillar, right.pillar):
+            interactions.add("岁运相战", -12)
+
+    # 三、刑必须在“原局全部地支 + 所有岁运地支”的联合集合中判断。
+    all_branches = original.branches + [layer.pillar.branch for layer in layers]
+    for branch in {"辰", "午", "酉", "亥"}:
+        if count(all_branches, branch) >= 2:
+            interactions.add(f"{branch}{branch}自刑", -6)
+    if contains_all(all_branches, {"寅", "巳", "申"}):
+        interactions.add("寅巳申无恩之刑", -12)
+    if contains_all(all_branches, {"丑", "戌", "未"}):
+        interactions.add("丑戌未恃势之刑", -12, review_month_command=True)
+
+    # 四、动态制化须检查原局与各岁运层共同到位的十神。
+    active_gods = exact_ten_gods_of_stems_and_branch_main_qi(original, layers)
+    if active_gods.has("七杀", "食神"):
+        interactions.add("食神制杀", +8, note="有救而先伤")
+    elif active_gods.has("七杀", {"正印", "偏印"}):
+        interactions.add("印化杀", +6, note="有救而先伤")
+    if active_gods.has("伤官", {"正印", "偏印"}):
+        interactions.add("伤官配印", +6)
+    if active_gods.has({"正财", "偏财"}) and original.climate.uses_water:
+        interactions.add("财坏印并伤调候", -6)
+
+    # 五、动态取用：大运定基调，流年定应期，流月只作短期触发。
+    projected_strength = clamp(
+        original.strength.final_score +
+        sum(layer_strength_delta(layer) * layer.time_weight for layer in layers),
+        0, 100,
+    )
+    requires_reselection = strength_band(projected_strength) != \
+                           strength_band(original.strength.final_score)
+    if requires_reselection:
+        interactions.add("重新取用复核", 0,
+                         note="强弱跨阈值，原局静态喜忌不得机械沿用")
+
+    total_score = sum(x.score for x in layer_impacts) + \
+                  sum(x.score for x in interactions)
+    risk = classify_transit_risk(total_score, interactions)
+    return TransitAnalysis(context, layer_impacts, interactions,
+                           projected_strength, requires_reselection,
+                           total_score, risk, collect_review_notes())
+
+# 输出要求：中文报告与JSON必须来自同一个TransitAnalysis，不准各写一套判断。
+# 中文至少显示：岁运上下文、风险等级、结构排序分、强弱估计、是否重新取用、
+# 每层作用、层间组合、制化救应、空亡填实及所有待复核口径。
+# 调候字兼具另一格局十神身份时必须分层：调候未见加8、已见不足加4、已备加0、
+# 太过扣6；然后与该干的格局十神分合并。故癸在原局调候已备时，岁运再见癸不加
+# 调候分，仍可按偏印及当前取用路线计负分，这不是“调候之神被误判为忌”。
+
+Step 20: 主分析入口（整合所有模块）
+
+def full_analysis(birth_data: dict) -> dict:
+    """
+    主入口：输入出生信息，输出完整分析报告
+    
+    birth_data = {
+        "year": 1990, "month": 5, "day": 15,
+        "hour": 14, "minute": 30,
+        "gender": "male",
+        "longitude": 116.4  # 用于真太阳时
+    }
+    """
+    # ═══ 排盘层（Step 0~9）═══
+    chart = calculate_four_pillars(birth_data)  # Step 1~6
+    birth_context = build_birth_context(
+        birth_data,
+        previous_jieqi=get_previous_jieqi_exact_time(birth_data),
+        next_jieqi=get_next_jieqi_exact_time(birth_data),
+        command_table_version=DEFAULT_CONFIG.command_table_version
+    )
+    dayun = calculate_dayun(chart, birth_data)   # Step 8
+    nayin = get_all_nayin(*chart["gz_list"])    # Step 10
+    
+    # ═══ 分析层（本部分）═══
+    # 15. 关系先行；天干合化仅在完整条件满足时进入五行力量
+    relations = detect_all_relations(chart)
+    relations.extend(detect_arching(chart["branches"], relations))
+    kong_wang = analyze_kong_wang(chart, DEFAULT_CONFIG.kong_wang)
+    stem_relations = detect_stem_relations(chart)
+    all_relations = {"branches": relations, "stems": stem_relations}
+    balance = calc_element_balance(chart, all_relations, DEFAULT_CONFIG.elements)
+
+    # 11. 日主强弱（组件归一化后合成0~100）
+    strength = assess_strength(chart, all_relations, kong_wang, DEFAULT_CONFIG.strength)
+    
+    # 12. 调候
+    climate = judge_climate(chart["day_stem"], chart["month_branch"],
+                            chart["stems"], chart["branches"], relations,
+                            kong_wang, balance)
+
+    # 13. 格局
+    occurrences = build_ten_god_occurrences(chart, all_relations, kong_wang)
+    combos = detect_shi_shen_combos(chart, strength, all_relations, kong_wang)
+    human_command = determine_month_command_hidden_stem(
+        birth_context, chart["month_branch"], DEFAULT_CONFIG.command_table
+    )
+    pattern = determine_pattern(chart, combos, occurrences, all_relations, human_command)
+    
+    # 17.2 承载能力必须先于候选用神；14 特殊格局只在 confirmed 时锁定方向
+    capacity = assess_carrying_capacity(chart, strength, climate, all_relations, balance)
+    special_patterns = evaluate_special_patterns(
+        chart, strength, capacity, balance, occurrences, all_relations, kong_wang
+    )
+    
+    # 17 与 17.5：天干级候选、承载折减、角色分配和根/冲/合化验证
+    useful_gods = determine_yong_shen(chart, strength, climate, pattern, special_patterns,
+                                      combos, balance, capacity)
+    yong_stem = useful_gods["selected"]["yong_shen"].stem
+    verification = verify_yong_shen(yong_stem, chart["stems"],
+                                    chart["branches"], relations, capacity, kong_wang)
+    
+    # 17.5 用神验证
+    # 18. 生克链
+    chain = analyze_sheng_ke_chain(chart["stems"], chart["branches"], chart["day_stem"])
+    
+    # 19. 大运预判
+    fortune_impacts = [
+        analyze_dayun_liunian(useful_gods, dy["gz"], None, chart)
+        for dy in dayun["cycles"]
+    ]
+    
+    # ═══ 输出 ═══
+    return {
+        "schema_version": "1.7",
+        "rule_set": "ziping-v1-candidate",
+        "analysis_config": DEFAULT_CONFIG,
+        "birth_context": birth_context,
+        "input_pillars": chart["gz_list"],
+        "day_master": chart["day_stem"],
+        "nayin": nayin,
+        "strength": strength,
+        "carrying_capacity": capacity,
+        "element_balance": balance,
+        "climate": climate,
+        "pattern": pattern,
+        "special_patterns": special_patterns,
+        "relations": relations,
+        "kong_wang": kong_wang,
+        "combos": combos,
+        "useful_gods": useful_gods | {"verification": verification},
+        "sheng_ke_chain": chain,
+        "fortune_impacts": fortune_impacts,
+        "warnings": collect_warnings(chart, strength, pattern, useful_gods),
+    }
+
+实现顺序建议（依赖关系）
+
+Step 10 纳音（独立，无依赖）
+    ↓
+Step 15 合冲刑害检测（被11/17依赖）
+    ↓
+Step 11 日主强弱（依赖15的冲减修正）
+    ↓
+Step 12 调候（依赖15的冲合、旬空及五行力量，且依赖日主×月令调候表）
+    ↓
+Step 13 格局判定（依赖藏干、出生时刻、节气边界和人元司令表版本）
+    ↓
+Step 14 特殊格局（依赖11的强弱分数）
+    ↓
+Step 16 十神组合（依赖十神标注）
+    ↓
+Step 17 用神判定（依赖11/12/13/14/16）
+    ↓
+Step 17.5 用神验证（依赖15，必须精确到候选天干）
+    ↓
+Step 18 生克链（依赖五行力量统计）
+    ↓
+Step 19 大运预判（依赖17的输出）
+    ↓
+Step 20 主入口整合
+
+承载能力最低测试集
+
+其中 `庚辰／癸未／乙亥／甲申` 作为子平法回归样例，验收顺序必须是：
+
+1. 未月乙木以癸先、壬后论调候，但原局癸透、亥中壬有根，应输出“调候已备”或“已见且足用”，不得再给水候选完整缺失分。
+2. 月支未本气己土可建立偏财格候选，但“本气取格”与“分日司令”分开输出；只有精确出生时刻、节气交接时刻和司令表版本齐备时，才允许写当日何干司令。
+3. 甲乙并透，辰未藏乙，亥未又有拱卯之象；强弱与格局病项必须显示“比劫有势、财星藏支”，不得只按身弱增印。
+4. 庚金透年干，申为其禄根但申落旬空；应写“庚官透干，申中庚根因空亡折减”，不得写“庚官整体坐空”或直接归零。
+5. 格局病药路径应产生“庚官制比护财”候选，火产生“泄比生财、通关”候选。在水已足、从格不成、庚官仍有有效力量的前提下，庚的有效分应高于壬癸；若未高于，必须输出哪一条冲、合、空亡或力量证据使庚失效，不得只返回“用神待定”。
+6. 癸透只能证明癸透，不能让壬获得透干加分；未中丁火深藏，不得与月干癸自动组成“枭印夺食”。
+7. 最终角色互斥：庚、火、水木等候选须按格局、调候、承载与有效力量排序，同一天干或同一五行不得同时成为喜神和仇神。
+8. 财格采用“官制比护财”路线时，食伤只有达到有效力量阈值才可列为“生财有利条件”；未中丁火仅藏且力微时，应写“尚不足独任泄比生财”。
+9. 同一五行必须允许分干定性：本例丙为伤官，直犯庚官，按近忌论；丁为食神，只作受限闲神。不得用“火为闲神”抹平丙丁差异。
+10. 己丑运必须识别丑未冲提纲，取消普通“冲忌神根 +8”并加入冲提纲折减与复核提示；戊子运必须识别运支补成申子辰三合水局；丙戌运必须加入伤官见官的组合级折减。
+11. 主取用路线已经锁定、候选本干透而有根、未被合化且验证效力达到阈值时，可输出“用神可定”；同时必须保留“病重药轻、仍待岁运扶助”的程度说明。
+12. 庚寅等岁运冲击落旬空的用神根时，保留当前从严折减，但报告必须标明“冲空”存在冲起、冲实等不同口径，不得伪装成无争议定论。
+13. 癸巳等岁运冲日支时，不得套用普通“冲忌神根 +8”；应单列日支宫位与日主坐支变动，按 −6 作结构折减并进入重点复核。
+14. 原局未透未藏的候选天干（如辛）可以作为同五行方向候选参与排序，但中文报告必须明确标为“原局未见本干”，候选权重不得解释为实根或原局占比。
+15. 岁运不得以“同五行”代替“同一具体天干”：乙日主见庚为正官、见辛为七杀；庚申与辛酉必须进入不同规则分支。运支按本气天干判十神，不能把酉金直接当庚金用神加分。
+16. 七杀到位先计攻身，再检查原局食神制杀和印星化杀；有救应只能减轻折减并输出“有救而先伤”，不得把有印机械改判为吉。
+17. 岁运地支值原局旬空支时必须输出“填实”应期标记，并标明随本气十神所得的吉神填实、凶神填实或填实待辨；填实本身不得与十神作用重复加减分。
+18. 岁运刑必须联合原局、大运、流年和流月检测：酉酉等自刑、寅巳申无恩之刑、丑戌未恃势之刑均须形成独立组合证据；涉及月令或财库时额外进入重点复核。
+19. 天干五合必须识别被合对象的具体角色：合绊喜用或调候字为减，合去忌仇可为加；一干同时受原局与岁运相合时必须输出“争合”，不得只记录相合名称。
+20. 岁运柱与原局柱完全相同须标“伏吟”；天干相克且地支相冲须标“天克地冲（反吟级结构）”；大运与流年同柱须标“岁运并临”，层间天克地冲须标“岁运相战”。
+21. 干支承载须同时采用藏干通根、十二长生和盖头截脚：甲申处绝地应折减；丙戌处墓库应写“有根但闭藏”，不能只因火生土就判为纯泄弱。
+22. 食神制杀、印化杀、伤官配印和财坏印须在原局与全部岁运层的联合十神集合中检测；救应结果必须保留“先伤”和被伤制化之神的复核提示。
+23. 岁运加入后若日主强弱跨越“偏弱／中和／偏强”阈值，必须设置 `requires_reselection` 并重新复核取用，禁止把原局静态喜忌机械套用到底。
+24. 大运、流年、流月必须分别保留层级：大运权重1.00、流年0.65、流月0.35；总分由各层作用与组合作用构成，风险等级不是事件发生概率。
+25. 2017丁酉回归样例至少应同时出现：乙酉大运辛杀攻身、运年双酉填实、酉酉自刑、丁食神制杀救应；不得仅输出“金为用神同类加分”，也不得由已知事件反向写死结论。
+26. 岁运地支与原局六合必须返回合化方向并分层处理：午未合须同时记录土向与合提纲牵绊；辰酉合须记录金向及酉填实；巳申合须同时记录水向与合绊庚根。六合本身不得冒充已经合化。
+27. 六合合势不得只按五行套用既定用神：必须追到参与地支中实际承载该合势五行的藏干，再按正官／七杀、正印／偏印等具体十神评价；正偏无法确定时只列结构，不直接加喜用分。
+28. 生旺半合、旺墓半合与生墓拱合须由干支基础层统一判定。半合只按部分力量计入；所缺之支已经由原局或岁运补齐时，应升级为完整三合检测，不得与半合重复计分。
+29. 同一岁运支同时参与六合、半合、冲或刑时，必须输出“合冲竞见”，相关合势进入竞合受制状态并折减，禁止把多个互相争夺同一地支的关系全部按满额成立。
+30. 岁运地支须按本气、中气、余气分别以 1.0／0.6／0.3 权重评价具体十神。同一干支允许吉凶双通道并存，例如丙伤官既可损庚官，也可在原局比劫、财星有力时泄比生财；两条证据不得互相覆盖。
+31. 联合岁运须统计所有时间层与原局共同形成的争合数量；本例乙酉运逢乙巳年应明确输出“三乙争合庚”，但联合层只描述争合规模，不与逐层牵绊分重复扣分。
+32. `TransitAnalysis` 除兼容结构总分外，必须分别累计身体伤灾、财务借贷、事业技艺、合同规则、人际感情、迁动变更六类有利与不利通道。风险等级优先依据身体伤灾和重大组合，禁止仅因破财类总分更低就判定其重于直接攻身风险。
+33. 身体伤灾类型必须把“原始压力”和“救应”分列：七杀攻身、刑冲见血等先记不利通道，食神制杀、印化杀另记有利通道。救应说明为何有转机或减轻后果，不得以净值抵销已经成立的先伤结构；JSON 保留参考净值只为数据兼容，中文报告不得把它解释为伤灾被消除。
+34. 七杀压力须按大运、流年、流月及地支本中余气计算有效强度。有效压力跨越多层阈值时增加“杀势叠临”非线性折减；同一旬空七杀支在多个岁运层重复填实时再升级为“双杀填实并叠攻”。该递增项只进入身体伤灾，不得外溢成事业失败分。
+35. `TransitContext` 必须携带当前公历年和大运起始年。两者相等时标记“交运年”，只把大运层已经成立的吉凶作用乘以 1.15，不凭空新增吉凶；报告必须回显所用系数，以便不同起运算法下复核。
+36. 应事映射按作用对象确定：七杀攻身、自刑锁定身体伤灾；伤官见官主要进入合同规则；食伤泄比生财进入事业技艺与财务借贷；合绊用神根按该用神的具体十神归类，财归财务、官归事业与规则、杀归身体与规则、食伤归技艺与财务。六合、半合也须按合势的具体十神归类，不得统一塞入事业项。
+37. 大运、流年和流月任意两层地支相冲时，必须单列“岁运相战（支冲）”；若天干也相克，再增加天克地冲增量，避免把地支相冲误写成必须同时满足天干相克。岁运相战本身进入事业与迁动；财务和关系必须由比劫成局、财星受损或日支宫位等具体结构另行归因，禁止一个冲象包办全部结论。
+38. 财务应事必须拆为“收入受阻、支出与债务、收入机会、财务变动”四类机制。比劫成局、财源被群比截夺优先归收入受阻；单个比劫透出、争夺与破耗归支出与债务；食伤泄比生财及有效财星到位归收入机会。子型只说明风险机制，不得直接断言现实中必然欠薪、借贷或获利。
+39. 同一结构来源经两条以上规则进入两个以上应事类型时，必须生成“一源多溢”记录，按共同来源聚合规则名称、影响类型和原始分值。多个来源允许并列：成局、宫位与岁运相战不得被压成同一个源头；各应事类型仍独立计分。
+40. 2023 癸卯回归样例必须识别乙酉大运与癸卯流年的酉卯岁运相战、卯支补成亥卯未木局、比劫财源竞争及日支亥合入比劫局。输出应分别形成“比劫成局→收入受阻、关系宫位”和“岁运相战→事业、迁动”两个来源，并由多类型高压矩阵触发重点预警。该样例只作为规则覆盖回归，不得把已知欠薪、离职或感情经历写入判断条件。
+41. 时间层称谓必须由 `TransitLayer` 决定：大运用“运干／运支”，流年用“岁干／岁支”，流月用“月干／月支”。单柱通用评估可以保留“岁运候选”，但进入联合报告后必须完成层级化重命名，禁止在流年块中写“运干癸、运支卯”。
+42. 一源多溢的判定阈值统一为“同一结构来源经多条规则进入两个以上应事类型”。算法口径、空结果模板、JSON 和中文报告必须使用同一阈值，不得再出现“三个以上”的旧文案。
+43. 风险深度分级采用独立应事矩阵而非兼容总分单值：单线压力达到 50，或至少三个应事类型压力达到 8 且（兼容结构分不高于 -40 或存在单线极值），才列重点预警；仅多线达到阈值或身体线达到 10，则列预警。双杀填实等明确重大组合仍可直接升级。这样不得让轻度多线摩擦与单线极端伤灾共用同一深度解释。
+44. 批量回归报告必须在全部样本计算完成后比较各应事单线；全样本最大压力达到 50 时，在对应年份综合提示中标出“单线极值：类型、分值（本批回归样本最深）”。该标记只作跨样本比较，不参与任何原始分、净分或风险分计算。
+45. 财务子型先识别结构形态再解释散干：当前岁运已形成比劫成局围财时，同一上下文内的散比肩、劫财与成局分均归收入受阻；未形成围财结构时，散比劫仍归支出与债务。2023 应为收入受阻 23.6、支出与债务 0；2025 应保持支出与债务 8.7，不得被联动修改。
+
+```python
+def test_resource_effect_is_discounted_when_fire_cannot_activate_it():
+    capacity = capacity_fixture(overall=35)
+    jia = score_stem_candidate("甲", effects=[RESOURCE_ACTIVATION(+20)])
+    assert apply_carrying_capacity(jia, capacity).effective_score < jia.raw_score
+
+def test_climate_warmth_is_not_discounted_by_low_capacity():
+    capacity = capacity_fixture(overall=35)
+    climate = {"state": "missing", "stems": ["丙", "丁"]}
+    bing = score_stem_candidate("丙", effects=[CLIMATE_WARMTH(climate_direct_score(climate, "丙"))])
+    assert apply_carrying_capacity(bing, capacity).effective_score == 40
+
+def test_low_capacity_returns_review_instead_of_no_useful_god():
+    result = analyze_fixture("ding-hai-double-si-clash")
+    assert result["useful_gods"]["status"] == "needs_review"
+    assert result["useful_gods"]["candidates"]
+
+def test_satisfied_climate_is_not_added_again():
+    result = analyze_fixture("geng-chen_gui-wei_yi-hai_jia-shen")
+    assert result["climate"]["state"] == "satisfied"
+    assert climate_direct_score(result["climate"], "壬") == 0
+    assert climate_direct_score(result["climate"], "癸") == 0
+
+def test_exact_stem_transparency_does_not_borrow_same_element():
+    result = analyze_fixture("geng-chen_gui-wei_yi-hai_jia-shen")
+    ren = verification_for(result, "壬")
+    gui = verification_for(result, "癸")
+    assert ren["tou_gan"] is False       # 癸透不能冒充壬透
+    assert gui["tou_gan"] is True
+
+def test_roles_are_mutually_exclusive():
+    result = analyze_fixture("geng-chen_gui-wei_yi-hai_jia-shen")
+    roles = result["useful_gods"]["selected"]
+    assigned = [roles[k].element for k in ("yong_shen", "xi_shen", "ji_shen", "chou_shen")]
+    assert len(set(assigned)) == len(assigned)
+
+def test_pattern_medicine_beats_already_satisfied_climate():
+    result = analyze_fixture("geng-chen_gui-wei_yi-hai_jia-shen")
+    selected = result["useful_gods"]["selected"]
+    assert selected["yong_shen"].stem == "庚"
+    assert any(e.rule == "pattern.control_peers_protect_wealth"
+               for e in selected["yong_shen"].reasons)
+    assert candidate(result, "庚").effective_score > candidate(result, "壬").effective_score
+    assert candidate(result, "庚").effective_score > candidate(result, "癸").effective_score
+
+def test_arching_and_kong_wang_are_reported_without_overstatement():
+    result = analyze_fixture("geng-chen_gui-wei_yi-hai_jia-shen")
+    assert any(r["type"] == "拱合" and r["virtual_branch"] == "卯" for r in result["relations"])
+    assert "申" in result["kong_wang"]["branches"]
+    assert result["kong_wang"]["affected"][0]["root_multiplier"] > 0
+
+def test_hidden_food_does_not_automatically_form_owl_robs_food():
+    result = analyze_fixture("geng-chen_gui-wei_yi-hai_jia-shen")
+    assert not any(c["combo"] == "枭印夺食" and c["severity"] == "bad"
+                   for c in result["combos"])
+```
+
+关键边界问题提醒
+问题   处理方式
+月令藏干本气被合化   取格时需检查，若本气被合走则看中气
+
+两个十神同透争格   取力量大者（有根者）为格
+
+本气取格与分日司令   无精确节气时只写“本气取格”，禁止写“某星司令”
+
+调候字原局已足   只写“调候已备”，同类候选不再加满分
+
+同五行异天干   可作同类助力，但不得冒充该候选天干透干或本干根
+
+生墓两支缺中神   记“拱合候选”，虚支只折算暗助，不等同实支
+
+旬空影响   只折减空亡地支承载的根和十神，不把同十神全部判空
+
+从格与身弱的边界   分数24~30之间需人工复核，标记为"疑似从格"
+
+化气格与正格冲突   化气优先，但需四条全满足
+
+大运天干地支分看   是否采用“前5年重天干、后5年重地支”由规则集版本明确配置，报告必须回显所用策略
+
+用神被大运合走   该运为凶，需在Step 19中检测
+
+实现完成的标准是 Step 10~20 的输入、证据、阈值、中间结果与最终输出全部对齐；任一步仍使用占位映射、无量纲布尔判断或无证据结论，均视为未完成。
