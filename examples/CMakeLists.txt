@@ -33,6 +33,7 @@ option(BUILD_EXAMPLES "Build example programs" OFF)
 # 示例程序列表及描述
 set(EXAMPLES
     example_ba_zi       # "八字排盘示例"
+    example_ba_zi_mangpai # "盲派八字分析示例"
     example_da_liu_ren  # "大六壬起课示例"
     example_liu_yao     # "六爻起卦示例"
     example_zi_wei      # "紫微斗数排盘示例"
@@ -107,6 +108,7 @@ endif()
 message(STATUS "")
 message(STATUS "  可用示例:")
 message(STATUS "    - example_ba_zi        : 八字排盘示例")
+message(STATUS "    - example_ba_zi_mangpai: 盲派八字分析示例")
 message(STATUS "    - example_da_liu_ren   : 大六壬起课示例")
 message(STATUS "    - example_liu_yao      : 六爻起卦示例")
 message(STATUS "    - example_zi_wei       : 紫微斗数排盘示例")

@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.28)
 
+# CMake 4 对文件集归属进行严格校验；模块源文件只应属于一个非 HEADERS 文件集。
+cmake_policy(SET CMP0211 NEW)
+
 project(ZhouYiLab 
     VERSION 1.0.0
     DESCRIPTION "周易实验室 - 传统文化算法库"
@@ -118,10 +121,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include)
 #
 
 # 收集所有 C++ 源文件
-file(GLOB_RECURSE CPP_SOURCES "src/*.cpp")
+file(GLOB_RECURSE CPP_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 # 收集模块接口文件
-file(GLOB_RECURSE MODULE_INTERFACE_FILES 
+file(GLOB_RECURSE MODULE_INTERFACE_FILES CONFIGURE_DEPENDS
     "src/*.cppm"    # C++23 module 接口文件
     "src/*.ixx"     # MSVC module 接口文件
 )
