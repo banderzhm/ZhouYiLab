@@ -1,12 +1,15 @@
 ﻿// 八字系统示例
 import ZhouYi.BaZiController;
+import ZhouYi.BaZiPresenter;
 import ZhouYi.BaZiAnalysis;
+import ZhouYi.BaZiAnalysis.Report;
 import ZhouYi.GanZhi;
 import ZhouYi.ZhMapper;
 import fmt;
 import std;
 
 using namespace ZhouYi::BaZiController;
+using namespace ZhouYi::BaZiPresenter;
 using namespace ZhouYi::GanZhi;
 using namespace ZhouYi::Mapper;
 using namespace std;
@@ -20,7 +23,7 @@ int main() {
 - 分析能力：能够核对排盘，分析五行生克、旺衰、格局、喜忌与岁运，并给出可追溯依据。
 - 目标：依据排盘结果说明命局结构、格局成败、取用依据及岁运作用。
 - 约束：不得夸大或作确定性吉凶承诺；所有结论仅供传统文化研究与参考。
-- 输出格式：先列排盘事实，再列算法口径、命理判断、证据和待复核事项。
+- 输出格式：先列八字排盘与原局，再列取格取用口径、命局判断、命理依据和待考事项。
 )");
 
   fmt::print("\n");

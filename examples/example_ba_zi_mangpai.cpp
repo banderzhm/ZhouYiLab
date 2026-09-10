@@ -1,12 +1,15 @@
 // 盲派八字分析示例
 import ZhouYi.BaZiController;
+import ZhouYi.BaZiPresenter;
 import ZhouYi.BaZiAnalysis;
+import ZhouYi.BaZiAnalysis.Report;
 import ZhouYi.BaZiAnalysis.MangPai.Transit;
 import ZhouYi.GanZhi;
 import fmt;
 import std;
 
 using namespace ZhouYi::BaZiController;
+using namespace ZhouYi::BaZiPresenter;
 using namespace ZhouYi::GanZhi;
 
 namespace {
@@ -77,7 +80,7 @@ void write_report(
 int main() {
   const auto chart = pai_pan_lunar(2000, 6, 15, 16, 30, true);
   AnalysisRequest request;
-  request.method = AnalysisMethod::BlindSchool;
+  request.method = ZhouYi::BaZiAnalysis::AnalysisMethod::BlindSchool;
   const auto analysis = analyze_ba_zi(chart, request);
   display_analysis(analysis);
 

@@ -1124,7 +1124,7 @@ nlohmann::json Detail::render_transit_json(const TransitAnalysis &result) {
 std::string Detail::render_transit_zh(const TransitAnalysis &result) {
   std::ostringstream output;
   output << "# 岁运联合分析\n\n";
-  output << "- 数据契约版本：" << result.schema_version << "。\n";
+  output << "- 报告格式版本：" << result.schema_version << "。\n";
   output << "【算法口径：大运定基调、流年定应期、流月作短期触发；天干与地支"
             "本中余气分层评价，同一干支允许吉凶双通道并存；六合、半合须按具体"
             "十神并处理合冲竞见。总分仅表示结构合计，身体、财务、事业、规则、"
