@@ -61,13 +61,13 @@ void display_result(const BaZiResult &result) {
   // 天干十神
   auto shi_shen_arr = result.get_si_zhu_shi_shen();
   fmt::println("天干十神：{}（{}）  {}（{}）  {}（{}）  {}（{}）",
-               std::string(Mapper::to_zh(bazi.year.gan)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.year.gan)),
                shi_shen_to_zh(shi_shen_arr[0]),
-               std::string(Mapper::to_zh(bazi.month.gan)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.month.gan)),
                shi_shen_to_zh(shi_shen_arr[1]),
-               std::string(Mapper::to_zh(bazi.day.gan)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.day.gan)),
                shi_shen_to_zh(shi_shen_arr[2]),
-               std::string(Mapper::to_zh(bazi.hour.gan)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.hour.gan)),
                shi_shen_to_zh(shi_shen_arr[3]));
 
   // 地支十神（使用地支藏干的主气）
@@ -77,13 +77,13 @@ void display_result(const BaZiResult &result) {
   auto hour_cang_gan = get_cang_gan(bazi.hour.zhi);
 
   fmt::println("地支十神：{}（{}）  {}（{}）  {}（{}）  {}（{}）",
-               std::string(Mapper::to_zh(bazi.year.zhi)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.year.zhi)),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, year_cang_gan[0])),
-               std::string(Mapper::to_zh(bazi.month.zhi)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.month.zhi)),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, month_cang_gan[0])),
-               std::string(Mapper::to_zh(bazi.day.zhi)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.day.zhi)),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, day_cang_gan[0])),
-               std::string(Mapper::to_zh(bazi.hour.zhi)),
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(bazi.hour.zhi)),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, hour_cang_gan[0])));
 
   // 藏干详情
@@ -94,7 +94,8 @@ void display_result(const BaZiResult &result) {
   for (std::size_t i = 0; i < year_cang_gan.size(); ++i) {
     if (i > 0)
       fmt::print(" ");
-    fmt::print("{}（{}）", std::string(Mapper::to_zh(year_cang_gan[i])),
+    fmt::print("{}（{}）",
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(year_cang_gan[i])),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, year_cang_gan[i])));
   }
   fmt::println("");
@@ -104,7 +105,8 @@ void display_result(const BaZiResult &result) {
   for (std::size_t i = 0; i < month_cang_gan.size(); ++i) {
     if (i > 0)
       fmt::print(" ");
-    fmt::print("{}（{}）", std::string(Mapper::to_zh(month_cang_gan[i])),
+    fmt::print("{}（{}）",
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(month_cang_gan[i])),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, month_cang_gan[i])));
   }
   fmt::println("");
@@ -114,7 +116,8 @@ void display_result(const BaZiResult &result) {
   for (std::size_t i = 0; i < day_cang_gan.size(); ++i) {
     if (i > 0)
       fmt::print(" ");
-    fmt::print("{}（{}）", std::string(Mapper::to_zh(day_cang_gan[i])),
+    fmt::print("{}（{}）",
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(day_cang_gan[i])),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, day_cang_gan[i])));
   }
   fmt::println("");
@@ -124,7 +127,8 @@ void display_result(const BaZiResult &result) {
   for (std::size_t i = 0; i < hour_cang_gan.size(); ++i) {
     if (i > 0)
       fmt::print(" ");
-    fmt::print("{}（{}）", std::string(Mapper::to_zh(hour_cang_gan[i])),
+    fmt::print("{}（{}）",
+               std::string(ZhouYi::GanZhi::Mapper::to_zh(hour_cang_gan[i])),
                shi_shen_to_zh(get_shi_shen(bazi.day.gan, hour_cang_gan[i])));
   }
   fmt::println("");
