@@ -1104,11 +1104,11 @@ TransitAnalysis Detail::evaluate_transit(const TransitContext &context,
   };
   if (has_god(ShiShen::QiSha) && has_god(ShiShen::ShiShen)) {
     add("transit.food_controls_killer", "岁运食神与七杀", "食神制杀", 8.0,
-        "食神与七杀在同一岁运上下文到位，作动态救应但不抹去先伤");
+        "食神与七杀同临岁运，作动态救应但不抹去先伤");
   } else if (has_god(ShiShen::QiSha) &&
              (has_god(ShiShen::ZhengYin) || has_god(ShiShen::PianYin))) {
     add("transit.seal_transforms_killer", "岁运印星与七杀", "印化杀", 6.0,
-        "印星与七杀在同一岁运上下文到位，作有救而先伤", false);
+        "印星与七杀同临岁运，作有救而先伤", false);
   }
   if (has_god(ShiShen::ShangGuan) &&
       (has_god(ShiShen::ZhengYin) || has_god(ShiShen::PianYin))) {

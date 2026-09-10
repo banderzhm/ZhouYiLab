@@ -6,7 +6,9 @@ import magic_enum;
 import ZhouYi.BaZiAnalysis.Fortune;
 import ZhouYi.BaZiAnalysis.Presenter;
 import ZhouYi.BaZiAnalysis.Relations;
+import ZhouYi.BaZiBase;
 import ZhouYi.GanZhi;
+import ZhouYi.ZhMapper;
 import std;
 
 namespace ZhouYi::BaZiAnalysis {
@@ -2205,34 +2207,6 @@ TransitAnalysis analyze_transit(const TransitContext &context,
 
 void annotate_sample_extremes(std::vector<TransitAnalysis> &analyses) {
   Detail::annotate_sample_extremes(analyses);
-}
-
-nlohmann::json to_json(const AnalysisResult &result) {
-  return Detail::render_json(result);
-}
-
-nlohmann::json to_json(const TransitAnalysis &result) {
-  return Detail::render_transit_json(result);
-}
-
-std::string to_zh(const AnalysisResult &result) {
-  return Detail::render_zh(result);
-}
-
-std::string to_zh(const TransitAnalysis &result) {
-  return Detail::render_transit_zh(result);
-}
-
-void write_zh(std::ostream &output, const AnalysisResult &result) {
-  output << Detail::render_zh(result);
-}
-
-void write_zh(std::ostream &output, const TransitAnalysis &result) {
-  output << Detail::render_transit_zh(result);
-}
-
-std::string format_analysis(const AnalysisResult &result) {
-  return Detail::render_summary(result);
 }
 
 } // namespace ZhouYi::BaZiAnalysis
