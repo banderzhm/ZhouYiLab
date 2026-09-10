@@ -4,6 +4,8 @@ export module ZhouYi.BaZiController;
 
 import ZhouYi.BaZi;
 import ZhouYi.BaZiAnalysis;
+import ZhouYi.BaZiAnalysis.Common;
+import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import ZhouYi.BaZiBase;
 import ZhouYi.TrueSolarTime;
 import std;

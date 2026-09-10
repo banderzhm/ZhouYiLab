@@ -1,7 +1,8 @@
 // C++23 Module - 盲派岁运引动接口
 export module ZhouYi.BaZiAnalysis.MangPai.Transit;
 
-import ZhouYi.BaZiAnalysis;
+import ZhouYi.BaZiAnalysis.ZiPing.Contract;
+import ZhouYi.BaZiBase;
 import std;
 
 export namespace ZhouYi::BaZiAnalysis::MangPai::Transit {
@@ -18,14 +19,17 @@ struct Analysis {
 };
 
 /** 按“引动—宾主—做功—宫位—应事”分析单个大运流年。 */
-Analysis analyze(const BaZi &chart, const Pillar &fortune, const Pillar &year,
-                 int calendar_year, bool transition_year = false);
+Analysis analyze(const ZhouYi::BaZiBase::BaZi &chart,
+                 const ZhouYi::BaZiBase::Pillar &fortune,
+                 const ZhouYi::BaZiBase::Pillar &year, int calendar_year,
+                 bool transition_year = false);
 
 /** 输出盲派岁运中文报告。 */
 void write_zh(std::ostream &output, const Analysis &result);
 
 /** 将传入的大运、流年与原局关系转换为盲派应期摘要。 */
-void build(AnalysisResult &result, const BaZi &chart,
-           const std::vector<Pillar> &fortunes);
+void build(ZhouYi::BaZiAnalysis::AnalysisResult &result,
+           const ZhouYi::BaZiBase::BaZi &chart,
+           const std::vector<ZhouYi::BaZiBase::Pillar> &fortunes);
 
 } // namespace ZhouYi::BaZiAnalysis::MangPai::Transit

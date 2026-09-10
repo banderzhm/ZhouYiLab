@@ -1,6 +1,7 @@
 // C++23 - 盲派八字分析编排实现
 module ZhouYi.BaZiAnalysis.MangPai;
 
+import ZhouYi.BaZiAnalysis;
 import ZhouYi.BaZiAnalysis.MangPai.BingZhu;
 import ZhouYi.BaZiAnalysis.MangPai.MuKu;
 import ZhouYi.BaZiAnalysis.MangPai.Structure;
