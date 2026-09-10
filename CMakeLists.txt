@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.28)
 
-# CMake 4 对文件集归属进行严格校验；模块源文件只应属于一个非 HEADERS 文件集。
-cmake_policy(SET CMP0211 NEW)
+# CMP0211 由较新的 CMake 引入，用于约束同一源文件不能同时属于多个
+# 非 HEADERS 文件集。CI 仍可能使用尚未提供该策略的 CMake，因此仅在
+# 当前 CMake 已知该策略时启用；旧版本本身也不会执行这项严格校验。
+if(POLICY CMP0211)
+    cmake_policy(SET CMP0211 NEW)
+endif()
 
 project(ZhouYiLab 
     VERSION 1.0.0
