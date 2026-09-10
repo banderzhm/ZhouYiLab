@@ -170,7 +170,9 @@ configure_cxx_modules(
 
 # 链接第三方库到核心库
 target_link_libraries(ZhouYiLabCore PUBLIC
-    fmt::fmt
+    # 项目源码通过 `import fmt;` 使用模块接口；fmt::fmt 是传统头文件库，
+    # fmt 12.2 起模块目标已独立为 fmt::fmt-module。
+    fmt::fmt-module
     nlohmann_json_modules
 )
 
