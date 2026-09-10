@@ -3,8 +3,8 @@
 export module ZhouYi.BaZiPresenter;
 
 import ZhouYi.BaZi;
-import ZhouYi.BaZiAnalysis;
 import ZhouYi.BaZiAnalysis.Report;
+import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import std;
 
 export namespace ZhouYi::BaZiPresenter {

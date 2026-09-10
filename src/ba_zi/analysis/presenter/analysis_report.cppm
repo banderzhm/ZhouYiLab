@@ -3,7 +3,7 @@
 export module ZhouYi.BaZiAnalysis.Report;
 
 import nlohmann.json;
-import ZhouYi.BaZiAnalysis;
+import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import std;
 
 export namespace ZhouYi::BaZiAnalysis {
