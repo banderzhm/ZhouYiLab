@@ -1,7 +1,7 @@
 // C++23 - 盲派宾主体用规则实现
 module ZhouYi.BaZiAnalysis.MangPai.BingZhu;
 
-import ZhouYi.BaZiAnalysis.MangPai.Common;
+import ZhouYi.BaZiAnalysis.MangPai.ShiShenRules;
 import ZhouYi.BaZiBase;
 import ZhouYi.GanZhi;
 import std;
@@ -28,9 +28,9 @@ void build(AnalysisResult &result, const BaZi &chart) {
            true, HiddenStemLevel::None, 1.0, 1.0, false, false});
       const auto text = ZhouYi::BaZiBase::pillar_position_name(i) + "透" +
                         std::string(shi_shen_to_zh(god));
-      if (Common::is_body_god(god))
+      if (ShiShenRules::is_body_god(god))
         result.blind_analysis->body.push_back(text);
-      if (Common::is_target_god(god))
+      if (ShiShenRules::is_target_god(god))
         result.blind_analysis->targets.push_back(text);
     }
 
@@ -55,9 +55,9 @@ void build(AnalysisResult &result, const BaZi &chart) {
       const auto hidden_text = ZhouYi::BaZiBase::pillar_position_name(i) +
                                "藏" + level +
                                std::string(shi_shen_to_zh(hidden_god));
-      if (Common::is_body_god(hidden_god))
+      if (ShiShenRules::is_body_god(hidden_god))
         result.blind_analysis->body.push_back(hidden_text);
-      if (Common::is_target_god(hidden_god))
+      if (ShiShenRules::is_target_god(hidden_god))
         result.blind_analysis->targets.push_back(hidden_text);
     }
   }

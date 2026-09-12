@@ -8,6 +8,20 @@
 ]]
 function(detect_stdlib_module_paths)
     if(UNIX)
+        # CMake 的 find_path 会复用缓存；工具链升级或包被替换后，旧路径可能
+        # 仍留在 CMakeCache.txt。先验证关键文件，避免把失效缓存带入 FILE_SET。
+        if(STDLIB_MODULE_DIRS AND
+           (NOT EXISTS "${STDLIB_MODULE_DIRS}/std.cppm" OR
+            NOT EXISTS "${STDLIB_MODULE_DIRS}/std.compat.cppm"))
+            unset(STDLIB_MODULE_DIRS CACHE)
+            unset(STDLIB_MODULE_DIRS)
+        endif()
+        if(STDLIB_INCLUDE_DIRS AND
+           NOT EXISTS "${STDLIB_INCLUDE_DIRS}/__config")
+            unset(STDLIB_INCLUDE_DIRS CACHE)
+            unset(STDLIB_INCLUDE_DIRS)
+        endif()
+
         # Linux/Unix/macOS: Auto-detect libc++ standard library module paths
         if(APPLE)
             set(HOMEBREW_LLVM_PREFIX_ARM64 "/opt/homebrew/opt/llvm")

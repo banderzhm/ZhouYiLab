@@ -1,4 +1,4 @@
-// C++23 Module - 八字基础事实实现
+// C++23 Module - 八字基础排盘实现
 module ZhouYi.BaZiBase;
 
 import ZhouYi.WuXingUtils;

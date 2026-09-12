@@ -1,0 +1,1703 @@
+输入：农历2000年六月十五日16:30，男命
+时间口径：未提供出生地，不校正真太阳时；北京时间16:30归申时
+对照网站：https://metisziwei.com/chart?y=2000&m=6&d=15&cal=lunar&h=16&mi=30&g=m
+
+【基础排盘对照】
+| 核验项 | Metis网站 | ZhouYiLab | 结果 |
+| --- | --- | --- | --- |
+| 公历 | 2000-07-16 16:30 | 2000年7月16日 16:30 | 一致 |
+| 农历 | 庚辰年六月十五 | 农历庚辰年六月十五 | 一致 |
+| 时辰 | 申时 | 申时 | 一致 |
+| 四柱 | 庚辰／癸未／乙亥／甲申 | 庚辰／癸未／乙亥／甲申 | 一致 |
+| 五行局 | 土五局 | 土五局 | 一致 |
+| 命宫／身宫 | 亥／卯 | 亥／卯 | 一致 |
+| 命主／身主 | 巨门／文昌 | 巨门／文昌 | 一致 |
+
+【十二宫宫干与主星落宫对照】
+| 地支 | Metis宫位 | ZhouYiLab宫位 | Metis主星 | ZhouYiLab主星 | 结果 |
+| --- | --- | --- | --- | --- | --- |
+| 寅 | 戊寅·田宅 | 田宅宫 (戊寅) | 贪狼 | 贪狼 | 一致 |
+| 卯 | 己卯·官禄 | 官禄宫 (己卯) | 天机、巨门 | 天机、巨门 | 一致 |
+| 辰 | 庚辰·仆役 | 奴仆宫 (庚辰) | 紫微、天相 | 紫微、天相 | 一致 |
+| 巳 | 辛巳·迁移 | 迁移宫 (辛巳) | 天梁 | 天梁 | 一致 |
+| 午 | 壬午·疾厄 | 疾厄宫 (壬午) | 七杀 | 七杀 | 一致 |
+| 未 | 癸未·财帛 | 财帛宫 (癸未) | 空宫 | 空宫 | 一致 |
+| 申 | 甲申·子女 | 子女宫 (甲申) | 廉贞 | 廉贞 | 一致 |
+| 酉 | 乙酉·夫妻 | 夫妻宫 (乙酉) | 空宫 | 空宫 | 一致 |
+| 戌 | 丙戌·兄弟 | 兄弟宫 (丙戌) | 破军 | 破军 | 一致 |
+| 亥 | 丁亥·命宫 | 命宫 (丁亥) | 天同 | 天同 | 一致 |
+| 子 | 戊子·父母 | 父母宫 (戊子) | 武曲、天府 | 武曲、天府 | 一致 |
+| 丑 | 己丑·福德 | 福德宫 (己丑) | 太阳、太阴 | 太阳、太阴 | 一致 |
+
+【十四主星、亮度与四化对照】
+| 宫位 | 星曜 | Metis亮度 | ZhouYiLab亮度 | 三级亮暗 | 四化 | 落宫 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 田宅·寅 | 贪狼 | 平 | 平 | 一致 | — | 一致 |
+| 官禄·卯 | 天机 | 旺 | 旺 | 一致 | — | 一致 |
+| 官禄·卯 | 巨门 | 旺 | 旺 | 一致 | — | 一致 |
+| 仆役·辰 | 紫微 | 闲 | 闲 | 一致 | — | 一致 |
+| 仆役·辰 | 天相 | 旺 | 旺 | 一致 | — | 一致 |
+| 迁移·巳 | 天梁 | 陷 | 陷 | 一致 | — | 一致 |
+| 疾厄·午 | 七杀 | 旺 | 旺 | 一致 | — | 一致 |
+| 子女·申 | 廉贞 | 庙 | 庙 | 一致 | — | 一致 |
+| 兄弟·戌 | 破军 | 旺 | 旺 | 一致 | — | 一致 |
+| 命宫·亥 | 天同 | 庙 | 庙 | 一致 | 化忌 | 一致 |
+| 父母·子 | 武曲 | 旺 | 旺 | 一致 | 化权 | 一致 |
+| 父母·子 | 天府 | 旺 | 旺 | 一致 | — | 一致 |
+| 福德·丑 | 太阳 | 陷 | 陷 | 一致 | 化禄 | 一致 |
+| 福德·丑 | 太阴 | 庙 | 庙 | 一致 | 化科 | 一致 |
+
+【主要辅曜与煞曜对照】
+| 宫位 | 星曜 | Metis亮度 | ZhouYiLab亮度 | 三级亮暗 | 四化 | 落宫 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 田宅·寅 | 文昌 | 陷 | 陷 | 一致 | — | 一致 |
+| 田宅·寅 | 天马 | 旺 | 旺 | 一致 | — | 一致 |
+| 官禄·卯 | 地空 | 平 | 平 | 一致 | — | 一致 |
+| 迁移·巳 | 右弼 | 旺 | 旺 | 一致 | — | 一致 |
+| 疾厄·午 | 铃星 | 庙 | 庙 | 一致 | — | 一致 |
+| 财帛·未 | 天钺 | 旺 | 旺 | 一致 | — | 一致 |
+| 财帛·未 | 地劫 | 平 | 平 | 一致 | — | 一致 |
+| 财帛·未 | 陀罗 | 庙 | 庙 | 一致 | — | 一致 |
+| 子女·申 | 禄存 | 庙 | 庙 | 一致 | — | 一致 |
+| 夫妻·酉 | 左辅 | 旺 | 旺 | 一致 | — | 一致 |
+| 夫妻·酉 | 擎羊 | 陷 | 陷 | 一致 | — | 一致 |
+| 兄弟·戌 | 火星 | 庙 | 庙 | 一致 | — | 一致 |
+| 父母·子 | 文曲 | 庙 | 庙 | 一致 | — | 一致 |
+| 福德·丑 | 天魁 | 旺 | 旺 | 一致 | — | 一致 |
+
+【网站已定级杂曜亮度对照】
+| 宫位 | 星曜 | Metis亮度 | ZhouYiLab亮度 | 三级亮暗 | 四化 | 落宫 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 田宅·寅 | 天哭 | 平 | 平 | 一致 | — | 一致 |
+| 官禄·卯 | 八座 | 平 | 平 | 一致 | — | 一致 |
+| 官禄·卯 | 恩光 | 庙 | 庙 | 一致 | — | 一致 |
+| 官禄·卯 | 天才 | 旺 | 旺 | 一致 | — | 一致 |
+| 仆役·辰 | 华盖 | 庙 | 庙 | 一致 | — | 一致 |
+| 仆役·辰 | 天伤 | 平 | 平 | 一致 | — | 一致 |
+| 迁移·巳 | 天空 | 庙 | 庙 | 一致 | — | 一致 |
+| 迁移·巳 | 孤辰 | 陷 | 陷 | 一致 | — | 一致 |
+| 疾厄·午 | 凤阁 | 平 | 平 | 一致 | — | 一致 |
+| 疾厄·午 | 天福 | 平 | 平 | 一致 | — | 一致 |
+| 疾厄·午 | 天使 | 平 | 平 | 一致 | — | 一致 |
+| 疾厄·午 | 年解 | 庙 | 庙 | 一致 | — | 一致 |
+| 财帛·未 | 天寿 | 旺 | 旺 | 一致 | — | 一致 |
+| 子女·申 | 龙池 | 平 | 平 | 一致 | — | 一致 |
+| 夫妻·酉 | 咸池 | 平 | 平 | 一致 | — | 一致 |
+| 夫妻·酉 | 月德 | 闲 | 闲 | 一致 | — | 一致 |
+| 夫妻·酉 | 副旬 | 庙 | 庙 | 一致 | — | 一致 |
+| 兄弟·戌 | 天虚 | 陷 | 陷 | 一致 | — | 一致 |
+| 命宫·亥 | 红鸾 | 庙 | 庙 | 一致 | — | 一致 |
+| 命宫·亥 | 三台 | 平 | 平 | 一致 | — | 一致 |
+| 命宫·亥 | 天官 | 旺 | 旺 | 一致 | — | 一致 |
+| 福德·丑 | 天贵 | 旺 | 旺 | 一致 | — | 一致 |
+| 福德·丑 | 天德 | 庙 | 庙 | 一致 | — | 一致 |
+| 福德·丑 | 寡宿 | 平 | 平 | 一致 | — | 一致 |
+| 福德·丑 | 破碎 | 陷 | 陷 | 一致 | — | 一致 |
+
+【十二宫与大限对照】
+十二宫宫位、宫干、宫支、十四主星落宫全部一致；十二大限为“5岁起限，顺布十二宫”：一致。
+
+【核验结论】
+1. 历法、四柱、命身宫、五行局、命身主、十四主星落宫、四化和大限一致。
+2. 十四主星落宫 14/14 一致；亮度文字精确一致 14/14，归并亮／常／暗后一致 14/14。
+3. 主要辅煞落宫 14/14 一致；亮度文字精确一致 14/14，归并亮／常／暗后一致 14/14。
+4. 网站已定级杂曜落宫 25/25 一致；亮度文字精确一致 25/25。
+5. 默认采用网站当前“混合亮度表”；网站没有给亮度的杂曜保持未定义，纯文本不显示亮度，结构化结果写 null，不再以“平”代填。
+
+【ZhouYiLab完整排盘】
+
+           紫微斗数命盘
+
+
+阳历：2000年7月16日
+农历：农历庚辰年六月十五 农历庚辰年六月十五甲申时
+性别：男
+四柱：庚辰 癸未 乙亥 甲申
+五行局：土五局
+命宫：丁亥，命主：巨门
+身宫：己卯，身主：文昌
+
+
+           十二宫详情
+
+
+【田宅宫 (戊寅)】
+  主星：贪狼 [平]
+  辅星：文昌 [陷]
+  杂耀：天厨 天马 [旺] 台辅 天刑 天哭 [平]
+  神煞
+    ├岁前星 : 吊客
+    ├将前星 : 岁驿
+    ├十二长生 : 病
+    └博士十二神 : 飞廉
+  大限：35~44虚岁
+  小限：5,17,29,41,53虚岁
+  流年：11,23,35,47,59虚岁
+
+【官禄宫 (己卯)】
+  主星：天机 [旺] 巨门 [旺]
+  煞星：地空 [平]
+  杂耀：八座 [平] 恩光 [庙] 天才 [旺] 天月
+  神煞
+    ├岁前星 : 病符
+    ├将前星 : 息神
+    ├十二长生 : 死
+    └博士十二神 : 喜神
+  大限：45~54虚岁
+  小限：6,18,30,42,54虚岁
+  流年：12,24,36,48,60虚岁
+
+【奴仆宫 (庚辰)】
+  主星：紫微 [闲] 天相 [旺]
+  杂耀：华盖 [庙] 阴煞 天伤 [平]
+  神煞
+    ├岁前星 : 岁建
+    ├将前星 : 华盖
+    ├十二长生 : 墓
+    └博士十二神 : 病符
+  大限：55~64虚岁
+  小限：7,19,31,43,55虚岁
+  流年：1,13,25,37,49虚岁
+
+【迁移宫 (辛巳)】
+  主星：天梁 [陷]
+  辅星：右弼 [旺]
+  杂耀：天喜 孤辰 [陷] 天空 [庙]
+  神煞
+    ├岁前星 : 晦气
+    ├将前星 : 劫煞
+    ├十二长生 : 绝
+    └博士十二神 : 大耗
+  大限：65~74虚岁
+  小限：8,20,32,44,56虚岁
+  流年：2,14,26,38,50虚岁
+
+【疾厄宫 (壬午)】
+  主星：七杀 [旺]
+  煞星：铃星 [庙]
+  杂耀：天姚 天福 [平] 凤阁 [平] 蜚廉 天使 [平] 年解 [庙] 截空
+  神煞
+    ├岁前星 : 丧门
+    ├将前星 : 灾煞
+    ├十二长生 : 胎
+    └博士十二神 : 伏兵
+  大限：75~84虚岁
+  小限：9,21,33,45,57虚岁
+  流年：3,15,27,39,51虚岁
+
+【财帛宫 (癸未)】
+  辅星：天钺 [旺]
+  煞星：陀罗 [庙] 地劫 [平]
+  杂耀：天寿 [旺] 副截
+  神煞
+    ├岁前星 : 贯索
+    ├将前星 : 天煞
+    ├十二长生 : 养
+    └博士十二神 : 官府
+  大限：85~94虚岁
+  小限：10,22,34,46,58虚岁
+  流年：4,16,28,40,52虚岁
+
+【子女宫 (甲申)】
+  主星：廉贞 [庙]
+  辅星：禄存 [庙]
+  杂耀：天巫 龙池 [平] 旬空
+  神煞
+    ├岁前星 : 官符
+    ├将前星 : 指背
+    ├十二长生 : 长生
+    └博士十二神 : 博士
+  大限：95~104虚岁
+  小限：11,23,35,47,59虚岁
+  流年：5,17,29,41,53虚岁
+
+【夫妻宫 (乙酉)】
+  辅星：左辅 [旺]
+  煞星：擎羊 [陷]
+  杂耀：咸池 [平] 月德 [闲] 副旬 [庙]
+  神煞
+    ├岁前星 : 小耗
+    ├将前星 : 咸池
+    ├十二长生 : 沐浴
+    └博士十二神 : 力士
+  大限：105~114虚岁
+  小限：12,24,36,48,60虚岁
+  流年：6,18,30,42,54虚岁
+
+【兄弟宫 (丙戌)】
+  主星：破军 [旺]
+  煞星：火星 [庙]
+  杂耀：解神 封诰 天虚 [陷]
+  神煞
+    ├岁前星 : 大耗
+    ├将前星 : 月煞
+    ├十二长生 : 冠带
+    └博士十二神 : 青龙
+  大限：115~124虚岁
+  小限：1,13,25,37,49虚岁
+  流年：7,19,31,43,55虚岁
+
+【命宫 (丁亥)】
+  主星：天同 [庙] 化忌
+  杂耀：红鸾 [庙] 天官 [旺] 三台 [平] 大耗 龙德
+  神煞
+    ├岁前星 : 龙德
+    ├将前星 : 亡神
+    ├十二长生 : 临官
+    └博士十二神 : 小耗
+  大限：5~14虚岁
+  小限：2,14,26,38,50虚岁
+  流年：8,20,32,44,56虚岁
+
+【父母宫 (戊子)】
+  主星：武曲 [旺] 化权 天府 [旺]
+  辅星：文曲 [庙]
+  神煞
+    ├岁前星 : 白虎
+    ├将前星 : 将星
+    ├十二长生 : 帝旺
+    └博士十二神 : 将军
+  大限：15~24虚岁
+  小限：3,15,27,39,51虚岁
+  流年：9,21,33,45,57虚岁
+
+【福德宫 (己丑)】
+  主星：太阳 [陷] 化禄 太阴 [庙] 化科
+  辅星：天魁 [旺]
+  杂耀：天贵 [旺] 天德 [庙] 寡宿 [平] 破碎 [陷]
+  神煞
+    ├岁前星 : 天德
+    ├将前星 : 攀鞍
+    ├十二长生 : 衰
+    └博士十二神 : 奏书
+  大限：25~34虚岁
+  小限：4,16,28,40,52虚岁
+  流年：10,22,34,46,58虚岁
+
+
+【完整结构化结果】
+{
+  "da_xian": [
+    {
+      "end_age": 44,
+      "gong_index": 0,
+      "start_age": 35
+    },
+    {
+      "end_age": 54,
+      "gong_index": 1,
+      "start_age": 45
+    },
+    {
+      "end_age": 64,
+      "gong_index": 2,
+      "start_age": 55
+    },
+    {
+      "end_age": 74,
+      "gong_index": 3,
+      "start_age": 65
+    },
+    {
+      "end_age": 84,
+      "gong_index": 4,
+      "start_age": 75
+    },
+    {
+      "end_age": 94,
+      "gong_index": 5,
+      "start_age": 85
+    },
+    {
+      "end_age": 104,
+      "gong_index": 6,
+      "start_age": 95
+    },
+    {
+      "end_age": 114,
+      "gong_index": 7,
+      "start_age": 105
+    },
+    {
+      "end_age": 124,
+      "gong_index": 8,
+      "start_age": 115
+    },
+    {
+      "end_age": 14,
+      "gong_index": 9,
+      "start_age": 5
+    },
+    {
+      "end_age": 24,
+      "gong_index": 10,
+      "start_age": 15
+    },
+    {
+      "end_age": 34,
+      "gong_index": 11,
+      "start_age": 25
+    }
+  ],
+  "ge_ju": {
+    "ji_ge": [
+      {
+        "description": "太阳太阴同居丑未，阴阳并临，格局高下须结合亮度与煞曜。",
+        "geju_basis": {
+          "bonus": [
+            "日月至少一曜庙旺"
+          ],
+          "breaking": [],
+          "required": [
+            "太阳、太阴同宫于丑或未"
+          ]
+        },
+        "key_palaces": [
+          11
+        ],
+        "key_stars": [
+          "太阳",
+          "太阴"
+        ],
+        "level": "佳格",
+        "name": "日月同宫",
+        "score": 40,
+        "source": "《紫微斗数全书》",
+        "status": "成立"
+      },
+      {
+        "description": "机月同梁四曜中有三星会入命宫三方，格意成立但不及四曜齐会。",
+        "geju_basis": {
+          "bonus": [],
+          "breaking": [],
+          "required": [
+            "机月同梁四曜中恰有三星会命"
+          ]
+        },
+        "key_palaces": [
+          9
+        ],
+        "key_stars": [],
+        "level": "辅格",
+        "name": "机月同梁三星会",
+        "score": 15,
+        "source": "机月同梁辅格",
+        "status": "成立"
+      }
+    ],
+    "total_score": 20,
+    "xiong_ge": [
+      {
+        "description": "生年化忌落命宫或迁移宫，须结合原星庙陷与吉曜制化。",
+        "geju_basis": {
+          "bonus": [],
+          "breaking": [],
+          "required": [
+            "天同化忌入命"
+          ]
+        },
+        "key_palaces": [
+          9
+        ],
+        "key_stars": [
+          "天同"
+        ],
+        "level": "警示",
+        "name": "天同化忌入命",
+        "score": -35,
+        "source": "生年四化格局",
+        "status": "成立"
+      }
+    ]
+  },
+  "gender": "男",
+  "lunar_date": "农历庚辰年六月十五",
+  "lunar_hour": "农历庚辰年六月十五甲申时",
+  "ming_gong_index": 9,
+  "ming_zhu": "巨门",
+  "palaces": [
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 2,
+      "da_xian": {
+        "end_age": 44,
+        "start_age": 35
+      },
+      "fu_xing": [
+        "文昌"
+      ],
+      "gan_zhi": "戊寅",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        11,
+        23,
+        35,
+        47,
+        59
+      ],
+      "name": "田宅宫",
+      "opposite_index": 6,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "平",
+          "category": "主星",
+          "name": "贪狼"
+        },
+        {
+          "brightness": "陷",
+          "category": "辅星",
+          "name": "文昌"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "天厨"
+        },
+        {
+          "brightness": "旺",
+          "category": "杂曜",
+          "name": "天马"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "台辅"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "天刑"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "天哭"
+        }
+      ],
+      "stem_index": 4,
+      "xiao_xian_ages": [
+        5,
+        17,
+        29,
+        41,
+        53
+      ],
+      "za_yao": [
+        "天厨",
+        "天马",
+        "台辅",
+        "天刑",
+        "天哭"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "平",
+          "name": "贪狼"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 3,
+      "da_xian": {
+        "end_age": 54,
+        "start_age": 45
+      },
+      "fu_xing": [],
+      "gan_zhi": "己卯",
+      "is_body_palace": true,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        12,
+        24,
+        36,
+        48,
+        60
+      ],
+      "name": "官禄宫",
+      "opposite_index": 7,
+      "sha_xing": [
+        "地空"
+      ],
+      "stars": [
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "天机"
+        },
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "巨门"
+        },
+        {
+          "brightness": "平",
+          "category": "煞星",
+          "name": "地空"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "八座"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "恩光"
+        },
+        {
+          "brightness": "旺",
+          "category": "杂曜",
+          "name": "天才"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "天月"
+        }
+      ],
+      "stem_index": 5,
+      "xiao_xian_ages": [
+        6,
+        18,
+        30,
+        42,
+        54
+      ],
+      "za_yao": [
+        "八座",
+        "恩光",
+        "天才",
+        "天月"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "旺",
+          "name": "天机"
+        },
+        {
+          "liang_du": "旺",
+          "name": "巨门"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 4,
+      "da_xian": {
+        "end_age": 64,
+        "start_age": 55
+      },
+      "fu_xing": [],
+      "gan_zhi": "庚辰",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        1,
+        13,
+        25,
+        37,
+        49
+      ],
+      "name": "奴仆宫",
+      "opposite_index": 8,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "闲",
+          "category": "主星",
+          "name": "紫微"
+        },
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "天相"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "华盖"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "阴煞"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "天伤"
+        }
+      ],
+      "stem_index": 6,
+      "xiao_xian_ages": [
+        7,
+        19,
+        31,
+        43,
+        55
+      ],
+      "za_yao": [
+        "华盖",
+        "阴煞",
+        "天伤"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "闲",
+          "name": "紫微"
+        },
+        {
+          "liang_du": "旺",
+          "name": "天相"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 5,
+      "da_xian": {
+        "end_age": 74,
+        "start_age": 65
+      },
+      "fu_xing": [
+        "右弼"
+      ],
+      "gan_zhi": "辛巳",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        2,
+        14,
+        26,
+        38,
+        50
+      ],
+      "name": "迁移宫",
+      "opposite_index": 9,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "陷",
+          "category": "主星",
+          "name": "天梁"
+        },
+        {
+          "brightness": "旺",
+          "category": "辅星",
+          "name": "右弼"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "天喜"
+        },
+        {
+          "brightness": "陷",
+          "category": "杂曜",
+          "name": "孤辰"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "天空"
+        }
+      ],
+      "stem_index": 7,
+      "xiao_xian_ages": [
+        8,
+        20,
+        32,
+        44,
+        56
+      ],
+      "za_yao": [
+        "天喜",
+        "孤辰",
+        "天空"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "陷",
+          "name": "天梁"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 6,
+      "da_xian": {
+        "end_age": 84,
+        "start_age": 75
+      },
+      "fu_xing": [],
+      "gan_zhi": "壬午",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        3,
+        15,
+        27,
+        39,
+        51
+      ],
+      "name": "疾厄宫",
+      "opposite_index": 10,
+      "sha_xing": [
+        "铃星"
+      ],
+      "stars": [
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "七杀"
+        },
+        {
+          "brightness": "庙",
+          "category": "煞星",
+          "name": "铃星"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "天姚"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "天福"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "凤阁"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "蜚廉"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "天使"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "年解"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "截空"
+        }
+      ],
+      "stem_index": 8,
+      "xiao_xian_ages": [
+        9,
+        21,
+        33,
+        45,
+        57
+      ],
+      "za_yao": [
+        "天姚",
+        "天福",
+        "凤阁",
+        "蜚廉",
+        "天使",
+        "年解",
+        "截空"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "旺",
+          "name": "七杀"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": 11,
+      "borrowed_stars": [
+        "太阳",
+        "太阴"
+      ],
+      "branch_index": 7,
+      "da_xian": {
+        "end_age": 94,
+        "start_age": 85
+      },
+      "fu_xing": [
+        "天钺"
+      ],
+      "gan_zhi": "癸未",
+      "is_body_palace": false,
+      "is_empty": true,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        4,
+        16,
+        28,
+        40,
+        52
+      ],
+      "name": "财帛宫",
+      "opposite_index": 11,
+      "sha_xing": [
+        "陀罗",
+        "地劫"
+      ],
+      "stars": [
+        {
+          "brightness": "旺",
+          "category": "辅星",
+          "name": "天钺"
+        },
+        {
+          "brightness": "庙",
+          "category": "煞星",
+          "name": "陀罗"
+        },
+        {
+          "brightness": "平",
+          "category": "煞星",
+          "name": "地劫"
+        },
+        {
+          "brightness": "旺",
+          "category": "杂曜",
+          "name": "天寿"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "副截"
+        }
+      ],
+      "stem_index": 9,
+      "xiao_xian_ages": [
+        10,
+        22,
+        34,
+        46,
+        58
+      ],
+      "za_yao": [
+        "天寿",
+        "副截"
+      ],
+      "zhu_xing": []
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 8,
+      "da_xian": {
+        "end_age": 104,
+        "start_age": 95
+      },
+      "fu_xing": [
+        "禄存"
+      ],
+      "gan_zhi": "甲申",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        5,
+        17,
+        29,
+        41,
+        53
+      ],
+      "name": "子女宫",
+      "opposite_index": 0,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "庙",
+          "category": "主星",
+          "name": "廉贞"
+        },
+        {
+          "brightness": "庙",
+          "category": "辅星",
+          "name": "禄存"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "天巫"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "龙池"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "旬空"
+        }
+      ],
+      "stem_index": 0,
+      "xiao_xian_ages": [
+        11,
+        23,
+        35,
+        47,
+        59
+      ],
+      "za_yao": [
+        "天巫",
+        "龙池",
+        "旬空"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "庙",
+          "name": "廉贞"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": 1,
+      "borrowed_stars": [
+        "天机",
+        "巨门"
+      ],
+      "branch_index": 9,
+      "da_xian": {
+        "end_age": 114,
+        "start_age": 105
+      },
+      "fu_xing": [
+        "左辅"
+      ],
+      "gan_zhi": "乙酉",
+      "is_body_palace": false,
+      "is_empty": true,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        6,
+        18,
+        30,
+        42,
+        54
+      ],
+      "name": "夫妻宫",
+      "opposite_index": 1,
+      "sha_xing": [
+        "擎羊"
+      ],
+      "stars": [
+        {
+          "brightness": "旺",
+          "category": "辅星",
+          "name": "左辅"
+        },
+        {
+          "brightness": "陷",
+          "category": "煞星",
+          "name": "擎羊"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "咸池"
+        },
+        {
+          "brightness": "闲",
+          "category": "杂曜",
+          "name": "月德"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "副旬"
+        }
+      ],
+      "stem_index": 1,
+      "xiao_xian_ages": [
+        12,
+        24,
+        36,
+        48,
+        60
+      ],
+      "za_yao": [
+        "咸池",
+        "月德",
+        "副旬"
+      ],
+      "zhu_xing": []
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 10,
+      "da_xian": {
+        "end_age": 124,
+        "start_age": 115
+      },
+      "fu_xing": [],
+      "gan_zhi": "丙戌",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        7,
+        19,
+        31,
+        43,
+        55
+      ],
+      "name": "兄弟宫",
+      "opposite_index": 2,
+      "sha_xing": [
+        "火星"
+      ],
+      "stars": [
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "破军"
+        },
+        {
+          "brightness": "庙",
+          "category": "煞星",
+          "name": "火星"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "解神"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "封诰"
+        },
+        {
+          "brightness": "陷",
+          "category": "杂曜",
+          "name": "天虚"
+        }
+      ],
+      "stem_index": 2,
+      "xiao_xian_ages": [
+        1,
+        13,
+        25,
+        37,
+        49
+      ],
+      "za_yao": [
+        "解神",
+        "封诰",
+        "天虚"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "旺",
+          "name": "破军"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 11,
+      "da_xian": {
+        "end_age": 14,
+        "start_age": 5
+      },
+      "fu_xing": [],
+      "gan_zhi": "丁亥",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": true,
+      "liu_nian_ages": [
+        8,
+        20,
+        32,
+        44,
+        56
+      ],
+      "name": "命宫",
+      "opposite_index": 3,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "庙",
+          "category": "主星",
+          "name": "天同",
+          "si_hua": "化忌"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "红鸾"
+        },
+        {
+          "brightness": "旺",
+          "category": "杂曜",
+          "name": "天官"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "三台"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "大耗"
+        },
+        {
+          "brightness": null,
+          "category": "杂曜",
+          "name": "龙德"
+        }
+      ],
+      "stem_index": 3,
+      "xiao_xian_ages": [
+        2,
+        14,
+        26,
+        38,
+        50
+      ],
+      "za_yao": [
+        "红鸾",
+        "天官",
+        "三台",
+        "大耗",
+        "龙德"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "庙",
+          "name": "天同",
+          "si_hua": "化忌"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 0,
+      "da_xian": {
+        "end_age": 24,
+        "start_age": 15
+      },
+      "fu_xing": [
+        "文曲"
+      ],
+      "gan_zhi": "戊子",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        9,
+        21,
+        33,
+        45,
+        57
+      ],
+      "name": "父母宫",
+      "opposite_index": 4,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "武曲",
+          "si_hua": "化权"
+        },
+        {
+          "brightness": "旺",
+          "category": "主星",
+          "name": "天府"
+        },
+        {
+          "brightness": "庙",
+          "category": "辅星",
+          "name": "文曲"
+        }
+      ],
+      "stem_index": 4,
+      "xiao_xian_ages": [
+        3,
+        15,
+        27,
+        39,
+        51
+      ],
+      "za_yao": [],
+      "zhu_xing": [
+        {
+          "liang_du": "旺",
+          "name": "武曲",
+          "si_hua": "化权"
+        },
+        {
+          "liang_du": "旺",
+          "name": "天府"
+        }
+      ]
+    },
+    {
+      "borrowed_from_index": null,
+      "borrowed_stars": [],
+      "branch_index": 1,
+      "da_xian": {
+        "end_age": 34,
+        "start_age": 25
+      },
+      "fu_xing": [
+        "天魁"
+      ],
+      "gan_zhi": "己丑",
+      "is_body_palace": false,
+      "is_empty": false,
+      "is_ming_palace": false,
+      "liu_nian_ages": [
+        10,
+        22,
+        34,
+        46,
+        58
+      ],
+      "name": "福德宫",
+      "opposite_index": 5,
+      "sha_xing": [],
+      "stars": [
+        {
+          "brightness": "陷",
+          "category": "主星",
+          "name": "太阳",
+          "si_hua": "化禄"
+        },
+        {
+          "brightness": "庙",
+          "category": "主星",
+          "name": "太阴",
+          "si_hua": "化科"
+        },
+        {
+          "brightness": "旺",
+          "category": "辅星",
+          "name": "天魁"
+        },
+        {
+          "brightness": "旺",
+          "category": "杂曜",
+          "name": "天贵"
+        },
+        {
+          "brightness": "庙",
+          "category": "杂曜",
+          "name": "天德"
+        },
+        {
+          "brightness": "平",
+          "category": "杂曜",
+          "name": "寡宿"
+        },
+        {
+          "brightness": "陷",
+          "category": "杂曜",
+          "name": "破碎"
+        }
+      ],
+      "stem_index": 5,
+      "xiao_xian_ages": [
+        4,
+        16,
+        28,
+        40,
+        52
+      ],
+      "za_yao": [
+        "天贵",
+        "天德",
+        "寡宿",
+        "破碎"
+      ],
+      "zhu_xing": [
+        {
+          "liang_du": "陷",
+          "name": "太阳",
+          "si_hua": "化禄"
+        },
+        {
+          "liang_du": "庙",
+          "name": "太阴",
+          "si_hua": "化科"
+        }
+      ]
+    }
+  ],
+  "shen_gong_index": 1,
+  "shen_zhu": "文昌",
+  "si_hua": {
+    "gong_gan_si_hua": [
+      {
+        "gong_gan": "Wu",
+        "gong_index": 0,
+        "si_hua_list": [
+          {
+            "star": "贪狼",
+            "to_gong": 0,
+            "type": "化禄"
+          },
+          {
+            "star": "太阴",
+            "to_gong": 11,
+            "type": "化权"
+          },
+          {
+            "star": "右弼",
+            "to_gong": 3,
+            "type": "化科"
+          },
+          {
+            "star": "天机",
+            "to_gong": 1,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Ji",
+        "gong_index": 1,
+        "si_hua_list": [
+          {
+            "star": "武曲",
+            "to_gong": 10,
+            "type": "化禄"
+          },
+          {
+            "star": "贪狼",
+            "to_gong": 0,
+            "type": "化权"
+          },
+          {
+            "star": "天梁",
+            "to_gong": 3,
+            "type": "化科"
+          },
+          {
+            "star": "文曲",
+            "to_gong": 10,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Geng",
+        "gong_index": 2,
+        "si_hua_list": [
+          {
+            "star": "太阳",
+            "to_gong": 11,
+            "type": "化禄"
+          },
+          {
+            "star": "武曲",
+            "to_gong": 10,
+            "type": "化权"
+          },
+          {
+            "star": "太阴",
+            "to_gong": 11,
+            "type": "化科"
+          },
+          {
+            "star": "天同",
+            "to_gong": 9,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Xin",
+        "gong_index": 3,
+        "si_hua_list": [
+          {
+            "star": "巨门",
+            "to_gong": 1,
+            "type": "化禄"
+          },
+          {
+            "star": "太阳",
+            "to_gong": 11,
+            "type": "化权"
+          },
+          {
+            "star": "文曲",
+            "to_gong": 10,
+            "type": "化科"
+          },
+          {
+            "star": "文昌",
+            "to_gong": 0,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Ren",
+        "gong_index": 4,
+        "si_hua_list": [
+          {
+            "star": "天梁",
+            "to_gong": 3,
+            "type": "化禄"
+          },
+          {
+            "star": "紫微",
+            "to_gong": 2,
+            "type": "化权"
+          },
+          {
+            "star": "左辅",
+            "to_gong": 7,
+            "type": "化科"
+          },
+          {
+            "star": "武曲",
+            "to_gong": 10,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Gui",
+        "gong_index": 5,
+        "si_hua_list": [
+          {
+            "star": "破军",
+            "to_gong": 8,
+            "type": "化禄"
+          },
+          {
+            "star": "巨门",
+            "to_gong": 1,
+            "type": "化权"
+          },
+          {
+            "star": "太阴",
+            "to_gong": 11,
+            "type": "化科"
+          },
+          {
+            "star": "贪狼",
+            "to_gong": 0,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Jia",
+        "gong_index": 6,
+        "si_hua_list": [
+          {
+            "star": "廉贞",
+            "to_gong": 6,
+            "type": "化禄"
+          },
+          {
+            "star": "破军",
+            "to_gong": 8,
+            "type": "化权"
+          },
+          {
+            "star": "武曲",
+            "to_gong": 10,
+            "type": "化科"
+          },
+          {
+            "star": "太阳",
+            "to_gong": 11,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Yi",
+        "gong_index": 7,
+        "si_hua_list": [
+          {
+            "star": "天机",
+            "to_gong": 1,
+            "type": "化禄"
+          },
+          {
+            "star": "天梁",
+            "to_gong": 3,
+            "type": "化权"
+          },
+          {
+            "star": "紫微",
+            "to_gong": 2,
+            "type": "化科"
+          },
+          {
+            "star": "太阴",
+            "to_gong": 11,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Bing",
+        "gong_index": 8,
+        "si_hua_list": [
+          {
+            "star": "天同",
+            "to_gong": 9,
+            "type": "化禄"
+          },
+          {
+            "star": "天机",
+            "to_gong": 1,
+            "type": "化权"
+          },
+          {
+            "star": "文昌",
+            "to_gong": 0,
+            "type": "化科"
+          },
+          {
+            "star": "廉贞",
+            "to_gong": 6,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Ding",
+        "gong_index": 9,
+        "si_hua_list": [
+          {
+            "star": "太阴",
+            "to_gong": 11,
+            "type": "化禄"
+          },
+          {
+            "star": "天同",
+            "to_gong": 9,
+            "type": "化权"
+          },
+          {
+            "star": "天机",
+            "to_gong": 1,
+            "type": "化科"
+          },
+          {
+            "star": "巨门",
+            "to_gong": 1,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Wu",
+        "gong_index": 10,
+        "si_hua_list": [
+          {
+            "star": "贪狼",
+            "to_gong": 0,
+            "type": "化禄"
+          },
+          {
+            "star": "太阴",
+            "to_gong": 11,
+            "type": "化权"
+          },
+          {
+            "star": "右弼",
+            "to_gong": 3,
+            "type": "化科"
+          },
+          {
+            "star": "天机",
+            "to_gong": 1,
+            "type": "化忌"
+          }
+        ]
+      },
+      {
+        "gong_gan": "Ji",
+        "gong_index": 11,
+        "si_hua_list": [
+          {
+            "star": "武曲",
+            "to_gong": 10,
+            "type": "化禄"
+          },
+          {
+            "star": "贪狼",
+            "to_gong": 0,
+            "type": "化权"
+          },
+          {
+            "star": "天梁",
+            "to_gong": 3,
+            "type": "化科"
+          },
+          {
+            "star": "文曲",
+            "to_gong": 10,
+            "type": "化忌"
+          }
+        ]
+      }
+    ],
+    "zi_hua": [
+      {
+        "gong_index": 0,
+        "types": [
+          "化禄"
+        ]
+      },
+      {
+        "gong_index": 6,
+        "types": [
+          "化禄"
+        ]
+      },
+      {
+        "gong_index": 9,
+        "types": [
+          "化权"
+        ]
+      }
+    ]
+  },
+  "si_zhu": {
+    "day": "乙亥",
+    "hour": "甲申",
+    "month": "癸未",
+    "year": "庚辰"
+  },
+  "solar_date": "2000年7月16日",
+  "tian_fu_index": 10,
+  "wu_xing_ju": "土五局",
+  "zi_wei_index": 2
+}

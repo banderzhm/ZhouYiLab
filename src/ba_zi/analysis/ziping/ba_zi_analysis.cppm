@@ -2,7 +2,7 @@
 // 主模块只公开用例级函数；数据模型分别由公共、子平和盲派契约维护。
 export module ZhouYi.BaZiAnalysis;
 
-export import ZhouYi.BaZiAnalysis.Common;
+export import ZhouYi.BaZiAnalysis.Contract;
 export import ZhouYi.BaZiAnalysis.MangPai.Contract;
 export import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import ZhouYi.BaZiBase;

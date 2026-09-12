@@ -60,12 +60,12 @@ double untransformed_combine_penalty(const StemRelation &relation,
   return config.distant_stem_combine_penalty * 0.5;
 }
 
-nlohmann::json evidence_json(const Evidence &evidence) {
-  return {{"rule", evidence.rule},
-          {"subject", evidence.subject},
-          {"relation", evidence.relation},
-          {"points", evidence.points},
-          {"reason", evidence.reason}};
+nlohmann::json evidence_json(const MingLiBasis &ming_li_basis) {
+  return {{"rule", ming_li_basis.rule},
+          {"subject", ming_li_basis.subject},
+          {"relation", ming_li_basis.relation},
+          {"points", ming_li_basis.points},
+          {"reason", ming_li_basis.reason}};
 }
 
 nlohmann::json candidate_json(const ShenCandidate &candidate) {
@@ -102,9 +102,9 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
     const auto &blind = *result.blind_analysis;
     nlohmann::json works = nlohmann::json::array();
     for (const auto &work : blind.work_chains) {
-      nlohmann::json evidence = nlohmann::json::array();
-      for (const auto &item : work.evidence)
-        evidence.push_back(evidence_json(item));
+      nlohmann::json ming_li_basis = nlohmann::json::array();
+      for (const auto &item : work.ming_li_basis)
+        ming_li_basis.push_back(evidence_json(item));
       works.push_back({{"source", work.source},
                        {"target", work.target},
                        {"direction", work.direction},
@@ -116,7 +116,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
                        {"target_ten_god", work.target_ten_god},
                        {"effective_power", work.effective_power},
                        {"effective", work.effective},
-                       {"evidence", evidence}});
+                       {"ming_li_basis", ming_li_basis}});
     }
     nlohmann::json palaces = nlohmann::json::array();
     for (const auto &palace : blind.palaces)
@@ -139,9 +139,9 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
            {"clashed", occurrence.clashed}});
     nlohmann::json relations = nlohmann::json::array();
     for (const auto &relation : result.relations) {
-      nlohmann::json evidence = nlohmann::json::array();
-      for (const auto &item : relation.evidence)
-        evidence.push_back(evidence_json(item));
+      nlohmann::json ming_li_basis = nlohmann::json::array();
+      for (const auto &item : relation.ming_li_basis)
+        ming_li_basis.push_back(evidence_json(item));
       relations.push_back(
           {{"type", enum_code(relation.type)},
            {"type_zh", std::string(ZhouYi::Mapper::to_zh(relation.type))},
@@ -153,13 +153,13 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
            {"effective", relation.effective},
            {"direction", relation.direction},
            {"impact", relation.impact},
-           {"evidence", evidence}});
+           {"ming_li_basis", ming_li_basis}});
     }
     nlohmann::json stem_relations = nlohmann::json::array();
     for (const auto &relation : result.stem_relations) {
-      nlohmann::json evidence = nlohmann::json::array();
-      for (const auto &item : relation.evidence)
-        evidence.push_back(evidence_json(item));
+      nlohmann::json ming_li_basis = nlohmann::json::array();
+      for (const auto &item : relation.ming_li_basis)
+        ming_li_basis.push_back(evidence_json(item));
       stem_relations.push_back({{"type", enum_code(relation.type)},
                                 {"first", stem_name(relation.first)},
                                 {"second", stem_name(relation.second)},
@@ -167,7 +167,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
                                 {"second_position", relation.second_position},
                                 {"transform", relation.transform},
                                 {"effective", relation.effective},
-                                {"evidence", evidence}});
+                                {"ming_li_basis", ming_li_basis}});
     }
     return {
         {"schema_version", result.schema_version},
@@ -213,7 +213,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
              events.push_back({{"type", event.type},
                                {"pressure", event.pressure},
                                {"triggers", event.triggers},
-                               {"evidence", event.evidence}});
+                               {"ming_li_basis", event.ming_li_basis}});
            return events;
          }()},
         {"tombs",
@@ -228,7 +228,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
                   {"relation", tomb.relation},
                   {"state", tomb.state},
                   {"opened", tomb.opened},
-                  {"evidence", tomb.evidence}});
+                  {"ming_li_basis", tomb.ming_li_basis}});
            return tombs;
          }()},
         {"transit_impacts", blind.transit_impacts},
@@ -236,19 +236,19 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
   }
   nlohmann::json balance = nlohmann::json::array();
   for (const auto &stat : result.element_balance) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &item : stat.evidence)
-      evidence.push_back(evidence_json(item));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &item : stat.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(item));
     balance.push_back({{"element", element_name(stat.element)},
                        {"raw", stat.raw},
                        {"percent", stat.percent},
-                       {"evidence", evidence}});
+                       {"ming_li_basis", ming_li_basis}});
   }
   nlohmann::json relations = nlohmann::json::array();
   for (const auto &relation : result.relations) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &item : relation.evidence)
-      evidence.push_back(evidence_json(item));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &item : relation.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(item));
     nlohmann::json members = nlohmann::json::array();
     for (const auto branch : relation.members)
       members.push_back(branch_name(branch));
@@ -265,7 +265,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
          {"strength", enum_code(relation.strength)},
          {"strength_zh", zh_text(relation.strength)},
          {"impact", relation.impact},
-         {"evidence", evidence},
+         {"ming_li_basis", ming_li_basis},
          {"members", members},
          {"virtual_branch",
           relation.virtual_branch
@@ -274,9 +274,9 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
   }
   nlohmann::json stem_relations = nlohmann::json::array();
   for (const auto &relation : result.stem_relations) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &item : relation.evidence)
-      evidence.push_back(evidence_json(item));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &item : relation.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(item));
     stem_relations.push_back(
         {{"type", enum_code(relation.type)},
          {"type_zh", std::string(ZhouYi::Mapper::to_zh(relation.type))},
@@ -284,19 +284,19 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
          {"second", stem_name(relation.second)},
          {"transform", relation.transform},
          {"effective", relation.effective},
-         {"evidence", evidence}});
+         {"ming_li_basis", ming_li_basis}});
   }
   nlohmann::json candidates = nlohmann::json::array();
   for (const auto &candidate : result.useful_gods.candidates)
     candidates.push_back(candidate_json(candidate));
   nlohmann::json capacity_evidence = nlohmann::json::array();
-  for (const auto &item : result.carrying_capacity.evidence)
+  for (const auto &item : result.carrying_capacity.ming_li_basis)
     capacity_evidence.push_back(evidence_json(item));
   nlohmann::json capacity_penalties = nlohmann::json::array();
   for (const auto &item : result.carrying_capacity.penalties)
     capacity_penalties.push_back(evidence_json(item));
   nlohmann::json strength_evidence = nlohmann::json::array();
-  for (const auto &item : result.strength.evidence)
+  for (const auto &item : result.strength.ming_li_basis)
     strength_evidence.push_back(evidence_json(item));
   nlohmann::json nayin = nlohmann::json::array();
   for (const auto &item : result.nayin) {
@@ -305,7 +305,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
                      {"element", element_name(item.element)}});
   }
   nlohmann::json climate_evidence = nlohmann::json::array();
-  for (const auto &item : result.climate.evidence)
+  for (const auto &item : result.climate.ming_li_basis)
     climate_evidence.push_back(evidence_json(item));
   nlohmann::json climate_stems = nlohmann::json::array();
   for (const auto stem : result.climate.preferred_stems)
@@ -314,7 +314,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
   for (const auto stem : result.climate.present_stems)
     climate_present_stems.push_back(stem_name(stem));
   nlohmann::json pattern_evidence = nlohmann::json::array();
-  for (const auto &item : result.pattern.evidence)
+  for (const auto &item : result.pattern.ming_li_basis)
     pattern_evidence.push_back(evidence_json(item));
   nlohmann::json competing_patterns = nlohmann::json::array();
   for (const auto item : result.pattern.competing_patterns) {
@@ -323,29 +323,29 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
   }
   nlohmann::json special = nlohmann::json::array();
   for (const auto &item : result.special_patterns) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &entry : item.evidence)
-      evidence.push_back(evidence_json(entry));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &entry : item.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(entry));
     special.push_back(
         {{"name", enum_code(item.name)},
          {"name_zh", zh_text(item.name)},
          {"status", enum_code(item.status)},
          {"element", item.element ? nlohmann::json(element_name(*item.element))
                                   : nlohmann::json{}},
-         {"evidence", evidence},
+         {"ming_li_basis", ming_li_basis},
          {"reasons", item.reasons}});
   }
   nlohmann::json combos = nlohmann::json::array();
   for (const auto &item : result.ten_god_combos) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &entry : item.evidence)
-      evidence.push_back(evidence_json(entry));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &entry : item.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(entry));
     combos.push_back(
         {{"kind", enum_code(item.kind)},
          {"name_zh", std::string(ZhouYi::Mapper::to_zh(item.kind))},
          {"severity", enum_code(item.severity)},
          {"note", item.note},
-         {"evidence", evidence}});
+         {"ming_li_basis", ming_li_basis}});
   }
   nlohmann::json occurrences = nlohmann::json::array();
   for (const auto &item : result.ten_god_occurrences) {
@@ -362,37 +362,37 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
                            {"clashed", item.clashed}});
   }
   nlohmann::json kong_evidence = nlohmann::json::array();
-  for (const auto &item : result.kong_wang.evidence)
+  for (const auto &item : result.kong_wang.ming_li_basis)
     kong_evidence.push_back(evidence_json(item));
   nlohmann::json kong_positions = result.kong_wang.affected_positions;
   nlohmann::json chain = nlohmann::json::array();
   for (const auto element : result.sheng_ke_chain.chain)
     chain.push_back(element_name(element));
   nlohmann::json chain_evidence = nlohmann::json::array();
-  for (const auto &item : result.sheng_ke_chain.evidence)
+  for (const auto &item : result.sheng_ke_chain.ming_li_basis)
     chain_evidence.push_back(evidence_json(item));
   nlohmann::json fortunes = nlohmann::json::array();
   for (const auto &item : result.fortune_impacts) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &entry : item.evidence)
-      evidence.push_back(evidence_json(entry));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &entry : item.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(entry));
     fortunes.push_back({{"pillar", item.pillar.to_string()},
                         {"label", item.label},
                         {"score", item.score},
                         {"reasons", item.reasons},
                         {"review_notes", item.review_notes},
-                        {"evidence", evidence}});
+                        {"ming_li_basis", ming_li_basis}});
   }
   nlohmann::json input_pillars = nlohmann::json::array();
   for (const auto &pillar : result.input_pillars)
     input_pillars.push_back(pillar.to_string());
   nlohmann::json verification;
   if (result.useful_gods.verification) {
-    nlohmann::json evidence = nlohmann::json::array();
+    nlohmann::json ming_li_basis = nlohmann::json::array();
     nlohmann::json exact_roots = nlohmann::json::array();
     nlohmann::json same_element_support = nlohmann::json::array();
-    for (const auto &item : result.useful_gods.verification->evidence)
-      evidence.push_back(evidence_json(item));
+    for (const auto &item : result.useful_gods.verification->ming_li_basis)
+      ming_li_basis.push_back(evidence_json(item));
     for (const auto &item : result.useful_gods.verification->exact_roots)
       exact_roots.push_back(evidence_json(item));
     for (const auto &item :
@@ -411,7 +411,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
          result.useful_gods.verification->carrying_capacity},
         {"exact_roots", exact_roots},
         {"same_element_support", same_element_support},
-        {"evidence", evidence}};
+        {"ming_li_basis", ming_li_basis}};
   }
 
   return {
@@ -467,7 +467,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
           branch_name(result.kong_wang.branches[1])}},
         {"affected_positions", kong_positions},
         {"root_multiplier", result.kong_wang.root_multiplier},
-        {"evidence", kong_evidence}}},
+        {"ming_li_basis", kong_evidence}}},
       {"climate",
        {{"needed", result.climate.needed},
         {"present", result.climate.present},
@@ -478,7 +478,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
         {"usable_power", result.climate.usable_power},
         {"urgency", enum_code(result.climate.urgency)},
         {"reason", result.climate.reason},
-        {"evidence", climate_evidence}}},
+        {"ming_li_basis", climate_evidence}}},
       {"pattern",
        {{"name", enum_code(result.pattern.name)},
         {"name_zh", zh_text(result.pattern.name)},
@@ -489,7 +489,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
         {"condition", enum_code(result.pattern.condition)},
         {"disease_power", result.pattern.disease_power},
         {"medicine_power", result.pattern.medicine_power},
-        {"evidence", pattern_evidence},
+        {"ming_li_basis", pattern_evidence},
         {"supports", result.pattern.supports},
         {"conflicts", result.pattern.conflicts},
         {"basis", enum_code(result.pattern.basis)},
@@ -517,14 +517,14 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
         {"stem_support", result.strength.stem_support},
         {"season_adjustment", result.strength.season_adjustment},
         {"relation_adjustment", result.strength.relation_adjustment},
-        {"evidence", strength_evidence}}},
+        {"ming_li_basis", strength_evidence}}},
       {"carrying_capacity",
        {{"overall", result.carrying_capacity.overall},
         {"root_stability", result.carrying_capacity.root_stability},
         {"climate_workability", result.carrying_capacity.climate_workability},
         {"circulation", result.carrying_capacity.circulation},
         {"penalties", capacity_penalties},
-        {"evidence", capacity_evidence}}},
+        {"ming_li_basis", capacity_evidence}}},
       {"useful_gods",
        {{"status", enum_code(result.useful_gods.status)},
         {"method", enum_code(result.useful_gods.method)},
@@ -553,7 +553,7 @@ nlohmann::json Detail::render_json(const AnalysisResult &result) {
        {{"chain", chain},
         {"breaks", result.sheng_ke_chain.breaks},
         {"smooth", result.sheng_ke_chain.smooth},
-        {"evidence", chain_evidence}}},
+        {"ming_li_basis", chain_evidence}}},
       {"fortune_impacts", fortunes},
       {"warnings", result.warnings}};
 }
@@ -604,9 +604,9 @@ std::string Detail::render_zh(const AnalysisResult &result) {
              << work.relation << "（" << work.direction << "），" << work.result
              << "；十神：" << work.source_ten_god << "→" << work.target_ten_god
              << "；有效力量：" << work.effective_power << "。";
-      if (!work.evidence.empty()) {
+      if (!work.ming_li_basis.empty()) {
         output << "  依据：";
-        for (const auto &item : work.evidence)
+        for (const auto &item : work.ming_li_basis)
           output << item.reason << "；";
       }
       output << "\n";
@@ -625,8 +625,8 @@ std::string Detail::render_zh(const AnalysisResult &result) {
     output << "\n## 墓库状态\n";
     for (const auto &tomb : blind.tombs)
       output << "- " << tomb.tomb_branch << "收" << tomb.stored_stem << "："
-             << tomb.relation << "，" << tomb.state << "（" << tomb.evidence
-             << "）。\n";
+             << tomb.relation << "，" << tomb.state << "（"
+             << tomb.ming_li_basis << "）。\n";
     output << "\n## 应事分项\n";
     for (const auto &event : blind.event_impacts) {
       output << "- " << event.type << "：作用压力 " << event.pressure
@@ -634,8 +634,8 @@ std::string Detail::render_zh(const AnalysisResult &result) {
       for (const auto &trigger : event.triggers)
         output << trigger << "；";
       output << "证据：";
-      for (const auto &evidence : event.evidence)
-        output << evidence << "；";
+      for (const auto &ming_li_basis : event.ming_li_basis)
+        output << ming_li_basis << "；";
       output << "\n";
     }
     output << "\n## 岁运引动\n";
@@ -1029,9 +1029,9 @@ nlohmann::json Detail::render_transit_json(const TransitAnalysis &result) {
   };
   nlohmann::json layers = nlohmann::json::array();
   for (const auto &impact : result.layer_impacts) {
-    nlohmann::json evidence = nlohmann::json::array();
-    for (const auto &item : impact.evidence)
-      evidence.push_back(evidence_json(item));
+    nlohmann::json ming_li_basis = nlohmann::json::array();
+    for (const auto &item : impact.ming_li_basis)
+      ming_li_basis.push_back(evidence_json(item));
     nlohmann::json channels = nlohmann::json::array();
     for (const auto &channel : impact.channels)
       channels.push_back(channel_json(channel));
@@ -1040,7 +1040,7 @@ nlohmann::json Detail::render_transit_json(const TransitAnalysis &result) {
                       {"score", impact.score},
                       {"reasons", impact.reasons},
                       {"review_notes", impact.review_notes},
-                      {"evidence", evidence},
+                      {"ming_li_basis", ming_li_basis},
                       {"channels", channels}});
   }
   nlohmann::json interactions = nlohmann::json::array();

@@ -1,4 +1,4 @@
-// C++23 Module - 八字分析报告实现
+// C++23 Module - 八字中文报告门面实现
 module ZhouYi.BaZiAnalysis.Report;
 
 import ZhouYi.BaZiAnalysis.Presenter;

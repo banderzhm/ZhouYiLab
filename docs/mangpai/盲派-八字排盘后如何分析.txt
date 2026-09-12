@@ -176,7 +176,7 @@ BlindAnalysisResult {
     symbols;
     event_impacts;
     warnings;
-    evidence;
+    ming_li_basis;
 }
 ```
 
@@ -302,7 +302,7 @@ WorkChain {
     effective_power;
     result_type;            // 得财、得官、受制、破财、伤身、婚姻变动等
     effective;
-    evidence;
+    ming_li_basis;
 }
 ```
 
@@ -346,7 +346,7 @@ TombRelation {
     palace_role;
     key_source;
     effect;
-    evidence;
+    ming_li_basis;
 }
 ```
 
@@ -412,12 +412,12 @@ analyze_mangpai(request):
     timing = analyze_da_yun_year_month_day(chart, work_chains, request)
     symbols = map_symbols(chart, palaces, work_chains, request.question)
     event_impacts = classify_events(timing, work_chains, symbols)
-    evidence = collect_evidence(occurrences, relations, work_chains, timing)
-    warnings = collect_review_items(request, evidence)
+    ming_li_basis = collect_evidence(occurrences, relations, work_chains, timing)
+    warnings = collect_review_items(request, ming_li_basis)
     return BlindAnalysisResult{schema_version: "1.1", rule_set: request.rule_set,
         input_pillars: chart.pillars, birth_context: request.birth_context,
         occurrences, palaces, body_use, relations, work_chains, useful_waste,
-        structures, timing, symbols, event_impacts, warnings, evidence}
+        structures, timing, symbols, event_impacts, warnings, ming_li_basis}
 ```
 
 十一、工程组织约束

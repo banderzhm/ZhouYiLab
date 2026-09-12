@@ -1,7 +1,7 @@
 // 紫微斗数星曜文档 - 四十八神煞（实现）
 module ZhouYi.ZiWei.StarDoc.ShenSha;
 
-import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZiWei.StarDoc.Types;
 import ZhouYi.ZhMapper;
 import std;
 

@@ -2,7 +2,7 @@
 
 // 导入 tyme 模块
 import ZhouYi.tyme;
-import ZhouYi.tyme.util;
+import ZhouYi.tyme.shou_xing_ephemeris;
 
 // 导入 fmt
 import fmt;

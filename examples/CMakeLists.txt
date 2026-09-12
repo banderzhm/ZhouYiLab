@@ -39,6 +39,7 @@ set(EXAMPLES
     example_zi_wei      # "紫微斗数排盘示例"
     example_stacktrace  # "std::stacktrace 功能测试"
     example_qi_men      # "奇门遁甲排盘示例"
+    example_mei_hua     # "梅花易数起卦示例"
 )
 
 # ==============================================================================
@@ -114,4 +115,5 @@ message(STATUS "    - example_liu_yao      : 六爻起卦示例")
 message(STATUS "    - example_zi_wei       : 紫微斗数排盘示例")
 message(STATUS "    - example_stacktrace   : std::stacktrace 功能测试")
 message(STATUS "    - example_qi_men       : 奇门遁甲排盘示例")
+message(STATUS "    - example_mei_hua      : 梅花易数起卦示例")
 message(STATUS "==========================================")

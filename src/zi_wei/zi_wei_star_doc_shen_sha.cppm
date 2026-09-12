@@ -2,7 +2,7 @@
 // 包含长生12神、博士12神、将前12神、岁前12神
 export module ZhouYi.ZiWei.StarDoc.ShenSha;
 
-import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZiWei.StarDoc.Types;
 import ZhouYi.ZhMapper;
 import std;
 

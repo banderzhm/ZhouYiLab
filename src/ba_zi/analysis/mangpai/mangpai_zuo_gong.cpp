@@ -2,7 +2,7 @@
 module ZhouYi.BaZiAnalysis.MangPai.ZuoGong;
 
 import ZhouYi.BaZiAnalysis.Relations;
-import ZhouYi.BaZiAnalysis.MangPai.Common;
+import ZhouYi.BaZiAnalysis.MangPai.ShiShenRules;
 import ZhouYi.BaZiBase;
 import ZhouYi.ZhMapper;
 import ZhouYi.GanZhi;
@@ -53,7 +53,7 @@ void build(AnalysisResult &result, const BaZi &chart) {
                    ? "主位被引动，需结合十神取象"
                    : "宾位之间发生结构作用，需结合主位复核")
             : "关系存在但有效性不足，需结合根气、空亡和岁运复核";
-    work.evidence = relation.evidence;
+    work.ming_li_basis = relation.ming_li_basis;
     result.blind_analysis->work_chains.push_back(work);
     if (relation.effective) {
       result.blind_analysis->useful_gods.push_back(work.source);
@@ -107,7 +107,7 @@ void build(AnalysisResult &result, const BaZi &chart) {
       work.effective = true;
       work.result =
           "日主合官，官来就我；职业取象偏向依附平台、规则或组织取得结果";
-      work.evidence = relation.evidence;
+      work.ming_li_basis = relation.ming_li_basis;
       result.blind_analysis->work_chains.push_back(std::move(work));
       result.blind_analysis->useful_gods.push_back(
           "日柱" + std::string(Mapper::to_zh(stems[subject_position])));

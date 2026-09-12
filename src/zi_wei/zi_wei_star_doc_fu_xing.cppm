@@ -2,7 +2,7 @@
 export module ZhouYi.ZiWei.StarDoc.FuXing;
 
 import std;
-import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZiWei.StarDoc.Types;
 import ZhouYi.ZhMapper;
 
 export namespace ZhouYi::ZiWei::StarDoc {

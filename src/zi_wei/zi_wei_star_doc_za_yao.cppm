@@ -1,7 +1,7 @@
 // 紫微斗数星曜文档 - 三十七杂耀（接口）
 export module ZhouYi.ZiWei.StarDoc.ZaYao;
 
-import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZiWei.StarDoc.Types;
 import std;
 
 export namespace ZhouYi::ZiWei::StarDoc {

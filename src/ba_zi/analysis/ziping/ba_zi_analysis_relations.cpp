@@ -54,8 +54,9 @@ std::vector<BranchRelation> Detail::detect_branch_relations(const BaZi &chart) {
              j,
              symmetric,
              "仅记录结构关系；未直接改变五行力量",
-             {Evidence{"relation.detect", subject, result.empty() ? "" : "关系",
-                       0.0, "需结合月令、根气和成化条件再判断实际影响"}}});
+             {MingLiBasis{"relation.detect", subject,
+                          result.empty() ? "" : "关系", 0.0,
+                          "需结合月令、根气和成化条件再判断实际影响"}}});
         result.back().members = {branches[i], branches[j]};
         result.back().effective = false;
         result.back().direction = symmetric ? "双向"
@@ -117,11 +118,11 @@ std::vector<BranchRelation> Detail::detect_branch_relations(const BaZi &chart) {
                             : position_of(members.front()),
          true,
          impact,
-         {Evidence{"relation.group", subject, complete ? "全局" : "半局",
-                   effective ? 1.0 : 0.0,
-                   effective
-                       ? "月令同气、化神透干且成员未受冲"
-                       : "需月令同气、化神透干且成员不受冲，才可认定有效"}},
+         {MingLiBasis{"relation.group", subject, complete ? "全局" : "半局",
+                      effective ? 1.0 : 0.0,
+                      effective
+                          ? "月令同气、化神透干且成员未受冲"
+                          : "需月令同气、化神透干且成员不受冲，才可认定有效"}},
          members,
          effective,
          "双向",
@@ -203,7 +204,7 @@ std::vector<BranchRelation> Detail::detect_branch_relations(const BaZi &chart) {
                       position_of(members.back()),
                       false,
                       "刑关系仅记录结构，需结合宫位与喜忌解释",
-                      {Evidence{"relation.xing", subject, "刑", 0.0, note}},
+                      {MingLiBasis{"relation.xing", subject, "刑", 0.0, note}},
                       members,
                       false,
                       std::move(note)});
@@ -269,19 +270,19 @@ std::vector<StemRelation> Detail::detect_stem_relations(const BaZi &chart) {
            StemRelationKind::FiveCombine,
            effective ? "合化" + element_name(*element) : "仅合不化",
            effective,
-           {Evidence{"relation.stem_combine",
-                     stem_name(stems[i]) + stem_name(stems[j]), "五合",
-                     effective ? 1.0 : 0.0,
-                     effective
-                         ? "月令引化、化神有根、无争合且无克破"
-                         : "仅合不化：" +
-                               std::accumulate(std::next(missing.begin()),
-                                               missing.end(), missing.front(),
-                                               [](std::string left,
-                                                  const std::string &right) {
-                                                 return std::move(left) + "、" +
-                                                        right;
-                                               })}}});
+           {MingLiBasis{"relation.stem_combine",
+                        stem_name(stems[i]) + stem_name(stems[j]), "五合",
+                        effective ? 1.0 : 0.0,
+                        effective
+                            ? "月令引化、化神有根、无争合且无克破"
+                            : "仅合不化：" + std::accumulate(
+                                                 std::next(missing.begin()),
+                                                 missing.end(), missing.front(),
+                                                 [](std::string left,
+                                                    const std::string &right) {
+                                                   return std::move(left) +
+                                                          "、" + right;
+                                                 })}}});
     }
   }
   return result;

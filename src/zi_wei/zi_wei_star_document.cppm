@@ -3,7 +3,7 @@
 export module ZhouYi.ZiWei.StarDocument;
 
 // 导出子模块
-export import ZhouYi.ZiWei.StarDoc.Common;
+export import ZhouYi.ZiWei.StarDoc.Types;
 export import ZhouYi.ZiWei.StarDoc.ZhuXing;
 export import ZhouYi.ZiWei.StarDoc.FuXing;
 export import ZhouYi.ZiWei.StarDoc.ZaYao;
