@@ -2,7 +2,7 @@
 // 统一入口函数实现
 module ZhouYi.ZiWei.StarDocument;
 
-import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZiWei.StarDoc.Types;
 import ZhouYi.ZiWei.StarDoc.ZhuXing;
 import ZhouYi.ZiWei.StarDoc.FuXing;
 import ZhouYi.ZiWei.StarDoc.ZaYao;

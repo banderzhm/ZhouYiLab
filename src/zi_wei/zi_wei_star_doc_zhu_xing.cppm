@@ -2,7 +2,7 @@
 // 包含紫微、天机、太阳、武曲、天同、廉贞、天府、太阴、贪狼、巨门、天相、天梁、七杀、破军
 export module ZhouYi.ZiWei.StarDoc.ZhuXing;
 
-import ZhouYi.ZiWei.StarDoc.Common;
+import ZhouYi.ZiWei.StarDoc.Types;
 import ZhouYi.ZhMapper;
 import std;
 

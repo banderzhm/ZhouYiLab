@@ -51,9 +51,9 @@ void relabel_fortune_layer(FortuneImpact &impact, TransitLayer layer) {
     relabel(reason);
   for (auto &note : impact.review_notes)
     relabel(note);
-  for (auto &evidence : impact.evidence) {
-    relabel(evidence.subject);
-    relabel(evidence.reason);
+  for (auto &ming_li_basis : impact.ming_li_basis) {
+    relabel(ming_li_basis.subject);
+    relabel(ming_li_basis.reason);
   }
   for (auto &channel : impact.channels) {
     relabel(channel.subject);
@@ -96,29 +96,30 @@ auto element_from_relation(std::string_view relation) -> std::optional<WuXing> {
   return std::nullopt;
 }
 
-auto evidence_domains(const Evidence &evidence, const AnalysisResult &analysis)
+auto evidence_domains(const MingLiBasis &ming_li_basis,
+                      const AnalysisResult &analysis)
     -> std::vector<TransitEventType> {
-  if (evidence.rule == "fortune.qi_sha_attack" ||
-      evidence.rule == "fortune.qi_sha_rescue")
+  if (ming_li_basis.rule == "fortune.qi_sha_attack" ||
+      ming_li_basis.rule == "fortune.qi_sha_rescue")
     return {TransitEventType::BodySafety};
-  if (evidence.rule == "fortune.output_generates_wealth")
+  if (ming_li_basis.rule == "fortune.output_generates_wealth")
     return {TransitEventType::CareerDirection, TransitEventType::WealthDebt};
-  if (evidence.rule == "fortune.hurting_officer_meets_officer")
+  if (ming_li_basis.rule == "fortune.hurting_officer_meets_officer")
     return {TransitEventType::RulesDisputes};
-  if (evidence.rule == "fortune.clash_day_branch")
+  if (ming_li_basis.rule == "fortune.clash_day_branch")
     return {TransitEventType::BodySafety, TransitEventType::Relationship,
             TransitEventType::MovementChange};
-  if (evidence.rule == "fortune.day_branch_joined_group")
+  if (ming_li_basis.rule == "fortune.day_branch_joined_group")
     return {TransitEventType::Relationship};
-  if (evidence.rule == "fortune.clash_month_command")
+  if (ming_li_basis.rule == "fortune.clash_month_command")
     return {TransitEventType::CareerDirection,
             TransitEventType::MovementChange};
-  if (evidence.rule == "fortune.competing_combine")
+  if (ming_li_basis.rule == "fortune.competing_combine")
     return {TransitEventType::CareerDirection};
-  if (evidence.rule == "fortune.stem_relation")
+  if (ming_li_basis.rule == "fortune.stem_relation")
     return {TransitEventType::CareerDirection, TransitEventType::RulesDisputes};
-  if (evidence.rule == "fortune.complete_branch_group") {
-    const auto element = element_from_relation(evidence.relation);
+  if (ming_li_basis.rule == "fortune.complete_branch_group") {
+    const auto element = element_from_relation(ming_li_basis.relation);
     if (element) {
       const auto day_element = get_wu_xing(analysis.day_master);
       if (*element == day_element)
@@ -133,21 +134,21 @@ auto evidence_domains(const Evidence &evidence, const AnalysisResult &analysis)
     }
     return {TransitEventType::CareerDirection};
   }
-  if (evidence.rule == "fortune.branch_relation" ||
-      evidence.rule == "fortune.exact_stem_role" ||
-      evidence.rule == "fortune.control" ||
-      evidence.rule == "fortune.climate_dual_role")
+  if (ming_li_basis.rule == "fortune.branch_relation" ||
+      ming_li_basis.rule == "fortune.exact_stem_role" ||
+      ming_li_basis.rule == "fortune.control" ||
+      ming_li_basis.rule == "fortune.climate_dual_role")
     return {TransitEventType::CareerDirection};
-  if (evidence.rule == "fortune.route_ten_god") {
-    if (evidence.relation == "比肩" || evidence.relation == "劫财")
+  if (ming_li_basis.rule == "fortune.route_ten_god") {
+    if (ming_li_basis.relation == "比肩" || ming_li_basis.relation == "劫财")
       return {TransitEventType::WealthDebt, TransitEventType::CareerDirection};
-    if (evidence.relation == "正财" || evidence.relation == "偏财")
+    if (ming_li_basis.relation == "正财" || ming_li_basis.relation == "偏财")
       return {TransitEventType::WealthDebt, TransitEventType::CareerDirection};
-    if (evidence.relation == "食神")
+    if (ming_li_basis.relation == "食神")
       return {TransitEventType::CareerDirection};
-    if (evidence.relation == "伤官")
+    if (ming_li_basis.relation == "伤官")
       return {TransitEventType::RulesDisputes};
-    if (evidence.relation == "正官" || evidence.relation == "七杀")
+    if (ming_li_basis.relation == "正官" || ming_li_basis.relation == "七杀")
       return {TransitEventType::CareerDirection,
               TransitEventType::RulesDisputes};
     return {TransitEventType::CareerDirection};
@@ -157,16 +158,18 @@ auto evidence_domains(const Evidence &evidence, const AnalysisResult &analysis)
 
 void build_effect_channels(FortuneImpact &impact,
                            const AnalysisResult &analysis) {
-  for (const auto &evidence : impact.evidence) {
-    auto domains = evidence_domains(evidence, analysis);
+  for (const auto &ming_li_basis : impact.ming_li_basis) {
+    auto domains = evidence_domains(ming_li_basis, analysis);
     if (domains.empty())
       continue;
-    const auto nature = evidence.points > 0.0   ? TransitEffectNature::Favorable
-                        : evidence.points < 0.0 ? TransitEffectNature::Adverse
-                                                : TransitEffectNature::Neutral;
-    impact.channels.push_back({evidence.rule, evidence.subject,
-                               evidence.relation, nature, evidence.points,
-                               std::move(domains), evidence.reason});
+    const auto nature =
+        ming_li_basis.points > 0.0   ? TransitEffectNature::Favorable
+        : ming_li_basis.points < 0.0 ? TransitEffectNature::Adverse
+                                     : TransitEffectNature::Neutral;
+    impact.channels.push_back({ming_li_basis.rule, ming_li_basis.subject,
+                               ming_li_basis.relation, nature,
+                               ming_li_basis.points, std::move(domains),
+                               ming_li_basis.reason});
   }
 }
 
@@ -358,7 +361,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
     }();
     const auto apply_stem = [&](TianGan arriving_stem, std::string_view source,
                                 double strength_multiplier) {
-      const auto evidence_begin = impact.evidence.size();
+      const auto evidence_begin = impact.ming_li_basis.size();
       const auto god = get_shi_shen(day_stem, arriving_stem);
       const auto element = get_wu_xing(arriving_stem);
       const std::string subject =
@@ -372,7 +375,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
               return false;
             contribution = points;
             impact.reasons.push_back(subject + "为当前" + std::string(role));
-            impact.evidence.push_back(
+            impact.ming_li_basis.push_back(
                 {"fortune.exact_stem_role", subject, std::string(role) + "到位",
                  points, "岁运按具体天干匹配五神角色，不以同五行异干替代"});
             return true;
@@ -400,11 +403,11 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
           impact.reasons.push_back(subject + "为七杀，分干论攻身与制化");
           impact.review_notes.push_back("七杀到位：" + rescue +
                                         "；须结合岁运是否再伤制化之神复核");
-          impact.evidence.push_back(
+          impact.ming_li_basis.push_back(
               {"fortune.qi_sha_attack", subject, "七杀攻身", attack,
                "七杀攻身先按不利结构记账；后续制化只另记救应，不冲销先伤"});
           if (rescue_score > 0.0) {
-            impact.evidence.push_back(
+            impact.ming_li_basis.push_back(
                 {"fortune.qi_sha_rescue", subject,
                  active_food_power >= 1.0 ? "食神制杀" : "印化杀", rescue_score,
                  rescue});
@@ -425,7 +428,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
         }
         if (god != ShiShen::QiSha) {
           impact.reasons.push_back(subject + "按官制比护财路线分十神论");
-          impact.evidence.push_back(
+          impact.ming_li_basis.push_back(
               {"fortune.route_ten_god", subject,
                std::string(ZhouYi::GanZhi::shi_shen_to_zh(god)), contribution,
                "同五行异十神不沿用同一角色分，按当前主取用路线分别评价"});
@@ -433,15 +436,16 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
       } else if (!exact_role && wu_xing_ke(element, yong_element)) {
         contribution = -8.0;
         impact.reasons.push_back(subject + "克制当前候选用神");
-        impact.evidence.push_back({"fortune.control", subject, "克用", -8.0,
-                                   "未命中具体五神角色时，以五行克用作兜底"});
+        impact.ming_li_basis.push_back(
+            {"fortune.control", subject, "克用", -8.0,
+             "未命中具体五神角色时，以五行克用作兜底"});
       } else if (!exact_role && (element == yong_element ||
                                  (xi_element && element == *xi_element) ||
                                  (ji_element && element == *ji_element) ||
                                  (chou_element && element == *chou_element))) {
         impact.reasons.push_back(subject +
                                  "与五神之一同五行但非同干，不直接套分");
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.same_element_different_stem", subject, "同五行异干", 0.0,
              "仅记录五行方向，不冒充已分配角色的具体天干"});
       }
@@ -451,7 +455,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
         const double circulation = god == ShiShen::ShangGuan ? 6.0 : 5.0;
         contribution += circulation;
         impact.reasons.push_back(subject + "另有泄比生财通道");
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.output_generates_wealth", subject, "食伤泄比生财",
              circulation,
              "原局比劫与财星均有实际力量；食伤虽可能损官，也可泄比并转生财"
@@ -486,15 +490,16 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
         }
         contribution += climate_adjustment;
         impact.reasons.push_back(subject + "兼具调候与十神双重身份");
-        impact.evidence.push_back({"fortune.climate_dual_role", subject,
-                                   "调候与格局分层", climate_adjustment,
-                                   climate_reason});
+        impact.ming_li_basis.push_back({"fortune.climate_dual_role", subject,
+                                        "调候与格局分层", climate_adjustment,
+                                        climate_reason});
       }
       contribution *= strength_multiplier;
-      for (auto index = evidence_begin; index < impact.evidence.size(); ++index)
-        impact.evidence[index].points *= strength_multiplier;
+      for (auto index = evidence_begin; index < impact.ming_li_basis.size();
+           ++index)
+        impact.ming_li_basis[index].points *= strength_multiplier;
       if (std::abs(strength_multiplier - 1.0) > 0.01) {
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.stem_branch_strength", subject, "干支力度修正",
              contribution,
              "按透藏层级或干支承载系数修正该作用；" + stem_strength_basis});
@@ -522,9 +527,9 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
       impact.reasons.push_back("运支值原局旬空，触发" + fill_nature);
       impact.review_notes.push_back(
           "空亡填实属于应期标记；吉凶随运支本气及原局制化，不重复加减分");
-      impact.evidence.push_back({"fortune.kong_wang_filled",
-                                 branch_name(pillar.zhi), fill_nature, 0.0,
-                                 "岁运地支与原局旬空支同支，记为填实应期"});
+      impact.ming_li_basis.push_back(
+          {"fortune.kong_wang_filled", branch_name(pillar.zhi), fill_nature,
+           0.0, "岁运地支与原局旬空支同支，记为填实应期"});
     }
     if (get_shi_shen(day_stem, pillar.gan) == ShiShen::ShangGuan &&
         get_shi_shen(day_stem, useful.yong_shen->stem) == ShiShen::ZhengGuan) {
@@ -532,9 +537,9 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
       impact.reasons.push_back("运干伤官直犯原局官用");
       impact.review_notes.push_back(
           "伤官见官，以天干之克为主，地支喜神不得完全抵销");
-      impact.evidence.push_back({"fortune.hurting_officer_meets_officer",
-                                 pillar.to_string(), "伤官见官", -10.0,
-                                 "运干为伤官且候选用神为正官，另作组合级折减"});
+      impact.ming_li_basis.push_back(
+          {"fortune.hurting_officer_meets_officer", pillar.to_string(),
+           "伤官见官", -10.0, "运干为伤官且候选用神为正官，另作组合级折减"});
     }
     const bool clashes_month_command =
         is_chong(pillar.zhi, original_pillars[1].zhi);
@@ -543,7 +548,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
       impact.reasons.push_back("运支冲月令提纲");
       impact.review_notes.push_back(
           "冲提纲主环境与格局根基变动，不按普通冲忌神根作纯加分");
-      impact.evidence.push_back(
+      impact.ming_li_basis.push_back(
           {"fortune.clash_month_command",
            branch_name(pillar.zhi) + branch_name(original_pillars[1].zhi),
            "冲提纲", -12.0, "月令为提纲，受冲单列结构风险"});
@@ -589,7 +594,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
                                      element_name(element) + "气成势");
             impact.review_notes.push_back(
                 "岁运参与成局，须按组合后的五行气势复核，不能只看运支本身");
-            impact.evidence.push_back(
+            impact.ming_li_basis.push_back(
                 {"fortune.complete_branch_group", pillar.to_string(),
                  group_name + element_name(element), group_score,
                  "运支补足原局两支，按组合级作用另行加减"});
@@ -602,7 +607,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
               impact.reasons.push_back(
                   joins_peer_group ? "原局日支被合入比劫局，宫位另行记账"
                                    : "原局日支参与岁运成局，宫位另行记账");
-              impact.evidence.push_back(
+              impact.ming_li_basis.push_back(
                   {"fortune.day_branch_joined_group", pillar.to_string(),
                    joins_peer_group ? "日支合入比劫局" : "日支参与成局",
                    palace_score,
@@ -644,7 +649,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
         impact.review_notes.push_back(
             "日支为配偶宫兼日主坐支，受冲不按普通冲忌神根直接作吉论；"
             "按宫位与日主坐支变动单列折减，具体应事另行复核");
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.clash_day_branch",
              pillar.to_string() + branch_name(original.zhi), "冲日支", -6.0,
              "日支受冲按宫位与日主坐支变动单列折减"});
@@ -657,7 +662,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
           impact.review_notes.push_back("该用神根原落旬空；冲空有冲起、冲实等不"
                                         "同口径，当前规则从严仍按冲用神根折减");
         }
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.branch_relation",
              pillar.to_string() + branch_name(original.zhi),
              original_is_kong ? "冲旬空用神根" : "冲用神根", -12.0,
@@ -669,7 +674,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
           original_index != 2) {
         impact.score += 8.0;
         impact.reasons.push_back("运支冲原局忌神根");
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.branch_relation",
              pillar.to_string() + branch_name(original.zhi), "冲忌神根", 8.0,
              "运支冲击含候选忌神根气的原局地支"});
@@ -698,7 +703,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
         }
         impact.score += combine_score;
         impact.reasons.push_back("运干合原局" + target);
-        impact.evidence.push_back(
+        impact.ming_li_basis.push_back(
             {"fortune.stem_relation",
              pillar.to_string() + stem_name(original.gan), "天干五合",
              combine_score,
@@ -716,7 +721,7 @@ Detail::evaluate_fortunes(const std::vector<Pillar> &fortunes,
           impact.reasons.push_back("岁运天干参与原局争合");
           impact.review_notes.push_back(
               "同一原局天干同时受日主或其他天干争合，按用神受牵制重点复核");
-          impact.evidence.push_back(
+          impact.ming_li_basis.push_back(
               {"fortune.competing_combine", pillar.to_string(), "争合", -6.0,
                "岁运加入后形成一干多合，不能按普通单一五合处理"});
         }
@@ -819,8 +824,8 @@ TransitAnalysis Detail::evaluate_transit(const TransitContext &context,
       if (item.layer == TransitLayer::DaYun && is_da_yun_transition_year) {
         constexpr double transition_factor = 1.15;
         impacts.front().score *= transition_factor;
-        for (auto &evidence : impacts.front().evidence)
-          evidence.points *= transition_factor;
+        for (auto &ming_li_basis : impacts.front().ming_li_basis)
+          ming_li_basis.points *= transition_factor;
         for (auto &channel : impacts.front().channels)
           channel.score *= transition_factor;
         impacts.front().reasons.push_back(

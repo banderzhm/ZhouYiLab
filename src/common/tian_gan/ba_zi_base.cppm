@@ -128,7 +128,7 @@ struct Pillar {
   }
 };
 
-/** 单柱纳音基础事实，由基础层统一计算，分析层不得重复维护六十甲子表。 */
+/** 单柱纳音排定结果，由干支基础层统一计算，分析层不得重复维护六十甲子表。 */
 struct PillarNayin {
   std::string name;
   WuXing element;
@@ -149,10 +149,11 @@ struct HumanCommandInfo {
  *
  *
  * 四柱位置属于八字基础数据，不应由各分析流派重复维护名称表。
- * @param position
+ * @param
+ * position
  * 位置索引，0=年柱、1=月柱、2=日柱、3=时柱。
- * @throws std::out_of_range
- * 当索引不在 0~3 范围内时抛出。
+ * @throws
+ * std::out_of_range 当索引不在 0~3 范围内时抛出。
  */
 std::string pillar_position_name(std::size_t position);
 
@@ -162,12 +163,13 @@ PillarNayin calculate_pillar_nayin(const Pillar &pillar);
 /**
  * @brief 按出生公历时刻计算人元司令。
  * @param year 公历年份。
+ *
  * @param
  * month 公历月份。
  * @param day 公历日期。
  * @param hour 公历小时。
- * @param
- * minute 分钟。
+ *
+ * @param minute 分钟。
  * @param second 秒。
  */
 HumanCommandInfo calculate_human_command(int year, int month, int day, int hour,

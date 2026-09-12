@@ -121,10 +121,10 @@ KongWangResult calculate_kong_wang(const BaZi &chart,
         chart_branches[position] != result.branches[1])
       continue;
     result.affected_positions.push_back(static_cast<int>(position));
-    result.evidence.push_back({"kong_wang.branch",
-                               position_name(position, false), "旬空", 0.0,
-                               branch_name(chart_branches[position]) +
-                                   "落旬空，只折减该支承载的根气与十神"});
+    result.ming_li_basis.push_back({"kong_wang.branch",
+                                    position_name(position, false), "旬空", 0.0,
+                                    branch_name(chart_branches[position]) +
+                                        "落旬空，只折减该支承载的根气与十神"});
   }
   return result;
 }
@@ -302,7 +302,7 @@ ClimateResult assess_climate(const BaZi &chart,
         continue;
       found = true;
       stem_power += occurrence.effective_power;
-      result.evidence.push_back(
+      result.ming_li_basis.push_back(
           {"climate.exact_stem", occurrence.position, stem_name(preferred),
            occurrence.effective_power,
            occurrence.exposed ? "调候字精确透干"
@@ -331,7 +331,7 @@ ClimateResult assess_climate(const BaZi &chart,
       : result.state == ClimateState::Satisfied
           ? "调候已备，不再重复补药"
           : "调候同类已过量，继续增加反加重偏性";
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"climate.state", branch_name(month), enum_code(result.state),
        result.state == ClimateState::Missing ? 40.0 : 0.0, state_reason});
   return result;
@@ -357,7 +357,7 @@ detect_ten_god_combos(const std::vector<TenGodOccurrence> &occurrences,
           const std::vector<const TenGodOccurrence *> &evidence_items) {
         TenGodCombo combo{kind, severity, std::move(note), {}};
         for (const auto *item : evidence_items) {
-          combo.evidence.push_back(
+          combo.ming_li_basis.push_back(
               {"ten_god.occurrence", item->position, stem_name(item->stem),
                item->effective_power,
                item->exposed ? "透干十神"
@@ -433,8 +433,9 @@ calculate_balance(const BaZi &chart, const AnalysisConfig &config,
     const auto element = get_wu_xing(stems[i]);
     auto &stat = balance[element_index(element)];
     stat.raw += config.stem_weight;
-    stat.evidence.push_back({"element.stem", stem_name(stems[i]), "天干",
-                             config.stem_weight, "天干按配置权重计入五行力量"});
+    stat.ming_li_basis.push_back({"element.stem", stem_name(stems[i]), "天干",
+                                  config.stem_weight,
+                                  "天干按配置权重计入五行力量"});
   }
 
   for (std::size_t position = 0; position < branches.size(); ++position) {
@@ -447,7 +448,7 @@ calculate_balance(const BaZi &chart, const AnalysisConfig &config,
       const auto element = get_wu_xing(hidden[index]);
       auto &stat = balance[element_index(element)];
       stat.raw += contribution;
-      stat.evidence.push_back(
+      stat.ming_li_basis.push_back(
           {"element.hidden_stem",
            branch_name(branches[position]) + stem_name(hidden[index]),
            index == 0 ? "本气" : (index == 1 ? "中气" : "余气"), contribution,
@@ -471,7 +472,7 @@ calculate_balance(const BaZi &chart, const AnalysisConfig &config,
     const auto element = get_wu_xing(hidden.front());
     auto &stat = balance[element_index(element)];
     stat.raw += contribution;
-    stat.evidence.push_back(
+    stat.ming_li_basis.push_back(
         {"element.arching",
          branch_name(relation.first) + branch_name(relation.second),
          "虚拱" + branch_name(*relation.virtual_branch), contribution,
@@ -491,11 +492,11 @@ calculate_balance(const BaZi &chart, const AnalysisConfig &config,
       const auto original = get_wu_xing(stem);
       balance[element_index(original)].raw = std::max(
           0.0, balance[element_index(original)].raw - config.stem_weight);
-      balance[element_index(original)].evidence.push_back(
+      balance[element_index(original)].ming_li_basis.push_back(
           {"element.stem_transform", stem_name(stem), "合化移出",
            -config.stem_weight, "已确认天干五合，力量按化神重计"});
       balance[element_index(*transformed)].raw += config.stem_weight;
-      balance[element_index(*transformed)].evidence.push_back(
+      balance[element_index(*transformed)].ming_li_basis.push_back(
           {"element.stem_transform", stem_name(stem), "合化移入",
            config.stem_weight, "已确认天干五合，力量按化神重计"});
     }
@@ -554,7 +555,7 @@ double month_command_score(TianGan day_stem, DiZhi month_branch,
     result.tomb_opened = opening.opened;
     result.tomb_opening_cause = opening.cause;
     const double score = opening.opened ? 60.0 : 35.0;
-    result.evidence.push_back(
+    result.ming_li_basis.push_back(
         {"strength.month_tomb", branch_name(month_branch),
          opening.opened ? "墓库已开" : "墓库未开", score,
          opening.opened
@@ -577,7 +578,7 @@ double root_stability_score(const BaZi &chart, TianGan day_stem,
                             const std::vector<BranchRelation> &relations,
                             const KongWangResult &kong_wang,
                             const AnalysisConfig &config,
-                            std::vector<Evidence> &evidence) {
+                            std::vector<MingLiBasis> &ming_li_basis) {
   const auto day_element = get_wu_xing(day_stem);
   const auto branches = ZhouYi::BaZiBase::get_branches(chart);
   double raw = 0.0;
@@ -602,7 +603,7 @@ double root_stability_score(const BaZi &chart, TianGan day_stem,
       if (empty)
         contribution *= config.kong_wang_root_multiplier;
       raw += contribution;
-      evidence.push_back(
+      ming_li_basis.push_back(
           {"capacity.root",
            branch_name(branches[position]) + stem_name(hidden[index]),
            same ? "同类根" : "印根", contribution,
@@ -628,9 +629,9 @@ double root_stability_score(const BaZi &chart, TianGan day_stem,
     }
     if (life_adjustment != 0.0) {
       raw = std::max(0.0, raw + life_adjustment);
-      evidence.push_back({"strength.twelve_life",
-                          branch_name(branches[position]), "十二长生",
-                          life_adjustment, std::move(life_reason)});
+      ming_li_basis.push_back({"strength.twelve_life",
+                               branch_name(branches[position]), "十二长生",
+                               life_adjustment, std::move(life_reason)});
     }
   }
   for (const auto &relation : relations) {
@@ -652,7 +653,7 @@ double root_stability_score(const BaZi &chart, TianGan day_stem,
     if (disrupted)
       contribution *= config.clashed_root_multiplier;
     raw += contribution;
-    evidence.push_back(
+    ming_li_basis.push_back(
         {"strength.arching",
          branch_name(relation.first) + branch_name(relation.second),
          "虚拱" + branch_name(*relation.virtual_branch), contribution,
@@ -664,7 +665,7 @@ double root_stability_score(const BaZi &chart, TianGan day_stem,
 }
 
 double stem_support_score(const BaZi &chart, WuXing day_element,
-                          std::vector<Evidence> &evidence) {
+                          std::vector<MingLiBasis> &ming_li_basis) {
   double score = 50.0;
   const auto stems = ZhouYi::BaZiBase::get_stems(chart);
   for (std::size_t index = 0; index < stems.size(); ++index) {
@@ -687,8 +688,8 @@ double stem_support_score(const BaZi &chart, WuXing day_element,
       relation = "耗身";
     }
     score += delta;
-    evidence.push_back({"strength.stem", stem_name(stems[index]), relation,
-                        delta, "天干对日主的直接作用"});
+    ming_li_basis.push_back({"strength.stem", stem_name(stems[index]), relation,
+                             delta, "天干对日主的直接作用"});
   }
   return clamp_score(score);
 }
@@ -701,12 +702,13 @@ StrengthResult assess_strength(const BaZi &chart,
   StrengthResult result;
   result.month_command =
       month_command_score(chart.day.gan, chart.month.zhi, relations, result);
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"strength.month_command", branch_name(chart.month.zhi), "月令",
        result.month_command, "月令按日主五行的生、扶、泄、克关系归一化评分"});
   result.roots = root_stability_score(chart, chart.day.gan, relations,
-                                      kong_wang, config, result.evidence);
-  result.stem_support = stem_support_score(chart, day_element, result.evidence);
+                                      kong_wang, config, result.ming_li_basis);
+  result.stem_support =
+      stem_support_score(chart, day_element, result.ming_li_basis);
   result.season_adjustment = 60.0;
   if (is_winter(chart.month.zhi) && day_element == WuXing::Huo)
     result.season_adjustment = 30.0;
@@ -717,12 +719,13 @@ StrengthResult assess_strength(const BaZi &chart,
         return relation.type == BranchRelationKind::Clash;
       }));
   result.relation_adjustment = clamp_score(60.0 - clashes * 12.0);
-  result.evidence.push_back({"strength.season", branch_name(chart.month.zhi),
-                             "季节", result.season_adjustment - 60.0,
-                             "季节对日主可发挥程度的归一化修正"});
-  result.evidence.push_back({"strength.relations", "四支", "冲合刑害",
-                             result.relation_adjustment - 60.0,
-                             "冲关系降低根气稳定性；合刑害仅保留结构证据"});
+  result.ming_li_basis.push_back(
+      {"strength.season", branch_name(chart.month.zhi), "季节",
+       result.season_adjustment - 60.0, "季节对日主可发挥程度的归一化修正"});
+  result.ming_li_basis.push_back(
+      {"strength.relations", "四支", "冲合刑害",
+       result.relation_adjustment - 60.0,
+       "冲关系降低根气稳定性；合刑害仅保留结构证据"});
   result.score =
       clamp_score(0.40 * result.month_command + 0.30 * result.roots +
                   0.15 * result.stem_support + 0.10 * result.season_adjustment +
@@ -741,7 +744,7 @@ StrengthResult assess_strength(const BaZi &chart,
 }
 
 double climate_workability_score(WuXing day_element, DiZhi month_branch,
-                                 std::vector<Evidence> &evidence) {
+                                 std::vector<MingLiBasis> &ming_li_basis) {
   double value = 60.0;
   if (is_winter(month_branch)) {
     if (day_element == WuXing::Huo)
@@ -758,8 +761,9 @@ double climate_workability_score(WuXing day_element, DiZhi month_branch,
     else if (day_element == WuXing::Jin)
       value = 45.0;
   }
-  evidence.push_back({"capacity.climate", branch_name(month_branch), "寒暖燥湿",
-                      value - 60.0, "按日主五行与季节环境评估可发挥程度"});
+  ming_li_basis.push_back({"capacity.climate", branch_name(month_branch),
+                           "寒暖燥湿", value - 60.0,
+                           "按日主五行与季节环境评估可发挥程度"});
   return value;
 }
 
@@ -789,7 +793,7 @@ WuXing controller_element(WuXing element) {
 
 double circulation_score(WuXing day_element,
                          const std::array<ElementStat, 5> &balance,
-                         std::vector<Evidence> &evidence) {
+                         std::vector<MingLiBasis> &ming_li_basis) {
   const double support =
       balance[element_index(day_element)].percent +
       balance[element_index(resource_element(day_element))].percent;
@@ -798,9 +802,9 @@ double circulation_score(WuXing day_element,
       balance[element_index(generated_element(day_element))].percent * 0.5;
   const double score = clamp_score(50.0 + (support - 40.0) * 0.45 -
                                    std::max(0.0, pressure - 25.0) * 0.55);
-  evidence.push_back({"capacity.circulation", element_name(day_element),
-                      "生克流通", score - 50.0,
-                      "比较印比支持与官杀、泄耗压力"});
+  ming_li_basis.push_back({"capacity.circulation", element_name(day_element),
+                           "生克流通", score - 50.0,
+                           "比较印比支持与官杀、泄耗压力"});
   return score;
 }
 
@@ -811,25 +815,26 @@ CarryingCapacity assess_capacity(const BaZi &chart,
                                  const std::array<ElementStat, 5> &balance,
                                  const AnalysisConfig &config) {
   CarryingCapacity result;
-  std::vector<Evidence> root_evidence;
+  std::vector<MingLiBasis> root_evidence;
   result.root_stability = root_stability_score(
       chart, chart.day.gan, relations, kong_wang, config, root_evidence);
-  std::vector<Evidence> climate_evidence;
+  std::vector<MingLiBasis> climate_evidence;
   result.climate_workability = climate_workability_score(
       get_wu_xing(chart.day.gan), chart.month.zhi, climate_evidence);
-  std::vector<Evidence> circulation_evidence;
+  std::vector<MingLiBasis> circulation_evidence;
   result.circulation = circulation_score(get_wu_xing(chart.day.gan), balance,
                                          circulation_evidence);
   result.overall = clamp_score(
       0.40 * strength.score + 0.30 * result.root_stability +
       0.20 * result.climate_workability + 0.10 * result.circulation);
-  result.evidence.insert(result.evidence.end(), root_evidence.begin(),
-                         root_evidence.end());
-  result.evidence.insert(result.evidence.end(), climate_evidence.begin(),
-                         climate_evidence.end());
-  result.evidence.insert(result.evidence.end(), circulation_evidence.begin(),
-                         circulation_evidence.end());
-  for (const auto &item : result.evidence) {
+  result.ming_li_basis.insert(result.ming_li_basis.end(), root_evidence.begin(),
+                              root_evidence.end());
+  result.ming_li_basis.insert(result.ming_li_basis.end(),
+                              climate_evidence.begin(), climate_evidence.end());
+  result.ming_li_basis.insert(result.ming_li_basis.end(),
+                              circulation_evidence.begin(),
+                              circulation_evidence.end());
+  for (const auto &item : result.ming_li_basis) {
     if (item.points < 0.0 || item.reason.find("受冲") != std::string::npos) {
       result.penalties.push_back(item);
     }
@@ -1327,7 +1332,7 @@ determine_pattern(const BaZi &chart, const std::vector<TenGodCombo> &combos,
       result.competing_patterns.push_back(
           pattern_name(get_shi_shen(chart.day.gan, hidden)));
   }
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"pattern.month_command",
        branch_name(chart.month.zhi) + stem_name(pattern_stem), "月令取格", 0.0,
        main_transformed
@@ -1336,7 +1341,7 @@ determine_pattern(const BaZi &chart, const std::vector<TenGodCombo> &combos,
                                  : (pattern_stem == month_hidden.front()
                                         ? "月令本气取格"
                                         : "月令藏干透出，优先以透干取格"))});
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"pattern.human_command", branch_name(chart.month.zhi), "分日司令", 0.0,
        birth_context.human_command
            ? birth_context.human_command_reason
@@ -1751,7 +1756,7 @@ ShengKeChainResult analyze_chain(TianGan day_master,
     }
   }
   result.smooth = result.breaks.empty();
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"sheng_ke_chain", stem_name(day_master), "五行流通",
        result.smooth ? 1.0 : -1.0,
        result.smooth ? "各链段均达到最低力量阈值" : "存在力量不足链段"});
@@ -2006,15 +2011,16 @@ verify_yong_shen(const BaZi &chart, const ShenCandidate &candidate,
       exact_root_power = std::max(exact_root_power, root_points);
       if (clashed)
         result.is_chonged = true;
-      Evidence root{"useful_god.verify_exact_root",
-                    branch_name(branches[position]) + stem_name(hidden[index]),
-                    result.root_level, root_points,
-                    clashed && empty ? "候选本干根受冲且落空，双重折减"
-                    : clashed        ? "候选本干根所在支受冲"
-                    : empty          ? "候选本干根落旬空，根气折减不归零"
-                                     : "候选本干在原局有根"};
+      MingLiBasis root{"useful_god.verify_exact_root",
+                       branch_name(branches[position]) +
+                           stem_name(hidden[index]),
+                       result.root_level, root_points,
+                       clashed && empty ? "候选本干根受冲且落空，双重折减"
+                       : clashed        ? "候选本干根所在支受冲"
+                       : empty          ? "候选本干根落旬空，根气折减不归零"
+                                        : "候选本干在原局有根"};
       result.exact_roots.push_back(root);
-      result.evidence.push_back(std::move(root));
+      result.ming_li_basis.push_back(std::move(root));
     }
   }
   result.tou_gan = std::any_of(stems.begin(), stems.end(), [&](TianGan stem) {
@@ -2044,12 +2050,12 @@ verify_yong_shen(const BaZi &chart, const ShenCandidate &candidate,
   result.power = clamp_score(result.power);
   result.effective = exact_root_power >= 10.0 && !result.is_transformed &&
                      result.power >= config.useful_god_effective_threshold;
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"useful_god.verify_transparency", stem_name(candidate.stem), "透干",
        result.tou_gan ? 20.0 : 0.0,
        result.tou_gan ? "候选本干已精确透于原局；同五行异干不代替"
                       : "候选本干未透于原局"});
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"useful_god.verify_relation", stem_name(candidate.stem),
        result.is_transformed ? "合化" : (result.is_he ? "合绊" : "无合"),
        -result.combine_penalty,
@@ -2057,7 +2063,7 @@ verify_yong_shen(const BaZi &chart, const ShenCandidate &candidate,
            ? "候选本干参与有效合化，原有作用迁移"
            : (result.is_he ? "候选本干见五合不化，按相邻/隔位距离折减"
                            : "未见候选本干参与天干五合")});
-  result.evidence.push_back(
+  result.ming_li_basis.push_back(
       {"useful_god.verify_capacity", stem_name(candidate.stem), "承载能力",
        capacity.overall, "承载能力与根气、冲合共同决定候选是否可兑现"});
   return result;

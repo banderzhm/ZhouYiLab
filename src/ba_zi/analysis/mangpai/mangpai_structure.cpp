@@ -2,7 +2,7 @@
 module ZhouYi.BaZiAnalysis.MangPai.Structure;
 
 import ZhouYi.GanZhi;
-import ZhouYi.BaZiAnalysis.MangPai.Common;
+import ZhouYi.BaZiAnalysis.MangPai.ShiShenRules;
 import std;
 
 namespace ZhouYi::BaZiAnalysis::MangPai::Structure {
@@ -34,7 +34,7 @@ void add(AnalysisResult &result, std::string text) {
   result.blind_analysis->structures.push_back(std::move(text));
 }
 void add_event(AnalysisResult &result, std::string type, double pressure,
-               std::string trigger, std::string evidence) {
+               std::string trigger, std::string ming_li_basis) {
   auto &events = result.blind_analysis->event_impacts;
   const auto it =
       std::find_if(events.begin(), events.end(),
@@ -43,11 +43,11 @@ void add_event(AnalysisResult &result, std::string type, double pressure,
     events.push_back({std::move(type),
                       pressure,
                       {std::move(trigger)},
-                      {std::move(evidence)}});
+                      {std::move(ming_li_basis)}});
   } else {
     it->pressure += pressure;
     it->triggers.push_back(std::move(trigger));
-    it->evidence.push_back(std::move(evidence));
+    it->ming_li_basis.push_back(std::move(ming_li_basis));
   }
 }
 
@@ -71,8 +71,8 @@ void classify_waste(AnalysisResult &result) {
   for (const auto &occurrence : result.ten_god_occurrences) {
     // 体神和目标用是独立于宫位的两条轴：体（印、比、食伤）与用（财、官、杀）
     // 均不得被归为废神；只有不参与做功且不属于体用的闲字才可列废。
-    if (Common::is_body_god(occurrence.ten_god) ||
-        Common::is_target_god(occurrence.ten_god))
+    if (ShiShenRules::is_body_god(occurrence.ten_god) ||
+        ShiShenRules::is_target_god(occurrence.ten_god))
       continue;
     if (participates_in_work(occurrence, blind.work_chains))
       continue;

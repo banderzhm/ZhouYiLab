@@ -1,9 +1,9 @@
-// C++23 - 盲派公共辅助实现
-module ZhouYi.BaZiAnalysis.MangPai.Common;
+// C++23 - 盲派体用十神规则实现
+module ZhouYi.BaZiAnalysis.MangPai.ShiShenRules;
 
 import ZhouYi.GanZhi;
 
-namespace ZhouYi::BaZiAnalysis::MangPai::Common {
+namespace ZhouYi::BaZiAnalysis::MangPai::ShiShenRules {
 
 bool is_body_god(ZhouYi::GanZhi::ShiShen god) {
   using enum ZhouYi::GanZhi::ShiShen;
@@ -17,4 +17,4 @@ bool is_target_god(ZhouYi::GanZhi::ShiShen god) {
          god == QiSha || god == ShangGuan;
 }
 
-} // namespace ZhouYi::BaZiAnalysis::MangPai::Common
+} // namespace ZhouYi::BaZiAnalysis::MangPai::ShiShenRules

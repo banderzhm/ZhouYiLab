@@ -1,4 +1,4 @@
-// C++23 Module - 八字分析报告接口
+// C++23 Module - 八字中文报告门面接口
 // 负责结构化序列化与中文报告，不参与分析规则计算。
 export module ZhouYi.BaZiAnalysis.Report;
 

@@ -8,7 +8,7 @@
 
 ```python
 @dataclass
-class Evidence:
+class MingLiBasis:
     rule: str                 # 规则编号，如 strength.de_ling
     subject: str              # 作用对象，如 月令寅、年支申
     relation: str             # 比劫/印/财/官/冲/合等
@@ -19,7 +19,7 @@ class Evidence:
 class ElementStat:
     raw: float                # 未归一化力量
     percent: float             # raw / 五行总和 * 100
-    sources: list[Evidence]
+    sources: list[MingLiBasis]
 
 @dataclass
 class ShenCandidate:
@@ -30,8 +30,8 @@ class ShenCandidate:
     effective_score: float    # 经透藏根气、合冲空亡、承载能力修正后的有效分
     percent: float             # 同一角色候选总分中的相对支持度
     effects: list
-    reasons: list[Evidence]
-    conflicts: list[Evidence]
+    reasons: list[MingLiBasis]
+    conflicts: list[MingLiBasis]
 
 @dataclass
 class CarryingCapacity:
@@ -40,8 +40,8 @@ class CarryingCapacity:
     root_stability: float      # 日主及印比根气，已扣除冲、合化等失效部分
     climate_workability: float # 日主能否在寒暖燥湿环境中发挥
     circulation: float         # 生扶、泄耗、克制是否通畅
-    penalties: list[Evidence]
-    evidence: list[Evidence]
+    penalties: list[MingLiBasis]
+    ming_li_basis: list[MingLiBasis]
 
 @dataclass
 class AnalysisResult:
@@ -52,7 +52,7 @@ class AnalysisResult:
     input_pillars: list[str]   # 年、月、日、时四柱快照
     day_master: str
     nayin: list[dict]
-    strength: dict              # score_100、level、components、evidence
+    strength: dict              # score_100、level、components、ming_li_basis
     carrying_capacity: CarryingCapacity
     element_balance: dict[str, ElementStat]
     climate: dict
@@ -91,7 +91,7 @@ def calc_element_balance(chart, relations, config):
         for item in relation:
             if item.get("effective") and item.get("element"):
                 raw[item["element"]] += item.get("power", 0)
-                sources[item["element"]].append(item.get("evidence", []))
+                sources[item["element"]].append(item.get("ming_li_basis", []))
     total = sum(raw.values())
     return {e: {"raw": raw[e], "percent": percent(raw[e], total),
                 "sources": sources[e]} for e in FIVE_ELEMENTS}
@@ -233,7 +233,7 @@ class StrengthResult:
     de_di_score: float        # 得地得分
     de_shi_score: float       # 得势得分
     components: dict          # 五个0..100分量及各自权重
-    evidence: List[Evidence]
+    ming_li_basis: List[MingLiBasis]
 
 11.2 得令判定（权重40%）
 
@@ -244,7 +244,7 @@ def score_de_ling(chart: dict, relations: dict, config) -> ComponentScore:
     """
     month_branch = chart["month_branch"]
     weights = config.hidden_weights       # 默认 [1.0, 0.6, 0.3]
-    support, oppose, evidence = 0.0, 0.0, []
+    support, oppose, ming_li_basis = 0.0, 0.0, []
     for hidden, weight in zip(HIDDEN_STEMS[month_branch], weights):
         ten_god = get_shi_shen(chart["day_stem"], hidden)
         effective = weight * relation_multiplier(month_branch, hidden, relations)
@@ -252,17 +252,17 @@ def score_de_ling(chart: dict, relations: dict, config) -> ComponentScore:
             support += effective
         else:
             oppose += effective
-        evidence.append(Evidence("strength.de_ling", month_branch, ten_god,
+        ming_li_basis.append(MingLiBasis("strength.de_ling", month_branch, ten_god,
                                  effective, f"月令藏干{hidden}"))
 
     value = clamp(50 + 50 * safe_ratio(support - oppose, support + oppose), 0, 100)
     tomb = detect_tomb_trigger(month_branch, chart["branches"], relations)
     if tomb.triggered:
-        evidence.append(Evidence(
+        ming_li_basis.append(MingLiBasis(
             "strength.tomb_trigger", month_branch, tomb.cause, 0,
             f"墓库受{tomb.cause}引动；是吉是凶另看库中何物透藏及喜忌，不自动加分"
         ))
-    return ComponentScore(value=round(value, 2), evidence=evidence,
+    return ComponentScore(value=round(value, 2), ming_li_basis=ming_li_basis,
                           meta={"tomb": tomb})
 
 @dataclass
@@ -293,7 +293,7 @@ def score_de_di(chart: dict, relations: dict, kong_wang: dict, config) -> Compon
         arching_multiplier=config.arching_root_multiplier,
     )
     value = percent(clamp(roots.total, 0, roots.maximum), roots.maximum)
-    return ComponentScore(value=value, evidence=roots.evidence,
+    return ComponentScore(value=value, ming_li_basis=roots.ming_li_basis,
                           meta={"real_roots": roots.real,
                                 "virtual_roots": roots.arching,
                                 "twelve_life": roots.twelve_life_labels})
@@ -305,7 +305,7 @@ def score_de_shi(chart: dict, relations: dict) -> ComponentScore:
     天干帮扶/克泄耗均先计算透干的有效力量，再映射到0..100。
     合而不化、合化成功、争合、克制不能都按同一个天干满分计。
     """
-    support, oppose, evidence = 0.0, 0.0, []
+    support, oppose, ming_li_basis = 0.0, 0.0, []
     for position, stem in enumerate(chart["stems"]):
         if position == 2:                 # 跳过日干自身
             continue
@@ -315,10 +315,10 @@ def score_de_shi(chart: dict, relations: dict) -> ComponentScore:
             support += p
         else:
             oppose += p
-        evidence.append(Evidence("strength.de_shi", stem, ten_god, p,
+        ming_li_basis.append(MingLiBasis("strength.de_shi", stem, ten_god, p,
                                  f"天干位置={position}"))
     value = clamp(50 + 50 * safe_ratio(support - oppose, support + oppose), 0, 100)
-    return ComponentScore(value=round(value, 2), evidence=evidence)
+    return ComponentScore(value=round(value, 2), ming_li_basis=ming_li_basis)
 
 11.5 综合打分与等级判定
 
@@ -340,7 +340,7 @@ def assess_strength(chart: dict, relations: dict, kong_wang: dict, config) -> St
         de_shi_score=shi.value,
         components={"de_ling": ling, "de_di": di, "de_shi": shi,
                     "season": season, "relations": flow},
-        evidence=flatten_evidence(ling, di, shi, season, flow)
+        ming_li_basis=flatten_evidence(ling, di, shi, season, flow)
     )
 
 Step 12: 调候需求判定
@@ -680,7 +680,7 @@ def check_cong_ge(chart: dict, strength: StrengthResult,
     if strength.score > 30 or support > CONG_SUPPORT_MAX or unbroken_roots:
         return {
             "type": "从格", "sub_type": None, "status": "excluded",
-            "evidence": base_evidence,
+            "ming_li_basis": base_evidence,
             "conflicts": ["日主未到极弱弃命条件或仍有有效印比根援"],
         }
 
@@ -735,7 +735,7 @@ def check_cong_ge(chart: dict, strength: StrengthResult,
         "is_fake": status == "needs_review",
         "supports": supports,
         "conflicts": conflicts,
-        "evidence": base_evidence + [f"{k}={v}" for k, v in family_power.items()],
+        "ming_li_basis": base_evidence + [f"{k}={v}" for k, v in family_power.items()],
     }
 
 14.2 专旺格判定
@@ -801,7 +801,7 @@ def check_zhuan_wang(chart: dict, strength: StrengthResult,
         "status": status,
         "supports": supports,
         "conflicts": conflicts,
-        "evidence": [
+        "ming_li_basis": [
             f"月支={month_branch}", f"同印占比={support_percent}%",
             f"官杀有效力量={officer_power}",
         ],
@@ -897,7 +897,7 @@ def evaluate_special_patterns(chart, strength, capacity, balance,
 
 Step 15: 合冲刑害检测引擎
 
-所有关系结果统一包含 `a`、`b`、`positions`、`symmetric`、`effective`、`impact` 和 `evidence` 字段。合、冲、刑、害本身只描述结构；是否改变五行力量，必须另行依据得令、得根、成化条件和作用对象判定，不能检测到关系后统一加减分。刑要额外记录方向（如寅→巳），自刑记录同一地支的两次出现。
+所有关系结果统一包含 `a`、`b`、`positions`、`symmetric`、`effective`、`impact` 和 `ming_li_basis` 字段。合、冲、刑、害本身只描述结构；是否改变五行力量，必须另行依据得令、得根、成化条件和作用对象判定，不能检测到关系后统一加减分。刑要额外记录方向（如寅→巳），自刑记录同一地支的两次出现。
 
 15.1 六合检测
 
@@ -1137,7 +1137,7 @@ def detect_shi_shen_combos(chart: dict, strength: StrengthResult,
     # 1. 官杀混杂
     if guan and sha and not check_guan_sha_resolution(occurrences, relations):
         results.append({"combo": "官杀混杂", "severity": "warn",
-                        "evidence": occurrence_evidence(guan + sha)})
+                        "ming_li_basis": occurrence_evidence(guan + sha)})
     
     # 2. 伤官见官
     if any(can_form_combo(a, b) for a in shang for b in guan):
@@ -1298,8 +1298,8 @@ def assess_carrying_capacity(chart, strength, climate, relations, balance, confi
         circulation=circulation.value,
         penalties=[*roots.penalties, *climate_workability.penalties,
                    *circulation.penalties],
-        evidence=[*roots.evidence, *climate_workability.evidence,
-                  *circulation.evidence]
+        ming_li_basis=[*roots.ming_li_basis, *climate_workability.ming_li_basis,
+                  *circulation.ming_li_basis]
     )
 ```
 
@@ -1325,7 +1325,7 @@ def apply_carrying_capacity(candidate, capacity):
     candidate.raw_score = direct + active
     candidate.effective_score = direct + active * factor
     if active and factor < 1.0:
-        candidate.conflicts.append(Evidence(
+        candidate.conflicts.append(MingLiBasis(
             rule="useful_god.carrying_capacity",
             subject=candidate.stem,
             relation="承载不足",
@@ -1449,7 +1449,7 @@ def _build_result_from_candidates(candidates: list, chart: dict, pattern: dict,
             capacity.overall < LOW_CAPACITY_THRESHOLD or
             score_gap(candidates) < REVIEW_SCORE_GAP
         ) else "confirmed",
-        "evidence": [*yong.reasons, *xi.reasons, *ji.reasons, *chou.reasons],
+        "ming_li_basis": [*yong.reasons, *xi.reasons, *ji.reasons, *chou.reasons],
     }
 
 17.5 用神验证（根气、关系、承载能力）
@@ -1509,7 +1509,7 @@ def verify_yong_shen(yong_stem: str, four_stems: List[str],
         "effective": exact_root_level != "无根" and not is_chonged,
         "power": _calc_power(exact_root_level, tou_gan, is_chonged, is_he, kong_wang),
         "carrying_capacity": capacity.overall,
-        "capacity_evidence": capacity.evidence
+        "capacity_evidence": capacity.ming_li_basis
     }
 
 Step 18: 生克链连贯性分析

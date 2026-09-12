@@ -1,7 +1,7 @@
 // C++23 Module - 盲派八字分析接口
 export module ZhouYi.BaZiAnalysis.MangPai;
 
-import ZhouYi.BaZiAnalysis.Common;
+import ZhouYi.BaZiAnalysis.Contract;
 import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import ZhouYi.BaZiBase;
 import std;

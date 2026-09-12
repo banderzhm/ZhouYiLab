@@ -1,6 +1,6 @@
-// C++23 Module - 八字分析公共契约
+// C++23 Module - 八字分析统一契约
 // 只放各流派共用的出生排盘条件、命理依据和配置，不承载具体流派结论。
-export module ZhouYi.BaZiAnalysis.Common;
+export module ZhouYi.BaZiAnalysis.Contract;
 
 import ZhouYi.GanZhi;
 import std;
@@ -9,8 +9,8 @@ export namespace ZhouYi::BaZiAnalysis {
 
 using ZhouYi::GanZhi::TianGan;
 
-/** 单条可追溯规则证据。 */
-struct Evidence {
+/** 单条可追溯命理依据。 */
+struct MingLiBasis {
   std::string rule;     ///< 稳定规则标识，供追踪和程序消费。
   std::string subject;  ///< 规则作用的干支、柱位或候选对象。
   std::string relation; ///< 命中的命理关系或规则状态。

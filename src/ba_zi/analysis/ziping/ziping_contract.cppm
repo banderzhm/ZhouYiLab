@@ -2,7 +2,7 @@
 // 只定义子平原局、格局、取用与岁运结果，不声明服务或展示函数。
 export module ZhouYi.BaZiAnalysis.ZiPing.Contract;
 
-export import ZhouYi.BaZiAnalysis.Common;
+export import ZhouYi.BaZiAnalysis.Contract;
 export import ZhouYi.BaZiAnalysis.MangPai.Contract;
 import nlohmann.json;
 import ZhouYi.BaZiBase;
@@ -191,10 +191,10 @@ enum class TenGodComboKind {
 
 /** 单个五行的加权力量、归一化占比及证据。 */
 struct ElementStat {
-  WuXing element;                 ///< 当前统计的五行。
-  double raw{};                   ///< 按配置权重累加、尚未归一化的力量。
-  double percent{};               ///< 当前五行占全部五行力量的百分比。
-  std::vector<Evidence> evidence; ///< 构成原始力量的逐项证据。
+  WuXing element;   ///< 当前统计的五行。
+  double raw{};     ///< 按配置权重累加、尚未归一化的力量。
+  double percent{}; ///< 当前五行占全部五行力量的百分比。
+  std::vector<MingLiBasis> ming_li_basis; ///< 构成五行力量的逐项命理依据。
 };
 
 /** 一组地支关系及其方向、成局状态和影响说明。 */
@@ -202,14 +202,14 @@ struct BranchRelation {
   BranchRelationKind type{BranchRelationKind::Clash}; ///< 关系类型。
   DiZhi first;                                        ///< 第一参与地支。
   DiZhi second;                                       ///< 第二参与地支。
-  int first_position{};           ///< 第一地支柱位：0年、1月、2日、3时。
-  int second_position{};          ///< 第二地支柱位：0年、1月、2日、3时。
-  bool symmetric{true};           ///< 关系是否双向成立。
-  std::string impact;             ///< 对后续分析的中文影响说明。
-  std::vector<Evidence> evidence; ///< 识别关系与判定有效性的证据。
-  std::vector<DiZhi> members;     ///< 三合、三会、三刑等全部参与地支。
-  bool effective{};               ///< 是否满足成局或成化条件。
-  std::string direction;          ///< 刑的作用方向；对称关系通常为“双向”。
+  int first_position{};  ///< 第一地支柱位：0年、1月、2日、3时。
+  int second_position{}; ///< 第二地支柱位：0年、1月、2日、3时。
+  bool symmetric{true};  ///< 关系是否双向成立。
+  std::string impact;    ///< 对后续分析的中文影响说明。
+  std::vector<MingLiBasis> ming_li_basis; ///< 识别关系与判定有效性的命理依据。
+  std::vector<DiZhi> members;             ///< 三合、三会、三刑等全部参与地支。
+  bool effective{};                       ///< 是否满足成局或成化条件。
+  std::string direction; ///< 刑的作用方向；对称关系通常为“双向”。
   RelationStrength strength{RelationStrength::None}; ///< 组合结构强度。
   std::optional<DiZhi> virtual_branch; ///< 拱合所缺中神；非拱合为空。
 };
@@ -221,9 +221,9 @@ struct StemRelation {
   int first_position{};  ///< 第一天干柱位：0年、1月、2日、3时。
   int second_position{}; ///< 第二天干柱位：0年、1月、2日、3时。
   StemRelationKind type{StemRelationKind::FiveCombine}; ///< 天干关系类型。
-  std::string transform;          ///< “仅合不化”或实际合化五行说明。
-  bool effective{};               ///< 合化条件是否全部成立。
-  std::vector<Evidence> evidence; ///< 合、化及破化条件的证据。
+  std::string transform;                  ///< “仅合不化”或实际合化五行说明。
+  bool effective{};                       ///< 合化条件是否全部成立。
+  std::vector<MingLiBasis> ming_li_basis; ///< 合、化及破化条件的命理依据。
 };
 
 /** 单柱纳音名称和所属五行。 */
@@ -244,7 +244,7 @@ struct ClimateResult {
   double usable_power{}; ///< 调候天干按透藏、冲空折算后的有效力量。
   ClimateUrgency urgency{ClimateUrgency::None}; ///< 调候优先级。
   std::string reason;                           ///< 调候结论摘要。
-  std::vector<Evidence> evidence;               ///< 调候用字和状态证据。
+  std::vector<MingLiBasis> ming_li_basis;       ///< 调候用字和状态依据。
 };
 
 /** 正格取格、成败病药和竞争格局的判定结果。 */
@@ -256,7 +256,7 @@ struct PatternResult {
   PatternCondition condition{PatternCondition::Established}; ///< 成败病药状态。
   double disease_power{};                        ///< 破坏格局的病神有效力量。
   double medicine_power{};                       ///< 制病救格的药神有效力量。
-  std::vector<Evidence> evidence;                ///< 取格与病药计算证据。
+  std::vector<MingLiBasis> ming_li_basis;        ///< 取格与病药推演依据。
   std::vector<std::string> supports;             ///< 有利于格局成立的条件。
   std::vector<std::string> conflicts;            ///< 格局病处或破格条件。
   PatternBasis basis{PatternBasis::MonthMainQi}; ///< 取格依据。
@@ -269,17 +269,17 @@ struct PatternResult {
 struct SpecialPatternResult {
   SpecialPatternKind name{SpecialPatternKind::FollowWealth}; ///< 特殊格局名称。
   SpecialPatternStatus status{SpecialPatternStatus::Excluded}; ///< 判定状态。
-  std::vector<Evidence> evidence;   ///< 成立或排除该格的量化证据。
-  std::vector<std::string> reasons; ///< 成立、不足或排除原因。
-  std::optional<WuXing> element;    ///< 顺势、专旺或化气所对应五行。
+  std::vector<MingLiBasis> ming_li_basis; ///< 成立或排除该格的命理依据。
+  std::vector<std::string> reasons;       ///< 成立、不足或排除原因。
+  std::optional<WuXing> element;          ///< 顺势、专旺或化气所对应五行。
 };
 
 /** 十神组合的性质、说明和参与证据。 */
 struct TenGodCombo {
-  TenGodComboKind kind;           ///< 十神组合名称。
-  ComboSeverity severity;         ///< 有碍、有制可解或相成。
-  std::string note;               ///< 透藏、力量和制化说明。
-  std::vector<Evidence> evidence; ///< 实际参与组合的十神证据。
+  TenGodComboKind kind;                   ///< 十神组合名称。
+  ComboSeverity severity;                 ///< 有碍、有制可解或相成。
+  std::string note;                       ///< 透藏、力量和制化说明。
+  std::vector<MingLiBasis> ming_li_basis; ///< 实际参与组合的十神依据。
 };
 
 /** 一个透干或藏干十神在指定柱位的有效力量记录。 */
@@ -298,18 +298,18 @@ struct TenGodOccurrence {
 
 /** 日柱旬空及其对命局各柱根气的折减结果。 */
 struct KongWangResult {
-  std::array<DiZhi, 2> branches{};     ///< 日柱所在旬的两个旬空地支。
-  std::vector<int> affected_positions; ///< 原局命中旬空的柱位。
-  double root_multiplier{0.5};         ///< 旬空支中根气和十神的保留系数。
-  std::vector<Evidence> evidence;      ///< 各柱旬空命中证据。
+  std::array<DiZhi, 2> branches{};        ///< 日柱所在旬的两个旬空地支。
+  std::vector<int> affected_positions;    ///< 原局命中旬空的柱位。
+  double root_multiplier{0.5};            ///< 旬空支中根气和十神的保留系数。
+  std::vector<MingLiBasis> ming_li_basis; ///< 各柱旬空命中依据。
 };
 
 /** 五行生克链、断点和流通状态。 */
 struct ShengKeChainResult {
-  std::vector<WuXing> chain;       ///< 从印比食财官回到印的五行链。
-  std::vector<std::string> breaks; ///< 力量不足或受阻的链段说明。
-  bool smooth{};                   ///< 全部关键链段是否达到流通要求。
-  std::vector<Evidence> evidence;  ///< 各链段力量和断点证据。
+  std::vector<WuXing> chain;              ///< 从印比食财官回到印的五行链。
+  std::vector<std::string> breaks;        ///< 力量不足或受阻的链段说明。
+  bool smooth{};                          ///< 全部关键链段是否达到流通要求。
+  std::vector<MingLiBasis> ming_li_basis; ///< 各链段力量和断点依据。
 };
 
 /** 岁运应事类型；各类型独立累计，避免以单一总分混淆风险性质。 */
@@ -350,11 +350,11 @@ struct TransitEffectChannel {
 
 /** 单步大运或流年相对原局喜忌的规则作用。 */
 struct FortuneImpact {
-  Pillar pillar;                    ///< 被评估的大运或流年干支。
-  std::string label;                ///< 岁运类型或作用摘要。
-  double score{};                   ///< 规则作用净分，仅用于结构排序。
-  std::vector<std::string> reasons; ///< 构成净分的命理理由。
-  std::vector<Evidence> evidence;   ///< 每项加减分的结构化证据。
+  Pillar pillar;                          ///< 被评估的大运或流年干支。
+  std::string label;                      ///< 岁运类型或作用摘要。
+  double score{};                         ///< 规则作用净分，仅用于结构排序。
+  std::vector<std::string> reasons;       ///< 构成净分的命理理由。
+  std::vector<MingLiBasis> ming_li_basis; ///< 每项加减分的命理依据。
   std::vector<std::string>
       review_notes; ///< 七杀制化、填实、冲宫位及成局等重点复核事项。
   std::vector<TransitEffectChannel> channels; ///< 吉凶并行的独立作用通道。
@@ -461,18 +461,18 @@ struct StrengthResult {
   double roots{};                         ///< 得地分项，范围 0～100。
   double stem_support{};                  ///< 得势分项，范围 0～100。
   double season_adjustment{};             ///< 季节寒暖燥湿修正分，范围 0～100。
-  double relation_adjustment{};   ///< 合冲刑害及拱局修正分，范围 0～100。
-  std::vector<Evidence> evidence; ///< 各分项计算证据。
+  double relation_adjustment{}; ///< 合冲刑害及拱局修正分，范围 0～100。
+  std::vector<MingLiBasis> ming_li_basis; ///< 各分项推演依据。
 };
 
 /** 日主兑现候选作用的综合承载能力。 */
 struct CarryingCapacity {
-  double overall{};                ///< 综合承载能力分，范围 0～100。
-  double root_stability{};         ///< 根气稳定性，范围 0～100。
-  double climate_workability{};    ///< 寒暖燥湿条件下的可发挥度，范围 0～100。
-  double circulation{};            ///< 生克流通能力，范围 0～100。
-  std::vector<Evidence> penalties; ///< 过旺、无根、受冲等折减证据。
-  std::vector<Evidence> evidence;  ///< 各承载分项的计算证据。
+  double overall{};             ///< 综合承载能力分，范围 0～100。
+  double root_stability{};      ///< 根气稳定性，范围 0～100。
+  double climate_workability{}; ///< 寒暖燥湿条件下的可发挥度，范围 0～100。
+  double circulation{};         ///< 生克流通能力，范围 0～100。
+  std::vector<MingLiBasis> penalties;     ///< 过旺、无根、受冲等折减依据。
+  std::vector<MingLiBasis> ming_li_basis; ///< 各承载分项的推演依据。
 };
 
 /** 用神候选参与命局作用的分类。 */
@@ -504,24 +504,24 @@ struct ShenCandidate {
   double percent{};                     ///< 占全部正向候选有效分的百分比。
   bool present_in_chart{};              ///< 该候选本干是否在原局透出或藏见。
   std::vector<CandidateEffect> effects; ///< 候选承担的全部作用。
-  std::vector<Evidence> reasons;        ///< 支持候选的加分证据。
-  std::vector<Evidence> conflicts;      ///< 限制候选的减分或冲突证据。
+  std::vector<MingLiBasis> reasons;     ///< 支持候选的取用依据。
+  std::vector<MingLiBasis> conflicts;   ///< 限制候选的制碍依据。
 };
 
 /** 对候选用神本干进行透干、藏根、合冲和承载验证的结果。 */
 struct UsefulGodVerification {
-  std::string root_level;            ///< 无根、余气弱根、中气中根或本气强根。
-  bool tou_gan{};                    ///< 候选本干是否在原局天干透出。
-  bool is_chonged{};                 ///< 候选本干根气是否受地支冲。
-  bool is_he{};                      ///< 候选本干是否参与天干五合。
-  bool is_transformed{};             ///< 候选本干参与的五合是否真正合化。
-  bool effective{};                  ///< 最终效力是否达到可定用阈值。
-  double power{};                    ///< 用神验证效力，范围 0～100。
-  double combine_penalty{};          ///< 合绊或合化造成的折减分。
-  double carrying_capacity{};        ///< 验证时采用的日主承载能力分。
-  std::vector<Evidence> exact_roots; ///< 候选本干的精确藏根证据。
-  std::vector<Evidence> same_element_support; ///< 同五行异干的辅助力量。
-  std::vector<Evidence> evidence; ///< 透干、根气、合冲和承载的汇总证据。
+  std::string root_level;     ///< 无根、余气弱根、中气中根或本气强根。
+  bool tou_gan{};             ///< 候选本干是否在原局天干透出。
+  bool is_chonged{};          ///< 候选本干根气是否受地支冲。
+  bool is_he{};               ///< 候选本干是否参与天干五合。
+  bool is_transformed{};      ///< 候选本干参与的五合是否真正合化。
+  bool effective{};           ///< 最终效力是否达到可定用阈值。
+  double power{};             ///< 用神验证效力，范围 0～100。
+  double combine_penalty{};   ///< 合绊或合化造成的折减分。
+  double carrying_capacity{}; ///< 验证时采用的日主承载能力分。
+  std::vector<MingLiBasis> exact_roots;          ///< 候选本干的精确藏根依据。
+  std::vector<MingLiBasis> same_element_support; ///< 同五行异干的辅助力量。
+  std::vector<MingLiBasis> ming_li_basis; ///< 透干、根气、合冲和承载依据。
 };
 
 /** 用神路线、五神互斥角色、候选排名和复核提示。 */

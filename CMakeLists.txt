@@ -118,6 +118,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include)
 #   src/               - 主程序入口（main.cpp）和测试文件
 #   src/common/        - 通用基础模块（天干、地支、干支、中文映射等）
 #   src/liu_yao/       - 六爻相关模块
+#   src/mei_hua/       - 梅花易数排盘与占断模块
 #   src/da_liu_ren/    - 大六壬相关模块
 #   src/ba_zi/         - 八字相关模块
 #   src/zi_wei/        - 紫微斗数相关模块
