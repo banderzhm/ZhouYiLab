@@ -122,6 +122,8 @@ jobs:
           -G "Ninja" \
           -DCMAKE_CXX_COMPILER="${LLVM_PREFIX}/bin/clang++" \
           -DCMAKE_C_COMPILER="${LLVM_PREFIX}/bin/clang" \
+          -DBUILD_EXAMPLES=ON \
+          -DBUILD_TESTING=ON \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_CXX_FLAGS="-isysroot ${SDKROOT} -stdlib=libc++" \
           -DCMAKE_EXE_LINKER_FLAGS="-L${LLVM_PREFIX}/lib/c++ -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lc++ -lc++abi" \
@@ -151,6 +153,22 @@ jobs:
           otool -L ${{ github.workspace }}/build/ZhouYiLab || true
         fi
 
+    - name: Verify expected build artifacts
+      run: cmake -P ${{ github.workspace }}/build/verify_artifacts_${{ matrix.build_type }}.cmake
+
+    - name: Run regression tests
+      run: ctest --test-dir ${{ github.workspace }}/build -C ${{ matrix.build_type }} --output-on-failure --no-tests=error
+
+    - name: Upload regression reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: regression-macos_clang-${{ matrix.os }}-${{ matrix.build_type }}
+        path: |
+          ${{ github.workspace }}/build/tests/reports/**
+          ${{ github.workspace }}/build/Testing/Temporary/LastTest.log
+        retention-days: 7
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       if: success()
@@ -159,7 +177,8 @@ jobs:
         path: |
           ${{ github.workspace }}/build/*.a
           ${{ github.workspace }}/build/ZhouYiLab
-          ${{ github.workspace }}/build/example/*
+          ${{ github.workspace }}/build/examples/example_*
+        if-no-files-found: error
         retention-days: 7
 
     - name: Display build summary

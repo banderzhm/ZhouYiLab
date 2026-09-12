@@ -79,11 +79,13 @@ jobs:
           -G "Ninja" \
           -DCMAKE_CXX_COMPILER=clang++-${{ matrix.clang_version }} \
           -DCMAKE_C_COMPILER=clang-${{ matrix.clang_version }} \
+          -DBUILD_EXAMPLES=ON \
+          -DBUILD_TESTING=ON \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_CXX_FLAGS="-stdlib=libc++" \
           -DCMAKE_EXE_LINKER_FLAGS="-lc++abi" \
-          -DLIBCXX_MODULE_DIRS=/usr/lib/llvm-${{ matrix.clang_version }}/share/libc++/v1 \
-          -DLIBCXX_INCLUDE_DIRS=/usr/lib/llvm-${{ matrix.clang_version }}/include/c++/v1 \
+          -DSTDLIB_MODULE_DIRS=/usr/lib/llvm-${{ matrix.clang_version }}/share/libc++/v1 \
+          -DSTDLIB_INCLUDE_DIRS=/usr/lib/llvm-${{ matrix.clang_version }}/include/c++/v1 \
           -S ${{ github.workspace }}
       env:
         CC: clang-${{ matrix.clang_version }}
@@ -92,14 +94,32 @@ jobs:
     - name: Build
       run: cmake --build ${{ github.workspace }}/build --parallel 2
 
+    - name: Verify expected build artifacts
+      run: cmake -P ${{ github.workspace }}/build/verify_artifacts_${{ matrix.build_type }}.cmake
+
+    - name: Run regression tests
+      run: ctest --test-dir ${{ github.workspace }}/build -C ${{ matrix.build_type }} --output-on-failure --no-tests=error
+
+    - name: Upload regression reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: regression-clang-${{ matrix.clang_version }}-${{ matrix.build_type }}
+        path: |
+          ${{ github.workspace }}/build/tests/reports/**
+          ${{ github.workspace }}/build/Testing/Temporary/LastTest.log
+        retention-days: 7
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       if: success()
       with:
         name: zhouyi-lab-linux-clang${{ matrix.clang_version }}-${{ matrix.build_type }}
         path: |
+          ${{ github.workspace }}/build/ZhouYiLab
           ${{ github.workspace }}/build/*.a
-          ${{ github.workspace }}/build/example/*
+          ${{ github.workspace }}/build/examples/example_*
+        if-no-files-found: error
         retention-days: 7
 
     - name: Display build summary

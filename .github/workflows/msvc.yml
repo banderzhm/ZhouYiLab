@@ -44,11 +44,29 @@ jobs:
         cmake -B "${{ github.workspace }}/build" `
           -G "Visual Studio 17 2022" `
           -A x64 `
+          -DBUILD_EXAMPLES=ON `
+          -DBUILD_TESTING=ON `
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
           -S "${{ github.workspace }}"
 
     - name: Build
       run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.build_type }} -j 2
+
+    - name: Verify expected build artifacts
+      run: cmake -P ${{ github.workspace }}/build/verify_artifacts_${{ matrix.build_type }}.cmake
+
+    - name: Run regression tests
+      run: ctest --test-dir ${{ github.workspace }}/build -C ${{ matrix.build_type }} --output-on-failure --no-tests=error
+
+    - name: Upload regression reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: regression-msvc-${{ runner.os }}-${{ matrix.build_type }}
+        path: |
+          ${{ github.workspace }}/build/tests/reports/**
+          ${{ github.workspace }}/build/Testing/Temporary/LastTest.log
+        retention-days: 7
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -58,5 +76,7 @@ jobs:
         path: |
           ${{ github.workspace }}/build/${{ matrix.build_type }}/*.lib
           ${{ github.workspace }}/build/${{ matrix.build_type }}/*.exe
+          ${{ github.workspace }}/build/examples/${{ matrix.build_type }}/*.exe
+        if-no-files-found: error
         retention-days: 7
 
