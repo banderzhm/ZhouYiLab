@@ -10,6 +10,17 @@ https://www.mingtugps.cn/discover
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
 [![CMake](https://img.shields.io/badge/CMake-4.1.2+-green.svg)](https://cmake.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Linux Clang](https://github.com/banderzhm/ZhouYiLab/actions/workflows/clang.yml/badge.svg?branch=main)](https://github.com/banderzhm/ZhouYiLab/actions/workflows/clang.yml)
+[![Windows MSVC](https://github.com/banderzhm/ZhouYiLab/actions/workflows/msvc.yml/badge.svg?branch=main)](https://github.com/banderzhm/ZhouYiLab/actions/workflows/msvc.yml)
+[![macOS Clang](https://github.com/banderzhm/ZhouYiLab/actions/workflows/macos_clang.yml/badge.svg?branch=main)](https://github.com/banderzhm/ZhouYiLab/actions/workflows/macos_clang.yml)
+
+## 平台支持
+
+| 平台 | 架构 | 编译器与标准库 | 构建配置 | 状态 |
+|---|---|---|---|---|
+| Windows | x64 | Visual Studio 2022（MSVC） | Debug / Release | ✅ |
+| Linux | x64 | Clang 19 / 20 / 21 + libc++ | Debug / Release | ✅ |
+| macOS 14 / 15 | Apple Silicon（arm64） | Homebrew LLVM 20 + libc++ | Debug / Release | ✅ |
 
 ---
 
