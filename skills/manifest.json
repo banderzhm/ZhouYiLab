@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": [
+    "zhouyilab-workflow",
+    "zhouyilab-modules",
+    "zhouyilab-domain",
+    "zhouyilab-cpp-style",
+    "zhouyilab-reporting",
+    "zhouyilab-testing",
+    "zhouyilab-build",
+    "zhouyilab-skill-maintenance",
+    "zhouyilab-use-common",
+    "zhouyilab-use-bazi",
+    "zhouyilab-use-ziwei",
+    "zhouyilab-use-liuyao",
+    "zhouyilab-use-daliuren",
+    "zhouyilab-use-qimen",
+    "zhouyilab-use-meihua"
+  ]
+}
