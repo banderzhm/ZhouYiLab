@@ -97,6 +97,15 @@ function(detect_stdlib_module_paths)
                 get_filename_component(LLVM_LIB_PATH "${STDLIB_MODULE_DIRS}/../../../lib/c++" ABSOLUTE)
                 message(STATUS "LLVM libc++ library path: ${LLVM_LIB_PATH}")
 
+                # Homebrew libc++abi 使用配套 LLVM unwinder。混用系统 unwinder
+                # 会在旧版 macOS 上使派生异常绕过 catch(std::exception&)。
+                # 使用绝对路径且仅搜索当前 LLVM 前缀，避免误链接系统版本。
+                find_library(LLVM_UNWIND_LIBRARY NAMES unwind
+                    PATHS "${LLVM_LIB_PATH}/../unwind" "${LLVM_LIB_PATH}/.."
+                    NO_DEFAULT_PATH NO_CACHE REQUIRED)
+                get_filename_component(LLVM_UNWIND_DIR "${LLVM_UNWIND_LIBRARY}" DIRECTORY)
+                message(STATUS "LLVM unwind library: ${LLVM_UNWIND_LIBRARY}")
+
                 add_compile_options(
                     -nostdinc++
                     -isystem ${STDLIB_INCLUDE_DIRS}
@@ -106,6 +115,8 @@ function(detect_stdlib_module_paths)
                     -stdlib=libc++
                     -L${LLVM_LIB_PATH}
                     -Wl,-rpath,${LLVM_LIB_PATH}
+                    -Wl,-rpath,${LLVM_UNWIND_DIR}
+                    ${LLVM_UNWIND_LIBRARY}
                     -lc++
                     -lc++abi
                 )
