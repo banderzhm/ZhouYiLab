@@ -1,4 +1,4 @@
-﻿# ZhouYiLab - 周易实验室
+# ZhouYiLab - 周易实验室
 ## 商务合作微信-备注周易实验室: 17306666568
 ## 基于当前算法java版本实现的项目
 https://www.mingtugps.cn/discover
@@ -52,7 +52,7 @@ GPT更喜欢YAML格式，Claude更喜欢XML格式，而Gemini/Gemma则更倾向�
   - `import fmt;` - 现代格式化输出
   - `import magic_enum;` - 编译期枚举反射
   - `import nlohmann.json;` - JSON 序列化
--  **自定义模块系统**：所有业务代码使用 `.cppm` 模块接口文件
+-  **自定义模块系统**：业务模块采用 `.cppm` 接口 + `.cpp` 实现
 
 ###  现代构建系统
 
@@ -77,11 +77,12 @@ GPT更喜欢YAML格式，Claude更喜欢XML格式，而Gemini/Gemma则更倾向�
 
 ### 必需工具
 
-- **CMake 4.1.2+**（推荐）或 **CMake 3.30+**（最低兼容版本）
+- **CMake 4.1.2+**（推荐）或 **CMake 3.28+**（工程声明的最低版本，未纳入当前 CI 验证）
 - 支持 C++23 modules 和 `import std;` 的编译器：
-  - **GCC 14+**  完全支持
-  - **Clang 18+**  完全支持
-  - **MSVC 2022 17.10+**  实验性支持（需要最新版本）
+  - Linux：Clang 19 / 20 / 21 + 同版本 libc++。
+  - macOS：Homebrew LLVM 20 + 同版本 libc++。
+  - Windows：Visual Studio 2022 MSVC，须安装标准库模块。
+  - GCC、Apple 系统 Clang 和其他版本未纳入当前矩阵，不声明完全支持。
 
 ### 第三方依赖
 
@@ -117,51 +118,79 @@ git submodule update --init --recursive
 #### Windows (使用 Visual Studio)
 
 ```bash
-cmake -B build -G "Visual Studio 17 2022"
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_EXAMPLES=ON
 cmake --build build --config Release
 ```
 
-#### Linux / macOS
+#### Linux
 
 ```bash
 # 使用 Ninja 构建（推荐，速度更快）
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++-20 -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DBUILD_EXAMPLES=ON
 cmake --build build
 
 # 或使用多核编译
 cmake --build build -j$(nproc)
 ```
 
+#### macOS
+
+```bash
+brew install llvm@20 ninja cmake
+LLVM_PREFIX="$(brew --prefix llvm@20)"
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER="$LLVM_PREFIX/bin/clang++" -DSTDLIB_MODULE_DIRS="$LLVM_PREFIX/share/libc++/v1" -DSTDLIB_INCLUDE_DIRS="$LLVM_PREFIX/include/c++/v1" -DBUILD_EXAMPLES=ON
+cmake --build build --parallel 2
+```
+
+LOCAL 模式要求标准库模块与编译器、头文件匹配；缺失模块时配置阶段直接报错。
+
 ### 3 运行示例
 
 ```bash
 # 基本运行
-./build/bin/ZhouYiLab
-
-# 运行完整的 C++23 modules 演示
-./build/bin/ZhouYiLab --demo
+./build/ZhouYiLab
 
 # 运行八字示例
-./build/bin/example_ba_zi
+./build/examples/example_ba_zi
 
 # 运行盲派八字分析示例
-./build/bin/example_ba_zi_mangpai
+./build/examples/example_ba_zi_mangpai
 
 # 运行大六壬示例
-./build/bin/example_da_liu_ren
+./build/examples/example_da_liu_ren
 
 # 运行六爻示例
-./build/bin/example_liu_yao
+./build/examples/example_liu_yao
 
 # 运行梅花易数示例
-./build/bin/example_mei_hua
+./build/examples/example_mei_hua
 
 # 运行奇门遁甲示例
-./build/bin/example_qi_men
+./build/examples/example_qi_men
 
 # 运行紫微斗数示例
-./build/bin/example_zi_wei
+./build/examples/example_zi_wei
 ```
+
+以上命令从仓库根目录执行，报告写入对应 `docs/` 子目录。
+Visual Studio 多配置构建使用 `build/Release/ZhouYiLab.exe` 和
+`build/examples/Release/example_*.exe`；Debug 相应替换目录名。
+
+### 4 运行回归
+
+示例负责排盘与报告展示，`tests/` 负责参考案例、边界输入和穷举校验。
+
+```bash
+cmake -S . -B build -DBUILD_EXAMPLES=ON -DBUILD_TESTING=ON
+cmake --build build --config Release --parallel 2
+ctest --test-dir build -C Release --output-on-failure --no-tests=error
+```
+
+首次配置需采用上方平台工具链参数。CTest 使用
+`build/tests/reports/<术数>/` 作为独立工作目录，回归报告不会覆盖仓库文档。
+紫微参考命盘与亮度格局、奇门参考九宫与格局、梅花本互变及体用契约分别执行。
+三平台 CI 编译全部示例与测试并运行回归，失败日志和报告随构建产物保留。
+纯 Markdown 和 `docs/**` 修改不触发编译；源码与文档混合修改仍正常触发。
 
 程序将展示：
 - 使用 `import std;` 的现代 C++ 代码
@@ -177,15 +206,18 @@ cmake --build build -j$(nproc)
 
 ```cpp
 import ZhouYi.BaZiController;
+import ZhouYi.BaZiPresenter;
+import ZhouYi.BaZiAnalysis.Contract;
 
 using namespace ZhouYi::BaZiController;
+using ZhouYi::BaZiAnalysis::AnalysisMethod;
 
 auto chart = pai_pan_lunar(2000, 6, 15, 16, 30, true);
 
 AnalysisRequest request;
 request.method = AnalysisMethod::BlindSchool; // 或 AnalysisMethod::Ziping
 auto analysis = analyze_ba_zi(chart, request);
-display_analysis(analysis);
+ZhouYi::BaZiPresenter::display_analysis(analysis);
 ```
 
 `AnalysisResult` 会保留四柱、旬空、纳音、出生时刻等基础排盘数据；
@@ -238,7 +270,7 @@ ZhouYiLab/
     liu_yao/               # 六爻模块
     qi_men/                # 奇门遁甲模块
     zi_wei/                # 紫微斗数模块
-    main.cpp               #  唯一允许的 .cpp 文件
+    main.cpp               # 主程序入口
  examples/                    # 示例程序 
     example_ba_zi.cpp      # 八字系统示例
     example_da_liu_ren.cpp # 大六壬示例
@@ -297,12 +329,12 @@ ZhouYi.BaZi (八字核心算法)
 
 ZhouYi.BaZiController (八字控制器)
    import ZhouYi.BaZi;            (核心算法)
-   import fmt;                    (格式化输出)
+   import ZhouYi.BaZiAnalysis.Contract; (分析请求与契约)
    import std;
   功能：
     - 排盘接口封装
-    - 结果格式化显示
-    - 交互式排盘
+    - 按流派调度分析器
+    - 中文展示由 ZhouYi.BaZiPresenter / ZhouYi.BaZiAnalysis.Report 承担
 
 ZhouYi.DaLiuRen (大六壬模块)
    import ZhouYi.GanZhi;          (干支系统)
@@ -754,7 +786,7 @@ if (result) {
 
 ### 2 模块化规范
 
-- **强制使用模块**：除 `main.cpp` 外，所有源文件必须使用 `.cppm` 扩展名
+- **接口与实现分离**：接口使用 `.cppm`；实现使用 `.cpp` 并声明 `module 模块名;`；示例、测试和主程序入口使用 `.cpp`。
 - **导入顺序规范**：
   ```cpp
   // 1. 第三方库模块

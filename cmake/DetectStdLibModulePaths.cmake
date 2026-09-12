@@ -336,14 +336,11 @@ function(configure_cxx_modules)
         )
 
     elseif(CFG_EFFECTIVE_MODE STREQUAL "LOCAL")
-        message(WARNING "Standard library module path not detected, using project modules only")
-        target_sources(${CFG_TARGET} PUBLIC
-            FILE_SET cxx_modules TYPE CXX_MODULES
-            BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-            FILES
-                ${CFG_MODULE_INTERFACE_FILES}
-                ${CFG_EXTRA_MODULE_FILES}
-        )
+        message(FATAL_ERROR
+            "LOCAL mode requires standard library module interfaces. "
+            "Set STDLIB_MODULE_DIRS to the directory containing std.cppm/std.compat.cppm "
+            "(MSVC: std.ixx/std.compat.ixx), and on Unix set STDLIB_INCLUDE_DIRS "
+            "to matching libc++ headers. Compiler: ${CMAKE_CXX_COMPILER}")
     else()
         message(FATAL_ERROR "Unknown EFFECTIVE_MODE='${CFG_EFFECTIVE_MODE}' in configure_cxx_modules")
     endif()

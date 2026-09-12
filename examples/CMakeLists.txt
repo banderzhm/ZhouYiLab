@@ -86,6 +86,20 @@ add_custom_target(all_examples
     COMMENT "构建所有示例程序"
 )
 
+# 直接从目标路径生成产物核验脚本，兼容 Ninja 和 Visual Studio 多配置目录。
+# 上传前逐一检查主程序、核心库和示例，避免通配符只匹配到部分文件仍报成功。
+if(BUILD_EXAMPLES)
+    set(artifact_checks "")
+    foreach(artifact_target IN ITEMS ZhouYiLab ZhouYiLabCore ${EXAMPLES})
+        string(APPEND artifact_checks
+            "if(NOT EXISTS \"$<TARGET_FILE:${artifact_target}>\")\n"
+            "  message(FATAL_ERROR \"Missing artifact: $<TARGET_FILE:${artifact_target}>\")\n"
+            "endif()\n")
+    endforeach()
+    file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/verify_artifacts_$<CONFIG>.cmake"
+        CONTENT "${artifact_checks}")
+endif()
+
 # ==============================================================================
 # 提示信息
 # ==============================================================================

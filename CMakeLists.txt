@@ -228,10 +228,13 @@ endif()
 message(STATUS "==========================================")
 
 # ==============================================================================
-# 测试配置 (已禁用)
+# 独立回归测试（默认关闭，CI 显式启用）
 # ==============================================================================
-# 测试功能已被移除以避免 CI 环境中的模块系统冲突
-# Tests have been removed to avoid module system conflicts in CI environment
+option(BUILD_TESTING "Build regression tests" OFF)
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
 # ==============================================================================
 # 示例程序配置
