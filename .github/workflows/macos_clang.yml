@@ -126,7 +126,6 @@ jobs:
           -DBUILD_TESTING=ON \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_CXX_FLAGS="-isysroot ${SDKROOT} -stdlib=libc++" \
-          -DCMAKE_EXE_LINKER_FLAGS="-L${LLVM_PREFIX}/lib/c++ -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lc++ -lc++abi" \
           -DCMAKE_OSX_SYSROOT="${SDKROOT}" \
           -DSTDLIB_MODULE_DIRS="${STDLIB_MODULE_DIRS}" \
           -DSTDLIB_INCLUDE_DIRS="${STDLIB_INCLUDE_DIRS}" \
