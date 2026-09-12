@@ -72,12 +72,12 @@ jobs:
           LIBCXX_MODULES=$(find ${LLVM_PREFIX} -name "std.cppm" -exec dirname {} \; 2>/dev/null | head -1)
         fi
         
-        echo "LIBCXX_MODULES=${LIBCXX_MODULES}" >> $GITHUB_OUTPUT
+        echo "STDLIB_MODULE_DIRS=${LIBCXX_MODULES}" >> $GITHUB_OUTPUT
         echo "libc++ modules path: ${LIBCXX_MODULES}"
         
         # 头文件路径
         LIBCXX_INCLUDE="${LLVM_PREFIX}/include/c++/v1"
-        echo "LIBCXX_INCLUDE=${LIBCXX_INCLUDE}" >> $GITHUB_OUTPUT
+        echo "STDLIB_INCLUDE_DIRS=${LIBCXX_INCLUDE}" >> $GITHUB_OUTPUT
         echo "libc++ include path: ${LIBCXX_INCLUDE}"
         
         # 验证路径存在
@@ -109,8 +109,8 @@ jobs:
       run: |
         LLVM_PREFIX="${{ steps.llvm-paths.outputs.LLVM_PREFIX }}"
         SDKROOT="${{ steps.sdk-path.outputs.SDKROOT }}"
-        LIBCXX_MODULES="${{ steps.llvm-paths.outputs.LIBCXX_MODULES }}"
-        LIBCXX_INCLUDE="${{ steps.llvm-paths.outputs.LIBCXX_INCLUDE }}"
+        STDLIB_MODULE_DIRS="${{ steps.llvm-paths.outputs.STDLIB_MODULE_DIRS }}"
+        STDLIB_INCLUDE_DIRS="${{ steps.llvm-paths.outputs.STDLIB_INCLUDE_DIRS }}"
         
         cmake -B ${{ github.workspace }}/build \
           -G "Ninja" \
@@ -120,8 +120,8 @@ jobs:
           -DCMAKE_CXX_FLAGS="-isysroot ${SDKROOT} -stdlib=libc++" \
           -DCMAKE_EXE_LINKER_FLAGS="-L${LLVM_PREFIX}/lib/c++ -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lc++ -lc++abi" \
           -DCMAKE_OSX_SYSROOT="${SDKROOT}" \
-          -DLIBCXX_MODULE_DIRS="${LIBCXX_MODULES}" \
-          -DLIBCXX_INCLUDE_DIRS="${LIBCXX_INCLUDE}" \
+          -DSTDLIB_MODULE_DIRS="${STDLIB_MODULE_DIRS}" \
+          -DSTDLIB_INCLUDE_DIRS="${STDLIB_INCLUDE_DIRS}" \
           -S ${{ github.workspace }}
       env:
         CC: ${{ steps.llvm-paths.outputs.LLVM_PREFIX }}/bin/clang
