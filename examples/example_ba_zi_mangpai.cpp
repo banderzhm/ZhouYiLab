@@ -1,5 +1,7 @@
 // 盲派八字分析示例
 import ZhouYi.BaZiController;
+import ZhouYi.BaZi;
+import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import ZhouYi.BaZiPresenter;
 import ZhouYi.BaZiAnalysis;
 import ZhouYi.BaZiAnalysis.Report;
@@ -15,7 +17,8 @@ using namespace ZhouYi::GanZhi;
 namespace {
 
 void write_report(
-    std::ostream &out, const BaZiResult &result, const AnalysisResult &analysis,
+    std::ostream &out, const ZhouYi::BaZi::BaZiResult &result,
+    const ZhouYi::BaZiAnalysis::AnalysisResult &analysis,
     const std::vector<int> &years,
     const std::vector<ZhouYi::BaZiAnalysis::MangPai::Transit::Analysis>
         &transits) {
