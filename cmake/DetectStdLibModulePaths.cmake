@@ -8,6 +8,12 @@
 ]]
 function(detect_stdlib_module_paths)
     if(UNIX)
+        # 版本化 Homebrew/LLVM（如 llvm@20）不会位于固定的 opt/llvm 下。
+        # 从本次实际采用的 clang 路径推导前缀，保证模块接口、头文件和
+        # 编译器始终来自同一套工具链。
+        get_filename_component(ACTIVE_LLVM_BIN_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        get_filename_component(ACTIVE_LLVM_PREFIX "${ACTIVE_LLVM_BIN_DIR}" DIRECTORY)
+
         # CMake 的 find_path 会复用缓存；工具链升级或包被替换后，旧路径可能
         # 仍留在 CMakeCache.txt。先验证关键文件，避免把失效缓存带入 FILE_SET。
         if(STDLIB_MODULE_DIRS AND
@@ -50,6 +56,7 @@ function(detect_stdlib_module_paths)
                 /usr/local/lib/llvm-20/share/libc++/v1
                 /usr/local/lib/llvm-19/share/libc++/v1
                 /opt/llvm/share/libc++/v1
+                ${ACTIVE_LLVM_PREFIX}/share/libc++/v1
                 /opt/homebrew/opt/llvm/share/libc++/v1
                 /usr/local/opt/llvm/share/libc++/v1
             DOC "Path to standard library modules (libc++)"
@@ -68,6 +75,7 @@ function(detect_stdlib_module_paths)
                 /usr/local/lib/llvm-19/include/c++/v1
                 /opt/llvm/include/c++/v1
                 /usr/include/c++/v1
+                ${ACTIVE_LLVM_PREFIX}/include/c++/v1
                 /opt/homebrew/opt/llvm/include/c++/v1
                 /usr/local/opt/llvm/include/c++/v1
             DOC "Path to libc++ headers"
