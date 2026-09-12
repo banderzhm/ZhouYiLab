@@ -25,25 +25,25 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Homebrew and install LLVM
+    - name: Install versioned LLVM toolchain
       run: |
-        brew update
-        brew install llvm ninja cmake
-        
-        # 显示安装的 LLVM 版本
-        LLVM_VERSION=$(/opt/homebrew/opt/llvm/bin/clang++ --version 2>/dev/null || /usr/local/opt/llvm/bin/clang++ --version)
+        # 未版本化 llvm 会随 Homebrew 滚动到不再为旧 macOS 提供 bottle 的
+        # 最新主版本。llvm@20 同时覆盖 Sonoma 与 Sequoia，并满足 C++23
+        # 标准库模块构建要求。
+        brew install llvm@20
+        command -v ninja >/dev/null 2>&1 || brew install ninja
+        command -v cmake >/dev/null 2>&1 || brew install cmake
+
+        LLVM_PREFIX="$(brew --prefix llvm@20)"
+        LLVM_VERSION=$("${LLVM_PREFIX}/bin/clang++" --version)
         echo "Installed LLVM version:"
         echo "$LLVM_VERSION"
 
     - name: Detect Homebrew LLVM paths
       id: llvm-paths
       run: |
-        # 根据架构检测 Homebrew 路径
-        if [ -d "/opt/homebrew/opt/llvm" ]; then
-          LLVM_PREFIX="/opt/homebrew/opt/llvm"
-        else
-          LLVM_PREFIX="/usr/local/opt/llvm"
-        fi
+        LLVM_PREFIX="$(brew --prefix llvm@20)"
+        test -x "${LLVM_PREFIX}/bin/clang++"
         
         echo "LLVM_PREFIX=${LLVM_PREFIX}" >> $GITHUB_OUTPUT
         echo "Detected LLVM prefix: ${LLVM_PREFIX}"
