@@ -26,6 +26,10 @@ CMakeLists.txt text eol=crlf
 # Shell 脚本 (保持 LF)
 *.sh text eol=lf
 
+# 项目 skills 与确定性聚合产物统一 LF，避免检出后产生同步误报
+/skills/** text eol=lf
+/AGENTS.md text eol=lf
+
 # 二进制文件
 *.png binary
 *.jpg binary
