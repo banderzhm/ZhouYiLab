@@ -1,5 +1,7 @@
 module ZhouYi.QiMen;
 
+import ZhouYi.ZhMapper;
+
 namespace ZhouYi::QiMen {
 namespace {
 constexpr std::array<TianGan, 10> kStems{
@@ -185,9 +187,7 @@ void to_json(nlohmann::json &json, const QiMenPan &pan) {
     return nlohmann::json{
         {"rule_id", finding.rule_id},
         {"name", finding.name},
-        {"nature", finding.nature == PatternNature::Auspicious     ? "吉"
-                   : finding.nature == PatternNature::Inauspicious ? "凶"
-                                                                   : "中"},
+        {"nature", std::string(ZhouYi::Mapper::to_zh(finding.nature))},
         {"palace", get_number_from_palace(finding.palace)},
         {"pan_ju_basis", finding.pan_ju_basis}};
   };
@@ -197,7 +197,7 @@ void to_json(nlohmann::json &json, const QiMenPan &pan) {
             {"day", pan.solar_day},
             {"hour", pan.hour},
             {"minute", pan.minute}}},
-          {"dun", pan.dun == Dun::Yang ? "阳遁" : "阴遁"},
+          {"dun", std::string(ZhouYi::Mapper::to_zh(pan.dun))},
           {"yuan", yuan_name(pan.yuan)},
           {"ju", pan.ju},
           {"solar_term", solar_term_name(pan.solar_term)},

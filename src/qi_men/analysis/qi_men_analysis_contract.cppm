@@ -7,6 +7,7 @@ export module ZhouYi.QiMen.Analysis.Contract;
 export import ZhouYi.QiMen;
 
 import ZhouYi.GanZhi;
+import ZhouYi.ZhMapper;
 import std;
 
 export namespace ZhouYi::QiMenAnalysis {
@@ -158,3 +159,48 @@ struct AnalysisResult {
 };
 
 } // namespace ZhouYi::QiMenAnalysis
+
+namespace ZhouYi::Mapper {
+
+/** QuestionKind 的奇门占问门类中文映射。 */
+template <> struct ZhMap<ZhouYi::QiMenAnalysis::QuestionKind> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 9>{"泛占",     "功名事业", "求财经营",
+                                           "婚恋关系", "疾病医药", "出行迁动",
+                                           "官讼争议", "学业考试", "寻人失物"};
+  }
+};
+
+/** YongShenRole 的用神职责中文映射。 */
+template <> struct ZhMap<ZhouYi::QiMenAnalysis::YongShenRole> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 9>{"日干",   "时干",   "年命",
+                                           "值符",   "值使",   "专用门",
+                                           "专用星", "专用神", "专用奇仪"};
+  }
+};
+
+/** PalaceRelation 的主客生克中文映射。 */
+template <> struct ZhMap<ZhouYi::QiMenAnalysis::PalaceRelation> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 6>{"同宫",   "比和",   "主生客",
+                                           "客生主", "主克客", "客克主"};
+  }
+};
+
+/** EffectNature 的占断作用中文映射。 */
+template <> struct ZhMap<ZhouYi::QiMenAnalysis::EffectNature> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 4>{"助力", "制碍", "引动", "待辨"};
+  }
+};
+
+/** Judgment 的综合盘势中文映射。 */
+template <> struct ZhMap<ZhouYi::QiMenAnalysis::Judgment> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 5>{"得势", "有利", "吉凶并见", "受阻",
+                                           "待定"};
+  }
+};
+
+} // namespace ZhouYi::Mapper

@@ -42,6 +42,7 @@ int main() {
 需要用神、主客、格局和应期分析时，调用 `ZhouYi::QiMenAnalysis::analyze`；旧 `QiMenAnalyzer::get_summary` 只提供摘要。
 `AnalysisResult` 的 `yong_shen` 是用神落宫，`palace_readings` 是主用诸宫门星神仪及格局，`main_guest` 是日时主客，`global_configuration` 是全局结构；另有助碍、`manifestations` 分门取象、`timing` 应期与方位和 `review_points`。
 占问门类用 `question_kind` 设置，程序不会根据 `question` 的文字自动判断占类。九类占问的枚举名称见 `qi_men_analysis_contract.cppm`。
+`Dun`、`PatternNature`、`QuestionKind`、`YongShenRole`、`PalaceRelation`、`EffectNature`、`Judgment` 都有 `ZhouYi.ZhMapper` 的 `ZhMap` 特化，下游取中文名直接 import `ZhouYi.ZhMapper` 后调用 `ZhouYi::Mapper::to_zh(value)`，不要自己抄一份中文表；presenter 的中文与此同源。
 完整文本用 `write_zh(out,pan,analysis)`；完整中文 JSON 用 `to_zh_json(pan,analysis)`。若只要盘面，兼容 controller 的 `get_pan_description`、`get_pan_json` 返回字符串，`get_pan_json_object` 才返回对象。
 
 ## 怎么跑示例和测试

@@ -8,6 +8,8 @@ import ZhouYi.QiMen.Analysis;
 import ZhouYi.QiMen.Analysis.Presenter;
 import ZhouYi.QiMen.Controller;
 import ZhouYi.QiMen.Pan;
+import ZhouYi.ZhMapper;
+import nlohmann.json;
 import fmt;
 import std;
 
@@ -251,6 +253,247 @@ std::string run_detailed_analysis_examples() {
   }
   return output.str();
 }
+/** @brief 逐值比较枚举中文映射，返回不一致描述；全部一致时为空串。 */
+template <typename E, std::size_t N>
+std::string zh_map_diff(const std::array<E, N> &values,
+                        const std::array<std::string_view, N> &expected) {
+  std::string diff;
+  for (std::size_t index = 0; index < N; ++index) {
+    const std::string_view actual = ZhouYi::Mapper::to_zh(values[index]);
+    if (actual.empty() || actual != expected[index]) {
+      if (!diff.empty())
+        diff += "；";
+      diff += fmt::format("第{}项 期望「{}」实际「{}」", index, expected[index],
+                          actual);
+    }
+  }
+  return diff;
+}
+
+/** @brief 文本是否包含指定中文串。 */
+bool text_has(const std::string &text, std::string_view value) {
+  return text.find(value) != std::string::npos;
+}
+
+/**
+ * @brief 奇门七个枚举的中文映射逐值核对与 presenter 同源核对
+ *
+ * 一、逐值：每个取值都必须映射到约定的中文，空串或回退英文都算不一致。
+ * 二、同源：用探针结果渲染 presenter 报告与中文 JSON，断言其中出现的中文与
+ *     映射表逐字相同，presenter 不再自带一份中文表。
+ */
+std::string run_enum_zh_map_contract() {
+  std::string report = "\n【枚举中文映射与 presenter 逐值核对】\n";
+  report +=
+      "映射来源：ZhouYi.ZhMapper 的 ZhMap 特化；presenter 直接调用 to_zh。\n\n";
+
+  const std::array<Dun, 2> duns{Dun::Yang, Dun::Yin};
+  const std::array<std::string_view, 2> dun_names{"阳遁", "阴遁"};
+  const std::array<PatternNature, 3> nature_values{PatternNature::Auspicious,
+                                                   PatternNature::Inauspicious,
+                                                   PatternNature::Neutral};
+  const std::array<std::string_view, 3> nature_names{"吉", "凶", "中"};
+  const std::array<ZhouYi::QiMenAnalysis::QuestionKind, 9> question_values{
+      ZhouYi::QiMenAnalysis::QuestionKind::FanZhan,
+      ZhouYi::QiMenAnalysis::QuestionKind::GongMing,
+      ZhouYi::QiMenAnalysis::QuestionKind::QiuCai,
+      ZhouYi::QiMenAnalysis::QuestionKind::HunLian,
+      ZhouYi::QiMenAnalysis::QuestionKind::JiBing,
+      ZhouYi::QiMenAnalysis::QuestionKind::ChuXing,
+      ZhouYi::QiMenAnalysis::QuestionKind::GuanSong,
+      ZhouYi::QiMenAnalysis::QuestionKind::XueYe,
+      ZhouYi::QiMenAnalysis::QuestionKind::XunWu};
+  const std::array<std::string_view, 9> question_names{
+      "泛占",     "功名事业", "求财经营", "婚恋关系", "疾病医药",
+      "出行迁动", "官讼争议", "学业考试", "寻人失物"};
+  const std::array<ZhouYi::QiMenAnalysis::YongShenRole, 9> role_values{
+      ZhouYi::QiMenAnalysis::YongShenRole::RiGan,
+      ZhouYi::QiMenAnalysis::YongShenRole::ShiGan,
+      ZhouYi::QiMenAnalysis::YongShenRole::NianMing,
+      ZhouYi::QiMenAnalysis::YongShenRole::ZhiFu,
+      ZhouYi::QiMenAnalysis::YongShenRole::ZhiShi,
+      ZhouYi::QiMenAnalysis::YongShenRole::ZhuanYongMen,
+      ZhouYi::QiMenAnalysis::YongShenRole::ZhuanYongXing,
+      ZhouYi::QiMenAnalysis::YongShenRole::ZhuanYongShen,
+      ZhouYi::QiMenAnalysis::YongShenRole::ZhuanYongGan};
+  const std::array<std::string_view, 9> role_names{
+      "日干",   "时干",   "年命",   "值符",    "值使",
+      "专用门", "专用星", "专用神", "专用奇仪"};
+  const std::array<ZhouYi::QiMenAnalysis::PalaceRelation, 6> relation_values{
+      ZhouYi::QiMenAnalysis::PalaceRelation::TongGong,
+      ZhouYi::QiMenAnalysis::PalaceRelation::BiHe,
+      ZhouYi::QiMenAnalysis::PalaceRelation::ZhuShengKe,
+      ZhouYi::QiMenAnalysis::PalaceRelation::KeShengZhu,
+      ZhouYi::QiMenAnalysis::PalaceRelation::ZhuKeKe,
+      ZhouYi::QiMenAnalysis::PalaceRelation::KeKeZhu};
+  const std::array<std::string_view, 6> relation_names{
+      "同宫", "比和", "主生客", "客生主", "主克客", "客克主"};
+  const std::array<ZhouYi::QiMenAnalysis::EffectNature, 4> effect_values{
+      ZhouYi::QiMenAnalysis::EffectNature::ZhuLi,
+      ZhouYi::QiMenAnalysis::EffectNature::ZhiAi,
+      ZhouYi::QiMenAnalysis::EffectNature::YinDong,
+      ZhouYi::QiMenAnalysis::EffectNature::DaiBian};
+  const std::array<std::string_view, 4> effect_names{"助力", "制碍", "引动",
+                                                     "待辨"};
+  const std::array<ZhouYi::QiMenAnalysis::Judgment, 5> judgment_values{
+      ZhouYi::QiMenAnalysis::Judgment::DeShi,
+      ZhouYi::QiMenAnalysis::Judgment::YouLi,
+      ZhouYi::QiMenAnalysis::Judgment::JiXiongBingJian,
+      ZhouYi::QiMenAnalysis::Judgment::ShouZu,
+      ZhouYi::QiMenAnalysis::Judgment::DaiDing};
+  const std::array<std::string_view, 5> judgment_names{
+      "得势", "有利", "吉凶并见", "受阻", "待定"};
+
+  std::string diff;
+  const auto merge = [&diff](const std::string &part) {
+    if (!part.empty())
+      diff += (diff.empty() ? "" : "；") + part;
+  };
+  merge(zh_map_diff(duns, dun_names));
+  merge(zh_map_diff(nature_values, nature_names));
+  merge(zh_map_diff(question_values, question_names));
+  merge(zh_map_diff(role_values, role_names));
+  merge(zh_map_diff(relation_values, relation_names));
+  merge(zh_map_diff(effect_values, effect_names));
+  merge(zh_map_diff(judgment_values, judgment_names));
+  report +=
+      fmt::format("逐值映射：{} 个取值。\n",
+                  duns.size() + nature_values.size() + question_values.size() +
+                      role_values.size() + relation_values.size() +
+                      effect_values.size() + judgment_values.size());
+
+  // presenter 同源核对：用探针结果逐个取值渲染，断言中文原样出现。
+  const auto generated = QiMenController::pai_pan_solar(2024, 6, 21, 12, 30);
+  if (!generated)
+    throw std::runtime_error(generated.error());
+  const QiMenPan probe_pan = *generated;
+  std::size_t probe_checks = 0;
+  const auto render = [](const QiMenPan &pan,
+                         const ZhouYi::QiMenAnalysis::AnalysisResult &result) {
+    std::ostringstream output;
+    ZhouYi::QiMenAnalysis::write_zh(output, pan, result);
+    return output.str();
+  };
+
+  for (std::size_t index = 0; index < duns.size(); ++index) {
+    QiMenPan pan = probe_pan;
+    pan.dun = duns[index];
+    ++probe_checks;
+    if (!text_has(render(pan, {}), "遁局：" + std::string(dun_names[index])))
+      merge(fmt::format("阴阳遁「{}」未出现在遁局行", dun_names[index]));
+    const nlohmann::json pan_json = pan;
+    if (pan_json.at("dun").get<std::string>() != dun_names[index])
+      merge(
+          fmt::format("阴阳遁「{}」与 JSON dun 字段不一致", dun_names[index]));
+  }
+
+  for (std::size_t index = 0; index < nature_values.size(); ++index) {
+    QiMenPan pan = probe_pan;
+    pan.global_patterns.push_back(PatternFinding{.rule_id = "probe.nature",
+                                                 .name = "探针格局",
+                                                 .nature = nature_values[index],
+                                                 .palace = Palace::Center,
+                                                 .pan_ju_basis = "探针依据"});
+    ++probe_checks;
+    const std::string expected =
+        "[" + std::string(nature_names[index]) + "] 探针格局";
+    if (!text_has(format_qi_men_analysis(pan), expected))
+      merge(fmt::format("格局吉凶「{}」未出现在格局闭环", nature_names[index]));
+  }
+
+  for (std::size_t index = 0; index < question_values.size(); ++index) {
+    ZhouYi::QiMenAnalysis::AnalysisResult result;
+    result.request.question_kind = question_values[index];
+    result.request.question = "探针占问";
+    ++probe_checks;
+    if (!text_has(render(probe_pan, result),
+                  "占类：" + std::string(question_names[index])))
+      merge(fmt::format("占问门类「{}」未出现在报告", question_names[index]));
+    const nlohmann::json zh_json =
+        ZhouYi::QiMenAnalysis::to_zh_json(probe_pan, result);
+    if (zh_json.at("占问").at("门类").get<std::string>() !=
+        question_names[index])
+      merge(fmt::format("占问门类「{}」与中文 JSON 不一致",
+                        question_names[index]));
+  }
+
+  for (std::size_t index = 0; index < role_values.size(); ++index) {
+    ZhouYi::QiMenAnalysis::AnalysisResult result;
+    result.yong_shen.push_back(
+        ZhouYi::QiMenAnalysis::YongShenSelection{.role = role_values[index],
+                                                 .name = "探针用神",
+                                                 .palace = Palace::Center,
+                                                 .basis = "探针取用"});
+    ++probe_checks;
+    const std::string expected =
+        "| " + std::string(role_names[index]) + " | 探针用神 |";
+    if (!text_has(render(probe_pan, result), expected))
+      merge(fmt::format("用神职责「{}」未出现在用神表", role_names[index]));
+  }
+
+  for (std::size_t index = 0; index < relation_values.size(); ++index) {
+    ZhouYi::QiMenAnalysis::AnalysisResult result;
+    result.main_guest.relation = relation_values[index];
+    result.main_guest.interpretation = "探针断意";
+    ++probe_checks;
+    if (!text_has(render(probe_pan, result),
+                  "主客：" + std::string(relation_names[index]) + "。"))
+      merge(fmt::format("主客生克「{}」未出现在日时主客行",
+                        relation_names[index]));
+  }
+
+  for (std::size_t index = 0; index < effect_values.size(); ++index) {
+    ZhouYi::QiMenAnalysis::AnalysisResult result;
+    result.favorable.push_back(
+        ZhouYi::QiMenAnalysis::PanJuBasis{.rule = "探针规则",
+                                          .detail = "探针依据",
+                                          .nature = effect_values[index],
+                                          .palace = Palace::Center});
+    ++probe_checks;
+    const std::string expected =
+        "【" + std::string(effect_names[index]) + "】：探针依据";
+    if (!text_has(render(probe_pan, result), expected))
+      merge(fmt::format("占断作用「{}」未出现在依据行", effect_names[index]));
+  }
+
+  for (std::size_t index = 0; index < judgment_values.size(); ++index) {
+    ZhouYi::QiMenAnalysis::AnalysisResult result;
+    result.judgment = judgment_values[index];
+    result.conclusion = "探针断语";
+    ++probe_checks;
+    if (!text_has(render(probe_pan, result),
+                  "盘势：" + std::string(judgment_names[index])))
+      merge(fmt::format("综合盘势「{}」未出现在总断", judgment_names[index]));
+  }
+
+  report += fmt::format("presenter 同源核对：{} 项。\n", probe_checks);
+  report += "| 枚举 | 取值数 | 结论 |\n| --- | --- | --- |\n";
+  const std::array<std::pair<std::string_view, std::size_t>, 7> summary{
+      {{"阴阳遁", duns.size()},
+       {"格局吉凶", nature_values.size()},
+       {"占问门类", question_values.size()},
+       {"用神职责", role_values.size()},
+       {"主客生克", relation_values.size()},
+       {"占断作用", effect_values.size()},
+       {"综合盘势", judgment_values.size()}}};
+  const std::array<bool, 7> summary_ok{
+      zh_map_diff(duns, dun_names).empty(),
+      zh_map_diff(nature_values, nature_names).empty(),
+      zh_map_diff(question_values, question_names).empty(),
+      zh_map_diff(role_values, role_names).empty(),
+      zh_map_diff(relation_values, relation_names).empty(),
+      zh_map_diff(effect_values, effect_names).empty(),
+      zh_map_diff(judgment_values, judgment_names).empty()};
+  for (std::size_t index = 0; index < summary.size(); ++index)
+    report += fmt::format("| {} | {} | {} |\n", summary[index].first,
+                          summary[index].second,
+                          summary_ok[index] ? "逐值一致" : "不一致");
+  report += "\n";
+
+  if (!diff.empty())
+    throw std::runtime_error("奇门枚举中文映射核对失败：" + diff);
+  return report;
+}
 } // namespace
 
 int main() {
@@ -258,6 +501,7 @@ int main() {
     std::string report = "# 奇门遁甲多案例参考回归与格局闭环\n\n";
     report += run_reference_regression();
     report += run_fixed_palace_regression();
+    report += run_enum_zh_map_contract();
     const auto analysis_report = run_detailed_analysis_examples();
     std::filesystem::create_directories("docs/qimen");
     std::ofstream output("docs/qimen/example_qi_men_reference_regression.txt",

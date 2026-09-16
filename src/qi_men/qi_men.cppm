@@ -9,6 +9,7 @@ export module ZhouYi.QiMen;
 
 import ZhouYi.BaZiBase;
 import ZhouYi.GanZhi;
+import ZhouYi.ZhMapper;
 import nlohmann.json;
 import std;
 
@@ -145,7 +146,7 @@ struct PatternFinding {
   std::string name;              ///< 格局名称。
   PatternNature nature{};        ///< 吉凶属性。
   Palace palace{Palace::Center}; ///< 格局所在宫。
-  std::string pan_ju_basis;          ///< 成格依据。
+  std::string pan_ju_basis;      ///< 成格依据。
 };
 
 /** 单宫完整盘面。 */
@@ -232,3 +233,21 @@ Palace post_horse_palace(DiZhi hour_branch) noexcept;
 void to_json(nlohmann::json &json, const QiMenPan &pan);
 
 } // namespace ZhouYi::QiMen
+
+namespace ZhouYi::Mapper {
+
+/** 阴遁、阳遁的中文映射。 */
+template <> struct ZhMap<ZhouYi::QiMen::Dun> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 2>{"阳遁", "阴遁"};
+  }
+};
+
+/** 格局吉凶属性的中文映射；中性结构对应“中”。 */
+template <> struct ZhMap<ZhouYi::QiMen::PatternNature> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 3>{"吉", "凶", "中"};
+  }
+};
+
+} // namespace ZhouYi::Mapper

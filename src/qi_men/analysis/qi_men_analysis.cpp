@@ -1,6 +1,7 @@
 module ZhouYi.QiMen.Analysis;
 
 import ZhouYi.QiMen.Analysis.Judgment;
+import ZhouYi.ZhMapper;
 import fmt;
 
 namespace ZhouYi::QiMen {
@@ -391,16 +392,13 @@ std::string format_qi_men_analysis(const QiMenPan &pan) {
   std::size_t count = 0;
   for (const auto &g : pan.global_patterns) {
     out += fmt::format("{}. [{}] {}：{}\n", ++count,
-                       g.nature == PatternNature::Auspicious ? "吉" : "凶",
-                       g.name, g.pan_ju_basis);
+                       ZhouYi::Mapper::to_zh(g.nature), g.name, g.pan_ju_basis);
   }
   for (const auto &p : pan.palaces)
     for (const auto &g : p.patterns)
       out += fmt::format("{}. [{}] {}·{}：{}\n", ++count,
-                         g.nature == PatternNature::Auspicious     ? "吉"
-                         : g.nature == PatternNature::Inauspicious ? "凶"
-                                                                   : "平",
-                         palace_name(p.palace), g.name, g.pan_ju_basis);
+                         ZhouYi::Mapper::to_zh(g.nature), palace_name(p.palace),
+                         g.name, g.pan_ju_basis);
   if (count == 0)
     out += "本盘未满足当前规则库中任何格局的全部成格条件。\n";
   out +=
