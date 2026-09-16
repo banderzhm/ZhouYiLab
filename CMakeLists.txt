@@ -13,6 +13,9 @@ project(ZhouYiLab
     LANGUAGES CXX
 )
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 # ==============================================================================
 # C++ 标准配置
 # ==============================================================================
@@ -173,8 +176,16 @@ configure_cxx_modules(
 target_link_libraries(ZhouYiLabCore PUBLIC
     # 项目源码通过 `import fmt;` 使用模块接口；fmt::fmt 是传统头文件库，
     # fmt 12.2 起模块目标已独立为 fmt::fmt-module。
-    fmt::fmt-module
-    nlohmann_json_modules
+    $<BUILD_LOCAL_INTERFACE:fmt::fmt-module>
+    $<BUILD_LOCAL_INTERFACE:nlohmann_json_modules>
+    $<INSTALL_INTERFACE:fmt::fmt-module>
+    $<INSTALL_INTERFACE:ZhouYiLab::nlohmann_json_modules>
+)
+
+# Keep the installed module target dependent on the package-level imported
+# name instead of leaking the in-tree target name into ZhouYiLabTargets.
+set_property(TARGET nlohmann_json_modules PROPERTY INTERFACE_LINK_LIBRARIES
+    "$<BUILD_LOCAL_INTERFACE:nlohmann_json::nlohmann_json>;$<INSTALL_INTERFACE:nlohmann_json::nlohmann_json>"
 )
 
 # Windows 平台需要链接网络库
@@ -244,3 +255,52 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt")
     add_subdirectory(examples)
     message(STATUS "示例程序已启用 (位于 examples/ 目录)")
 endif()
+
+# Installable package for downstream backends. Keep the existing build graph
+# unchanged; this only exports the already-built full algorithm library and
+# its C++ module interfaces.
+install(TARGETS ZhouYiLabCore
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_LIBDIR}/zhouyilab/modules"
+)
+install(TARGETS nlohmann_json_modules
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    FILE_SET CXX_MODULES DESTINATION "${CMAKE_INSTALL_LIBDIR}/zhouyilab/modules"
+)
+install(TARGETS fmt-module
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    FILE_SET fmt DESTINATION "${CMAKE_INSTALL_LIBDIR}/zhouyilab/modules/fmt"
+)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/tyme4cpp/tyme/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/tyme"
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ZhouYiLabConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/ZhouYiLabConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/ZhouYiLab"
+)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/ZhouYiLabConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION}"
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/ZhouYiLabConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/ZhouYiLabConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/ZhouYiLab"
+)
