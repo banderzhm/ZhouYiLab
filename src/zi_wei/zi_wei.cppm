@@ -1,4 +1,4 @@
-﻿// 紫微斗数核心排盘模块
+// 紫微斗数核心排盘模块
 export module ZhouYi.ZiWei;
 
 import std;
@@ -164,6 +164,11 @@ struct ZiWeiResult {
   Pillar day_pillar;   // 日柱
   Pillar hour_pillar;  // 时柱
 
+  // 排盘所用的农历月序（1-12）
+  // 闰月前十五日仍按本月、十六日起按下月，与本命十二宫排列口径一致；运限模块
+  // 据此定位流月宫位，调用方不必再判断闰月。0 表示未填写的默认值。
+  int pai_pan_lunar_month = 0;
+
   // 命盘核心数据
   int ming_gong_index;  // 命宫索引（以寅宫为0）
   int shen_gong_index;  // 身宫索引
@@ -199,12 +204,22 @@ struct ZiWeiResult {
   /**
    * @brief 获取指定虚岁的运限盘（天地人三盘）
    *
-   * @param target_year 目标公历年份
-   * @param target_month 目标农历月份
-   * @param target_day 目标农历日
-   * @param target_hour 目标时辰
-   * @param current_age 当前虚岁
-   * @return 运限结果（包含大限、小限、流年、流月、流日、流时）
+   * 大限取本命盘已排定大限中当前虚岁所在限（干支即该限宫的宫干支）；小限按
+   * get_xiao_xian 的三合局起宫口径（见 get_xiao_xian_start_gong，男顺女逆，
+   * 与 palaces[i].xiao_xian_ages 同源）；流年以目标流年地支定宫。目标流年
+   * 干支取自公共 tyme 干支年模块，不在本模块另写年干支换算；流月、流日、流时
+   * 天干分别按五虎遁、日干支、五鼠遁定出。十二宫角标与目标流年口径的岁前／将前
+   * 见 HoroscopeResult::palace_tags。
+   *
+   * @param target_year 目标年份：同时作为流年的干支年与目标农历月日所属的农历年
+   * @param target_month 目标农历月份，范围 1-12；闰月按本月月序传入
+   * @param target_day 目标农历日，范围 1-30
+   * @param target_hour 目标时辰；子时按早子时口径，不顺延到次日
+   * @param current_age 当前虚岁，最小为 1
+   * @return
+   * 运限结果（大限、小限、流年、流月、流日、流时、各组流曜及十二宫角标）
+   * @throws std::invalid_argument 虚岁小于 1、农历月不在 1-12
+   * 或农历日非法时抛出
    */
   HoroscopeResult get_horoscope(int target_year, int target_month,
                                 int target_day, DiZhi target_hour,
@@ -416,8 +431,9 @@ inline ZiWeiResult pai_pan_solar(
   auto jiang_qian_arr = arrange_jiang_qian_12(year_pillar.zhi);
 
   // ============= 安大限 =============
-  auto da_xian_arr =
-      arrange_da_xian(ming_index, wu_xing_ju, is_male, year_pillar.zhi);
+  // 大限宫的干支取命盘同宫的真实宫干支，顺逆仍只看生年支与性别。
+  auto da_xian_arr = arrange_da_xian(ming_index, wu_xing_ju, is_male,
+                                     year_pillar.zhi, palaces);
 
   // 创建结果对象（使用聚合初始化）
   ZiWeiResult result{.solar_day = solar_day,
@@ -428,6 +444,7 @@ inline ZiWeiResult pai_pan_solar(
                      .month_pillar = month_pillar,
                      .day_pillar = day_pillar,
                      .hour_pillar = hour_pillar,
+                     .pai_pan_lunar_month = lunar_month,
                      .ming_gong_index = ming_index,
                      .shen_gong_index = shen_index,
                      .wu_xing_ju = wu_xing_ju,
@@ -633,39 +650,20 @@ inline ZiWeiResult pai_pan_solar(
     palace_info.da_xian_end = da_xian_arr[i].end_age;
 
     // 填充小限年龄（每12年一个周期，显示前5个）
-    // 小限起宫规则：
-    // 寅午戌年生人，由辰宫起1岁；申子辰年生人，由戌宫起1岁
-    // 亥卯未年生人，由丑宫起1岁；巳酉丑年生人，由未宫起1岁
-    // 男命顺行，女命逆行
+    // 起宫规则由 get_xiao_xian_start_gong 统一给出（三合局起宫），运限模块的
+    // get_xiao_xian 调用同一份实现，两处不再各写一份表。
     {
-      int zhi_idx = static_cast<int>(year_pillar.zhi);
+      const int start_gong = get_xiao_xian_start_gong(year_pillar.zhi);
 
-      // 根据生年地支确定小限起宫
-      // 寅午戌->8(辰宫)，申子辰->8(戌宫)，亥卯未->11(丑宫)，巳酉丑->5(未宫)
-      int start_gong = 0;
-      DiZhi zhi = year_pillar.zhi;
-      if (zhi == DiZhi::Yin || zhi == DiZhi::Wu || zhi == DiZhi::Xu) {
-        start_gong = 2; // 辰宫
-      } else if (zhi == DiZhi::Shen || zhi == DiZhi::Zi || zhi == DiZhi::Chen) {
-        start_gong = 8; // 戌宫
-      } else if (zhi == DiZhi::Hai || zhi == DiZhi::Mao || zhi == DiZhi::Wei) {
-        start_gong = 11; // 丑宫
-      } else {           // 巳酉丑
-        start_gong = 5;  // 未宫
-      }
-
-      // 男命顺行，女命逆行
-      // 计算该宫位对应的第一个小限虚岁
-      int diff =
+      // 男命顺行、女命逆行；先算该宫对应的第一个小限虚岁，再每 12 年记一次。
+      const int diff =
           is_male ? fix_index(i - start_gong) : fix_index(start_gong - i);
-      int first_age = diff + 1;
+      const int first_age = diff + 1;
 
-      // 每12年一个周期，记录5个
       for (int k = 0; k < 5; ++k) {
         palace_info.xiao_xian_ages.push_back(first_age + k * 12);
       }
     }
-
     // 填充流年年龄（基于地支，每12年一个周期）
     {
       // 流年以地支定宫，如子年在子宫

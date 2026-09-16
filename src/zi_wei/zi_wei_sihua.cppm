@@ -182,21 +182,90 @@ private:
 };
 
 /**
+ * @brief 可参与四化的星曜
+ *
+ * 覆盖十四主星与左辅、右弼、文昌、文曲四位辅曜：传统四化表只在这十八颗星内取
+ * 化禄、化权、化科、化忌，天魁、天钺、禄存等其余辅星不参与四化，故不列入。
+ * 枚举次序即传统星序，用于同一四化下多项并列时的稳定排序。
+ */
+enum class SiHuaXing {
+  ZiWei = 0, ///< 紫微。
+  TianJi,    ///< 天机。
+  TaiYang,   ///< 太阳。
+  WuQu,      ///< 武曲。
+  TianTong,  ///< 天同。
+  LianZhen,  ///< 廉贞。
+  TianFu,    ///< 天府。
+  TaiYin,    ///< 太阴。
+  TanLang,   ///< 贪狼。
+  JuMen,     ///< 巨门。
+  TianXiang, ///< 天相。
+  TianLiang, ///< 天梁。
+  QiSha,     ///< 七杀。
+  PoJun,     ///< 破军。
+  ZuoFu,     ///< 左辅。
+  YouBi,     ///< 右弼。
+  WenChang,  ///< 文昌。
+  WenQu,     ///< 文曲。
+  COUNT
+};
+
+/**
+ * @brief 一条四化记录
+ *
+ * 星曜键覆盖主星与辅曜，能表达“辛年文曲化科、文昌化忌”这类不由十四主星构成的
+ * 四化；map<ZhuXing, SiHua> 只能装主星，表达不了这些条目。
+ */
+struct SiHuaEntry {
+  SiHuaXing xing{SiHuaXing::ZiWei}; ///< 四化星曜。
+  SiHua hua{SiHua::Lu};             ///< 四化类型。
+
+  /** @brief 星曜与化象都相同即视为同一条四化。 */
+  bool operator==(const SiHuaEntry &) const = default;
+};
+
+/**
+ * @brief 获取天干对应的有序四化表
+ *
+ * 顺序固定为化禄、化权、化科、化忌；同一四化下若并见多星，按 SiHuaXing 的传统
+ * 星序稳定排列。每个天干都返回四个条目，不再按星曜枚举顺序或 map 键序输出。
+ *
+ * @param gan 天干（年干、宫干、流年月日时干同用一表）
+ * @return 四条四化记录，长度为 4
+ */
+vector<SiHuaEntry> get_si_hua_entries(TianGan gan);
+
+/**
+ * @brief 四化星曜键转十四主星
+ *
+ * 辅曜（左辅、右弼、文昌、文曲）不属于十四主星，返回空；需要判断辅曜四化时用
+ * get_si_hua_entries 直接比较星曜键。
+ *
+ * @param xing 四化星曜键
+ * @return 对应的十四主星；辅曜返回 nullopt
+ */
+optional<ZhuXing> to_zhu_xing(SiHuaXing xing);
+
+/**
  * @brief 获取天干对应的四化星
  *
+ * 只表达十四主星，辅曜条目返回 nullopt；需要含文昌、文曲等辅曜的四化请用
+ * get_si_hua_entries 或 get_si_hua_star_names。
+ *
  * @param gan 天干
- * @return 四化星数组（禄权科忌顺序）
+ * @return 四化星数组（禄权科忌顺序），该四化落在辅曜上时该项为空
  */
 array<optional<ZhuXing>, 4> get_si_hua_stars(TianGan gan);
 
 /**
-     * @brief 获取天干对应的完整四化星名。
-     *
-     *
- * 与仅能表达十四主星的 get_si_hua_stars 不同，本函数同时覆盖文昌、
-     *
- * 文曲、左辅、右弼等会参与四化的辅曜。
-     */
+ * @brief 获取天干对应的完整四化星名
+ *
+ * 与仅能表达十四主星的 get_si_hua_stars 不同，本函数同时覆盖文昌、文曲、左辅、
+ * 右弼等会参与四化的辅曜；顺序同为禄权科忌。
+ *
+ * @param gan 天干
+ * @return 四个四化星名，顺序为禄权科忌
+ */
 array<string_view, 4> get_si_hua_star_names(TianGan gan);
 
 /**
@@ -212,3 +281,16 @@ optional<SiHua> get_star_si_hua_type(TianGan gan, ZhuXing star);
 optional<SiHua> get_star_si_hua_type(TianGan gan, string_view star_name);
 
 } // namespace ZhouYi::ZiWei
+
+namespace ZhouYi::Mapper {
+
+/** 四化星曜键的中文映射，次序与 SiHuaXing 的传统星序一致。 */
+template <> struct ZhMap<ZhouYi::ZiWei::SiHuaXing> {
+  static constexpr auto get_map() {
+    return std::array<std::string_view, 18>{
+        "紫微", "天机", "太阳", "武曲", "天同", "廉贞", "天府", "太阴", "贪狼",
+        "巨门", "天相", "天梁", "七杀", "破军", "左辅", "右弼", "文昌", "文曲"};
+  }
+};
+
+} // namespace ZhouYi::Mapper

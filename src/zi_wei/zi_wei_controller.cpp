@@ -1,4 +1,4 @@
-﻿// 紫微斗数控制器实现
+// 紫微斗数控制器实现
 module ZhouYi.ZiWei.Controller;
 
 import ZhouYi.GanZhi;
@@ -434,10 +434,13 @@ void display_da_xian_analysis(const ZiWeiResult &result) {
 
   for (int i = 0; i < 12; ++i) {
     const auto &da_xian = result.da_xian_data[i];
+    // 大限干支即该限宫的宫干支，与命盘同宫一致。
     fmt::print(
-        "第{}限：{}岁-{}岁 - 大限宫位：第{}宫 {}\n", i + 1, da_xian.start_age,
-        da_xian.end_age, da_xian.gong_index,
-        string(to_zh(result.palaces[da_xian.gong_index].gong_data.gong_wei)));
+        "第{}限：{}岁-{}岁 - 大限宫位：第{}宫 {} {}{}\n", i + 1,
+        da_xian.start_age, da_xian.end_age, da_xian.gong_index,
+        string(to_zh(result.palaces[da_xian.gong_index].gong_data.gong_wei)),
+        string(GanZhi::Mapper::to_zh(da_xian.tian_gan)),
+        string(GanZhi::Mapper::to_zh(da_xian.di_zhi)));
   }
 }
 
@@ -463,21 +466,11 @@ void display_liu_nian_analysis(const ZiWeiResult &result, int target_year,
   fmt::print("       {}年流年分析（{}岁）\n", target_year, current_age);
   fmt::print("\n\n");
 
-  // 使用tyme库获取流年天干地支
-  auto solar_day = tyme::SolarDay::from_ymd(target_year, 1, 1);
-  auto sixty_cycle_day = solar_day.get_sixty_cycle_day();
-  auto year_cycle = sixty_cycle_day.get_year();
-
-  auto year_gan = year_cycle.get_heaven_stem();
-  auto year_zhi = year_cycle.get_earth_branch();
-
-  // 转换为我们的TianGan和DiZhi类型
-  TianGan tian_gan = static_cast<TianGan>(year_gan.get_index());
-  DiZhi di_zhi = static_cast<DiZhi>(year_zhi.get_index());
-
-  // 调用horoscope模块获取流年数据
-  auto liu_nian_data =
-      get_liu_nian(target_year, tian_gan, di_zhi, result.ming_gong_index);
+  // 流年干支只由目标干支年决定，与农历月日无关；统一走 get_horoscope，
+  // 不再用公历 1 月 1 日反查节气年（1 月 1 日落在上一节气年，会取到上一年）。
+  const HoroscopeResult horoscope =
+      result.get_horoscope(target_year, 1, 1, DiZhi::Zi, current_age);
+  const LiuNianData &liu_nian_data = horoscope.liu_nian;
 
   fmt::print("流年干支：{}{} ({}年)\n",
              string(GanZhi::Mapper::to_zh(liu_nian_data.tian_gan)),
@@ -486,14 +479,11 @@ void display_liu_nian_analysis(const ZiWeiResult &result, int target_year,
              string(to_zh(
                  result.palaces[liu_nian_data.gong_index].gong_data.gong_wei)));
 
-  // 显示流年四化
+  // 流年四化由运限模块按禄→权→科→忌给出，覆盖主星与文昌、文曲等辅星。
   fmt::print("\n流年四化：\n");
-  for (int i = 0; i < 4; ++i) {
-    if (!liu_nian_data.si_hua[i].empty()) {
-      fmt::print("  {} - {}\n", string(to_zh(static_cast<SiHua>(i))),
-                 liu_nian_data.si_hua[i]);
-    }
-  }
+  for (const SiHuaEntry &entry : liu_nian_data.si_hua_entries)
+    fmt::print("  {} - {}\n", string(to_zh(entry.hua)),
+               string(to_zh(entry.xing)));
 
   fmt::print("\n流年宫位详情：\n");
   fmt::print("{}\n", result.palaces[liu_nian_data.gong_index].to_string());
@@ -506,29 +496,11 @@ void display_liu_yue_analysis(const ZiWeiResult &result, int target_year,
              current_age);
   fmt::print("\n\n");
 
-  // 使用tyme库获取流月天干地支
-  auto solar_day = tyme::SolarDay::from_ymd(target_year, target_month,
-                                            15); // 使用月中作为参考日
-  auto lunar_day = solar_day.get_lunar_day();
-  int lunar_month = lunar_day.get_lunar_month().get_month();
-  int birth_month = result.month_pillar.zhi == DiZhi::Zi
-                        ? 11
-                        : static_cast<int>(result.month_pillar.zhi) - 1;
-
-  auto sixty_cycle_day = solar_day.get_sixty_cycle_day();
-  auto month_cycle = sixty_cycle_day.get_month();
-  auto year_cycle = sixty_cycle_day.get_year();
-
-  TianGan month_gan =
-      static_cast<TianGan>(month_cycle.get_heaven_stem().get_index());
-  DiZhi month_zhi =
-      static_cast<DiZhi>(month_cycle.get_earth_branch().get_index());
-  DiZhi year_zhi =
-      static_cast<DiZhi>(year_cycle.get_earth_branch().get_index());
-
-  // 调用horoscope模块获取流月数据
-  auto liu_yue_data = get_liu_yue(lunar_month, birth_month, month_gan,
-                                  month_zhi, year_zhi, result.ming_gong_index);
+  // target_month 与 get_horoscope 同为农历月序；流月干支由该函数按五虎遁自
+  // 流年干推出，不再用公历 15 日反查月柱。
+  const HoroscopeResult horoscope = result.get_horoscope(
+      target_year, target_month, 1, DiZhi::Zi, current_age);
+  const LiuYueData &liu_yue_data = horoscope.liu_yue;
 
   fmt::print("流月干支：{}{} (农历{}月)\n",
              string(GanZhi::Mapper::to_zh(liu_yue_data.tian_gan)),
@@ -538,14 +510,11 @@ void display_liu_yue_analysis(const ZiWeiResult &result, int target_year,
              string(to_zh(
                  result.palaces[liu_yue_data.gong_index].gong_data.gong_wei)));
 
-  // 显示流月四化
+  // 流月四化由运限模块按禄→权→科→忌给出，覆盖主星与文昌、文曲等辅星。
   fmt::print("\n流月四化：\n");
-  for (int i = 0; i < 4; ++i) {
-    if (!liu_yue_data.si_hua[i].empty()) {
-      fmt::print("  {} - {}\n", string(to_zh(static_cast<SiHua>(i))),
-                 liu_yue_data.si_hua[i]);
-    }
-  }
+  for (const SiHuaEntry &entry : liu_yue_data.si_hua_entries)
+    fmt::print("  {} - {}\n", string(to_zh(entry.hua)),
+               string(to_zh(entry.xing)));
 
   fmt::print("\n流月宫位详情：\n");
   fmt::print("{}\n", result.palaces[liu_yue_data.gong_index].to_string());
@@ -559,45 +528,11 @@ void display_liu_ri_analysis(const ZiWeiResult &result, int target_year,
              target_day, current_age);
   fmt::print("\n\n");
 
-  // 使用tyme库获取流日天干地支
-  auto solar_day =
-      tyme::SolarDay::from_ymd(target_year, target_month, target_day);
-  auto lunar_day = solar_day.get_lunar_day();
-  int lunar_day_num = lunar_day.get_day();
-
-  auto sixty_cycle_day = solar_day.get_sixty_cycle_day();
-  auto day_cycle = sixty_cycle_day.get_sixty_cycle();
-
-  TianGan day_gan =
-      static_cast<TianGan>(day_cycle.get_heaven_stem().get_index());
-  DiZhi day_zhi = static_cast<DiZhi>(day_cycle.get_earth_branch().get_index());
-
-  // 先获取流月宫位索引（简化实现，假设从结果中获取）
-  auto solar_day_month =
-      tyme::SolarDay::from_ymd(target_year, target_month, 15);
-  auto lunar_day_month = solar_day_month.get_lunar_day();
-  int lunar_month = lunar_day_month.get_lunar_month().get_month();
-  int birth_month = result.month_pillar.zhi == DiZhi::Zi
-                        ? 11
-                        : static_cast<int>(result.month_pillar.zhi) - 1;
-
-  auto sixty_cycle_day_month = solar_day_month.get_sixty_cycle_day();
-  auto month_cycle = sixty_cycle_day_month.get_month();
-  auto year_cycle = sixty_cycle_day_month.get_year();
-
-  TianGan month_gan =
-      static_cast<TianGan>(month_cycle.get_heaven_stem().get_index());
-  DiZhi month_zhi =
-      static_cast<DiZhi>(month_cycle.get_earth_branch().get_index());
-  DiZhi year_zhi =
-      static_cast<DiZhi>(year_cycle.get_earth_branch().get_index());
-
-  auto liu_yue_data = get_liu_yue(lunar_month, birth_month, month_gan,
-                                  month_zhi, year_zhi, result.ming_gong_index);
-
-  // 调用horoscope模块获取流日数据
-  auto liu_ri_data =
-      get_liu_ri(lunar_day_num, day_gan, day_zhi, liu_yue_data.gong_index);
+  // 农历月日与 get_horoscope 同一口径；流日干支直接取该日干支，不再按公历日
+  // 反查，也不再借公历 15 日的月柱另算一套流月。
+  const HoroscopeResult horoscope = result.get_horoscope(
+      target_year, target_month, target_day, DiZhi::Zi, current_age);
+  const LiuRiData &liu_ri_data = horoscope.liu_ri;
 
   fmt::print("流日干支：{}{} (农历{}日)\n",
              string(GanZhi::Mapper::to_zh(liu_ri_data.tian_gan)),
@@ -607,14 +542,11 @@ void display_liu_ri_analysis(const ZiWeiResult &result, int target_year,
       "流日宫位：第{}宫 {}\n", liu_ri_data.gong_index,
       string(to_zh(result.palaces[liu_ri_data.gong_index].gong_data.gong_wei)));
 
-  // 显示流日四化
+  // 流日四化由运限模块按禄→权→科→忌给出，覆盖主星与文昌、文曲等辅星。
   fmt::print("\n流日四化：\n");
-  for (int i = 0; i < 4; ++i) {
-    if (!liu_ri_data.si_hua[i].empty()) {
-      fmt::print("  {} - {}\n", string(to_zh(static_cast<SiHua>(i))),
-                 liu_ri_data.si_hua[i]);
-    }
-  }
+  for (const SiHuaEntry &entry : liu_ri_data.si_hua_entries)
+    fmt::print("  {} - {}\n", string(to_zh(entry.hua)),
+               string(to_zh(entry.xing)));
 
   fmt::print("\n流日宫位详情：\n");
   fmt::print("{}\n", result.palaces[liu_ri_data.gong_index].to_string());
@@ -628,54 +560,10 @@ void display_liu_shi_analysis(const ZiWeiResult &result, int target_year,
              target_month, target_day, string(to_zh(target_hour)), current_age);
   fmt::print("\n\n");
 
-  // 使用tyme库获取流时天干
-  auto solar_day =
-      tyme::SolarDay::from_ymd(target_year, target_month, target_day);
-  auto sixty_cycle_day = solar_day.get_sixty_cycle_day();
-  auto day_cycle = sixty_cycle_day.get_sixty_cycle();
-
-  // 根据日干和时辰地支计算时干（五鼠遁日起时法）
-  int day_gan_index = day_cycle.get_heaven_stem().get_index();
-  int hour_zhi_index = static_cast<int>(target_hour);
-  int hour_gan_index = (day_gan_index % 5 * 2 + hour_zhi_index) % 10;
-
-  TianGan hour_gan = static_cast<TianGan>(hour_gan_index);
-
-  // 获取流日宫位索引（需要先计算流日）
-  auto lunar_day = solar_day.get_lunar_day();
-  int lunar_day_num = lunar_day.get_day();
-  TianGan day_gan =
-      static_cast<TianGan>(day_cycle.get_heaven_stem().get_index());
-  DiZhi day_zhi = static_cast<DiZhi>(day_cycle.get_earth_branch().get_index());
-
-  // 获取流月数据
-  auto solar_day_month =
-      tyme::SolarDay::from_ymd(target_year, target_month, 15);
-  auto lunar_day_month = solar_day_month.get_lunar_day();
-  int lunar_month = lunar_day_month.get_lunar_month().get_month();
-  int birth_month = result.month_pillar.zhi == DiZhi::Zi
-                        ? 11
-                        : static_cast<int>(result.month_pillar.zhi) - 1;
-
-  auto sixty_cycle_day_month = solar_day_month.get_sixty_cycle_day();
-  auto month_cycle = sixty_cycle_day_month.get_month();
-  auto year_cycle = sixty_cycle_day_month.get_year();
-
-  TianGan month_gan =
-      static_cast<TianGan>(month_cycle.get_heaven_stem().get_index());
-  DiZhi month_zhi =
-      static_cast<DiZhi>(month_cycle.get_earth_branch().get_index());
-  DiZhi year_zhi =
-      static_cast<DiZhi>(year_cycle.get_earth_branch().get_index());
-
-  auto liu_yue_data = get_liu_yue(lunar_month, birth_month, month_gan,
-                                  month_zhi, year_zhi, result.ming_gong_index);
-  auto liu_ri_data =
-      get_liu_ri(lunar_day_num, day_gan, day_zhi, liu_yue_data.gong_index);
-
-  // 调用horoscope模块获取流时数据
-  auto liu_shi_data =
-      get_liu_shi(target_hour, hour_gan, liu_ri_data.gong_index);
+  // 流时干支由 get_horoscope 按日干五鼠遁定出，与本命、大限、流年共用一份口径。
+  const HoroscopeResult horoscope = result.get_horoscope(
+      target_year, target_month, target_day, target_hour, current_age);
+  const LiuShiData &liu_shi_data = horoscope.liu_shi;
 
   fmt::print("流时干支：{}{}\n",
              string(GanZhi::Mapper::to_zh(liu_shi_data.tian_gan)),
@@ -684,14 +572,11 @@ void display_liu_shi_analysis(const ZiWeiResult &result, int target_year,
              string(to_zh(
                  result.palaces[liu_shi_data.gong_index].gong_data.gong_wei)));
 
-  // 显示流时四化
+  // 流时四化由运限模块按禄→权→科→忌给出，覆盖主星与文昌、文曲等辅星。
   fmt::print("\n流时四化：\n");
-  for (int i = 0; i < 4; ++i) {
-    if (!liu_shi_data.si_hua[i].empty()) {
-      fmt::print("  {} - {}\n", string(to_zh(static_cast<SiHua>(i))),
-                 liu_shi_data.si_hua[i]);
-    }
-  }
+  for (const SiHuaEntry &entry : liu_shi_data.si_hua_entries)
+    fmt::print("  {} - {}\n", string(to_zh(entry.hua)),
+               string(to_zh(entry.xing)));
 
   fmt::print("\n流时宫位详情：\n");
   fmt::print("{}\n", result.palaces[liu_shi_data.gong_index].to_string());
