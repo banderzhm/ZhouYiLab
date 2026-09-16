@@ -1,0 +1,50 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+set(_zhouyilab_module_dir
+    "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/zhouyilab/modules")
+file(GLOB_RECURSE _zhouyilab_module_files
+    "${_zhouyilab_module_dir}/*.cppm"
+    "${_zhouyilab_module_dir}/*.ixx"
+)
+list(APPEND _zhouyilab_module_files
+    "${_zhouyilab_module_dir}/fmt/src/fmt.cc")
+
+if(NOT TARGET fmt::fmt-module)
+    add_library(fmt::fmt-module STATIC IMPORTED)
+    set_target_properties(fmt::fmt-module PROPERTIES
+        IMPORTED_LOCATION
+            "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}fmt-module${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        INTERFACE_COMPILE_FEATURES cxx_std_20
+    )
+endif()
+
+if(NOT TARGET ZhouYiLab::nlohmann_json_modules)
+    add_library(ZhouYiLab::nlohmann_json_modules STATIC IMPORTED)
+    set_target_properties(ZhouYiLab::nlohmann_json_modules PROPERTIES
+        IMPORTED_LOCATION
+            "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}nlohmann_json_modules${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@"
+    )
+endif()
+
+if(NOT TARGET ZhouYiLab::ZhouYiLabCore)
+    add_library(ZhouYiLab::ZhouYiLabCore STATIC IMPORTED)
+    set_target_properties(ZhouYiLab::ZhouYiLabCore PROPERTIES
+        IMPORTED_LOCATION
+            "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}ZhouYiLabCore${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        INTERFACE_COMPILE_FEATURES cxx_std_23
+        INTERFACE_COMPILE_DEFINITIONS MAGIC_ENUM_USE_STD_MODULE
+        INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@"
+        INTERFACE_LINK_LIBRARIES
+            "fmt::fmt-module;ZhouYiLab::nlohmann_json_modules"
+    )
+    target_sources(ZhouYiLab::ZhouYiLabCore INTERFACE
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        BASE_DIRS "${_zhouyilab_module_dir}"
+        FILES ${_zhouyilab_module_files}
+    )
+endif()
+
+check_required_components(ZhouYiLab)
