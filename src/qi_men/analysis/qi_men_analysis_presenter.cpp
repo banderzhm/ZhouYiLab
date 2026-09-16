@@ -1,44 +1,14 @@
 module ZhouYi.QiMen.Analysis.Presenter;
 
 import ZhouYi.GanZhi;
+import ZhouYi.ZhMapper;
 import fmt;
 import std;
 
 namespace ZhouYi::QiMenAnalysis {
 namespace {
 using namespace ZhouYi::QiMen;
-
-std::string_view question_name(QuestionKind kind) {
-  constexpr std::array<std::string_view, 9> names{
-      "泛占",     "功名事业", "求财经营", "婚恋关系", "疾病医药",
-      "出行迁动", "官讼争议", "学业考试", "寻人失物"};
-  return names[static_cast<std::size_t>(kind)];
-}
-
-std::string_view role_name(YongShenRole role) {
-  constexpr std::array<std::string_view, 9> names{
-      "日干",   "时干",   "年命",   "值符",    "值使",
-      "专用门", "专用星", "专用神", "专用奇仪"};
-  return names[static_cast<std::size_t>(role)];
-}
-
-std::string_view relation_name(PalaceRelation relation) {
-  constexpr std::array<std::string_view, 6> names{"同宫",   "比和",   "主生客",
-                                                  "客生主", "主克客", "客克主"};
-  return names[static_cast<std::size_t>(relation)];
-}
-
-std::string_view effect_name(EffectNature nature) {
-  constexpr std::array<std::string_view, 4> names{"助力", "制碍", "引动",
-                                                  "待辨"};
-  return names[static_cast<std::size_t>(nature)];
-}
-
-std::string_view judgment_name(Judgment judgment) {
-  constexpr std::array<std::string_view, 5> names{"得势", "有利", "吉凶并见",
-                                                  "受阻", "待定"};
-  return names[static_cast<std::size_t>(judgment)];
-}
+using namespace ZhouYi::Mapper;
 
 std::string gan(ZhouYi::GanZhi::TianGan value) {
   return std::string(ZhouYi::GanZhi::Mapper::to_zh(value));
@@ -64,7 +34,7 @@ std::string roles_text(const std::vector<YongShenRole> &roles) {
   for (std::size_t i = 0; i < roles.size(); ++i) {
     if (i)
       result += "、";
-    result += role_name(roles[i]);
+    result += to_zh(roles[i]);
   }
   return result.empty() ? "—" : result;
 }
@@ -73,7 +43,7 @@ nlohmann::json evidence_json(const PanJuBasis &item) {
   return {
       {"断法", item.rule},
       {"盘局依据", item.detail},
-      {"作用", effect_name(item.nature)},
+      {"作用", to_zh(item.nature)},
       {"落宫", item.palace ? std::string(palace_name(*item.palace)) : "全局"}};
 }
 
@@ -84,7 +54,7 @@ void write_evidence(std::ostream &output, const std::vector<PanJuBasis> &items,
     return;
   }
   for (const auto &item : items)
-    output << "- " << item.rule << "【" << effect_name(item.nature) << "】："
+    output << "- " << item.rule << "【" << to_zh(item.nature) << "】："
            << item.detail << '\n';
 }
 
@@ -124,7 +94,7 @@ void write_palace_cell(std::ostream &output, const PalaceInfo &palace) {
 nlohmann::json to_zh_json(const QiMenPan &pan, const AnalysisResult &analysis) {
   nlohmann::json output;
   output["契约版本"] = analysis.schema_version;
-  output["占问"] = {{"门类", question_name(analysis.request.question_kind)},
+  output["占问"] = {{"门类", to_zh(analysis.request.question_kind)},
                     {"所问", analysis.request.question},
                     {"年命", analysis.request.nian_ming
                                  ? gan(*analysis.request.nian_ming)
@@ -133,13 +103,13 @@ nlohmann::json to_zh_json(const QiMenPan &pan, const AnalysisResult &analysis) {
   output["排盘"] = std::move(pan_json);
   output["用神落宫"] = nlohmann::json::array();
   for (const auto &item : analysis.yong_shen)
-    output["用神落宫"].push_back({{"职责", role_name(item.role)},
+    output["用神落宫"].push_back({{"职责", to_zh(item.role)},
                                   {"用神", item.name},
                                   {"落宫", palace_name(item.palace)},
                                   {"取用", item.basis}});
   output["日时主客"] = {{"主宫", palace_name(analysis.main_guest.host_palace)},
                         {"客宫", palace_name(analysis.main_guest.guest_palace)},
-                        {"生克", relation_name(analysis.main_guest.relation)},
+                        {"生克", to_zh(analysis.main_guest.relation)},
                         {"断意", analysis.main_guest.interpretation}};
   output["主用诸宫"] = nlohmann::json::array();
   for (const auto &reading : analysis.palace_readings) {
@@ -173,7 +143,7 @@ nlohmann::json to_zh_json(const QiMenPan &pan, const AnalysisResult &analysis) {
          {"迟速", item.pace},
          {"触发", item.condition},
          {"依据", item.basis}});
-  output["总断"] = {{"盘势", judgment_name(analysis.judgment)},
+  output["总断"] = {{"盘势", to_zh(analysis.judgment)},
                     {"断语", analysis.conclusion},
                     {"复核", analysis.review_points}};
   return output;
@@ -183,7 +153,7 @@ void write_zh(std::ostream &output, const QiMenPan &pan,
               const AnalysisResult &analysis) {
   output << "==================== 奇门遁甲排盘与占断 ====================\n\n";
   output << "【占问资料】\n";
-  output << "占类：" << question_name(analysis.request.question_kind) << '\n';
+  output << "占类：" << to_zh(analysis.request.question_kind) << '\n';
   if (!analysis.request.question.empty())
     output << "所问：" << analysis.request.question << '\n';
   output << "年命："
@@ -202,8 +172,8 @@ void write_zh(std::ostream &output, const QiMenPan &pan,
            << pan.ba_zi->day.to_string() << " / " << pan.ba_zi->hour.to_string()
            << '\n';
   output << "节气：" << solar_term_name(pan.solar_term) << '\n';
-  output << "遁局：" << (pan.dun == Dun::Yang ? "阳遁" : "阴遁")
-         << static_cast<int>(pan.ju) << "局·" << yuan_name(pan.yuan) << '\n';
+  output << "遁局：" << to_zh(pan.dun) << static_cast<int>(pan.ju) << "局·"
+         << yuan_name(pan.yuan) << '\n';
   output << "旬首：" << jia_xun_name(pan.xun_shou) << "遁"
          << gan(pan.xun_hidden_gan) << '\n';
   output << "值符：" << star_name(pan.zhi_fu_star) << "落"
@@ -235,13 +205,13 @@ void write_zh(std::ostream &output, const QiMenPan &pan,
   output << "\n【用神落宫】\n";
   output << "| 职责 | 用神 | 落宫 | 取用依据 |\n| --- | --- | --- | --- |\n";
   for (const auto &item : analysis.yong_shen)
-    output << "| " << role_name(item.role) << " | " << item.name << " | "
+    output << "| " << to_zh(item.role) << " | " << item.name << " | "
            << palace_name(item.palace) << " | " << item.basis << " |\n";
 
   output << "\n【日时主客】\n";
   output << "主宫：" << palace_name(analysis.main_guest.host_palace)
          << "；客宫：" << palace_name(analysis.main_guest.guest_palace)
-         << "；主客：" << relation_name(analysis.main_guest.relation) << "。\n";
+         << "；主客：" << to_zh(analysis.main_guest.relation) << "。\n";
   output << "断意：" << analysis.main_guest.interpretation << '\n';
 
   output << "\n【主用诸宫合参】\n";
@@ -282,7 +252,7 @@ void write_zh(std::ostream &output, const QiMenPan &pan,
            << " | " << item.condition << " | " << item.basis << " |\n";
 
   output << "\n【总断】\n";
-  output << "盘势：" << judgment_name(analysis.judgment) << '\n';
+  output << "盘势：" << to_zh(analysis.judgment) << '\n';
   output << "断语：" << analysis.conclusion << '\n';
   if (!analysis.review_points.empty()) {
     output << "复核：\n";
