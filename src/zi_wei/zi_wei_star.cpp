@@ -1,8 +1,9 @@
-﻿// 紫微斗数星耀定位模块（实现）
+// 紫微斗数星耀定位模块（实现）
 module ZhouYi.ZiWei.Star;
 
 import ZhouYi.GanZhi;
 import ZhouYi.ZiWei.Constants;
+import ZhouYi.ZiWei.SiHua;
 import ZhouYi.ZhMapper;
 import fmt;
 import std;
@@ -210,7 +211,7 @@ pair<int, int> get_chang_qu_index(DiZhi hour_zhi) {
 }
 
 /**
-     * @brief 安天魁天钺诀
+ * @brief 安天魁天钺诀
  *
  * 口诀：
  * 甲戊庚之年丑未，乙己之年子申，
@@ -252,7 +253,7 @@ pair<int, int> get_kui_yue_index(TianGan year_gan, KuiYueSchool school) {
  * 丙戊禄在巳，丁己禄在午。
  * 庚禄定居申，辛禄酉上补。
  * 壬禄亥中藏，癸禄居子户。
-     */
+ */
 int get_lu_cun_index(TianGan year_gan) {
   switch (year_gan) {
   case TianGan::Jia:
@@ -279,7 +280,7 @@ int get_lu_cun_index(TianGan year_gan) {
 }
 
 /**
-     * @brief 定擎羊陀罗诀
+ * @brief 定擎羊陀罗诀
  *
  * 口诀：
  * 禄前羊刃当，禄后陀罗府。
@@ -347,65 +348,12 @@ pair<int, int> get_kong_jie_index(DiZhi hour_zhi) {
 }
 
 map<ZhuXing, SiHua> get_si_hua_table(TianGan year_gan) {
+  // 由 ZiWei.SiHua 的有序四化表派生，只保留十四主星键；辛年文曲化科、文昌化忌
+  // 这类辅曜四化不在本表表达，直接查 get_si_hua_entries。
   map<ZhuXing, SiHua> table;
-
-  switch (year_gan) {
-  case TianGan::Jia:
-    table[ZhuXing::LianZhen] = SiHua::Lu;
-    table[ZhuXing::PoJun] = SiHua::Quan;
-    table[ZhuXing::WuQu] = SiHua::Ke;
-    table[ZhuXing::TaiYang] = SiHua::Ji;
-    break;
-  case TianGan::Yi:
-    table[ZhuXing::TianJi] = SiHua::Lu;
-    table[ZhuXing::TianLiang] = SiHua::Quan;
-    table[ZhuXing::ZiWei] = SiHua::Ke;
-    table[ZhuXing::TaiYin] = SiHua::Ji;
-    break;
-  case TianGan::Bing:
-    table[ZhuXing::TianTong] = SiHua::Lu;
-    table[ZhuXing::TianJi] = SiHua::Quan;
-    table[ZhuXing::LianZhen] = SiHua::Ji;
-    break;
-  case TianGan::Ding:
-    table[ZhuXing::TaiYin] = SiHua::Lu;
-    table[ZhuXing::TianTong] = SiHua::Quan;
-    table[ZhuXing::TianJi] = SiHua::Ke;
-    table[ZhuXing::JuMen] = SiHua::Ji;
-    break;
-  case TianGan::Wu:
-    table[ZhuXing::TanLang] = SiHua::Lu;
-    table[ZhuXing::TaiYin] = SiHua::Quan;
-    table[ZhuXing::TianJi] = SiHua::Ji;
-    break;
-  case TianGan::Ji:
-    table[ZhuXing::WuQu] = SiHua::Lu;
-    table[ZhuXing::TanLang] = SiHua::Quan;
-    table[ZhuXing::TianLiang] = SiHua::Ke;
-    break;
-  case TianGan::Geng:
-    table[ZhuXing::TaiYang] = SiHua::Lu;
-    table[ZhuXing::WuQu] = SiHua::Quan;
-    table[ZhuXing::TaiYin] = SiHua::Ke;
-    table[ZhuXing::TianTong] = SiHua::Ji;
-    break;
-  case TianGan::Xin:
-    table[ZhuXing::JuMen] = SiHua::Lu;
-    table[ZhuXing::TaiYang] = SiHua::Quan;
-    break;
-  case TianGan::Ren:
-    table[ZhuXing::TianLiang] = SiHua::Lu;
-    table[ZhuXing::ZiWei] = SiHua::Quan;
-    table[ZhuXing::WuQu] = SiHua::Ji;
-    break;
-  case TianGan::Gui:
-    table[ZhuXing::PoJun] = SiHua::Lu;
-    table[ZhuXing::JuMen] = SiHua::Quan;
-    table[ZhuXing::TaiYin] = SiHua::Ke;
-    table[ZhuXing::TanLang] = SiHua::Ji;
-    break;
-  }
-
+  for (const SiHuaEntry &entry : get_si_hua_entries(year_gan))
+    if (const optional<ZhuXing> star = to_zhu_xing(entry.xing))
+      table[*star] = entry.hua;
   return table;
 }
 

@@ -1,9 +1,8 @@
-﻿// 紫微斗数四化系统模块（实现）
+// 紫微斗数四化系统模块（实现）
 module ZhouYi.ZiWei.SiHua;
 
 import ZhouYi.GanZhi;
 import ZhouYi.ZiWei.Constants;
-import ZhouYi.ZiWei.Star;
 import fmt;
 import std;
 import ZhouYi.ZhMapper;
@@ -63,83 +62,123 @@ string FeiHuaChain::to_string() const {
 
 // ============= 获取天干对应的四化星 =============
 
-array<optional<ZhuXing>, 4> get_si_hua_stars(TianGan gan) {
-  array<optional<ZhuXing>, 4> result = {nullopt, nullopt, nullopt, nullopt};
+/**
+ * @brief 年干四化表
+ *
+ * 第 i 行对应天干 i（甲、乙、丙、丁、戊、己、庚、辛、壬、癸），每行列出该干的
+ * 化禄、化权、化科、化忌四星；星曜键覆盖十四主星与左辅、右弼、文昌、文曲。
+ */
+constexpr array<array<SiHuaEntry, 4>, 10> kSiHuaTable = {{
+    {{{SiHuaXing::LianZhen, SiHua::Lu},
+      {SiHuaXing::PoJun, SiHua::Quan},
+      {SiHuaXing::WuQu, SiHua::Ke},
+      {SiHuaXing::TaiYang, SiHua::Ji}}}, // 甲
+    {{{SiHuaXing::TianJi, SiHua::Lu},
+      {SiHuaXing::TianLiang, SiHua::Quan},
+      {SiHuaXing::ZiWei, SiHua::Ke},
+      {SiHuaXing::TaiYin, SiHua::Ji}}}, // 乙
+    {{{SiHuaXing::TianTong, SiHua::Lu},
+      {SiHuaXing::TianJi, SiHua::Quan},
+      {SiHuaXing::WenChang, SiHua::Ke},
+      {SiHuaXing::LianZhen, SiHua::Ji}}}, // 丙
+    {{{SiHuaXing::TaiYin, SiHua::Lu},
+      {SiHuaXing::TianTong, SiHua::Quan},
+      {SiHuaXing::TianJi, SiHua::Ke},
+      {SiHuaXing::JuMen, SiHua::Ji}}}, // 丁
+    {{{SiHuaXing::TanLang, SiHua::Lu},
+      {SiHuaXing::TaiYin, SiHua::Quan},
+      {SiHuaXing::YouBi, SiHua::Ke},
+      {SiHuaXing::TianJi, SiHua::Ji}}}, // 戊
+    {{{SiHuaXing::WuQu, SiHua::Lu},
+      {SiHuaXing::TanLang, SiHua::Quan},
+      {SiHuaXing::TianLiang, SiHua::Ke},
+      {SiHuaXing::WenQu, SiHua::Ji}}}, // 己
+    {{{SiHuaXing::TaiYang, SiHua::Lu},
+      {SiHuaXing::WuQu, SiHua::Quan},
+      {SiHuaXing::TaiYin, SiHua::Ke},
+      {SiHuaXing::TianTong, SiHua::Ji}}}, // 庚
+    {{{SiHuaXing::JuMen, SiHua::Lu},
+      {SiHuaXing::TaiYang, SiHua::Quan},
+      {SiHuaXing::WenQu, SiHua::Ke},
+      {SiHuaXing::WenChang, SiHua::Ji}}}, // 辛
+    {{{SiHuaXing::TianLiang, SiHua::Lu},
+      {SiHuaXing::ZiWei, SiHua::Quan},
+      {SiHuaXing::ZuoFu, SiHua::Ke},
+      {SiHuaXing::WuQu, SiHua::Ji}}}, // 壬
+    {{{SiHuaXing::PoJun, SiHua::Lu},
+      {SiHuaXing::JuMen, SiHua::Quan},
+      {SiHuaXing::TaiYin, SiHua::Ke},
+      {SiHuaXing::TanLang, SiHua::Ji}}}, // 癸
+}};
 
-  switch (gan) {
-  case TianGan::Jia:
-    result[0] = ZhuXing::LianZhen; // 化禄
-    result[1] = ZhuXing::PoJun;    // 化权
-    result[2] = ZhuXing::WuQu;     // 化科
-    result[3] = ZhuXing::TaiYang;  // 化忌
-    break;
-  case TianGan::Yi:
-    result[0] = ZhuXing::TianJi;
-    result[1] = ZhuXing::TianLiang;
-    result[2] = ZhuXing::ZiWei;
-    result[3] = ZhuXing::TaiYin;
-    break;
-  case TianGan::Bing:
-    result[0] = ZhuXing::TianTong;
-    result[1] = ZhuXing::TianJi;
-    result[3] = ZhuXing::LianZhen;
-    break;
-  case TianGan::Ding:
-    result[0] = ZhuXing::TaiYin;
-    result[1] = ZhuXing::TianTong;
-    result[2] = ZhuXing::TianJi;
-    result[3] = ZhuXing::JuMen;
-    break;
-  case TianGan::Wu:
-    result[0] = ZhuXing::TanLang;
-    result[1] = ZhuXing::TaiYin;
-    result[3] = ZhuXing::TianJi;
-    break;
-  case TianGan::Ji:
-    result[0] = ZhuXing::WuQu;
-    result[1] = ZhuXing::TanLang;
-    result[2] = ZhuXing::TianLiang;
-    break;
-  case TianGan::Geng:
-    result[0] = ZhuXing::TaiYang;
-    result[1] = ZhuXing::WuQu;
-    result[2] = ZhuXing::TaiYin;
-    result[3] = ZhuXing::TianTong;
-    break;
-  case TianGan::Xin:
-    result[0] = ZhuXing::JuMen;
-    result[1] = ZhuXing::TaiYang;
-    break;
-  case TianGan::Ren:
-    result[0] = ZhuXing::TianLiang;
-    result[1] = ZhuXing::ZiWei;
-    result[3] = ZhuXing::WuQu;
-    break;
-  case TianGan::Gui:
-    result[0] = ZhuXing::PoJun;
-    result[1] = ZhuXing::JuMen;
-    result[2] = ZhuXing::TaiYin;
-    result[3] = ZhuXing::TanLang;
-    break;
+/** @brief 四化星曜键转十四主星；左辅、右弼、文昌、文曲不属于十四主星，返回空。
+ */
+optional<ZhuXing> to_zhu_xing(SiHuaXing xing) {
+  switch (xing) {
+  case SiHuaXing::ZiWei:
+    return ZhuXing::ZiWei;
+  case SiHuaXing::TianJi:
+    return ZhuXing::TianJi;
+  case SiHuaXing::TaiYang:
+    return ZhuXing::TaiYang;
+  case SiHuaXing::WuQu:
+    return ZhuXing::WuQu;
+  case SiHuaXing::TianTong:
+    return ZhuXing::TianTong;
+  case SiHuaXing::LianZhen:
+    return ZhuXing::LianZhen;
+  case SiHuaXing::TianFu:
+    return ZhuXing::TianFu;
+  case SiHuaXing::TaiYin:
+    return ZhuXing::TaiYin;
+  case SiHuaXing::TanLang:
+    return ZhuXing::TanLang;
+  case SiHuaXing::JuMen:
+    return ZhuXing::JuMen;
+  case SiHuaXing::TianXiang:
+    return ZhuXing::TianXiang;
+  case SiHuaXing::TianLiang:
+    return ZhuXing::TianLiang;
+  case SiHuaXing::QiSha:
+    return ZhuXing::QiSha;
+  case SiHuaXing::PoJun:
+    return ZhuXing::PoJun;
+  default:
+    return nullopt;
   }
+}
 
+vector<SiHuaEntry> get_si_hua_entries(TianGan gan) {
+  const auto &row = kSiHuaTable[static_cast<size_t>(gan)];
+  vector<SiHuaEntry> entries(row.begin(), row.end());
+
+  // 主序为化禄、化权、化科、化忌，次序为 SiHuaXing 的传统星序；表按此行文，
+  // 排序把并列次序固定下来，避免展示层再按星曜枚举顺序输出。
+  ranges::stable_sort(entries,
+                      [](const SiHuaEntry &lhs, const SiHuaEntry &rhs) {
+                        if (lhs.hua != rhs.hua)
+                          return lhs.hua < rhs.hua;
+                        return lhs.xing < rhs.xing;
+                      });
+  return entries;
+}
+
+array<optional<ZhuXing>, 4> get_si_hua_stars(TianGan gan) {
+  const vector<SiHuaEntry> entries = get_si_hua_entries(gan);
+  array<optional<ZhuXing>, 4> result{};
+  for (size_t index = 0; index < result.size() && index < entries.size();
+       ++index)
+    result[index] = to_zhu_xing(entries[index].xing);
   return result;
 }
 
 array<string_view, 4> get_si_hua_star_names(TianGan gan) {
-  static constexpr array<array<string_view, 4>, 10> table = {{
-      {{"廉贞", "破军", "武曲", "太阳"}},
-      {{"天机", "天梁", "紫微", "太阴"}},
-      {{"天同", "天机", "文昌", "廉贞"}},
-      {{"太阴", "天同", "天机", "巨门"}},
-      {{"贪狼", "太阴", "右弼", "天机"}},
-      {{"武曲", "贪狼", "天梁", "文曲"}},
-      {{"太阳", "武曲", "太阴", "天同"}},
-      {{"巨门", "太阳", "文曲", "文昌"}},
-      {{"天梁", "紫微", "左辅", "武曲"}},
-      {{"破军", "巨门", "太阴", "贪狼"}},
-  }};
-  return table[static_cast<size_t>(gan)];
+  const vector<SiHuaEntry> entries = get_si_hua_entries(gan);
+  array<string_view, 4> names{};
+  for (size_t index = 0; index < names.size() && index < entries.size();
+       ++index)
+    names[index] = to_zh(entries[index].xing);
+  return names;
 }
 
 optional<SiHua> get_star_si_hua_type(TianGan gan, ZhuXing star) {

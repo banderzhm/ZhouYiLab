@@ -42,7 +42,10 @@ int main() {
 - `export_to_json_full(chart)` 导出的 JSON 包含格局、四化等；`export_to_json(chart)` 只导出基础资料，要完整报告就用前者。
 - 深入格局规则用 `ZhouYi.ZiWei.GeJu` 的 `GeJuAnalyzer(PatternChart)` → `analyze_all()`；不能直接传 `ZiWeiResult`。当前 `prepare_pattern_chart` 在 controller 实现内部，并非公开转换 API，不应在调用示例里杜撰其可调用性。
 - `GeJuInfo` 读取 `status/level/basis.required/basis.bonus/basis.breaking/source`；兼容 `score` 不能替代成格/破格条件。
-- `chart.get_horoscope(target_year,target_month,target_day,target_hour,current_age)` 使用公历目标年、农历目标月日、地支时辰、虚岁。使用时显式 import `ZhouYi.ZiWei.Horoscope` 与 `ZhouYi.GanZhi`，不要混成全公历参数。
+- `chart.get_horoscope(target_year,target_month,target_day,target_hour,current_age)`：`target_year` 同时是流年的干支年与目标农历月日所属的农历年，`target_month` 为 1-12 的农历月序（闰月按本月月序传入），`target_day` 为农历日，`target_hour` 为地支时辰（子时按早子时口径），`current_age` 为虚岁且最小为 1。使用时显式 import `ZhouYi.ZiWei.Horoscope` 与 `ZhouYi.GanZhi`，不要混成全公历参数。
+- `HoroscopeResult` 除大限／小限／流年／流月／流日／流时与五组流曜外，还有 `palace_tags[0..11]`：按寅起宫序给出每宫的 `is_da_xian`／`is_xiao_xian`／`is_liu_nian` 角标，以及**目标流年口径**的 `sui_qian`／`jiang_qian`。本命盘的岁前／将前仍在 `palaces[i].sui_qian` 与 `palaces[i].jiang_qian`，两者口径不同，前端角标取 `palace_tags`。大限干支就是该限宫的真实宫干支（五虎遁宫干＋寅起宫支），与 `palaces[da_xian.gong_index].gong_data` 逐宫一致，可直接当宫干支用；`arrange_da_xian` 需要按寅起宫序传入十二宫数据。
+- 小限按生年支三合局起宫（`get_xiao_xian_start_gong`：寅午戌起辰宫、申子辰起戌宫、亥卯未起丑宫、巳酉丑起未宫），男顺女逆；它与 `palaces[i].xiao_xian_ages` 同源，同一虚岁在两处必须落同一个宫，不要再按“寅宫起 1 岁”或 1-6 岁童限表另算一套。
+- 运限四化在 `si_hua_entries`（`vector<SiHuaEntry>`，星曜键 `SiHuaXing` 覆盖十四主星与左辅、右弼、文昌、文曲），顺序固定为化禄、化权、化科、化忌，`si_hua` 是它的星名序列；辅曜四化（如辛年文曲化科、文昌化忌）只能从 `si_hua_entries` 读到。`get_si_hua_table()` 仍可用，但只装十四主星。
 
 ## 怎么跑示例和对照测试
 
