@@ -759,7 +759,6 @@ int main() {
            << (tag.is_xiao_xian ? "是" : "否") << " | "
            << (tag.is_liu_nian ? "是" : "否") << " |\n";
   }
-  report << "\n";
   report.close();
 
   output << "\n【运限契约核验】\n" << table.str();

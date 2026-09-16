@@ -488,7 +488,6 @@ std::string run_enum_zh_map_contract() {
     report += fmt::format("| {} | {} | {} |\n", summary[index].first,
                           summary[index].second,
                           summary_ok[index] ? "逐值一致" : "不一致");
-  report += "\n";
 
   if (!diff.empty())
     throw std::runtime_error("奇门枚举中文映射核对失败：" + diff);
