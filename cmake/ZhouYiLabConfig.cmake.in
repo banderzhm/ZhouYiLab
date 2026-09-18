@@ -8,8 +8,27 @@ file(GLOB_RECURSE _zhouyilab_module_files
     "${_zhouyilab_module_dir}/*.cppm"
     "${_zhouyilab_module_dir}/*.ixx"
 )
-list(APPEND _zhouyilab_module_files
-    "${_zhouyilab_module_dir}/fmt/src/fmt.cc")
+# Export one owner per named module. The consumer supplies std and JSON
+# (cnetmod does so in the main application), while fmt is owned by its
+# dedicated imported target below.
+list(FILTER _zhouyilab_module_files EXCLUDE REGEX
+    "/(std(\\.compat)?|json)\\.(cppm|ixx)$")
+list(FILTER _zhouyilab_module_files EXCLUDE REGEX "/fmt/")
+set(ZhouYiLab_MODULE_BASE_DIR "${_zhouyilab_module_dir}")
+set(ZhouYiLab_MODULE_FILES "${_zhouyilab_module_files}")
+set(ZhouYiLab_FMT_MODULE_FILE "${_zhouyilab_module_dir}/fmt/src/fmt.cc")
+set(ZhouYiLab_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
+set(_zhouyilab_msvc_utf8 "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+if(NOT TARGET fmt::fmt)
+    add_library(fmt::fmt STATIC IMPORTED)
+    set_target_properties(fmt::fmt PROPERTIES
+        IMPORTED_LOCATION
+            "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}fmt${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@"
+        INTERFACE_COMPILE_FEATURES cxx_std_20
+        INTERFACE_COMPILE_OPTIONS "${_zhouyilab_msvc_utf8}")
+endif()
 
 if(NOT TARGET fmt::fmt-module)
     add_library(fmt::fmt-module STATIC IMPORTED)
@@ -17,6 +36,7 @@ if(NOT TARGET fmt::fmt-module)
         IMPORTED_LOCATION
             "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}fmt-module${CMAKE_STATIC_LIBRARY_SUFFIX}"
         INTERFACE_COMPILE_FEATURES cxx_std_20
+        INTERFACE_COMPILE_OPTIONS "${_zhouyilab_msvc_utf8}"
     )
 endif()
 
@@ -26,6 +46,7 @@ if(NOT TARGET ZhouYiLab::nlohmann_json_modules)
         IMPORTED_LOCATION
             "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}nlohmann_json_modules${CMAKE_STATIC_LIBRARY_SUFFIX}"
         INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@"
+        INTERFACE_COMPILE_OPTIONS "${_zhouyilab_msvc_utf8}"
     )
 endif()
 
@@ -35,15 +56,11 @@ if(NOT TARGET ZhouYiLab::ZhouYiLabCore)
         IMPORTED_LOCATION
             "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/${CMAKE_STATIC_LIBRARY_PREFIX}ZhouYiLabCore${CMAKE_STATIC_LIBRARY_SUFFIX}"
         INTERFACE_COMPILE_FEATURES cxx_std_23
+        INTERFACE_COMPILE_OPTIONS "${_zhouyilab_msvc_utf8}"
         INTERFACE_COMPILE_DEFINITIONS MAGIC_ENUM_USE_STD_MODULE
         INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@"
         INTERFACE_LINK_LIBRARIES
             "fmt::fmt-module;ZhouYiLab::nlohmann_json_modules"
-    )
-    target_sources(ZhouYiLab::ZhouYiLabCore INTERFACE
-        FILE_SET cxx_modules TYPE CXX_MODULES
-        BASE_DIRS "${_zhouyilab_module_dir}"
-        FILES ${_zhouyilab_module_files}
     )
 endif()
 

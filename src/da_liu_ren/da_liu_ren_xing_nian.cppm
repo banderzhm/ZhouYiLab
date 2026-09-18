@@ -1,4 +1,6 @@
 // C++23 Module - 大六壬行年（年宫）推算
+module;
+
 export module ZhouYi.DaLiuRen.XingNian;
 
 import ZhouYi.GanZhi;
