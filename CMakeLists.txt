@@ -276,6 +276,13 @@ install(TARGETS fmt-module
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     FILE_SET fmt DESTINATION "${CMAKE_INSTALL_LIBDIR}/zhouyilab/modules/fmt"
 )
+# fmt.cc includes these implementation units with __has_include. They must
+# travel with the installed module source; otherwise a downstream rebuild
+# exports fmt but leaves its module-linkage symbols undefined.
+install(FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/src/format.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/src/os.cc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/zhouyilab/modules/fmt/src")
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
