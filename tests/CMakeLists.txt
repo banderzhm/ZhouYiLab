@@ -24,3 +24,13 @@ set_tests_properties(regression_zi_wei_horoscope PROPERTIES
     WORKING_DIRECTORY "${horoscope_report_dir}"
     TIMEOUT 300
     LABELS "regression")
+
+# Tyme 模块导入与日期转换的冒烟测试，不作为历法准确性的对照测试。
+add_executable(test_tyme_module tyme/test_tyme_module.cpp)
+target_link_libraries(test_tyme_module PRIVATE ZhouYiLabCore)
+target_compile_features(test_tyme_module PRIVATE cxx_std_23)
+add_test(NAME test_tyme_module COMMAND test_tyme_module)
+set_tests_properties(test_tyme_module PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    TIMEOUT 30
+    LABELS "smoke;tyme")

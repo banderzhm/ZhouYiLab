@@ -4,6 +4,7 @@
  */
 import ZhouYi.ZiWei;
 import ZhouYi.ZiWei.Controller;
+import ZhouYi.GanZhi;
 import fmt;
 import std;
 
@@ -28,6 +29,9 @@ int main() {
       throw std::runtime_error("紫微斗数报告写入失败");
     fmt::print("{}", result.to_string());
     ZhouYi::ZiWei::display_ge_ju_analysis(result);
+    ZhouYi::ZiWei::display_ming_gong_star_analysis(result);
+    ZhouYi::ZiWei::display_yun_xian_full_analysis(
+        result, 2026, 9, 16, ZhouYi::GanZhi::DiZhi::Shen, 27);
     fmt::println("报告已写入 docs/ziwei/example_zi_wei_output.txt");
     return 0;
   } catch (const std::exception &error) {

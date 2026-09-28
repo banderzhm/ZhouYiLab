@@ -5,6 +5,7 @@ import ZhouYi.ZiWei.Brightness;
 import ZhouYi.ZiWei.GeJu;
 import ZhouYi.ZiWei;
 import ZhouYi.ZiWei.Star;
+import ZhouYi.ZiWei.StarDocument;
 import ZhouYi.GanZhi;
 import ZhouYi.ZhMapper;
 import nlohmann.json;
@@ -1193,6 +1194,92 @@ vector<ParityCheck> verify_reference_case(const ZiWeiResult &result) {
   return checks;
 }
 
+bool verify_ming_gong_document_coverage(ostream &output) {
+  struct Fixture {
+    vector<string> stars;
+    DiZhi branch;
+    string_view expected_title;
+  };
+
+  // 守命组合按在线资料整理的十二地支结构抽样；覆盖十四主星的单、双星入口。
+  const array<Fixture, 18> fixtures = {{
+      {{"紫微"}, DiZhi::Zi, "紫微星子守命宫"},
+      {{"紫微", "破军"}, DiZhi::Chou, "紫微破军丑守命宫"},
+      {{"天机", "天梁"}, DiZhi::Chen, "天机天梁辰守命宫"},
+      {{"太阳", "太阴"}, DiZhi::Wei, "太阳太阴未守命宫"},
+      {{"武曲", "七杀"}, DiZhi::You, "武曲七杀酉守命宫"},
+      {{"天同"}, DiZhi::Hai, "天同星亥守命宫"},
+      {{"廉贞", "天府"}, DiZhi::Xu, "廉贞天府戌守命宫"},
+      {{"天府"}, DiZhi::Si, "天府星巳守命宫"},
+      {{"太阴"}, DiZhi::Mao, "太阴星卯守命宫"},
+      {{"贪狼"}, DiZhi::Shen, "贪狼星申守命宫"},
+      {{"巨门"}, DiZhi::Wu, "巨门星午守命宫"},
+      {{"天相"}, DiZhi::Hai, "天相星亥守命宫"},
+      {{"天梁"}, DiZhi::Zi, "天梁星子守命宫"},
+      {{"七杀"}, DiZhi::Yin, "七杀星寅守命宫"},
+      {{"破军"}, DiZhi::Chen, "破军星辰守命宫"},
+      {{"天同", "巨门"}, DiZhi::Wei, "天同巨门未守命宫"},
+      {{"武曲", "天府"}, DiZhi::Wu, "武曲天府午守命宫"},
+      {{"廉贞", "贪狼"}, DiZhi::Hai, "廉贞贪狼亥守命宫"},
+  }};
+
+  bool passed = true;
+  output << "【十四主星守命条目覆盖】\n";
+  for (const auto &fixture : fixtures) {
+    const auto document =
+        StarDoc::get_ming_gong_document(fixture.stars, fixture.branch);
+    const bool matched = document && document->title == fixture.expected_title;
+    output << "- " << fixture.expected_title << "："
+           << (matched ? "通过" : "失败") << '\n';
+    passed = passed && matched;
+  }
+  const auto zi_wei_wu =
+      StarDoc::get_ming_gong_document(vector<string>{"紫微"}, DiZhi::Wu);
+  const auto zi_wei_zi =
+      StarDoc::get_ming_gong_document(vector<string>{"紫微"}, DiZhi::Zi);
+  const auto has_section = [](const StarDoc::MingGongDocument &document,
+                              const string_view title) {
+    return ranges::any_of(document.sections, [title](const auto &section) {
+      return section.title == title;
+    });
+  };
+  const bool zi_wei_sections = zi_wei_wu && zi_wei_zi &&
+                               zi_wei_wu->sections.size() == 11 &&
+                               zi_wei_zi->sections.size() == 11 &&
+                               has_section(*zi_wei_wu, "午宫成局条件") &&
+                               has_section(*zi_wei_wu, "情感与声名") &&
+                               has_section(*zi_wei_zi, "子宫煞忌冲会") &&
+                               has_section(*zi_wei_zi, "情感与声名");
+  output << "- 紫微子午分主题断语：" << (zi_wei_sections ? "通过" : "失败")
+         << '\n';
+  passed = passed && zi_wei_sections;
+  const auto tian_tong_hai =
+      StarDoc::get_ming_gong_document(vector<string>{"天同"}, DiZhi::Hai);
+  const auto tian_tong_si =
+      StarDoc::get_ming_gong_document(vector<string>{"天同"}, DiZhi::Si);
+  const bool tian_tong_sections = tian_tong_hai && tian_tong_si &&
+                                  tian_tong_hai->sections.size() == 7 &&
+                                  tian_tong_si->sections.size() == 7;
+  output << "- 天同巳亥分主题断语：" << (tian_tong_sections ? "通过" : "失败")
+         << '\n';
+  passed = passed && tian_tong_sections;
+  const auto qi_sha_yin =
+      StarDoc::get_ming_gong_document(vector<string>{"七杀"}, DiZhi::Yin);
+  const bool generic_sections = qi_sha_yin && qi_sha_yin->sections.size() == 4;
+  output << "- 常规守命星系分主题断语：" << (generic_sections ? "通过" : "失败")
+         << '\n';
+  passed = passed && generic_sections;
+  const auto zi_wei_po_jun = StarDoc::get_ming_gong_document(
+      vector<string>{"紫微", "破军"}, DiZhi::Chou);
+  const bool companion_sections =
+      zi_wei_po_jun && zi_wei_po_jun->sections.size() == 5 &&
+      zi_wei_po_jun->sections[1].title == "同宫关系";
+  output << "- 双星守命同宫关系断语：" << (companion_sections ? "通过" : "失败")
+         << '\n';
+  passed = passed && companion_sections;
+  return passed;
+}
+
 } // namespace
 
 int main() {
@@ -1248,6 +1335,8 @@ int main() {
       throw runtime_error("无法创建 Metis 多案例回归报告");
     if (!verify_metis_core_fixtures(metis_regression_report))
       throw runtime_error("Metis 多案例回归核验失败");
+    if (!verify_ming_gong_document_coverage(metis_regression_report))
+      throw runtime_error("十四主星守命条目覆盖核验失败");
     fmt::print("Metis 多案例回归已写入 "
                "docs/ziwei/example_zi_wei_metis_regression.txt\n\n");
 

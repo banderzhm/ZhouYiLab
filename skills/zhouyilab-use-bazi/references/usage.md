@@ -1,13 +1,32 @@
 # 八字怎么排盘、分析和输出
 
-## 需要导入哪些模块
+## 先认清一张盘的排列
 
-- 排盘/编排：`ZhouYi.BaZiController` → `src/ba_zi/ba_zi_controller.cppm`。
-- 排盘结果：`ZhouYi.BaZi` → `src/ba_zi/ba_zi.cppm`；公共请求：`ZhouYi.BaZiAnalysis.Contract`。
-- 原局统一结果目前仍定义于 `ZhouYi.BaZiAnalysis.ZiPing.Contract`（`ziping_contract.cppm`），包括 `method` 和可选 `blind_analysis`。这是当前兼容契约，不应宣称原局已返回完全独立的 variant。
-- 中文排盘：`ZhouYi.BaZiPresenter`；分析中文/JSON：`ZhouYi.BaZiAnalysis.Report`。
+八字的四柱顺序在项目里是固定契约：**年柱、月柱、日柱、时柱**。不要以数组下标猜柱位，也不要把显示顺序改成日、月、年、时；`BaZiBase::get_pillars(chart.ba_zi)` 返回的四项也严格遵循这个顺序。
 
-## 排一个八字，按子平分析并输出
+| 柱位 | 读取字段 | 柱内字段 | 排盘中保留的资料 | 分析时的基准 |
+| --- | --- | --- | --- | --- |
+| 年柱 | `chart.ba_zi.year` | `gan`、`zhi` | 年干、年支及年支藏干 | 相对日干取十神 |
+| 月柱 | `chart.ba_zi.month` | `gan`、`zhi` | 月干、月支及月令资料 | 节令、人元司令、格局取用的时间上下文 |
+| 日柱 | `chart.ba_zi.day` | `gan`、`zhi` | 日干、日支及日支藏干 | `day.gan` 是十神参照的日主；不要把日干在报告中机械写成“日柱透比肩” |
+| 时柱 | `chart.ba_zi.hour` | `gan`、`zhi` | 时干、时支及时支藏干 | 与出生时刻、后段运限资料共同保留 |
+
+每一柱都是 `BaZiBase::Pillar`：`pillar.gan` 是天干枚举，`pillar.zhi` 是地支枚举，`pillar.to_string()` 生成如“甲子”的中文干支。地支藏干不在柱对象内缓存，统一由 `GanZhi::get_cang_gan(pillar.zhi)` 取得；返回顺序是基础层维护的**主气、中气、余气**，展示或分析不可另抄藏干表。
+
+以日干为参照时，透干十神用 `GanZhi::get_shi_shen(chart.ba_zi.day.gan, pillar.gan)`；支中各藏干也逐个传入同一函数。纳音由 `BaZiBase::calculate_pillar_nayin(pillar)` 给出名称与五行；旬空直接读 `chart.ba_zi.xun_kong_1`、`chart.ba_zi.xun_kong_2`。这些都是排盘资料，不能由子平或盲派分析器各自重算。
+
+## 出生时间怎样传入
+
+| 入口 | 参数排列 | 适合的资料 | 时间与地点口径 |
+| --- | --- | --- | --- |
+| `BaZiController::pai_pan_solar(y, m, d, h, minute, is_male)` | 公历年、月、日、24 小时制、分钟、性别 | 已知公历出生时刻 | 未传地点时，原时刻直接排盘 |
+| `pai_pan_solar(..., location)` | 在上述参数后追加 `std::optional<Time::Location>` | 已知经度、纬度、时区 | 传入地点才走现有真太阳时修正；调用方仍应保存原民用时刻和修正依据 |
+| `BaZiController::pai_pan_lunar(y, m, d, h, minute, is_male)` | 农历年、月、日、小时、分钟、性别 | 已知农历出生资料 | 当前没有地点重载；闰月沿用负月份口径 |
+| `batch_pai_pan` | 年、月、日、时、性别的 tuple | 批量且分钟均为 0 的场景 | 不适合保留“16:30”这类分钟资料 |
+
+返回的 `BaZiResult` 同时保存排盘用的公历字段 `birth_year` 到 `birth_second`、农历字段 `lunar_year` 到 `lunar_day` 与性别。地点修正重载当前没有把完整修正轨迹写回 `BaZiResult`；要在报告中并列原时与真太阳时，应在调用层保留 `TrueSolarTime` 的返回值，不能从 `birth_*` 反推。
+
+## 排盘、原局分析与中文报告
 
 ```cpp
 import ZhouYi.BaZi;
@@ -16,43 +35,48 @@ import ZhouYi.BaZiPresenter;
 import ZhouYi.BaZiAnalysis.Contract;
 import ZhouYi.BaZiAnalysis.ZiPing.Contract;
 import ZhouYi.BaZiAnalysis.Report;
-import nlohmann.json;
 import std;
 
 int main() {
-  const auto chart = ZhouYi::BaZiController::pai_pan_lunar(2000, 6, 15, 16, 30, true);
+  const auto chart = ZhouYi::BaZiController::pai_pan_lunar(
+      2000, 6, 15, 16, 30, true);
+
   ZhouYi::BaZiAnalysis::AnalysisRequest request;
   request.method = ZhouYi::BaZiAnalysis::AnalysisMethod::Ziping;
   const auto analysis = ZhouYi::BaZiController::analyze_ba_zi(chart, request);
+
+  // 完整 txt 先写排盘，再写分析；分析报告本身不重复输出四柱。
   ZhouYi::BaZiPresenter::display_result(chart);
   ZhouYi::BaZiAnalysis::write_zh(std::cout, analysis);
-  const auto json = ZhouYi::BaZiAnalysis::to_json(analysis);
 }
 ```
 
-将 `method` 改为 `BlindSchool` 切换原局盲派。不传请求的 `analyze_ba_zi(chart)` 默认子平。
-请求中的 `birth_context` 缺省由完整排盘结果填充；人工覆盖时必须保证和排盘出生时刻一致。`config` 是子平模型参数，不是让盲派复用扶抑结论的开关。
+`analyze_ba_zi(chart)` 不传请求时默认子平。传 `AnalysisRequest` 后由 `method` 选择流派：
 
-## 出生时间怎么传，结果里有什么
+| `AnalysisRequest.method` | 原局资料的读取重点 | 不应混用的内容 |
+| --- | --- | --- |
+| `Ziping` | `element_balance`、`climate`、`pattern`、`strength`、`useful_gods`、`relations`、`fortune_impacts` 等子平契约 | 不能把盲派做功结论当扶抑分值解释 |
+| `BlindSchool` | `blind_analysis` 中的宾主、体用、墓库、做功与宫位资料 | 盲派岁运不走子平喜忌、强弱与净分模型 |
 
-| 输入/API | 语义 |
-| --- | --- |
-| `pai_pan_solar(y,m,d,h,minute,is_male)` | 公历，小时 0—23，男 true |
-| 同函数最后追加 `optional<Location>` | 可选修正；无地点原时刻不变 |
-| `pai_pan_lunar(y,m,d,h,minute,is_male)` | 农历；当前没有 location 重载，闰月沿用负月份 |
-| `batch_pai_pan` | tuple 为年、月、日、时、性别，分钟固定 0，不适合保留 16:30 的批处理 |
+请求中的 `birth_context` 默认由完整排盘结果构造；只有在调用方能保证与本次出生时刻完全一致时才覆盖。它用于节令和人元司令等需要精确时间的判断，不能用月支本气替代缺失的时间上下文。
 
-`chart.ba_zi` 保存四柱与旬空；`birth_*` 为公历时间，`lunar_*` 保留农历来源；`da_yun_system.get_da_yun_list()` 得到大运，`get_liu_nian(year)` 得到流年。读取 `analysis.method` 后选择子平字段或 `blind_analysis`，不要把盲派结果中的兼容默认数值当作扶抑判断。
-当前地点重载结果未完整保留修正元数据；若报告需要原时刻和偏移，调用层须另外保存 `TrueSolarTime`，不能从 `birth_*` 反推。
+## 大运、流年、流月、流日、流时如何接到原局
 
-## 子平和盲派的岁运分别怎么调用
+八字的时间层不是另一份四柱，而是围绕原局的叠加资料。读取顺序如下：
 
-子平：`BaZiController::analyze_sui_yun(chart, fortune.pillar, year, optional_liu_yue, config)`，后三者中流月默认空、配置默认值；得到 `TransitAnalysis`，用 `BaZiAnalysis::write_zh` / `to_json`。
+| 层次 | 从 `BaZiResult` 取得 | 关键字段 | 与原局衔接方式 |
+| --- | --- | --- | --- |
+| 大运 | `chart.da_yun_system.get_da_yun_list()` | `pillar`、`start_age`、`end_age`、`start_year`、`end_year`、干支十神 | 先以年份筛选当前大运，禁止硬编码示例中的运序下标 |
+| 流年 | `chart.get_liu_nian(year)` | `year`、`pillar`、`age`、干支十神 | 与已筛到的大运、原局四柱共同进入岁运分析 |
+| 流月 | `chart.get_liu_yue_list(year)` | 节气月序、`pillar`、起止日期 | 子平岁运入口可选传一柱流月；不传即只论大运、流年 |
+| 流日 | `chart.get_liu_ri(y, m, d)` | 公历日期、`pillar`、干支十神 | 供需要日级排定的展示或后续规则使用 |
+| 流时 | `chart.get_liu_shi(y, m, d, h)` | 小时、`pillar`、干支十神 | 与流日同用，不把钟点字符串当时支 |
 
-盲派另 import `ZhouYi.BaZiAnalysis.MangPai.Transit`、`ZhouYi.BaZiBase`，调用：
+子平岁运调用 `BaZiController::analyze_sui_yun(chart, da_yun.pillar, year, liu_yue, config)`。`liu_yue` 是 `std::optional<Pillar>`，为空时只排大运与流年。返回 `TransitAnalysis` 后仍用 `BaZiAnalysis::write_zh` 或 `to_json` 输出。
+
+盲派岁运需另 import `ZhouYi.BaZiAnalysis.MangPai.Transit`，并按“岁运引动—宾主变化—做功链变化—宫位取象—应事类型”读取：
 
 ```cpp
-// chart 已由上面的排盘入口生成；这是函数内的岁运片段。
 const int year = 2027;
 for (const auto &fortune : chart.da_yun_system.get_da_yun_list()) {
   if (year < fortune.start_year || year > fortune.end_year)
@@ -65,26 +89,27 @@ for (const auto &fortune : chart.da_yun_system.get_da_yun_list()) {
 }
 ```
 
-这是按公历起运年标记的现有口径，不是精确到交运日。别把示例的固定大运下标用于任意出生案例。盲派岁运字段为 `triggers/palaces/work_changes/symbols/event_types`，目前公开展示接口为 `write_zh`，没有专用 `to_json` 重载。
+这里的 `year == fortune.start_year` 是现有“交运年”标记口径，精度到公历起运年，不代表精确交运日。盲派岁运结果的 `triggers`、`palaces`、`work_changes`、`symbols`、`event_types` 是结构化取象项；当前只有 `write_zh` 中文输出，没有专用 JSON 重载。
 
-## 怎么跑示例，怎么保存报告
+## 报告应怎样完整落盘
 
-构建 `cmake --build build --config Debug --target example_ba_zi example_ba_zi_mangpai`。
-参考 `examples/example_ba_zi.cpp`、`examples/example_ba_zi_mangpai.cpp`：前者主体写 stdout，后者写工作目录下 `docs/example_ba_zi_mangpai_output.txt`，运行前准备 `docs/`。
-分析 `write_zh` 不包含完整排盘，制作 txt 必须同时输出排盘；需要流输出而非控制台时按示例读取排盘结构，不存在通用的 `BaZiPresenter::write_zh(out, chart)`。
-当前未注册独立八字 CTest；不能以其他术数三套测试通过替代八字结果对照。
+完整八字 txt 的顺序应是：出生公农历与性别 → 四柱（年/月/日/时）→ 各支藏干与十神 → 旬空、纳音与大运 → 原局分析 → 选定大运、流年、流月分析。`BaZiPresenter::display_result` 当前写控制台，`BaZiAnalysis::write_zh` 写任意 `std::ostream`，因此落文件时需要由例程先用排盘结构写基础资料，再把分析结果交给 `write_zh`；不能只输出分析而漏掉四柱。
 
-## 要改格局、做功或报告，去哪里改
+构建示例：`cmake --build build --config Debug --target example_ba_zi example_ba_zi_mangpai`。参考 `examples/example_ba_zi.cpp`、`examples/example_ba_zi_mangpai.cpp`；后者会在运行工作目录写 `docs/example_ba_zi_mangpai_output.txt`。当前没有独立八字 CTest，不能以其他术数的回归测试替代八字排盘或报告对照。
 
-以下文件都在 `src/ba_zi/` 下。函数声明看同名 `.cppm`，算法改 `.cpp`。
+## 改哪一层
 
-| 要改的功能 | 文件 |
+以下路径均在 `src/ba_zi/` 下；声明看 `.cppm`，实现和规则表看同名 `.cpp` 或语义对应的实现单元。
+
+| 需要调整的内容 | 文件职责 |
 | --- | --- |
-| 排盘调用、流派选择、把出生时间传给分析器 | `ba_zi_controller.cpp` |
-| 子平原局分析 | `analysis/ziping/ba_zi_analysis.cpp` |
-| 子平干支关系、岁运 | `analysis/ziping/ba_zi_analysis_relations.cpp`、`ba_zi_analysis_fortune.cpp` |
-| 盲派宾主、墓库、做功、岁运 | `analysis/mangpai/` 下的 `mangpai_bing_zhu.cpp`、`mangpai_muku.cpp`、`mangpai_zuo_gong.cpp`、`mangpai_transit.cpp` |
-| 基本排盘显示 | `presenter/ba_zi_presenter.cpp` |
-| 分析报告 | 对外函数在 `analysis/presenter/ba_zi_report.cpp`，具体排版在 `analysis/ziping/ba_zi_analysis_presenter.cpp` |
+| 排盘调用、时间上下文、流派分派 | `ba_zi_controller.cpp` |
+| 子平原局 | `analysis/ziping/ba_zi_analysis.cpp` |
+| 子平干支关系与岁运 | `analysis/ziping/ba_zi_analysis_relations.cpp`、`ba_zi_analysis_fortune.cpp` |
+| 盲派宾主、墓库、做功、岁运 | `analysis/mangpai/mangpai_bing_zhu.cpp`、`mangpai_muku.cpp`、`mangpai_zuo_gong.cpp`、`mangpai_transit.cpp` |
+| 基础排盘展示 | `presenter/ba_zi_presenter.cpp` |
+| 分析中文与 JSON | `analysis/presenter/ba_zi_report.cpp`、`analysis/ziping/ba_zi_analysis_presenter.cpp` |
+| 四柱、旬空、纳音、人元司令 | `src/common/tian_gan/ba_zi_base.*` |
+| 藏干、十神、刑冲合害、三合三会 | `src/common/tian_gan/ganzhi.*` |
 
-报告发现判断错误，回到对应分析文件修改；只是表格或措辞问题，再改展示文件。
+排盘资料有误时先查基础或排盘层；格局、做功、岁运结论有误时回到对应流派分析器；只是中文排版或字段显示有误才改 presenter/report。

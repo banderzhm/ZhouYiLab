@@ -118,7 +118,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/magic_enum/include)
 # ==============================================================================
 #
 # 源码目录结构：
-#   src/               - 主程序入口（main.cpp）和测试文件
+#   src/               - 主程序入口（main.cpp）和生产模块
+#   tests/             - 独立测试程序，不参与核心库源文件收集
 #   src/common/        - 通用基础模块（天干、地支、干支、中文映射等）
 #   src/liu_yao/       - 六爻相关模块
 #   src/mei_hua/       - 梅花易数排盘与占断模块
@@ -136,9 +137,6 @@ file(GLOB_RECURSE MODULE_INTERFACE_FILES CONFIGURE_DEPENDS
     "src/*.cppm"    # C++23 module 接口文件
     "src/*.ixx"     # MSVC module 接口文件
 )
-
-# 排除测试文件（它有自己的 main 函数）
-list(REMOVE_ITEM CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/test_tyme_module.cpp")
 
 # 排除主程序入口文件
 list(REMOVE_ITEM CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")

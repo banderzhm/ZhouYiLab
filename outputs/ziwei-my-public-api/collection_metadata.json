@@ -1,0 +1,42 @@
+{
+  "collectedAt": "2026-09-17T02:52:49.483Z",
+  "endpoint": "https://abc.ziwei.my/abc6_data.php",
+  "staticScripts": [
+    "https://abc.ziwei.my/abc6/js/modules/api.js",
+    "https://abc.ziwei.my/abc6/js/modules/constants.js"
+  ],
+  "calledActions": [
+    100,
+    101,
+    200,
+    300,
+    400
+  ],
+  "wordpressMaterials": {
+    "apiBase": "https://www.ziwei.my/wp-json/wp/v2",
+    "categories": {
+      "endpoint": "https://www.ziwei.my/wp-json/wp/v2/categories",
+      "count": 65
+    },
+    "tags": {
+      "endpoint": "https://www.ziwei.my/wp-json/wp/v2/tags",
+      "count": 387
+    },
+    "posts": {
+      "endpoint": "https://www.ziwei.my/wp-json/wp/v2/posts",
+      "count": 1860
+    },
+    "pages": {
+      "endpoint": "https://www.ziwei.my/wp-json/wp/v2/pages",
+      "count": 37
+    },
+    "contentPolicy": "仅目录元数据；未请求或保存 content.rendered。"
+  },
+  "sample": {
+    "birth_year": "2000",
+    "birth_month": "6",
+    "birth_day": "15",
+    "birth_time": "P03",
+    "gender": "M"
+  }
+}

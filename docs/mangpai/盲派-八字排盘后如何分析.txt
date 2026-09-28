@@ -6,10 +6,21 @@
 “理法—象法—技法”三层框架，以“宾主—体用—做功”为主线，所有差异
 通过 rule_set 版本和可选规则开关表达，不把一家口径伪装成唯一标准。
 
-资料参考（仅作概念依据，具体实现以本文规则为准）：
-- https://www.yuceju.com/ask/3198/
-- https://zh.wikipedia.org/wiki/盲派命理
-- https://asklingxi.com/zh-tw/books/duanjianye-mangpai-gaoji/02-he-xin-zuo-gong/05-jie
+## 资料口径与项目边界
+
+本文件不是某一位师承的口诀汇编。下面的资料只用于定位概念、条件和章节；
+`mangpai-v1` 的字段、权重、状态机和中文报告是项目工程契约，不能倒称为教材原文。
+
+| 内容 | 直接资料 | 项目采用方式与边界 |
+| --- | --- | --- |
+| 宾主的多层划分；“年月为宾、日时为主”；原局为静、岁运为动 | [《段建业盲派命理高级教程》1.2](https://asklingxi.com/books/duanjianye-mangpai-gaoji/01-ba-zi-ru-shou/02-jie)（台账 BZ-03／BZ-08） | 作为 `mangpai-v1` 的默认宾主口径；其他划分必须通过 `rule_set` 明示，不能静默改写。 |
+| 体为日主、印、禄、比劫等可用资源；财、官杀为目标用；食伤在体用之间 | [《段建业盲派命理高级教程》1.2](https://asklingxi.com/books/duanjianye-mangpai-gaoji/01-ba-zi-ru-shou/02-jie)（台账 BZ-03／BZ-08） | 本项目保留“辅助体”“目标用”“风险源”三个工程标签；它们是便于追溯的结果字段，不是原页逐字分类。 |
+| 合、冲、刑、穿、墓等岁运作用可以破坏或改道原局做功 | [《段建业盲派命理高级教程》3.3](https://asklingxi.com/ko/books/duanjianye-mangpai-gaoji/03-zheng-ju-fan-ju/03-jie)（台账 BZ-08） | 用于定义“岁运引动—宾主变化—做功链变化”的分析顺序；具体关系成立与参与项只调用 GanZhi 基础模块。 |
+| 大运定阶段路径、流年形成具体引动；岁运并临、征太岁、晦太岁属于专页语境 | [13.1 大运为路，流年为应](https://asklingxi.com/zh-tw/books/duanjianye-mangpai-gaoji/13-dayun-liunian/01-jie)、[13.2 岁运并临、征太岁、晦太岁](https://asklingxi.com/books/duanjianye-mangpai-gaoji/13-dayun-liunian/02-jie)（台账 BZ-08） | “征太岁”“晦太岁”只在显式 `rule_set` 中启用并记录条件；不得作为默认事故、疾病或财务断语。 |
+| 四柱固定宫位、六层步骤、`effective_power`、做功效率公式、墓库状态、事件分类、报告和 JSON 字段 | `mangpai-v1` 项目规则规格 | 这是工程实现，不冒充资料原文；每一条启用规则仍须输出参与干支、宫位、关系、未成立理由和规则标识。 |
+
+资料未经逐条定位时不得补造师承、口诀出处或确定断语。本文与子平格局、调候、扶抑
+保持分层，不把任一资料页当作唯一传承标准。
 
 理论篇：盲派究竟如何看命
 ========================

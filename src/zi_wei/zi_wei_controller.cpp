@@ -244,6 +244,102 @@ array<DiZhi, 12> prepare_gong_di_zhi(const ZiWeiResult &result) {
   }
   return gong_di_zhi;
 }
+
+/**
+ * 输出某一行限落宫的本命星情与三方四正。
+ *
+ *
+ * 行限宫只改变当层的命宫起点，本命宫垣、安星与宫干仍以原盘为根；此处不
+
+ * *
+ * 将“同宫”直接写成吉凶断语，只列出需要同参的盘面依据。
+
+ */
+void display_limit_palace_context(const ZiWeiResult &result,
+                                  string_view layer_name, int palace_index,
+                                  const array<string, 4> &si_hua) {
+  const auto &palace = result.get_palace_by_index(palace_index);
+  const auto san_fang = get_san_fang_si_zheng(palace_index);
+
+  vector<string> zhu_xing;
+  vector<string> fu_xing;
+  vector<string> sha_xing;
+  for (const auto &star : palace.zhu_xing)
+    zhu_xing.push_back(star.to_string());
+  for (const auto &star : palace.fu_xing)
+    fu_xing.push_back(star.to_string());
+  for (const auto &star : palace.sha_xing)
+    sha_xing.push_back(star.to_string());
+
+  fmt::print("### {}\n", layer_name);
+  fmt::print("- 行限命宫：{}{}（本命{}，寅起第{}宫）\n",
+             string(GanZhi::Mapper::to_zh(palace.gong_data.tian_gan)),
+             string(GanZhi::Mapper::to_zh(palace.gong_data.di_zhi)),
+             string(to_zh(palace.gong_data.gong_wei)), palace_index);
+  fmt::print("- 三方四正：本宫{}、对宫{}、三合{}、{}\n",
+             string(to_zh(result.get_palace_by_index(san_fang.ben_gong_index)
+                              .gong_data.gong_wei)),
+             string(to_zh(result.get_palace_by_index(san_fang.dui_gong_index)
+                              .gong_data.gong_wei)),
+             string(to_zh(result.get_palace_by_index(san_fang.cai_bo_index)
+                              .gong_data.gong_wei)),
+             string(to_zh(result.get_palace_by_index(san_fang.guan_lu_index)
+                              .gong_data.gong_wei)));
+  if (palace.is_empty) {
+    fmt::print("- 空宫借星：对宫第{}宫借{}\n", palace.opposite_index,
+               fmt::join(palace.borrowed_stars, "、"));
+  }
+  if (!zhu_xing.empty())
+    fmt::print("- 主星：{}\n", fmt::join(zhu_xing, "、"));
+  if (!fu_xing.empty())
+    fmt::print("- 辅曜：{}\n", fmt::join(fu_xing, "、"));
+  if (!sha_xing.empty())
+    fmt::print("- 煞曜：{}\n", fmt::join(sha_xing, "、"));
+
+  vector<string_view> active_si_hua;
+  for (const auto &star : si_hua) {
+    if (!star.empty())
+      active_si_hua.push_back(star);
+  }
+  if (!active_si_hua.empty())
+    fmt::print("- 本层四化：{}\n", fmt::join(active_si_hua, "、"));
+}
+
+/** 返回目标公历日对应的流年月日干支，以避免各展示函数各自取值后失去联动。 */
+struct TransitCycles {
+  TianGan year_gan;
+  DiZhi year_zhi;
+  TianGan month_gan;
+  DiZhi month_zhi;
+  TianGan day_gan;
+  DiZhi day_zhi;
+  int lunar_month;
+  int lunar_day;
+};
+
+TransitCycles resolve_transit_cycles(int target_year, int target_month,
+                                     int target_day) {
+  const auto solar_day =
+      tyme::SolarDay::from_ymd(target_year, target_month, target_day);
+  const auto lunar_day = solar_day.get_lunar_day();
+  const auto sixty_cycle_day = solar_day.get_sixty_cycle_day();
+  const auto year_cycle = sixty_cycle_day.get_year();
+  const auto month_cycle = sixty_cycle_day.get_month();
+  const auto day_cycle = sixty_cycle_day.get_sixty_cycle();
+  return {
+      .year_gan =
+          static_cast<TianGan>(year_cycle.get_heaven_stem().get_index()),
+      .year_zhi = static_cast<DiZhi>(year_cycle.get_earth_branch().get_index()),
+      .month_gan =
+          static_cast<TianGan>(month_cycle.get_heaven_stem().get_index()),
+      .month_zhi =
+          static_cast<DiZhi>(month_cycle.get_earth_branch().get_index()),
+      .day_gan = static_cast<TianGan>(day_cycle.get_heaven_stem().get_index()),
+      .day_zhi = static_cast<DiZhi>(day_cycle.get_earth_branch().get_index()),
+      .lunar_month = lunar_day.get_lunar_month().get_month(),
+      .lunar_day = lunar_day.get_day(),
+  };
+}
 } // namespace
 
 // ============= 四化分析功能实现 =============
@@ -613,10 +709,226 @@ void display_yun_xian_full_analysis(const ZiWeiResult &result, int target_year,
   display_liu_shi_analysis(result, target_year, target_month, target_day,
                            target_hour, current_age);
 
+  // 命局是根、大限定十年趋势、流年定应期；月日时仅在指定时刻继续细分。
+  // 联动区使用同一组干支计算，避免各段单独取月中日期后出现层级不一致。
+  display_yun_xian_linkage_analysis(result, target_year, target_month,
+                                    target_day, target_hour, current_age);
+
   fmt::print("\n");
   fmt::print("\n");
   fmt::print("       运限分析完成\n");
   fmt::print("\n");
+}
+
+void display_yun_xian_linkage_analysis(const ZiWeiResult &result,
+                                       int target_year, int target_month,
+                                       int target_day, DiZhi target_hour,
+                                       int current_age) {
+  const auto cycles =
+      resolve_transit_cycles(target_year, target_month, target_day);
+  const auto xiao_xian =
+      get_xiao_xian(current_age, result.is_male, result.year_pillar.zhi);
+  const auto liu_nian = get_liu_nian(target_year, cycles.year_gan,
+                                     cycles.year_zhi, result.ming_gong_index);
+  const int birth_month = result.month_pillar.zhi == DiZhi::Zi
+                              ? 11
+                              : static_cast<int>(result.month_pillar.zhi) - 1;
+  const auto liu_yue =
+      get_liu_yue(cycles.lunar_month, birth_month, cycles.month_gan,
+                  cycles.month_zhi, cycles.year_zhi, result.ming_gong_index);
+  const auto liu_ri = get_liu_ri(cycles.lunar_day, cycles.day_gan,
+                                 cycles.day_zhi, liu_yue.gong_index);
+  const int hour_gan_index = (static_cast<int>(cycles.day_gan) % 5 * 2 +
+                              static_cast<int>(target_hour)) %
+                             10;
+  const auto liu_shi = get_liu_shi(
+      target_hour, static_cast<TianGan>(hour_gan_index), liu_ri.gong_index);
+  const auto da_xian = ranges::find_if(
+      result.da_xian_data, [current_age](const DaXianData &item) {
+        return current_age >= item.start_age && current_age <= item.end_age;
+      });
+
+  fmt::print("\n\n【命局—限年同参】\n");
+  fmt::print("口径：命局为根，大限定十年章法，小限与流年定当年落宫；"
+             "流月、流日、流时只作已指定时刻的层层细分。\n\n");
+
+  if (da_xian != result.da_xian_data.end()) {
+    display_limit_palace_context(result, "大限（十年）", da_xian->gong_index,
+                                 da_xian->si_hua);
+  }
+  display_limit_palace_context(result, "小限（当岁）", xiao_xian.gong_index,
+                               {});
+  display_limit_palace_context(result, "流年（应期）", liu_nian.gong_index,
+                               liu_nian.si_hua);
+  display_limit_palace_context(result, "流月", liu_yue.gong_index,
+                               liu_yue.si_hua);
+  display_limit_palace_context(result, "流日", liu_ri.gong_index,
+                               liu_ri.si_hua);
+  display_limit_palace_context(result, "流时", liu_shi.gong_index,
+                               liu_shi.si_hua);
+
+  fmt::print("\n【层级交会】\n");
+  const auto same_palace = [&result](string_view left, int left_index,
+                                     string_view right, int right_index) {
+    if (left_index != right_index)
+      return;
+    fmt::print("- {}与{}同临{}{}，该宫本命星系、四化与三方四正须并参。\n", left,
+               right,
+               string(GanZhi::Mapper::to_zh(
+                   result.get_palace_by_index(left_index).gong_data.di_zhi)),
+               string(to_zh(
+                   result.get_palace_by_index(left_index).gong_data.gong_wei)));
+  };
+  if (da_xian != result.da_xian_data.end())
+    same_palace("大限", da_xian->gong_index, "流年", liu_nian.gong_index);
+  same_palace("小限", xiao_xian.gong_index, "流年", liu_nian.gong_index);
+  same_palace("流年", liu_nian.gong_index, "流月", liu_yue.gong_index);
+  same_palace("流月", liu_yue.gong_index, "流日", liu_ri.gong_index);
+  same_palace("流日", liu_ri.gong_index, "流时", liu_shi.gong_index);
+}
+
+void display_ming_gong_star_analysis(const ZiWeiResult &result) {
+  const auto &ming = result.get_palace_by_index(result.ming_gong_index);
+  const string branch = string(GanZhi::Mapper::to_zh(ming.gong_data.di_zhi));
+
+  fmt::print("\n【主星坐命解说】\n");
+  fmt::print("命宫在{}宫；星性以十四主星为纲，同宫组合、庙陷、生年四化及三方"
+             "四正为佐。\n\n",
+             branch);
+
+  if (ming.is_empty) {
+    const auto &opposite = result.get_palace_by_index(ming.opposite_index);
+    fmt::print("### 命宫空宫，借{}宫主星\n",
+               string(GanZhi::Mapper::to_zh(opposite.gong_data.di_zhi)));
+    fmt::print("命宫无十四主星，以对宫{}同参；仍须连同命宫三方四正、辅煞与四化"
+               "取象。\n",
+               fmt::join(ming.borrowed_stars, "、"));
+    return;
+  }
+
+  vector<string> ming_stars;
+  ming_stars.reserve(ming.zhu_xing.size());
+  for (const auto &star : ming.zhu_xing)
+    ming_stars.push_back(star.name);
+
+  const auto ming_document =
+      StarDoc::get_ming_gong_document(ming_stars, ming.gong_data.di_zhi);
+  if (ming_document) {
+    fmt::print("### {}\n", ming_document->title);
+    fmt::print("- 守命纲领：{}\n", ming_document->summary);
+    fmt::print("- 守命摘要：{}\n", ming_document->description);
+    for (const auto &section : ming_document->sections)
+      fmt::print("- {}：{}\n", section.title, section.content);
+    fmt::print("\n");
+  }
+
+  for (const auto &star : ming.zhu_xing) {
+    fmt::print("### {}坐{}守命\n", star.name, branch);
+    const auto document = get_star_document(star.name);
+    if (document) {
+      const auto wu_xing = document->wu_xing ? string(to_zh(*document->wu_xing))
+                                             : string("未载");
+      const auto yin_yang = document->yin_yang
+                                ? string(to_zh(*document->yin_yang))
+                                : string("未载");
+      fmt::print("- 星性：五行{}，{}；化气{}；职司{}。\n", wu_xing, yin_yang,
+                 document->hua_qi, document->zhi_wu);
+      if (!ming_document && !document->key_trait.empty())
+        fmt::print("- 要旨：{}。\n", document->key_trait);
+      if (!ming_document && !document->description.empty())
+        fmt::print("- 主星本义：{}\n", document->description);
+    }
+    if (star.liang_du)
+      fmt::print("- 入{}宫亮度：{}。\n", branch, string(to_zh(*star.liang_du)));
+    if (star.si_hua)
+      fmt::print("- 生年四化：{}{}。\n", star.name,
+                 string(to_zh(*star.si_hua)));
+    fmt::print("\n");
+  }
+
+  if (ming.zhu_xing.size() == 2) {
+    const auto &first = ming.zhu_xing[0].name;
+    const auto &second = ming.zhu_xing[1].name;
+    if (const auto dual = StarDoc::get_dual_star_document(first, second)) {
+      fmt::print("### {}同宫本义\n", dual->name);
+      if (!dual->ge_ju.empty())
+        fmt::print("- 格局称谓：{}。\n", dual->ge_ju);
+      fmt::print("- 组合要旨：{}。\n", dual->key_trait);
+      fmt::print("- 组合星情：{}\n\n", dual->description);
+    }
+  }
+}
+
+void display_ming_ju_focus_analysis(const ZiWeiResult &result) {
+  fmt::print("\n【命局焦点宫】\n");
+  fmt::print("口径：以宫垣主星为纲，辅煞为佐，连同庙陷、空宫、四化及三方"
+             "四正列出需要同参的宫位；不以单一星曜直接定吉凶。\n\n");
+
+  bool found_focus = false;
+  for (int index = 0; index < 12; ++index) {
+    const auto &palace = result.palaces[index];
+    vector<string> causes;
+    vector<string> bright_stars;
+    vector<string> dim_stars;
+    vector<string> transformed_stars;
+
+    if (palace.is_empty)
+      causes.push_back("空宫借对宫");
+    if (!palace.sha_xing.empty())
+      causes.push_back("煞曜同垣");
+
+    const auto inspect_stars = [&](const vector<StarData> &stars) {
+      for (const auto &star : stars) {
+        if (is_bright(star.liang_du))
+          bright_stars.push_back(star.name);
+        if (is_dim(star.liang_du))
+          dim_stars.push_back(star.name);
+        if (star.si_hua)
+          transformed_stars.push_back(star.name + string(to_zh(*star.si_hua)));
+      }
+    };
+    inspect_stars(palace.zhu_xing);
+    inspect_stars(palace.fu_xing);
+    inspect_stars(palace.sha_xing);
+    inspect_stars(palace.za_yao);
+
+    if (!dim_stars.empty())
+      causes.push_back("主辅曜见落陷");
+    if (!transformed_stars.empty())
+      causes.push_back("生年四化入宫");
+    if (index == result.ming_gong_index)
+      causes.push_back("命宫本位");
+    if (index == result.shen_gong_index)
+      causes.push_back("身宫同参");
+    if (causes.empty())
+      continue;
+
+    found_focus = true;
+    const auto san_fang = get_san_fang_si_zheng(index);
+    fmt::print("- {}{} {}：{}\n",
+               string(GanZhi::Mapper::to_zh(palace.gong_data.tian_gan)),
+               string(GanZhi::Mapper::to_zh(palace.gong_data.di_zhi)),
+               string(to_zh(palace.gong_data.gong_wei)),
+               fmt::join(causes, "、"));
+    if (!bright_stars.empty())
+      fmt::print("  - 庙旺：{}\n", fmt::join(bright_stars, "、"));
+    if (!dim_stars.empty())
+      fmt::print("  - 落陷：{}\n", fmt::join(dim_stars, "、"));
+    if (!transformed_stars.empty())
+      fmt::print("  - 四化：{}\n", fmt::join(transformed_stars, "、"));
+    fmt::print("  - 三方四正：{}、{}、{}、{}\n",
+               string(to_zh(result.get_palace_by_index(san_fang.ben_gong_index)
+                                .gong_data.gong_wei)),
+               string(to_zh(result.get_palace_by_index(san_fang.dui_gong_index)
+                                .gong_data.gong_wei)),
+               string(to_zh(result.get_palace_by_index(san_fang.cai_bo_index)
+                                .gong_data.gong_wei)),
+               string(to_zh(result.get_palace_by_index(san_fang.guan_lu_index)
+                                .gong_data.gong_wei)));
+  }
+  if (!found_focus)
+    fmt::print(
+        "- 未检出需单列的空宫、煞曜、庙陷或四化焦点；仍应按十二宫全盘参看。\n");
 }
 
 // ============= 综合分析功能实现 =============
@@ -633,6 +945,12 @@ void display_full_analysis(const ZiWeiResult &result) {
 
   // 格局分析
   display_ge_ju_analysis(result);
+
+  // 主星守命为命局取象的起点；星情文本来自已登记的十四主星与双星文档。
+  display_ming_gong_star_analysis(result);
+
+  // 命局焦点宫：供后续大限、流年逐层同参。
+  display_ming_ju_focus_analysis(result);
 
   // 四化分析
   display_gong_gan_si_hua(result);
