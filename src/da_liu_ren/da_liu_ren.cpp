@@ -294,10 +294,11 @@ std::array<DiZhi, 3> SanChuan::yao_ke() {
     TianGan day_gan = si_ke_.first.is_gan_zhi ? si_ke_.first.gan : TianGan::Jia;
     WuXing day_gan_wx = ZhouYi::GanZhi::get_wu_xing(day_gan);
     
-    // 检查第二、三、四课的下神（地支）是否克日干
-    WuXing second_wx = ZhouYi::GanZhi::get_wu_xing(si_ke_.second.lower_zhi);
-    WuXing third_wx = ZhouYi::GanZhi::get_wu_xing(si_ke_.third.lower_zhi);
-    WuXing fourth_wx = ZhouYi::GanZhi::get_wu_xing(si_ke_.fourth.lower_zhi);
+    // 遥克只比较二、三、四课的上神与日干。下神仅是四课的承载位置，
+    // 若拿下神参与遥克，会先按下神选中一课、再把该课上神发用，造成候选与发用不一致。
+    WuXing second_wx = ZhouYi::GanZhi::get_wu_xing(si_ke_.second.upper_zhi);
+    WuXing third_wx = ZhouYi::GanZhi::get_wu_xing(si_ke_.third.upper_zhi);
+    WuXing fourth_wx = ZhouYi::GanZhi::get_wu_xing(si_ke_.fourth.upper_zhi);
     
     if (wu_xing_ke(second_wx, day_gan_wx)) {
         overcomes.push_back(si_ke_.second);
@@ -309,8 +310,10 @@ std::array<DiZhi, 3> SanChuan::yao_ke() {
         overcomes.push_back(si_ke_.fourth);
     }
     
-    // 如果没有克日干的，则检查日干是否克第二、三、四课的下神
+    // 蒿矢优先：先取上神克日干；没有这类候选时才取日干克上神的弹射。
+    bool is_hao_shi = true;
     if (overcomes.empty()) {
+        is_hao_shi = false;
         if (wu_xing_ke(day_gan_wx, second_wx)) {
             overcomes.push_back(si_ke_.second);
         }
@@ -332,10 +335,10 @@ std::array<DiZhi, 3> SanChuan::yao_ke() {
         chu_chuan_ = overcomes[0].upper_zhi;
         zhong_chuan_ = tian_di_pan_[chu_chuan_];
         mo_chuan_ = tian_di_pan_[zhong_chuan_];
-        ke_shi_.push_back("遥克卦");
+        ke_shi_.push_back(is_hao_shi ? "蒿矢卦" : "弹射卦");
         return {chu_chuan_, zhong_chuan_, mo_chuan_};
     } else {
-        ke_shi_.push_back("遥克卦");
+        ke_shi_.push_back(is_hao_shi ? "蒿矢卦" : "弹射卦");
         return bi_yong(overcomes);
     }
 }

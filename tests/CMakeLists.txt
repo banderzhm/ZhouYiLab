@@ -1,5 +1,5 @@
 # 独立回归程序复用生产模块；输出仅写入构建目录。
-foreach(system IN ITEMS zi_wei qi_men mei_hua)
+foreach(system IN ITEMS zi_wei qi_men mei_hua da_liu_ren)
     add_executable(regression_${system} regression_${system}.cpp)
     target_link_libraries(regression_${system} PRIVATE ZhouYiLabCore)
     target_compile_features(regression_${system} PRIVATE cxx_std_23)
