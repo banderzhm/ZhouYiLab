@@ -447,8 +447,8 @@ bool is_xing(DiZhi zhi1, DiZhi zhi2) {
   const int second = static_cast<int>(zhi2);
   if ((first == 0 && second == 3) || (first == 3 && second == 0))
     return true;
-  if ((first == 2 && second == 5) || (first == 5 && second == 9) ||
-      (first == 9 && second == 2))
+  if ((first == 2 && second == 5) || (first == 5 && second == 8) ||
+      (first == 8 && second == 2))
     return true;
   if ((first == 1 && second == 10) || (first == 10 && second == 7) ||
       (first == 7 && second == 1))

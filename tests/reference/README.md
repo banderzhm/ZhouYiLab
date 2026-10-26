@@ -27,3 +27,32 @@ node tests/reference/compare_zi_wei_iztro.cjs `
 发现差异时脚本返回非零状态，并同时生成 Markdown 明细、JSON 断言和
 ZhouYiLab 原始输出。差异表示两个锁定实现的口径或结果不同，不单独
 证明任一流派绝对正确。
+
+## 大六壬：kinliuren + Crazycreate/liuyao 三角对照
+
+参考实现不作为 ZhouYiLab 的构建依赖。先分别下载并锁定提交，再构建
+`reference_da_liu_ren`，运行：
+
+- `kentang2017/kinliuren`：`557a9ad3ced7b0551b4e623a63dc74536a190a7e`
+- `Crazycreate/liuyao`：`a43983b2bf77b48be7e9d668012127e15ec6a0d1`
+- 规则文档旁证 `jingrongx/liuren`：`0c5b4cdd2c596fff81c05847b6eb78264c423cd4`
+
+```powershell
+node tests/reference/compare_da_liu_ren.cjs `
+  --probe cmake-build-debug-msvc-local-2/tests/reference_da_liu_ren.exe `
+  --liuyao-root C:/path/to/Crazycreate-liuyao `
+  --kinliuren-root C:/path/to/kinliuren `
+  --output-dir cmake-build-debug-msvc-local-2/tests/reports/da_liu_ren/reference
+```
+
+脚本做两种方向的核验：外部参考实现领入完整六十日循环、十二时辰、中气附近、
+闰日和远期日期；再按 ZhouYiLab 自己识别的九宗门挑选代表盘，反向交给两个参考
+实现复核。JSON/Markdown 报告会区分历法、月将加时、四课、三传、贵人和昼夜。
+`Crazycreate/liuyao` 的当前三传源码在遥克之后直接进入昴星，没有独立的别责、
+八专分支；这两类差异会标为 `reference-gap`，不能当作 ZhouYiLab 算错。子初换日、
+月将换将以及涉害同深时按“所临孟仲位”还是按“上神本身孟仲”取用等明确口径差异
+标为 `school`，由上游差异导致的后续字段标为 `cascade`，
+伏吟按古籍“有克从克、无克刚干柔支、自刑换路、再自刑取冲”裁决后标为
+`classical-adjudicated`；八专的五个日柱、禁用遥克及阴阳顺逆三位也按古籍归入该类。
+ZhouYiLab 与另一外部实现一致、仅第三方离群的差异标为 `consensus-adjudicated`，其余
+未裁决差异标为 `strict`。

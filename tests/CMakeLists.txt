@@ -32,6 +32,12 @@ add_executable(reference_zi_wei_iztro reference_zi_wei_iztro.cpp)
 target_link_libraries(reference_zi_wei_iztro PRIVATE ZhouYiLabCore)
 target_compile_features(reference_zi_wei_iztro PRIVATE cxx_std_23)
 
+# 大六壬跨实现对照数据导出器。外部参考库保持为手工运行依赖，
+# 不把 Node/Python 包带入普通 CTest 与三平台生产构建。
+add_executable(reference_da_liu_ren reference_da_liu_ren.cpp)
+target_link_libraries(reference_da_liu_ren PRIVATE ZhouYiLabCore)
+target_compile_features(reference_da_liu_ren PRIVATE cxx_std_23)
+
 # Tyme 模块导入与日期转换的冒烟测试，不作为历法准确性的对照测试。
 add_executable(test_tyme_module tyme/test_tyme_module.cpp)
 target_link_libraries(test_tyme_module PRIVATE ZhouYiLabCore)
