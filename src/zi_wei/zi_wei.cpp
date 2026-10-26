@@ -102,12 +102,13 @@ HoroscopeResult ZiWeiResult::get_horoscope(int target_year, int target_month,
 
   HoroscopeResult result{};
   result.da_xian = da_xian_data[find_da_xian_slot(da_xian_data, current_age)];
-  result.xiao_xian = get_xiao_xian(current_age, is_male, year_pillar.zhi);
+  result.xiao_xian = get_xiao_xian(current_age, is_male, lunar_year_pillar.zhi);
   result.liu_nian =
       get_liu_nian(target_year, liu_nian_gan, liu_nian_zhi, ming_gong_index);
   result.liu_yue =
-      get_liu_yue(target_month, pai_pan_lunar_month, to_tian_gan(liu_yue_cycle),
-                  to_di_zhi(liu_yue_cycle), liu_nian_zhi, ming_gong_index);
+      get_liu_yue(target_month, pai_pan_lunar_month, hour_pillar.zhi,
+                  to_tian_gan(liu_yue_cycle), to_di_zhi(liu_yue_cycle),
+                  liu_nian_zhi, ming_gong_index);
   result.liu_ri =
       get_liu_ri(target_day, to_tian_gan(target_ba_zi.get_day()),
                  to_di_zhi(target_ba_zi.get_day()), result.liu_yue.gong_index);

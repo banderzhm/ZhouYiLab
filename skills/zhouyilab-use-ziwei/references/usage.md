@@ -7,7 +7,8 @@
 | 资料层 | 固定顺序/入口 | 读取字段 | 说明 |
 | --- | --- | --- | --- |
 | 历法与时辰 | 公历日、农历日、农历时辰 | `solar_day`、`lunar_day`、`lunar_hour` | 排盘原始历法资料；不要只拿四柱文本反推农历日时 |
-| 四柱 | 年柱、月柱、日柱、时柱 | `year_pillar`、`month_pillar`、`day_pillar`、`hour_pillar` | 每项都是 `BaZiBase::Pillar`，有 `gan`、`zhi`、`to_string()` |
+| 四柱 | 年柱、月柱、日柱、时柱 | `year_pillar`、`month_pillar`、`day_pillar`、`hour_pillar` | 八字时间语义，年柱按立春换年；每项都是 `BaZiBase::Pillar` |
+| 紫微生年 | 农历年干支 | `lunar_year_pillar` | 按春节换年，供安宫、安星、四化、神煞及大小限使用；春节至立春之间与八字年柱可能不同 |
 | 十二地支宫位 | 寅=0 → 卯=1 → … → 丑=11 | `palaces[0..11]` | 这是地盘地支索引，既不是子宫起算，也不是命宫起算 |
 | 十二宫职 | 命宫起顺序由盘决定 | `palace.gong_data.gong_wei` | 用 `get_palace(GongWei::MingGong)` 等按宫职取，不要将 `GongWei` 枚举值直接当 `palaces` 下标 |
 | 命、身所在位置 | 同样采用寅起索引 | `ming_gong_index`、`shen_gong_index` | 用 `get_palace_by_index` 取相应地支宫，再读其宫职与星曜 |
@@ -69,12 +70,12 @@ const auto &spouse = chart.get_palace(ZhouYi::ZiWei::GongWei::FuQiGong);
 
 这些函数是当前 `ZhouYi.ZiWei.Controller` 的兼容控制台入口，不是一个统一分析 presenter。
 
-- `chart.get_horoscope(target_year,target_month,target_day,target_hour,current_age)`：`target_year` 同时是流年的干支年与目标农历月日所属的农历年，`target_month` 为 1-12 的农历月序（闰月按本月月序传入），`target_day` 为农历日，`target_hour` 为地支时辰（子时按早子时口径），`current_age` 为虚岁且最小为 1。使用时显式 import `ZhouYi.ZiWei.Horoscope` 与 `ZhouYi.GanZhi`，不要混成全公历参数。
+- `chart.get_horoscope(target_year,target_month,target_day,target_hour,current_age)`：`target_year` 同时是流年的干支年与目标农历月日所属的农历年，`target_month` 为 1-12 的农历月序（闰月按本月月序传入），`target_day` 为农历日，`target_hour` 为地支时辰（子时按早子时口径），`current_age` 为虚岁且最小为 1。流月从流年宫逆数出生月、顺数出生时支起正月，再顺数目标月；流日、流时在其上逐层顺推。使用时显式 import `ZhouYi.ZiWei.Horoscope` 与 `ZhouYi.GanZhi`，不要混成全公历参数。
 - `HoroscopeResult` 除大限／小限／流年／流月／流日／流时与五组流曜外，还有 `palace_tags[0..11]`：按寅起宫序给出每宫的 `is_da_xian`／`is_xiao_xian`／`is_liu_nian` 角标，以及**目标流年口径**的 `sui_qian`／`jiang_qian`。本命盘的岁前／将前仍在 `palaces[i].sui_qian` 与 `palaces[i].jiang_qian`，两者口径不同，前端角标取 `palace_tags`。大限干支就是该限宫的真实宫干支（五虎遁宫干＋寅起宫支），与 `palaces[da_xian.gong_index].gong_data` 逐宫一致，可直接当宫干支用；`arrange_da_xian` 需要按寅起宫序传入十二宫数据。
 - 小限按生年支三合局起宫（`get_xiao_xian_start_gong`：寅午戌起辰宫、申子辰起戌宫、亥卯未起丑宫、巳酉丑起未宫），男顺女逆；它与 `palaces[i].xiao_xian_ages` 同源，同一虚岁在两处必须落同一个宫，不要再按“寅宫起 1 岁”或 1-6 岁童限表另算一套。
 - 运限四化在 `si_hua_entries`（`vector<SiHuaEntry>`，星曜键 `SiHuaXing` 覆盖十四主星与左辅、右弼、文昌、文曲），顺序固定为化禄、化权、化科、化忌，`si_hua` 是它的星名序列；辅曜四化（如辛年文曲化科、文昌化忌）只能从 `si_hua_entries` 读到。`get_si_hua_table()` 仍可用，但只装十四主星。
 
-`export_to_json_full(chart)` 返回的是 JSON **字符串**，包含格局、四化等完整报告资料；`export_to_json(chart)` 只给基础排盘。若调用方需要 JSON 对象，先 import `nlohmann.json` 后自行解析字符串，不能对字符串调用 `.dump()`。
+`export_to_json_full(chart)` 返回的是 JSON **字符串**，包含格局、四化等完整报告资料；`export_to_json(chart)` 只给基础排盘。JSON 的 `si_zhu.year` 保留八字立春年柱，`zi_wei_lunar_year` 单列紫微农历生年。若调用方需要 JSON 对象，先 import `nlohmann.json` 后自行解析字符串，不能对字符串调用 `.dump()`。
 
 深入格局规则时可使用 `ZhouYi.ZiWei.GeJu` 的 `GeJuAnalyzer(PatternChart)` 与 `analyze_all()`；但 `PatternChart` 的装配目前在 controller 实现内，没有公开的 `ZiWeiResult → PatternChart` 转换入口。普通调用方应使用上述展示/JSON 入口；改格局规则时才沿内部数据准备路径修改，不能在应用代码中杜撰一个可调用的转换函数。
 

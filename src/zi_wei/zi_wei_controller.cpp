@@ -87,6 +87,7 @@ string export_to_json(const ZiWeiResult &result) {
   j["si_zhu"]["month"] = result.month_pillar.to_string();
   j["si_zhu"]["day"] = result.day_pillar.to_string();
   j["si_zhu"]["hour"] = result.hour_pillar.to_string();
+  j["zi_wei_lunar_year"] = result.lunar_year_pillar.to_string();
 
   // 命盘核心数据
   j["wu_xing_ju"] = string(to_zh(result.wu_xing_ju));
@@ -546,7 +547,7 @@ void display_xiao_xian_analysis(const ZiWeiResult &result, int current_age) {
   fmt::print("\n\n");
 
   auto xiao_xian_data =
-      get_xiao_xian(current_age, result.is_male, result.year_pillar.zhi);
+      get_xiao_xian(current_age, result.is_male, result.lunar_year_pillar.zhi);
 
   fmt::print(
       "小限宫位：第{}宫 {}\n", xiao_xian_data.gong_index,
@@ -727,15 +728,13 @@ void display_yun_xian_linkage_analysis(const ZiWeiResult &result,
   const auto cycles =
       resolve_transit_cycles(target_year, target_month, target_day);
   const auto xiao_xian =
-      get_xiao_xian(current_age, result.is_male, result.year_pillar.zhi);
+      get_xiao_xian(current_age, result.is_male, result.lunar_year_pillar.zhi);
   const auto liu_nian = get_liu_nian(target_year, cycles.year_gan,
                                      cycles.year_zhi, result.ming_gong_index);
-  const int birth_month = result.month_pillar.zhi == DiZhi::Zi
-                              ? 11
-                              : static_cast<int>(result.month_pillar.zhi) - 1;
   const auto liu_yue =
-      get_liu_yue(cycles.lunar_month, birth_month, cycles.month_gan,
-                  cycles.month_zhi, cycles.year_zhi, result.ming_gong_index);
+      get_liu_yue(cycles.lunar_month, result.pai_pan_lunar_month,
+                  result.hour_pillar.zhi, cycles.month_gan, cycles.month_zhi,
+                  cycles.year_zhi, result.ming_gong_index);
   const auto liu_ri = get_liu_ri(cycles.lunar_day, cycles.day_gan,
                                  cycles.day_zhi, liu_yue.gong_index);
   const int hour_gan_index = (static_cast<int>(cycles.day_gan) % 5 * 2 +

@@ -25,6 +25,13 @@ set_tests_properties(regression_zi_wei_horoscope PROPERTIES
     TIMEOUT 300
     LABELS "regression")
 
+# 外部参考实现对照数据导出器。该目标不注册为 CTest：iztro 是独立下载的
+# 可选参考实现，CI 不应因未安装 Node 包而失败。配套脚本见
+# tests/reference/compare_zi_wei_iztro.cjs。
+add_executable(reference_zi_wei_iztro reference_zi_wei_iztro.cpp)
+target_link_libraries(reference_zi_wei_iztro PRIVATE ZhouYiLabCore)
+target_compile_features(reference_zi_wei_iztro PRIVATE cxx_std_23)
+
 # Tyme 模块导入与日期转换的冒烟测试，不作为历法准确性的对照测试。
 add_executable(test_tyme_module tyme/test_tyme_module.cpp)
 target_link_libraries(test_tyme_module PRIVATE ZhouYiLabCore)
