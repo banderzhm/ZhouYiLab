@@ -164,6 +164,23 @@ std::string run_reference_regression() {
   return report;
 }
 
+std::string run_center_gate_lodging_regression() {
+  const auto result = QiMenController::pai_pan_solar(2026, 1, 1, 1, 30);
+  if (!result)
+    throw std::runtime_error(result.error());
+  const auto &pan = *result;
+  if (pan.solar_term != SolarTerm::DongZhi || pan.dun != Dun::Yang ||
+      pan.ju != 4 || pan.yuan != Yuan::Xia || pan.xun_shou != JiaXun::JiaXu ||
+      pan.zhi_fu_star != Star::TianQin || pan.zhi_fu_palace != Palace::North ||
+      pan.zhi_shi_gate != Gate::Si || pan.zhi_shi_palace != Palace::NorthEast)
+    throw std::runtime_error("阳遁值使推进到中五后的寄艮八决策不一致");
+
+  return "\n【中五寄宫决策回归】\n"
+         "案例：2026-01-01 01:30，冬至下元阳遁四局、甲戌旬。\n"
+         "结果：值符天禽落坎一，值使死门推进到中五后寄艮八；与 3meta "
+         "2.6.0 一致。\n";
+}
+
 std::string run_fixed_palace_regression() {
   auto result = QiMenPanGenerator::generate_pan(
       SolarTerm::ShuangJiang, TianGan::Wu, DiZhi::Shen, TianGan::Wu, DiZhi::Wu);
@@ -499,6 +516,7 @@ int main() {
   try {
     std::string report = "# 奇门遁甲多案例参考回归与格局闭环\n\n";
     report += run_reference_regression();
+    report += run_center_gate_lodging_regression();
     report += run_fixed_palace_regression();
     report += run_enum_zh_map_contract();
     const auto analysis_report = run_detailed_analysis_examples();
