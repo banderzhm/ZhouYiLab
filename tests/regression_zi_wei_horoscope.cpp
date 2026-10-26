@@ -214,12 +214,12 @@ int main() {
   // 1. 命例基础值，确认回归前提成立。
   check(chart.ming_gong_index == 9 && chart.shen_gong_index == 1 &&
             chart.wu_xing_ju == WuXingJu::TuWuJu &&
-            chart.year_pillar.zhi == DiZhi::Chen,
+            chart.lunar_year_pillar.zhi == DiZhi::Chen,
         "命例基础（命宫亥、身宫卯、土五局、庚辰年）", "9／1／土五局／辰",
         fmt::format("{}／{}／{}／{}", chart.ming_gong_index,
                     chart.shen_gong_index,
                     ZhouYi::Mapper::to_zh(chart.wu_xing_ju),
-                    zhi_zh(chart.year_pillar.zhi)),
+                    zhi_zh(chart.lunar_year_pillar.zhi)),
         table);
   check(chart.pai_pan_lunar_month == 6, "排盘农历月", "6",
         std::to_string(chart.pai_pan_lunar_month), table);
@@ -340,7 +340,8 @@ int main() {
   bool xiao_xian_age_table_match = true;
   string xiao_xian_age_text;
   for (int age = 1; age <= 12; ++age) {
-    const int gong = get_xiao_xian(age, true, chart.year_pillar.zhi).gong_index;
+    const int gong =
+        get_xiao_xian(age, true, chart.lunar_year_pillar.zhi).gong_index;
     xiao_xian_age_table_match =
         xiao_xian_age_table_match &&
         gong == expected_xiao_xian_ages_1_to_12[age - 1];
@@ -366,8 +367,8 @@ int main() {
       ++xiao_xian_pairs;
       xiao_xian_cross_match =
           xiao_xian_cross_match &&
-          get_xiao_xian(age, chart.is_male, chart.year_pillar.zhi).gong_index ==
-              index;
+          get_xiao_xian(age, chart.is_male, chart.lunar_year_pillar.zhi)
+                  .gong_index == index;
     }
   }
   check(xiao_xian_cross_match, "小限与 palaces[i].xiao_xian_ages 交叉一致",
@@ -375,11 +376,12 @@ int main() {
         fmt::format("核验 {} 组，{}", xiao_xian_pairs,
                     xiao_xian_cross_match ? "全部同宫" : "存在不同宫"),
         table);
-  check(palace_of_age(chart, current_age) == 10 &&
-            get_xiao_xian(current_age, chart.is_male, chart.year_pillar.zhi)
-                    .gong_index == 10,
-        "27岁小限反查命盘宫位", "宫10",
-        fmt::format("命盘记录宫{}", palace_of_age(chart, current_age)), table);
+  check(
+      palace_of_age(chart, current_age) == 10 &&
+          get_xiao_xian(current_age, chart.is_male, chart.lunar_year_pillar.zhi)
+                  .gong_index == 10,
+      "27岁小限反查命盘宫位", "宫10",
+      fmt::format("命盘记录宫{}", palace_of_age(chart, current_age)), table);
 
   // 9. 四宫起例穷举：三合局四组生年支的起宫各按口诀断言。
   check(get_xiao_xian_start_gong(DiZhi::Yin) == 2 &&
@@ -410,26 +412,35 @@ int main() {
     for (int age = 1; age <= 12; ++age)
       female_match =
           female_match &&
-          get_xiao_xian(age, false, chart.year_pillar.zhi).gong_index ==
+          get_xiao_xian(age, false, chart.lunar_year_pillar.zhi).gong_index ==
               expected_female[age - 1];
     check(female_match, "小限女命逆行", "1-12岁落宫 8,7,6,5,4,3,2,1,0,11,10,9",
           female_match ? "十二岁全部一致" : "存在不一致", table);
   }
 
-  // 11. 流月、流日、流时宫位：起点分别为流年宫、流月宫、流日宫。
-  check(horoscope.liu_yue.gong_index == 1 && horoscope.liu_yue.month == 3,
-        "流月宫", "第1宫（卯宫）",
+  // 阴年也只按性别定小限顺逆，防止退回“阳男阴女顺”的大限规则。
+  check(get_xiao_xian(2, true, DiZhi::Chou).gong_index == 6 &&
+            get_xiao_xian(2, false, DiZhi::Chou).gong_index == 4,
+        "阴年小限仍为男顺女逆", "丑年1岁未宫：男2岁宫6、女2岁宫4",
+        fmt::format("男宫{}、女宫{}",
+                    get_xiao_xian(2, true, DiZhi::Chou).gong_index,
+                    get_xiao_xian(2, false, DiZhi::Chou).gong_index),
+        table);
+
+  // 11. 流月从流年宫逆数生月、顺数生时，再顺数目标月；流日、流时逐层顺推。
+  check(horoscope.liu_yue.gong_index == 9 && horoscope.liu_yue.month == 3,
+        "流月宫（计入申时）", "第9宫（亥宫）",
         fmt::format("第{}宫 月{}", horoscope.liu_yue.gong_index,
                     horoscope.liu_yue.month),
         table);
-  check(horoscope.liu_ri.gong_index == 5 && horoscope.liu_ri.day == 5, "流日宫",
-        "第5宫（未宫）",
+  check(horoscope.liu_ri.gong_index == 1 && horoscope.liu_ri.day == 5, "流日宫",
+        "第1宫（卯宫）",
         fmt::format("第{}宫 日{}", horoscope.liu_ri.gong_index,
                     horoscope.liu_ri.day),
         table);
-  check(horoscope.liu_shi.gong_index == 11 &&
+  check(horoscope.liu_shi.gong_index == 7 &&
             horoscope.liu_shi.shi_chen == DiZhi::Wu,
-        "流时宫", "第11宫（丑宫）",
+        "流时宫", "第7宫（酉宫）",
         fmt::format("第{}宫 {}", horoscope.liu_shi.gong_index,
                     zhi_zh(horoscope.liu_shi.shi_chen)),
         table);
@@ -545,7 +556,8 @@ int main() {
   vector<int> xiao_xian_palaces;
   for (int age = 7; age <= 18; ++age)
     xiao_xian_palaces.push_back(
-        get_xiao_xian(age, chart.is_male, chart.year_pillar.zhi).gong_index);
+        get_xiao_xian(age, chart.is_male, chart.lunar_year_pillar.zhi)
+            .gong_index);
   check(
       covers_every_palace(xiao_xian_palaces), "小限十二宫轮转",
       "7-18 岁宫0-宫11 各一次",
@@ -707,6 +719,44 @@ int main() {
             covers_every_palace(horoscope.liu_shi_stars),
         "五组流曜宫序", "各组宫0-宫11 各一次", "逐组核对", table);
 
+  // 十干流昌流曲使用独立天干表，不复用本命按出生时支安昌曲的规则。
+  constexpr array<pair<int, int>, 10> expected_chang_qu = {{
+      {3, 7},
+      {4, 6},
+      {6, 4},
+      {7, 3},
+      {6, 4},
+      {7, 3},
+      {9, 1},
+      {10, 0},
+      {0, 10},
+      {1, 9},
+  }};
+  bool chang_qu_match = true;
+  for (int stem = 0; stem < 10; ++stem) {
+    const auto stars = get_horoscope_stars(static_cast<TianGan>(stem),
+                                           DiZhi::Zi, Scope::Yearly);
+    chang_qu_match =
+        chang_qu_match &&
+        palace_of_star(stars, "流昌") == expected_chang_qu[stem].first &&
+        palace_of_star(stars, "流曲") == expected_chang_qu[stem].second;
+  }
+  check(chang_qu_match, "十干流昌流曲落宫",
+        "甲巳酉、乙午申、丙戊申午、丁己酉巳、庚亥卯、辛子寅、壬寅子、癸卯亥",
+        chang_qu_match ? "十干逐项一致" : "存在不一致", table);
+
+  // 春节至立春之间，八字年柱保留立春年界，紫微安星另用农历生年。
+  const ZiWeiResult spring_boundary = pai_pan_solar(1984, 2, 2, 0, true);
+  check(spring_boundary.year_pillar.to_string() == "癸亥" &&
+            spring_boundary.lunar_year_pillar.to_string() == "甲子" &&
+            spring_boundary.wu_xing_ju == WuXingJu::HuoLiuJu,
+        "春节至立春年界分离", "八字癸亥／紫微甲子／火六局",
+        fmt::format("八字{}／紫微{}／{}",
+                    spring_boundary.year_pillar.to_string(),
+                    spring_boundary.lunar_year_pillar.to_string(),
+                    ZhouYi::Mapper::to_zh(spring_boundary.wu_xing_ju)),
+        table);
+
   std::filesystem::create_directories("docs/ziwei");
   std::ofstream report("docs/ziwei/example_zi_wei_horoscope_regression.txt");
   if (!report)
@@ -732,9 +782,9 @@ int main() {
   report << "| --- | --- | --- | --- |\n";
   for (int age = 1; age <= 18; ++age) {
     report << "| " << age << " | "
-           << get_xiao_xian(age, true, chart.year_pillar.zhi).gong_index
+           << get_xiao_xian(age, true, chart.lunar_year_pillar.zhi).gong_index
            << " | "
-           << get_xiao_xian(age, false, chart.year_pillar.zhi).gong_index
+           << get_xiao_xian(age, false, chart.lunar_year_pillar.zhi).gong_index
            << " | " << palace_of_age(chart, age) << " |\n";
   }
   report << "\n【get_horoscope().to_string()】\n";

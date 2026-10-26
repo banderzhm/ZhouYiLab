@@ -164,6 +164,14 @@ struct ZiWeiResult {
   Pillar day_pillar;   // 日柱
   Pillar hour_pillar;  // 时柱
 
+  /**
+   * @brief 紫微排盘使用的农历生年干支
+   *
+   * 与按立春换年的八字 year_pillar 分开；春节至立春之间二者可能不同。
+   * 安宫、安星、四化、神煞和大小限均使用本字段。
+   */
+  Pillar lunar_year_pillar;
+
   // 排盘所用的农历月序（1-12）
   // 闰月前十五日仍按本月、十六日起按下月，与本命十二宫排列口径一致；运限模块
   // 据此定位流月宫位，调用方不必再判断闰月。0 表示未填写的默认值。
@@ -240,6 +248,8 @@ struct ZiWeiResult {
     result += fmt::format("四柱：{} {} {} {}\n", year_pillar.to_string(),
                           month_pillar.to_string(), day_pillar.to_string(),
                           hour_pillar.to_string());
+    result += fmt::format("紫微生年：{}（农历年界）\n",
+                          lunar_year_pillar.to_string());
     result += fmt::format("五行局：{}\n", string(to_zh(wu_xing_ju)));
     result += fmt::format("命宫：{}{}，命主：{}\n",
                           string(GanZhi::Mapper::to_zh(
@@ -307,6 +317,8 @@ inline ZiWeiResult pai_pan_solar(
   Pillar month_pillar = convert_cycle(bazi.get_month());
   Pillar day_pillar = convert_cycle(bazi.get_day());
   Pillar hour_pillar = convert_cycle(bazi.get_hour());
+  const Pillar lunar_year_pillar = convert_cycle(
+      lunar_day.get_lunar_month().get_lunar_year().get_sixty_cycle());
 
   // 获取农历月份和日期
   // 闰月前十五日仍按本月，十六日起按下月安命身诸宫；负号只表达
@@ -322,7 +334,7 @@ inline ZiWeiResult pai_pan_solar(
 
   // 排布十二宫
   vector<GongWeiData> palaces =
-      arrange_twelve_palaces(year_pillar.gan, lunar_month, hour_zhi);
+      arrange_twelve_palaces(lunar_year_pillar.gan, lunar_month, hour_zhi);
 
   // 找到命宫索引
   int ming_index = -1;
@@ -348,18 +360,19 @@ inline ZiWeiResult pai_pan_solar(
   auto tian_fu_group = arrange_tian_fu_group(tian_fu_idx);
 
   // 获取四化表
-  auto si_hua_table = get_si_hua_table(year_pillar.gan);
+  auto si_hua_table = get_si_hua_table(lunar_year_pillar.gan);
 
   // 安辅星
   auto [zuo_idx, you_idx] = get_zuo_you_index(lunar_month);
   auto [chang_idx, qu_idx] = get_chang_qu_index(hour_zhi);
   auto [kui_idx, yue_idx] =
-      get_kui_yue_index(year_pillar.gan, config.kui_yue_school);
+      get_kui_yue_index(lunar_year_pillar.gan, config.kui_yue_school);
 
   // 安煢星
-  int lu_cun_idx = get_lu_cun_index(year_pillar.gan);
+  int lu_cun_idx = get_lu_cun_index(lunar_year_pillar.gan);
   auto [yang_idx, tuo_idx] = get_yang_tuo_index(lu_cun_idx);
-  auto [huo_idx, ling_idx] = get_huo_ling_index(year_pillar.zhi, hour_zhi);
+  auto [huo_idx, ling_idx] =
+      get_huo_ling_index(lunar_year_pillar.zhi, hour_zhi);
   auto [kong_idx, jie_idx] = get_kong_jie_index(hour_zhi);
 
   // 计算命主星和身主星
@@ -367,22 +380,22 @@ inline ZiWeiResult pai_pan_solar(
   DiZhi ming_gong_zhi = palaces[ming_index].di_zhi;
   string ming_zhu = get_ming_zhu_xing(ming_gong_zhi);
   // 身主星：以年支找身主
-  string shen_zhu = get_shen_zhu_xing(year_pillar.zhi);
+  string shen_zhu = get_shen_zhu_xing(lunar_year_pillar.zhi);
 
   // ============= 安杂耀 =============
   // 桃花星
   auto [hong_luan_idx, tian_xi_idx] =
-      get_hong_luan_tian_xi_index(year_pillar.zhi);
+      get_hong_luan_tian_xi_index(lunar_year_pillar.zhi);
   int tian_yao_idx = get_tian_yao_index(lunar_month);
-  int xian_chi_idx = get_xian_chi_index(year_pillar.zhi);
+  int xian_chi_idx = get_xian_chi_index(lunar_year_pillar.zhi);
 
   // 贵人星
   int jie_shen_idx = get_jie_shen_index(lunar_month);
   int tian_wu_idx = get_tian_wu_index(lunar_month);
   auto [tian_guan_idx, tian_fu2_idx] =
-      get_tian_guan_tian_fu_index(year_pillar.gan);
-  int tian_chu_idx = get_tian_chu_index(year_pillar.gan);
-  int tian_ma_idx = get_tian_ma_index(year_pillar.zhi);
+      get_tian_guan_tian_fu_index(lunar_year_pillar.gan);
+  int tian_chu_idx = get_tian_chu_index(lunar_year_pillar.gan);
+  int tian_ma_idx = get_tian_ma_index(lunar_year_pillar.zhi);
 
   // 吉星
   auto [san_tai_idx, ba_zuo_idx] =
@@ -390,50 +403,53 @@ inline ZiWeiResult pai_pan_solar(
   auto [en_guang_idx, tian_gui_idx] =
       get_en_guang_tian_gui_index(lunar_month, lunar_day_num, hour_zhi);
   auto [long_chi_idx, feng_ge_idx] =
-      get_long_chi_feng_ge_index(year_pillar.zhi);
-  auto [tian_cai_idx, tian_shou_idx] =
-      get_tian_cai_tian_shou_index(year_pillar.zhi, ming_index, shen_index);
+      get_long_chi_feng_ge_index(lunar_year_pillar.zhi);
+  auto [tian_cai_idx, tian_shou_idx] = get_tian_cai_tian_shou_index(
+      lunar_year_pillar.zhi, ming_index, shen_index);
   auto [tai_fu_idx, feng_gao_idx] = get_tai_fu_feng_gao_index(hour_zhi);
-  int hua_gai_idx = get_hua_gai_index(year_pillar.zhi);
+  int hua_gai_idx = get_hua_gai_index(lunar_year_pillar.zhi);
   int tian_yue2_idx = get_tian_yue_index(lunar_month);
-  auto [tian_de_idx, yue_de_idx] = get_tian_de_yue_de_index(year_pillar.zhi);
+  auto [tian_de_idx, yue_de_idx] =
+      get_tian_de_yue_de_index(lunar_year_pillar.zhi);
 
   // 凶星
-  auto [gu_chen_idx, gua_su_idx] = get_gu_chen_gua_su_index(year_pillar.zhi);
-  int fei_lian_idx = get_fei_lian_index(year_pillar.zhi);
-  int po_sui_idx = get_po_sui_index(year_pillar.zhi);
+  auto [gu_chen_idx, gua_su_idx] =
+      get_gu_chen_gua_su_index(lunar_year_pillar.zhi);
+  int fei_lian_idx = get_fei_lian_index(lunar_year_pillar.zhi);
+  int po_sui_idx = get_po_sui_index(lunar_year_pillar.zhi);
   int tian_xing_idx = get_tian_xing_index(lunar_month);
   int yin_sha_idx = get_yin_sha_index(lunar_month);
-  int tian_kong2_idx = get_tian_kong_index(year_pillar.zhi);
-  auto [tian_ku_idx, tian_xu_idx] = get_tian_ku_tian_xu_index(year_pillar.zhi);
+  int tian_kong2_idx = get_tian_kong_index(lunar_year_pillar.zhi);
+  auto [tian_ku_idx, tian_xu_idx] =
+      get_tian_ku_tian_xu_index(lunar_year_pillar.zhi);
   auto [tian_shi_idx, tian_shang_idx] =
-      get_tian_shi_tian_shang_index(ming_index, is_male, year_pillar.zhi);
-  int nian_jie_idx = get_nian_jie_index(year_pillar.zhi);
+      get_tian_shi_tian_shang_index(ming_index, is_male, lunar_year_pillar.zhi);
+  int nian_jie_idx = get_nian_jie_index(lunar_year_pillar.zhi);
   auto [xun_kong1_idx, xun_kong2_idx] =
-      get_xun_kong_index(year_pillar.gan, year_pillar.zhi);
+      get_xun_kong_index(lunar_year_pillar.gan, lunar_year_pillar.zhi);
   auto [jie_lu_idx, kong_wang_idx] =
-      get_jie_lu_kong_wang_index(year_pillar.gan);
-  const int da_hao_idx = get_da_hao_index(year_pillar.zhi);
+      get_jie_lu_kong_wang_index(lunar_year_pillar.gan);
+  const int da_hao_idx = get_da_hao_index(lunar_year_pillar.zhi);
 
   // ============= 安神煞 =============
   // 长生12神
   auto chang_sheng_arr =
-      arrange_chang_sheng_12(wu_xing_ju, is_male, year_pillar.zhi);
+      arrange_chang_sheng_12(wu_xing_ju, is_male, lunar_year_pillar.zhi);
   // 博士12神
   auto bo_shi_arr =
-      arrange_bo_shi_12(year_pillar.gan, year_pillar.zhi, is_male);
+      arrange_bo_shi_12(lunar_year_pillar.gan, lunar_year_pillar.zhi, is_male);
   // 岁前12神
-  auto sui_qian_arr = arrange_sui_qian_12(year_pillar.zhi);
+  auto sui_qian_arr = arrange_sui_qian_12(lunar_year_pillar.zhi);
   const auto long_de_position = ranges::find(sui_qian_arr, SuiQian12::LongDe);
   const int long_de2_idx =
       static_cast<int>(distance(sui_qian_arr.begin(), long_de_position));
   // 将前12神
-  auto jiang_qian_arr = arrange_jiang_qian_12(year_pillar.zhi);
+  auto jiang_qian_arr = arrange_jiang_qian_12(lunar_year_pillar.zhi);
 
   // ============= 安大限 =============
   // 大限宫的干支取命盘同宫的真实宫干支，顺逆仍只看生年支与性别。
   auto da_xian_arr = arrange_da_xian(ming_index, wu_xing_ju, is_male,
-                                     year_pillar.zhi, palaces);
+                                     lunar_year_pillar.zhi, palaces);
 
   // 创建结果对象（使用聚合初始化）
   ZiWeiResult result{.solar_day = solar_day,
@@ -444,6 +460,7 @@ inline ZiWeiResult pai_pan_solar(
                      .month_pillar = month_pillar,
                      .day_pillar = day_pillar,
                      .hour_pillar = hour_pillar,
+                     .lunar_year_pillar = lunar_year_pillar,
                      .pai_pan_lunar_month = lunar_month,
                      .ming_gong_index = ming_index,
                      .shen_gong_index = shen_index,
@@ -632,7 +649,7 @@ inline ZiWeiResult pai_pan_solar(
     // 生年四化必须覆盖主星与辅曜，不能因星曜被分组存储而漏标。
     const auto apply_birth_si_hua = [&](vector<StarData> &stars) {
       for (auto &star : stars)
-        star.si_hua = get_star_si_hua_type(year_pillar.gan, star.name);
+        star.si_hua = get_star_si_hua_type(lunar_year_pillar.gan, star.name);
     };
     apply_birth_si_hua(palace_info.zhu_xing);
     apply_birth_si_hua(palace_info.fu_xing);
@@ -653,7 +670,7 @@ inline ZiWeiResult pai_pan_solar(
     // 起宫规则由 get_xiao_xian_start_gong 统一给出（三合局起宫），运限模块的
     // get_xiao_xian 调用同一份实现，两处不再各写一份表。
     {
-      const int start_gong = get_xiao_xian_start_gong(year_pillar.zhi);
+      const int start_gong = get_xiao_xian_start_gong(lunar_year_pillar.zhi);
 
       // 男命顺行、女命逆行；先算该宫对应的第一个小限虚岁，再每 12 年记一次。
       const int diff =
@@ -676,7 +693,7 @@ inline ZiWeiResult pai_pan_solar(
       int gong_zhi_idx = gong_idx_to_di_zhi[i];
 
       // 计算从出生年到该地支年的差距
-      int birth_zhi_idx = static_cast<int>(year_pillar.zhi);
+      int birth_zhi_idx = static_cast<int>(lunar_year_pillar.zhi);
       int diff = (gong_zhi_idx - birth_zhi_idx + 12) % 12;
       int first_age = diff + 1; // 虚岁1岁是出生年
 
