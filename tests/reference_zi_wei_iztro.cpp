@@ -9,6 +9,7 @@ import ZhouYi.ZiWei;
 import ZhouYi.ZiWei.Brightness;
 import ZhouYi.ZiWei.Constants;
 import ZhouYi.ZiWei.Horoscope;
+import ZhouYi.ZiWei.Star;
 import fmt;
 import nlohmann.json;
 import std;
