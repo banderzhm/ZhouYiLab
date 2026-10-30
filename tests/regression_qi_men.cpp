@@ -510,10 +510,53 @@ std::string run_enum_zh_map_contract() {
     throw std::runtime_error("奇门枚举中文映射核对失败：" + diff);
   return report;
 }
+
+/** @brief 穷举六旬空亡、六十甲子旬空与十二支驿马落宫。 */
+void verify_shen_sha_foundations() {
+  constexpr std::array xun_heads{DiZhi::Zi, DiZhi::Xu,   DiZhi::Shen,
+                                 DiZhi::Wu, DiZhi::Chen, DiZhi::Yin};
+  constexpr std::array<std::array<DiZhi, 2>, 6> void_branches{{
+      {DiZhi::Xu, DiZhi::Hai},
+      {DiZhi::Shen, DiZhi::You},
+      {DiZhi::Wu, DiZhi::Wei},
+      {DiZhi::Chen, DiZhi::Si},
+      {DiZhi::Yin, DiZhi::Mao},
+      {DiZhi::Zi, DiZhi::Chou},
+  }};
+  constexpr std::array horse_palaces{
+      Palace::NorthEast, Palace::NorthWest, Palace::SouthWest,
+      Palace::SouthEast, Palace::NorthEast, Palace::NorthWest,
+      Palace::SouthWest, Palace::SouthEast, Palace::NorthEast,
+      Palace::NorthWest, Palace::SouthWest, Palace::SouthEast,
+  };
+
+  for (std::size_t index = 0; index < void_branches.size(); ++index) {
+    const auto xun = static_cast<JiaXun>(index);
+    if (get_void_branches(xun) != void_branches[index])
+      throw std::runtime_error("奇门六旬空亡表不一致");
+    if (ZhouYi::GanZhi::get_kong_wang(TianGan::Jia, xun_heads[index]) !=
+        void_branches[index])
+      throw std::runtime_error("奇门旬空与公共旬空不一致");
+  }
+
+  for (std::size_t index = 0; index < horse_palaces.size(); ++index) {
+    if (post_horse_palace(static_cast<DiZhi>(index)) != horse_palaces[index])
+      throw std::runtime_error("奇门驿马落宫表不一致");
+  }
+
+  for (std::size_t index = 0; index < 60; ++index) {
+    const auto stem = static_cast<TianGan>(index % 10);
+    const auto branch = static_cast<DiZhi>(index % 12);
+    if (ZhouYi::GanZhi::get_kong_wang(stem, branch) !=
+        void_branches[index / 10])
+      throw std::runtime_error("六十甲子旬空穷举不一致");
+  }
+}
 } // namespace
 
 int main() {
   try {
+    verify_shen_sha_foundations();
     std::string report = "# 奇门遁甲多案例参考回归与格局闭环\n\n";
     report += run_reference_regression();
     report += run_center_gate_lodging_regression();

@@ -789,7 +789,7 @@ DaLiuRenEngine::pai_pan_from_bazi(const BaZi &ba_zi,
   SanChuan san_chuan(tian_di_pan, si_ke);
 
   // 计算神煞
-  ShenSha::ShenShaEngine shen_sha_engine(ba_zi, ba_zi.day.zhi);
+  ShenSha::ShenShaEngine shen_sha_engine(ba_zi);
   auto shen_sha_result = shen_sha_engine.calculate();
 
   // 判定卦体
