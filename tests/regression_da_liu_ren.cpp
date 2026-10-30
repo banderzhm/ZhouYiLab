@@ -4,18 +4,193 @@
  */
 import ZhouYi.DaLiuRen;
 import ZhouYi.DaLiuRen.Controller;
+import ZhouYi.DaLiuRen.ShenSha;
+import ZhouYi.BaZiBase;
 import ZhouYi.GanZhi;
 import std;
 
 namespace {
 
+using ZhouYi::BaZiBase::BaZi;
+using ZhouYi::BaZiBase::Pillar;
 using ZhouYi::DaLiuRen::GanZhiKe;
 using ZhouYi::DaLiuRen::SanChuan;
 using ZhouYi::DaLiuRen::SiKe;
 using ZhouYi::DaLiuRen::TianDiPan;
 using ZhouYi::DaLiuRen::Controller::DaLiuRenController;
+using ZhouYi::DaLiuRen::ShenSha::ShenShaEngine;
 using ZhouYi::GanZhi::DiZhi;
 using ZhouYi::GanZhi::TianGan;
+
+/**
+ * @brief 用指定年月日干支构造神煞测试输入。
+ * @param year_gan 年干。
+ * @param year_zhi 年支。
+ * @param month_zhi 月支。
+ * @param day_gan 日干。
+ * @param day_zhi 日支。
+ * @return 供神煞引擎使用的四柱；时柱固定为甲子。
+ */
+BaZi make_shensha_bazi(TianGan year_gan, DiZhi year_zhi, DiZhi month_zhi,
+                       TianGan day_gan, DiZhi day_zhi) {
+  return BaZi(Pillar(year_gan, year_zhi), Pillar(TianGan::Jia, month_zhi),
+              Pillar(day_gan, day_zhi), Pillar(TianGan::Jia, DiZhi::Zi));
+}
+
+/**
+ * @brief 核验日支六项神煞表。
+ *
+ * 循环覆盖十二日支，防止三合分组只在四个孟支上碰巧正确。
+ */
+void verify_day_branch_shensha_tables() {
+  constexpr std::array yi_ma = {DiZhi::Yin, DiZhi::Hai, DiZhi::Shen, DiZhi::Si,
+                                DiZhi::Yin, DiZhi::Hai, DiZhi::Shen, DiZhi::Si,
+                                DiZhi::Yin, DiZhi::Hai, DiZhi::Shen, DiZhi::Si};
+  constexpr std::array tao_hua = {DiZhi::You, DiZhi::Wu, DiZhi::Mao, DiZhi::Zi,
+                                  DiZhi::You, DiZhi::Wu, DiZhi::Mao, DiZhi::Zi,
+                                  DiZhi::You, DiZhi::Wu, DiZhi::Mao, DiZhi::Zi};
+  constexpr std::array hua_gai = {DiZhi::Chen, DiZhi::Chou, DiZhi::Xu,
+                                  DiZhi::Wei,  DiZhi::Chen, DiZhi::Chou,
+                                  DiZhi::Xu,   DiZhi::Wei,  DiZhi::Chen,
+                                  DiZhi::Chou, DiZhi::Xu,   DiZhi::Wei};
+  constexpr std::array jie_sha = {DiZhi::Si,   DiZhi::Yin,  DiZhi::Hai,
+                                  DiZhi::Shen, DiZhi::Si,   DiZhi::Yin,
+                                  DiZhi::Hai,  DiZhi::Shen, DiZhi::Si,
+                                  DiZhi::Yin,  DiZhi::Hai,  DiZhi::Shen};
+  constexpr std::array zai_sha = {DiZhi::Wu, DiZhi::Mao, DiZhi::Zi, DiZhi::You,
+                                  DiZhi::Wu, DiZhi::Mao, DiZhi::Zi, DiZhi::You,
+                                  DiZhi::Wu, DiZhi::Mao, DiZhi::Zi, DiZhi::You};
+
+  for (std::size_t index = 0; index < 12; ++index) {
+    const auto day_zhi = static_cast<DiZhi>(index);
+    const auto day_gan = static_cast<TianGan>(index % 10);
+    const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
+                                        day_gan, day_zhi);
+    const auto result = ShenShaEngine(bazi, day_zhi).calculate();
+    if (result.ri_yi_ma != yi_ma[index] || result.tao_hua != tao_hua[index] ||
+        result.xian_chi != tao_hua[index] ||
+        result.ri_hua_gai != hua_gai[index] ||
+        result.ri_jie_sha != jie_sha[index] ||
+        result.ri_zai_sha != zai_sha[index]) {
+      throw std::runtime_error("大六壬日支神煞十二支表不一致");
+    }
+  }
+}
+
+/**
+ * @brief 核验日干神煞不依赖日支是否恰好落在目标宫。
+ */
+void verify_day_stem_shensha_tables() {
+  constexpr std::array ri_de = {
+      DiZhi::Yin, DiZhi::Shen, DiZhi::Si, DiZhi::Hai, DiZhi::Si,
+      DiZhi::Yin, DiZhi::Shen, DiZhi::Si, DiZhi::Hai, DiZhi::Si};
+  constexpr std::array ri_lu = {DiZhi::Yin, DiZhi::Mao, DiZhi::Si,   DiZhi::Wu,
+                                DiZhi::Si,  DiZhi::Wu,  DiZhi::Shen, DiZhi::You,
+                                DiZhi::Hai, DiZhi::Zi};
+  constexpr std::array yang_ren = {
+      DiZhi::Mao, DiZhi::Chen, DiZhi::Wu, DiZhi::Wei, DiZhi::Wu,
+      DiZhi::Wei, DiZhi::You,  DiZhi::Xu, DiZhi::Zi,  DiZhi::Chou};
+
+  for (std::size_t index = 0; index < 10; ++index) {
+    const auto day_gan = static_cast<TianGan>(index);
+    const auto day_zhi = static_cast<DiZhi>(index);
+    const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
+                                        day_gan, day_zhi);
+    const auto result = ShenShaEngine(bazi, day_zhi).calculate();
+    if (result.ri_de != ri_de[index] || result.ri_lu != ri_lu[index] ||
+        result.yang_ren != yang_ren[index]) {
+      throw std::runtime_error("大六壬日德、日禄或羊刃干表错误");
+    }
+  }
+}
+
+/**
+ * @brief 核验十二年支与十二月支中的关键神煞。
+ */
+void verify_year_and_month_shensha_tables() {
+  constexpr std::array year_yi_ma = {
+      DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai,
+      DiZhi::Shen, DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen, DiZhi::Si};
+  constexpr std::array year_xing = {
+      DiZhi::Mao, DiZhi::Xu,   DiZhi::Si,  DiZhi::Zi,  DiZhi::Chen, DiZhi::Shen,
+      DiZhi::Wu,  DiZhi::Chou, DiZhi::Yin, DiZhi::You, DiZhi::Wei,  DiZhi::Hai};
+  constexpr std::array month_po_sui = {
+      DiZhi::You, DiZhi::Si, DiZhi::Chou, DiZhi::You, DiZhi::Si, DiZhi::Chou,
+      DiZhi::You, DiZhi::Si, DiZhi::Chou, DiZhi::You, DiZhi::Si, DiZhi::Chou};
+  constexpr std::array month_yan = {
+      DiZhi::Xu,   DiZhi::You, DiZhi::Shen, DiZhi::Wei,  DiZhi::Wu, DiZhi::Si,
+      DiZhi::Chen, DiZhi::Mao, DiZhi::Yin,  DiZhi::Chou, DiZhi::Zi, DiZhi::Hai};
+
+  for (std::size_t index = 0; index < 12; ++index) {
+    const auto branch = static_cast<DiZhi>(index);
+    const auto stem = static_cast<TianGan>(index % 10);
+    const auto month_zhi = static_cast<DiZhi>((index + 2) % 12);
+    const auto bazi =
+        make_shensha_bazi(stem, branch, month_zhi, TianGan::Jia, DiZhi::Zi);
+    const auto result = ShenShaEngine(bazi, DiZhi::Zi).calculate();
+    if (result.nian_yi_ma != year_yi_ma[index] ||
+        result.sui_xing != year_xing[index] || result.sang_men != branch + 2 ||
+        result.diao_ke != branch + (-2) ||
+        result.po_sui != month_po_sui[index] ||
+        result.yue_yan != month_yan[index]) {
+      throw std::runtime_error("大六壬年煞或月煞十二支表错误");
+    }
+  }
+}
+
+/**
+ * @brief 核验六旬的旬首、旬奇和旬丁。
+ */
+void verify_xun_shensha() {
+  constexpr std::array xun_heads = {DiZhi::Zi, DiZhi::Xu,   DiZhi::Shen,
+                                    DiZhi::Wu, DiZhi::Chen, DiZhi::Yin};
+  constexpr std::array xun_qi = {DiZhi::Chou, DiZhi::Chou, DiZhi::Zi,
+                                 DiZhi::Zi,   DiZhi::Hai,  DiZhi::Hai};
+  for (std::size_t index = 0; index < xun_heads.size(); ++index) {
+    const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
+                                        TianGan::Jia, xun_heads[index]);
+    const auto result = ShenShaEngine(bazi, xun_heads[index]).calculate();
+    if (result.xun_yi != xun_heads[index] || result.xun_qi != xun_qi[index] ||
+        result.xun_ding != xun_heads[index] + 3) {
+      throw std::runtime_error("大六壬旬仪、旬奇或旬丁错误");
+    }
+  }
+}
+
+/**
+ * @brief 核验结构化映射没有遗漏日德与日禄。
+ */
+void verify_shensha_mapping_contains_stem_rules() {
+  const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
+                                      TianGan::Yi, DiZhi::Chou);
+  const auto result = ShenShaEngine(bazi, DiZhi::Chou).calculate();
+  const auto ri_de_names = result.get_shensha_on_zhi(DiZhi::Shen);
+  const auto ri_lu_names = result.get_shensha_on_zhi(DiZhi::Mao);
+  if (!std::ranges::contains(ri_de_names, std::string("日德")) ||
+      !std::ranges::contains(ri_lu_names, std::string("日禄"))) {
+    throw std::runtime_error("大六壬地支神煞映射遗漏日德或日禄");
+  }
+}
+
+/**
+ * @brief 核验中文报告与 JSON 按年、月、日归类同一批神煞。
+ */
+void verify_shensha_report_contract() {
+  const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
+                                      TianGan::Yi, DiZhi::Chou);
+  const auto result = ShenShaEngine(bazi, DiZhi::Chou).calculate();
+  const auto json = result.to_json();
+  const auto text = result.to_string();
+
+  if (!json.at("年").contains("死符") || !json.at("年").contains("红鸾") ||
+      json.at("月").contains("红鸾") || !json.at("月").contains("成神") ||
+      !json.at("月").contains("解神") || !json.at("月").contains("天巫") ||
+      !json.at("日").contains("华盖") || !json.at("日").contains("劫煞") ||
+      !json.at("日").contains("灾煞") || !json.at("日").contains("亡神") ||
+      !json.at("日").contains("破碎") || text.contains("红弯")) {
+    throw std::runtime_error("大六壬神煞中文报告或 JSON 分类错误");
+  }
+}
 
 /**
  * @brief 核验指定民用时间的三传。
@@ -156,6 +331,12 @@ void verify_bie_ze_yin_day_uses_day_branch_trine() {
 
 int main() {
   try {
+    verify_day_branch_shensha_tables();
+    verify_day_stem_shensha_tables();
+    verify_year_and_month_shensha_tables();
+    verify_xun_shensha();
+    verify_shensha_mapping_contains_stem_rules();
+    verify_shensha_report_contract();
     verify_hao_shi_uses_upper_deities();
     verify_yin_si_shen_punishment();
     verify_fu_yin_classical_routes();
