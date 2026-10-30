@@ -15,33 +15,6 @@ export namespace ZhouYi::DaLiuRen::ShenSha {
 using namespace ZhouYi::GanZhi;
 using namespace ZhouYi::BaZiBase;
 
-// ==================== 神煞分类枚举 ====================
-
-/**
- * @brief 神煞类别
- */
-enum class ShenShaCategory {
-  Ji,       // 吉神
-  Xiong,    // 凶神
-  DongBian, // 动变
-  LuMa,     // 禄马
-  TaoHua,   // 桃花咸池
-  KongWang, // 空亡
-  Sang,     // 丧煞
-  XueGuang, // 血光
-  GuDu,     // 孤独
-  YiXiang   // 医相
-};
-
-/**
- * @brief 神煞信息
- */
-struct ShenShaInfo {
-  std::string name;                        // 神煞名称
-  std::optional<DiZhi> zhi;                // 所在地支
-  std::vector<ShenShaCategory> categories; // 所属类别
-};
-
 // ==================== 神煞数据结构 ====================
 
 /**
@@ -64,7 +37,6 @@ struct ShenShaResult {
   DiZhi sui_xing;   // 岁刑
   DiZhi sui_he;     // 岁合
   DiZhi jie_sha;    // 劫煞
-  DiZhi fei_lian;   // 飞廉
   DiZhi sang_men;   // 丧门
   DiZhi diao_ke;    // 吊客
   DiZhi wang_shen;  // 亡神
@@ -73,11 +45,12 @@ struct ShenShaResult {
   DiZhi hong_luan;
 
   // 月神煞
-  DiZhi yue_yi_ma;  // 月驿马
-  DiZhi huang_shu;  // 皇书
-  DiZhi huang_en;   // 皇恩
-  DiZhi tian_zhao;  // 天诏
-  DiZhi fei_hun;    // 飞魂
+  DiZhi yue_yi_ma; // 月驿马
+  DiZhi huang_shu; // 皇书
+  DiZhi huang_en;  // 皇恩
+  DiZhi tian_zhao; // 天诏
+  /** @brief 飞魂，又名游魂；与天诏同用正月亥起顺行表。 */
+  DiZhi fei_hun;
   DiZhi tian_xi;    // 天喜
   DiZhi sheng_qi;   // 生气
   DiZhi tian_ma;    // 天马
@@ -99,27 +72,47 @@ struct ShenShaResult {
   DiZhi sang_che;   // 丧车
   DiZhi xin_shen;   // 信神
   DiZhi tian_ji;    // 天鸡
-  DiZhi sang_hun;   // 丧魂
-  DiZhi tian_gui;   // 天鬼
-  DiZhi da_shi;     // 大时
-  DiZhi xiao_shi;   // 小时
-  DiZhi yue_he;     // 月合
-  DiZhi yue_xing;   // 月刑
-  DiZhi huo_gui;    // 火鬼
-  DiZhi tian_mu;    // 天目
-  DiZhi jian_shen;  // 奸神
-  DiZhi jian_men;   // 奸门
-  DiZhi yao_shen;   // 钥神
-  DiZhi fei_huo;    // 飞祸
+  /** @brief 丧魄；使用逐月支表。 */
+  DiZhi sang_po;
+  DiZhi tian_gui;  // 天鬼
+  DiZhi da_shi;    // 大时
+  DiZhi xiao_shi;  // 小时
+  DiZhi yue_he;    // 月合
+  DiZhi yue_xing;  // 月刑
+  DiZhi huo_gui;   // 火鬼
+  DiZhi tian_mu;   // 天目
+  DiZhi jian_shen; // 奸神
+  DiZhi jian_men;  // 奸门
+  DiZhi yao_shen;  // 钥神
+  DiZhi fei_huo;   // 飞祸
+  /** @brief 月飞廉；按寅月至丑月的逐月支表取值。 */
+  DiZhi yue_fei_lian;
+  /** @brief 月华盖；按月支三合局的墓库位取值。 */
+  DiZhi yue_hua_gai;
+  /** @brief 月劫煞；按月支三合局取值。 */
+  DiZhi yue_jie_sha;
+  /** @brief 月灾煞；按月支三合局取值。 */
+  DiZhi yue_zai_sha;
+  /** @brief 月亡神；按月支三合局取值。 */
+  DiZhi yue_wang_shen;
+  /** @brief 月死神；正月起巳，随月建顺行。 */
+  DiZhi yue_si_shen;
+  /** @brief 贼神；按春卯、夏午、秋酉、冬子取值。 */
+  DiZhi zei_shen;
+
+  // 旬神煞
+  DiZhi xun_qi;   // 旬奇
+  DiZhi xun_yi;   // 旬仪（旬首）
+  DiZhi xun_ding; // 旬丁
+  /** @brief 旬乙；旬首后一位，不与按季取值的贼神混用。 */
+  DiZhi xun_yi_sha;
+
   // 日神煞
   DiZhi ri_yi_ma; // 日驿马
-  DiZhi xun_qi;   // 旬奇
   DiZhi ri_qi;    // 日奇
-  DiZhi xun_yi;   // 旬仪（旬首）
   DiZhi zhi_yi;   // 支仪
   DiZhi ri_de;    // 日德（地支）
   DiZhi ri_lu;    // 日禄（地支）
-  DiZhi xun_ding; // 旬丁
   DiZhi tao_hua;  // 桃花
   DiZhi xian_chi; // 咸池
   /** @brief 按日支三合局墓库位所取的华盖。 */
@@ -132,16 +125,13 @@ struct ShenShaResult {
   DiZhi ri_wang_shen;
   /** @brief 按日支孟仲季类型所取的破碎。 */
   DiZhi ri_po_sui;
-  DiZhi zei_fu;   // 贼符
-  DiZhi si_shen;  // 死神
+  /** @brief 支死神；按日支逐支取值。 */
+  DiZhi ri_si_shen;
   DiZhi zhi_de;   // 支德
   DiZhi yang_ren; // 阳刃
 
   // 地支到神煞的映射（每个地支上的神煞列表）
   std::map<DiZhi, std::vector<std::string>> zhi_to_shensha_map;
-
-  // 神煞信息列表（包含分类）
-  std::vector<ShenShaInfo> shen_sha_list;
 
   /**
    * @brief 构建地支到神煞的映射
@@ -175,16 +165,13 @@ struct ShenShaResult {
 class ShenShaEngine {
 private:
   const BaZi &ba_zi_;
-  DiZhi day_zhi_; // 日支
 
 public:
   /**
-   * @brief 构造函数
-   *
-   * @param ba_zi 八字
-   * @param day_zhi 日支
+   * @brief 构造神煞计算引擎。
+   * @param ba_zi 起课四柱；日神统一使用其中的日支。
    */
-  ShenShaEngine(const BaZi &ba_zi, DiZhi day_zhi);
+  explicit ShenShaEngine(const BaZi &ba_zi);
 
   /**
    * @brief 计算所有神煞
@@ -321,9 +308,9 @@ public:
   DiZhi calc_tian_ji() const;
 
   /**
-   * @brief 计算丧魂
+   * @brief 计算丧魄
    */
-  DiZhi calc_sang_hun() const;
+  DiZhi calc_sang_po() const;
 
   /**
    * @brief 计算天鬼
@@ -381,6 +368,21 @@ public:
   DiZhi calc_fei_huo() const;
 
   /**
+   * @brief 计算月飞廉
+   */
+  DiZhi calc_yue_fei_lian() const;
+
+  /**
+   * @brief 计算月死神
+   */
+  DiZhi calc_yue_si_shen() const;
+
+  /**
+   * @brief 计算贼神
+   */
+  DiZhi calc_zei_shen() const;
+
+  /**
    * @brief 计算红鸾
    */
   DiZhi calc_hong_luan() const;
@@ -406,11 +408,6 @@ public:
    * @brief 计算劫煞
    */
   DiZhi calc_jie_sha() const;
-
-  /**
-   * @brief 计算飞廉
-   */
-  DiZhi calc_fei_lian() const;
 
   /**
    * @brief 计算丧门
@@ -485,9 +482,9 @@ public:
   DiZhi calc_xian_chi() const;
 
   /**
-   * @brief 计算贼符
+   * @brief 计算旬乙
    */
-  DiZhi calc_zei_fu() const;
+  DiZhi calc_xun_yi_sha() const;
 
   /**
    * @brief 计算死符
@@ -495,9 +492,9 @@ public:
   DiZhi calc_si_fu() const;
 
   /**
-   * @brief 计算死神
+   * @brief 计算支死神
    */
-  DiZhi calc_si_shen() const;
+  DiZhi calc_ri_si_shen() const;
 
   /**
    * @brief 计算支德

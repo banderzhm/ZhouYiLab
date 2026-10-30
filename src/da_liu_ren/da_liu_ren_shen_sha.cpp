@@ -61,9 +61,9 @@ constexpr GanTable kRiQiByGan = {
 constexpr GanTable kYangRenByGan = {
     DiZhi::Mao, DiZhi::Chen, DiZhi::Wu, DiZhi::Wei, DiZhi::Wu,
     DiZhi::Wei, DiZhi::You,  DiZhi::Xu, DiZhi::Zi,  DiZhi::Chou};
-constexpr GanTable kSuiHeByGan = {
-    DiZhi::Chou, DiZhi::Zi,  DiZhi::Hai, DiZhi::Xu, DiZhi::You,
-    DiZhi::Shen, DiZhi::Wei, DiZhi::Wu,  DiZhi::Si, DiZhi::Chen};
+constexpr ZhiTable kLiuHeByZhi = {
+    DiZhi::Chou, DiZhi::Zi, DiZhi::Hai, DiZhi::Xu,   DiZhi::You, DiZhi::Shen,
+    DiZhi::Wei,  DiZhi::Wu, DiZhi::Si,  DiZhi::Chen, DiZhi::Mao, DiZhi::Yin};
 
 constexpr std::size_t zhi_index(DiZhi zhi) {
   return static_cast<std::size_t>(zhi);
@@ -90,8 +90,7 @@ constexpr DiZhi by_month(DiZhi month_zhi, const ZhiTable &table) {
 
 // ==================== 构造函数 ====================
 
-ShenShaEngine::ShenShaEngine(const BaZi &ba_zi, DiZhi day_zhi)
-    : ba_zi_(ba_zi), day_zhi_(day_zhi) {}
+ShenShaEngine::ShenShaEngine(const BaZi &ba_zi) : ba_zi_(ba_zi) {}
 
 // ==================== 年神煞计算 ====================
 
@@ -170,12 +169,13 @@ DiZhi ShenShaEngine::calc_huang_shu() const {
  * 计算皇恩
  * 用途：主恩赐、恩惠、上级照顾、贵人提携。为大吉之神。
  * 皇恩临传主得贵人相助，上级赏识，有恩惠降临。
+ * 本模块采用十二月独立表，不以固定步长推算。
  */
 DiZhi ShenShaEngine::calc_huang_en() const {
-  DiZhi yue_zhi = ba_zi_.month.zhi;
-  int offset =
-      (static_cast<int>(yue_zhi) - static_cast<int>(DiZhi::Yin) + 12) % 12;
-  return DiZhi::Wei + (offset * 2);
+  static constexpr ZhiTable table = {
+      DiZhi::Xu, DiZhi::Chou, DiZhi::Chen, DiZhi::Wei, DiZhi::You,  DiZhi::Mao,
+      DiZhi::Zi, DiZhi::Wu,   DiZhi::Yin,  DiZhi::Si,  DiZhi::Shen, DiZhi::Hai};
+  return by_month(ba_zi_.month.zhi, table);
 }
 
 /**
@@ -289,11 +289,12 @@ DiZhi ShenShaEngine::calc_gua_su() const {
  * 计算天医
  * 用途：主医药、治疗、康复、医疗之事。为吉神，主疾病可治。
  * 天医临传主疾病可愈，医药得力，身体康复，医疗顺利。
+ * 本模块采用正月辰起顺行十二支的月表。
  */
 DiZhi ShenShaEngine::calc_tian_yi() const {
   static constexpr ZhiTable table = {
-      DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao,
-      DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You};
+      DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You,
+      DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao};
   return by_month(ba_zi_.month.zhi, table);
 }
 
@@ -304,8 +305,8 @@ DiZhi ShenShaEngine::calc_tian_yi() const {
  */
 DiZhi ShenShaEngine::calc_di_yi() const {
   static constexpr ZhiTable table = {
-      DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You,
-      DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao};
+      DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao,
+      DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You};
   return by_month(ba_zi_.month.zhi, table);
 }
 
@@ -389,11 +390,11 @@ DiZhi ShenShaEngine::calc_tian_ji() const {
 }
 
 /**
- * 计算丧魂
- * 用途：主魂魄离散、精神恍惚、失魂落魄。为凶神，主精神不济。
- * 丧魂临传主精神恍惚，心神不定，失魂落魄，易受惊吓，魂不守舍。
+ * 计算丧魄
+ * 用途：主魂魄离散、精神恍惚。为凶神，主精神不济。
+ * 丧魄临传主精神恍惚，心神不定，易受惊吓。
  */
-DiZhi ShenShaEngine::calc_sang_hun() const {
+DiZhi ShenShaEngine::calc_sang_po() const {
   static constexpr ZhiTable table = {DiZhi::Wei,  DiZhi::Chen, DiZhi::Chou,
                                      DiZhi::Xu,   DiZhi::Wei,  DiZhi::Chen,
                                      DiZhi::Chou, DiZhi::Xu,   DiZhi::Wei,
@@ -439,7 +440,7 @@ DiZhi ShenShaEngine::calc_xiao_shi() const { return ba_zi_.month.zhi; }
  * 日驿马临传主当日有走动之事，出行办事，或有远方消息。
  */
 DiZhi ShenShaEngine::calc_ri_yi_ma() const {
-  return kYiMaByZhi[zhi_index(day_zhi_)];
+  return kYiMaByZhi[zhi_index(ba_zi_.day.zhi)];
 }
 
 /**
@@ -488,7 +489,7 @@ DiZhi ShenShaEngine::calc_xun_yi() const {
  * 支仪临传主威仪端正，仪表不凡，或有庄重场合，礼数周全。
  */
 DiZhi ShenShaEngine::calc_zhi_yi() const {
-  return kZhiYiByZhi[zhi_index(day_zhi_)];
+  return kZhiYiByZhi[zhi_index(ba_zi_.day.zhi)];
 }
 
 // ==================== 主计算函数 ====================
@@ -512,7 +513,6 @@ ShenShaResult ShenShaEngine::calculate() const {
   result.sui_xing = calc_sui_xing();
   result.sui_he = calc_sui_he();
   result.jie_sha = calc_jie_sha();
-  result.fei_lian = calc_fei_lian();
   result.sang_men = calc_sang_men();
   result.diao_ke = calc_diao_ke();
   result.wang_shen = calc_wang_shen();
@@ -546,7 +546,7 @@ ShenShaResult ShenShaEngine::calculate() const {
   result.sang_che = calc_sang_che();
   result.xin_shen = calc_xin_shen();
   result.tian_ji = calc_tian_ji();
-  result.sang_hun = calc_sang_hun();
+  result.sang_po = calc_sang_po();
   result.tian_gui = calc_tian_gui();
   result.da_shi = calc_da_shi();
   result.xiao_shi = calc_xiao_shi();
@@ -558,16 +558,26 @@ ShenShaResult ShenShaEngine::calculate() const {
   result.jian_men = calc_jian_men();
   result.yao_shen = calc_yao_shen();
   result.fei_huo = calc_fei_huo();
+  result.yue_fei_lian = calc_yue_fei_lian();
+  result.yue_hua_gai = kHuaGaiByZhi[zhi_index(ba_zi_.month.zhi)];
+  result.yue_jie_sha = kJieShaByZhi[zhi_index(ba_zi_.month.zhi)];
+  result.yue_zai_sha = kZaiShaByZhi[zhi_index(ba_zi_.month.zhi)];
+  result.yue_wang_shen = kWangShenByZhi[zhi_index(ba_zi_.month.zhi)];
+  result.yue_si_shen = calc_yue_si_shen();
+  result.zei_shen = calc_zei_shen();
+
+  // 旬神煞
+  result.xun_qi = calc_xun_qi();
+  result.xun_yi = calc_xun_yi();
+  result.xun_ding = calc_xun_ding();
+  result.xun_yi_sha = calc_xun_yi_sha();
 
   // 日神煞
   result.ri_yi_ma = calc_ri_yi_ma();
-  result.xun_qi = calc_xun_qi();
   result.ri_qi = calc_ri_qi();
-  result.xun_yi = calc_xun_yi();
   result.zhi_yi = calc_zhi_yi();
   result.ri_de = calc_ri_de();
   result.ri_lu = calc_ri_lu();
-  result.xun_ding = calc_xun_ding();
   result.tao_hua = calc_tao_hua();
   result.xian_chi = calc_xian_chi();
   result.ri_hua_gai = kHuaGaiByZhi[zhi_index(ba_zi_.day.zhi)];
@@ -575,8 +585,7 @@ ShenShaResult ShenShaEngine::calculate() const {
   result.ri_zai_sha = kZaiShaByZhi[zhi_index(ba_zi_.day.zhi)];
   result.ri_wang_shen = kWangShenByZhi[zhi_index(ba_zi_.day.zhi)];
   result.ri_po_sui = kPoSuiByZhi[zhi_index(ba_zi_.day.zhi)];
-  result.zei_fu = calc_zei_fu();
-  result.si_shen = calc_si_shen();
+  result.ri_si_shen = calc_ri_si_shen();
   result.zhi_de = calc_zhi_de();
   result.yang_ren = calc_yang_ren();
 
@@ -608,11 +617,10 @@ void ShenShaResult::build_zhi_mapping() {
   zhi_to_shensha_map[sui_de].push_back("岁德");
   zhi_to_shensha_map[sui_xing].push_back("岁刑");
   zhi_to_shensha_map[sui_he].push_back("岁合");
-  zhi_to_shensha_map[jie_sha].push_back("劫煞");
-  zhi_to_shensha_map[fei_lian].push_back("飞廉");
+  zhi_to_shensha_map[jie_sha].push_back("年劫煞");
   zhi_to_shensha_map[sang_men].push_back("丧门");
   zhi_to_shensha_map[diao_ke].push_back("吊客");
-  zhi_to_shensha_map[wang_shen].push_back("亡神");
+  zhi_to_shensha_map[wang_shen].push_back("年亡神");
   zhi_to_shensha_map[si_fu].push_back("死符");
   zhi_to_shensha_map[hong_luan].push_back("红鸾");
 
@@ -643,7 +651,7 @@ void ShenShaResult::build_zhi_mapping() {
   zhi_to_shensha_map[sang_che].push_back("丧车");
   zhi_to_shensha_map[xin_shen].push_back("信神");
   zhi_to_shensha_map[tian_ji].push_back("天鸡");
-  zhi_to_shensha_map[sang_hun].push_back("丧魂");
+  zhi_to_shensha_map[sang_po].push_back("丧魄");
   zhi_to_shensha_map[tian_gui].push_back("天鬼");
   zhi_to_shensha_map[da_shi].push_back("大时");
   zhi_to_shensha_map[xiao_shi].push_back("小时");
@@ -655,16 +663,26 @@ void ShenShaResult::build_zhi_mapping() {
   zhi_to_shensha_map[jian_men].push_back("奸门");
   zhi_to_shensha_map[yao_shen].push_back("钥神");
   zhi_to_shensha_map[fei_huo].push_back("飞祸");
+  zhi_to_shensha_map[yue_fei_lian].push_back("月飞廉");
+  zhi_to_shensha_map[yue_hua_gai].push_back("月华盖");
+  zhi_to_shensha_map[yue_jie_sha].push_back("月劫煞");
+  zhi_to_shensha_map[yue_zai_sha].push_back("月灾煞");
+  zhi_to_shensha_map[yue_wang_shen].push_back("月亡神");
+  zhi_to_shensha_map[yue_si_shen].push_back("月死神");
+  zhi_to_shensha_map[zei_shen].push_back("贼神");
+
+  // 旬神煞
+  zhi_to_shensha_map[xun_qi].push_back("旬奇");
+  zhi_to_shensha_map[xun_yi].push_back("旬仪");
+  zhi_to_shensha_map[xun_ding].push_back("旬丁");
+  zhi_to_shensha_map[xun_yi_sha].push_back("旬乙");
 
   // 日神煞
   zhi_to_shensha_map[ri_yi_ma].push_back("日驿马");
-  zhi_to_shensha_map[xun_qi].push_back("旬奇");
   zhi_to_shensha_map[ri_qi].push_back("日奇");
-  zhi_to_shensha_map[xun_yi].push_back("旬仪");
   zhi_to_shensha_map[zhi_yi].push_back("支仪");
   zhi_to_shensha_map[ri_de].push_back("日德");
   zhi_to_shensha_map[ri_lu].push_back("日禄");
-  zhi_to_shensha_map[xun_ding].push_back("旬丁");
   zhi_to_shensha_map[tao_hua].push_back("桃花");
   zhi_to_shensha_map[xian_chi].push_back("咸池");
   zhi_to_shensha_map[ri_hua_gai].push_back("华盖");
@@ -672,8 +690,7 @@ void ShenShaResult::build_zhi_mapping() {
   zhi_to_shensha_map[ri_zai_sha].push_back("灾煞");
   zhi_to_shensha_map[ri_wang_shen].push_back("日亡神");
   zhi_to_shensha_map[ri_po_sui].push_back("日破碎");
-  zhi_to_shensha_map[zei_fu].push_back("贼神");
-  zhi_to_shensha_map[si_shen].push_back("死神");
+  zhi_to_shensha_map[ri_si_shen].push_back("支死神");
   zhi_to_shensha_map[zhi_de].push_back("支德");
   zhi_to_shensha_map[yang_ren].push_back("阳刃");
 }
@@ -710,7 +727,6 @@ std::string ShenShaResult::to_string() const {
   result += fmt::format("  岁刑: {}\n", Mapper::to_zh(sui_xing));
   result += fmt::format("  岁合: {}\n", Mapper::to_zh(sui_he));
   result += fmt::format("  劫煞: {}\n", Mapper::to_zh(jie_sha));
-  result += fmt::format("  飞廉: {}\n", Mapper::to_zh(fei_lian));
   result += fmt::format("  丧门: {}\n", Mapper::to_zh(sang_men));
   result += fmt::format("  吊客: {}\n", Mapper::to_zh(diao_ke));
   result += fmt::format("  亡神: {}\n", Mapper::to_zh(wang_shen));
@@ -745,7 +761,7 @@ std::string ShenShaResult::to_string() const {
   result += fmt::format("  丧车: {}\n", Mapper::to_zh(sang_che));
   result += fmt::format("  信神: {}\n", Mapper::to_zh(xin_shen));
   result += fmt::format("  天鸡: {}\n", Mapper::to_zh(tian_ji));
-  result += fmt::format("  丧魂: {}\n", Mapper::to_zh(sang_hun));
+  result += fmt::format("  丧魄: {}\n", Mapper::to_zh(sang_po));
   result += fmt::format("  天鬼: {}\n", Mapper::to_zh(tian_gui));
   result += fmt::format("  大时: {}\n", Mapper::to_zh(da_shi));
   result += fmt::format("  小时: {}\n", Mapper::to_zh(xiao_shi));
@@ -757,17 +773,28 @@ std::string ShenShaResult::to_string() const {
   result += fmt::format("  奸门: {}\n", Mapper::to_zh(jian_men));
   result += fmt::format("  钥神: {}\n", Mapper::to_zh(yao_shen));
   result += fmt::format("  飞祸: {}\n", Mapper::to_zh(fei_huo));
+  result += fmt::format("  飞廉: {}\n", Mapper::to_zh(yue_fei_lian));
+  result += fmt::format("  华盖: {}\n", Mapper::to_zh(yue_hua_gai));
+  result += fmt::format("  劫煞: {}\n", Mapper::to_zh(yue_jie_sha));
+  result += fmt::format("  灾煞: {}\n", Mapper::to_zh(yue_zai_sha));
+  result += fmt::format("  亡神: {}\n", Mapper::to_zh(yue_wang_shen));
+  result += fmt::format("  死神: {}\n", Mapper::to_zh(yue_si_shen));
+  result += fmt::format("  贼神: {}\n", Mapper::to_zh(zei_shen));
+
+  // 旬神煞
+  result += "旬神煞:\n";
+  result += fmt::format("  旬奇: {}\n", Mapper::to_zh(xun_qi));
+  result += fmt::format("  旬仪: {}\n", Mapper::to_zh(xun_yi));
+  result += fmt::format("  旬丁: {}\n", Mapper::to_zh(xun_ding));
+  result += fmt::format("  旬乙: {}\n", Mapper::to_zh(xun_yi_sha));
 
   // 日神煞
   result += "日神煞:\n";
   result += fmt::format("  日驿马: {}\n", Mapper::to_zh(ri_yi_ma));
-  result += fmt::format("  旬奇: {}\n", Mapper::to_zh(xun_qi));
   result += fmt::format("  日奇: {}\n", Mapper::to_zh(ri_qi));
-  result += fmt::format("  旬仪: {}\n", Mapper::to_zh(xun_yi));
   result += fmt::format("  支仪: {}\n", Mapper::to_zh(zhi_yi));
   result += fmt::format("  日德: {}\n", Mapper::to_zh(ri_de));
   result += fmt::format("  日禄: {}\n", Mapper::to_zh(ri_lu));
-  result += fmt::format("  旬丁: {}\n", Mapper::to_zh(xun_ding));
   result += fmt::format("  桃花: {}\n", Mapper::to_zh(tao_hua));
   result += fmt::format("  咸池: {}\n", Mapper::to_zh(xian_chi));
   result += fmt::format("  华盖: {}\n", Mapper::to_zh(ri_hua_gai));
@@ -775,8 +802,7 @@ std::string ShenShaResult::to_string() const {
   result += fmt::format("  灾煞: {}\n", Mapper::to_zh(ri_zai_sha));
   result += fmt::format("  亡神: {}\n", Mapper::to_zh(ri_wang_shen));
   result += fmt::format("  破碎: {}\n", Mapper::to_zh(ri_po_sui));
-  result += fmt::format("  贼神: {}\n", Mapper::to_zh(zei_fu));
-  result += fmt::format("  死神: {}\n", Mapper::to_zh(si_shen));
+  result += fmt::format("  支死神: {}\n", Mapper::to_zh(ri_si_shen));
   result += fmt::format("  支德: {}\n", Mapper::to_zh(zhi_de));
   result += fmt::format("  阳刃: {}\n", Mapper::to_zh(yang_ren));
 
@@ -816,7 +842,6 @@ nlohmann::json ShenShaResult::to_json() const {
   nian["岁刑"] = std::string(Mapper::to_zh(sui_xing));
   nian["岁合"] = std::string(Mapper::to_zh(sui_he));
   nian["劫煞"] = std::string(Mapper::to_zh(jie_sha));
-  nian["飞廉"] = std::string(Mapper::to_zh(fei_lian));
   nian["丧门"] = std::string(Mapper::to_zh(sang_men));
   nian["吊客"] = std::string(Mapper::to_zh(diao_ke));
   nian["亡神"] = std::string(Mapper::to_zh(wang_shen));
@@ -852,7 +877,7 @@ nlohmann::json ShenShaResult::to_json() const {
   yue["丧车"] = std::string(Mapper::to_zh(sang_che));
   yue["信神"] = std::string(Mapper::to_zh(xin_shen));
   yue["天鸡"] = std::string(Mapper::to_zh(tian_ji));
-  yue["丧魂"] = std::string(Mapper::to_zh(sang_hun));
+  yue["丧魄"] = std::string(Mapper::to_zh(sang_po));
   yue["天鬼"] = std::string(Mapper::to_zh(tian_gui));
   yue["大时"] = std::string(Mapper::to_zh(da_shi));
   yue["小时"] = std::string(Mapper::to_zh(xiao_shi));
@@ -864,18 +889,30 @@ nlohmann::json ShenShaResult::to_json() const {
   yue["奸门"] = std::string(Mapper::to_zh(jian_men));
   yue["钥神"] = std::string(Mapper::to_zh(yao_shen));
   yue["飞祸"] = std::string(Mapper::to_zh(fei_huo));
+  yue["飞廉"] = std::string(Mapper::to_zh(yue_fei_lian));
+  yue["华盖"] = std::string(Mapper::to_zh(yue_hua_gai));
+  yue["劫煞"] = std::string(Mapper::to_zh(yue_jie_sha));
+  yue["灾煞"] = std::string(Mapper::to_zh(yue_zai_sha));
+  yue["亡神"] = std::string(Mapper::to_zh(yue_wang_shen));
+  yue["死神"] = std::string(Mapper::to_zh(yue_si_shen));
+  yue["贼神"] = std::string(Mapper::to_zh(zei_shen));
   j["月"] = yue;
+
+  // 旬神煞
+  nlohmann::json xun;
+  xun["旬奇"] = std::string(Mapper::to_zh(xun_qi));
+  xun["旬仪"] = std::string(Mapper::to_zh(xun_yi));
+  xun["旬丁"] = std::string(Mapper::to_zh(xun_ding));
+  xun["旬乙"] = std::string(Mapper::to_zh(xun_yi_sha));
+  j["旬"] = xun;
 
   // 日神煞
   nlohmann::json ri;
   ri["驿马"] = std::string(Mapper::to_zh(ri_yi_ma));
-  ri["旬奇"] = std::string(Mapper::to_zh(xun_qi));
   ri["日奇"] = std::string(Mapper::to_zh(ri_qi));
-  ri["旬仪"] = std::string(Mapper::to_zh(xun_yi));
   ri["支仪"] = std::string(Mapper::to_zh(zhi_yi));
   ri["日德"] = std::string(Mapper::to_zh(ri_de));
   ri["日禄"] = std::string(Mapper::to_zh(ri_lu));
-  ri["旬丁"] = std::string(Mapper::to_zh(xun_ding));
   ri["桃花"] = std::string(Mapper::to_zh(tao_hua));
   ri["咸池"] = std::string(Mapper::to_zh(xian_chi));
   ri["华盖"] = std::string(Mapper::to_zh(ri_hua_gai));
@@ -883,8 +920,7 @@ nlohmann::json ShenShaResult::to_json() const {
   ri["灾煞"] = std::string(Mapper::to_zh(ri_zai_sha));
   ri["亡神"] = std::string(Mapper::to_zh(ri_wang_shen));
   ri["破碎"] = std::string(Mapper::to_zh(ri_po_sui));
-  ri["贼神"] = std::string(Mapper::to_zh(zei_fu));
-  ri["死神"] = std::string(Mapper::to_zh(si_shen));
+  ri["支死神"] = std::string(Mapper::to_zh(ri_si_shen));
   ri["支德"] = std::string(Mapper::to_zh(zhi_de));
   ri["阳刃"] = std::string(Mapper::to_zh(yang_ren));
   j["日"] = ri;
@@ -923,7 +959,7 @@ DiZhi ShenShaEngine::calc_sui_xing() const {
  * 岁合：年支的六合
  */
 DiZhi ShenShaEngine::calc_sui_he() const {
-  return kSuiHeByGan[gan_index(ba_zi_.year.gan)];
+  return kLiuHeByZhi[zhi_index(ba_zi_.year.zhi)];
 }
 
 /**
@@ -934,17 +970,12 @@ DiZhi ShenShaEngine::calc_jie_sha() const {
 }
 
 /**
- * 飞廉：年支逆数五位
- */
-DiZhi ShenShaEngine::calc_fei_lian() const { return ba_zi_.year.zhi + 8; }
-
-/**
- * 丧门：年支顺数三位
+ * 丧门：岁前二辰
  */
 DiZhi ShenShaEngine::calc_sang_men() const { return ba_zi_.year.zhi + 2; }
 
 /**
- * 吊客：年支逆数三位
+ * 吊客：岁后二辰
  */
 DiZhi ShenShaEngine::calc_diao_ke() const { return ba_zi_.year.zhi + (-2); }
 
@@ -961,19 +992,7 @@ DiZhi ShenShaEngine::calc_wang_shen() const {
  * 月合：月建的六合
  */
 DiZhi ShenShaEngine::calc_yue_he() const {
-  DiZhi month_zhi = ba_zi_.month.zhi;
-  static const std::map<DiZhi, DiZhi> he_map = {
-      {DiZhi::Zi, DiZhi::Chou},  {DiZhi::Chou, DiZhi::Zi},
-      {DiZhi::Yin, DiZhi::Hai},  {DiZhi::Hai, DiZhi::Yin},
-      {DiZhi::Mao, DiZhi::Xu},   {DiZhi::Xu, DiZhi::Mao},
-      {DiZhi::Chen, DiZhi::You}, {DiZhi::You, DiZhi::Chen},
-      {DiZhi::Si, DiZhi::Shen},  {DiZhi::Shen, DiZhi::Si},
-      {DiZhi::Wu, DiZhi::Wei},   {DiZhi::Wei, DiZhi::Wu}};
-  auto it = he_map.find(month_zhi);
-  if (it != he_map.end()) {
-    return it->second;
-  }
-  return DiZhi::Zi;
+  return kLiuHeByZhi[zhi_index(ba_zi_.month.zhi)];
 }
 
 /**
@@ -984,7 +1003,7 @@ DiZhi ShenShaEngine::calc_yue_xing() const {
 }
 
 /**
- * 火鬼：春巳、夏申、秋亥、冬寅
+ * 火鬼：春午、夏酉、秋子、冬卯
  */
 DiZhi ShenShaEngine::calc_huo_gui() const {
   static constexpr std::array table = {DiZhi::Wu, DiZhi::You, DiZhi::Zi,
@@ -993,7 +1012,7 @@ DiZhi ShenShaEngine::calc_huo_gui() const {
 }
 
 /**
- * 天目：月建顺数四位
+ * 天目：春辰、夏未、秋戌、冬丑
  */
 DiZhi ShenShaEngine::calc_tian_mu() const {
   static constexpr std::array table = {DiZhi::Chen, DiZhi::Wei, DiZhi::Xu,
@@ -1002,7 +1021,7 @@ DiZhi ShenShaEngine::calc_tian_mu() const {
 }
 
 /**
- * 奸神：月建前三位
+ * 奸神：春寅、夏亥、秋申、冬巳
  * 用途：主奸诈、暗昧、阴私之事。为凶神，主有隐秘、欺诈、不光明之事。
  */
 DiZhi ShenShaEngine::calc_jian_shen() const {
@@ -1023,7 +1042,7 @@ DiZhi ShenShaEngine::calc_jian_men() const {
 }
 
 /**
- * 钥神：月建顺数五位
+ * 钥神：春巳、夏申、秋亥、冬寅
  * 用途：主开启、钥匙、要津、关键。为吉神，主有开启之机，得关键之助。
  */
 DiZhi ShenShaEngine::calc_yao_shen() const {
@@ -1033,12 +1052,36 @@ DiZhi ShenShaEngine::calc_yao_shen() const {
 }
 
 /**
- * 飞祸：年支逆数四位
+ * 飞祸：春申、夏寅、秋巳、冬亥
  * 用途：主飞来横祸、意外灾祸。为凶神，主有突发、意外之祸患。
  */
 DiZhi ShenShaEngine::calc_fei_huo() const {
   static constexpr std::array table = {DiZhi::Shen, DiZhi::Yin, DiZhi::Si,
                                        DiZhi::Hai};
+  return table[season_index(ba_zi_.month.zhi)];
+}
+
+/**
+ * 月飞廉：正月戌、二月巳，之后依逐月支表取值。
+ */
+DiZhi ShenShaEngine::calc_yue_fei_lian() const {
+  static constexpr ZhiTable table = {
+      DiZhi::Xu,   DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You,
+      DiZhi::Chen, DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao};
+  return by_month(ba_zi_.month.zhi, table);
+}
+
+/**
+ * 月死神：正月巳，随月建顺行。
+ */
+DiZhi ShenShaEngine::calc_yue_si_shen() const { return ba_zi_.month.zhi + 3; }
+
+/**
+ * 贼神：春卯、夏午、秋酉、冬子。
+ */
+DiZhi ShenShaEngine::calc_zei_shen() const {
+  static constexpr std::array table = {DiZhi::Mao, DiZhi::Wu, DiZhi::You,
+                                       DiZhi::Zi};
   return table[season_index(ba_zi_.month.zhi)];
 }
 
@@ -1055,8 +1098,7 @@ DiZhi ShenShaEngine::calc_hong_luan() const {
 // ==================== 日神煞（补充实现） ====================
 
 /**
- * 日德：甲戊庚牛羊，乙己鼠猴乡，丙丁猪鸡位，壬癸兔蛇藏，六辛逢马虎
- * 返回符合日德条件的地支
+ * 日德：甲己寅、乙庚申、丙辛巳、丁壬亥、戊癸巳。
  */
 DiZhi ShenShaEngine::calc_ri_de() const {
   return kRiDeByGan[gan_index(ba_zi_.day.gan)];
@@ -1071,7 +1113,7 @@ DiZhi ShenShaEngine::calc_ri_lu() const {
 }
 
 /**
- * 旬丁：空亡后第二位
+ * 旬丁：旬首后第三位
  */
 DiZhi ShenShaEngine::calc_xun_ding() const {
   auto kong_wang = get_kong_wang(ba_zi_.day.gan, ba_zi_.day.zhi);
@@ -1079,7 +1121,7 @@ DiZhi ShenShaEngine::calc_xun_ding() const {
 }
 
 /**
- * 成神：正月起巳，按巳、申、亥、寅循环
+ * 成神：正月巳、二月申、三月亥、四月寅，四位循环
  */
 DiZhi ShenShaEngine::calc_cheng_shen() const {
   static constexpr ZhiTable table = {
@@ -1101,19 +1143,24 @@ DiZhi ShenShaEngine::calc_tao_hua() const {
 DiZhi ShenShaEngine::calc_xian_chi() const { return calc_tao_hua(); }
 
 /**
- * 贼符：日支找孟位顺数七位
+ * 旬乙：旬首后一位
  */
-DiZhi ShenShaEngine::calc_zei_fu() const { return calc_xun_yi() + 1; }
+DiZhi ShenShaEngine::calc_xun_yi_sha() const { return calc_xun_yi() + 1; }
 
 /**
- * 死符：岁后五辰
+ * 死符：甲乙申、丙丁亥、戊己寅、庚辛巳、壬癸辰。
  */
-DiZhi ShenShaEngine::calc_si_fu() const { return ba_zi_.year.zhi + 5; }
+DiZhi ShenShaEngine::calc_si_fu() const {
+  static constexpr GanTable table = {
+      DiZhi::Shen, DiZhi::Shen, DiZhi::Hai, DiZhi::Hai,  DiZhi::Yin,
+      DiZhi::Yin,  DiZhi::Si,   DiZhi::Si,  DiZhi::Chen, DiZhi::Chen};
+  return table[gan_index(ba_zi_.year.gan)];
+}
 
 /**
- * 死神：日支找孟位逆数一位
+ * 支死神：子日起卯，随日支顺行
  */
-DiZhi ShenShaEngine::calc_si_shen() const {
+DiZhi ShenShaEngine::calc_ri_si_shen() const {
   return kSiShenByZhi[zhi_index(ba_zi_.day.zhi)];
 }
 

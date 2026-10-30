@@ -60,19 +60,146 @@ void verify_day_branch_shensha_tables() {
   constexpr std::array zai_sha = {DiZhi::Wu, DiZhi::Mao, DiZhi::Zi, DiZhi::You,
                                   DiZhi::Wu, DiZhi::Mao, DiZhi::Zi, DiZhi::You,
                                   DiZhi::Wu, DiZhi::Mao, DiZhi::Zi, DiZhi::You};
+  constexpr std::array wang_shen = {
+      DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen,
+      DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin};
+  constexpr std::array po_sui = {
+      DiZhi::Si, DiZhi::Chou, DiZhi::You, DiZhi::Si, DiZhi::Chou, DiZhi::You,
+      DiZhi::Si, DiZhi::Chou, DiZhi::You, DiZhi::Si, DiZhi::Chou, DiZhi::You};
+  constexpr std::array si_shen = {
+      DiZhi::Mao, DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen,
+      DiZhi::You, DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin};
+  constexpr std::array zhi_yi = {
+      DiZhi::Wu,  DiZhi::Si,   DiZhi::Chen, DiZhi::Mao, DiZhi::Yin, DiZhi::Chou,
+      DiZhi::Wei, DiZhi::Shen, DiZhi::You,  DiZhi::Xu,  DiZhi::Hai, DiZhi::Zi};
+  constexpr std::array zhi_de = {
+      DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You, DiZhi::Xu,
+      DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao, DiZhi::Chen};
 
   for (std::size_t index = 0; index < 12; ++index) {
     const auto day_zhi = static_cast<DiZhi>(index);
     const auto day_gan = static_cast<TianGan>(index % 10);
     const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
                                         day_gan, day_zhi);
-    const auto result = ShenShaEngine(bazi, day_zhi).calculate();
+    const auto result = ShenShaEngine(bazi).calculate();
     if (result.ri_yi_ma != yi_ma[index] || result.tao_hua != tao_hua[index] ||
         result.xian_chi != tao_hua[index] ||
         result.ri_hua_gai != hua_gai[index] ||
         result.ri_jie_sha != jie_sha[index] ||
-        result.ri_zai_sha != zai_sha[index]) {
+        result.ri_zai_sha != zai_sha[index] ||
+        result.ri_wang_shen != wang_shen[index] ||
+        result.ri_po_sui != po_sui[index] ||
+        result.ri_si_shen != si_shen[index] || result.zhi_yi != zhi_yi[index] ||
+        result.zhi_de != zhi_de[index]) {
       throw std::runtime_error("大六壬日支神煞十二支表不一致");
+    }
+  }
+}
+
+/**
+ * @brief 核验十二个月的逐月表、三合表与四季表。
+ */
+void verify_month_shensha_tables() {
+  constexpr std::array yue_yi_ma = {DiZhi::Shen, DiZhi::Si,   DiZhi::Yin,
+                                    DiZhi::Hai,  DiZhi::Shen, DiZhi::Si,
+                                    DiZhi::Yin,  DiZhi::Hai,  DiZhi::Shen,
+                                    DiZhi::Si,   DiZhi::Yin,  DiZhi::Hai};
+  constexpr std::array huang_shu = {DiZhi::Yin,  DiZhi::Yin,  DiZhi::Yin,
+                                    DiZhi::Si,   DiZhi::Si,   DiZhi::Si,
+                                    DiZhi::Shen, DiZhi::Shen, DiZhi::Shen,
+                                    DiZhi::Hai,  DiZhi::Hai,  DiZhi::Hai};
+  constexpr std::array tian_zhao = {
+      DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao, DiZhi::Chen,
+      DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You, DiZhi::Xu};
+  constexpr std::array tian_ma = {
+      DiZhi::Wu, DiZhi::Shen, DiZhi::Xu, DiZhi::Zi, DiZhi::Yin, DiZhi::Chen,
+      DiZhi::Wu, DiZhi::Shen, DiZhi::Xu, DiZhi::Zi, DiZhi::Yin, DiZhi::Chen};
+  constexpr std::array cheng_shen = {
+      DiZhi::Si,  DiZhi::Shen, DiZhi::Hai, DiZhi::Yin,  DiZhi::Si,  DiZhi::Shen,
+      DiZhi::Hai, DiZhi::Yin,  DiZhi::Si,  DiZhi::Shen, DiZhi::Hai, DiZhi::Yin};
+  constexpr std::array tian_yi = {
+      DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You,
+      DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao};
+  constexpr std::array di_yi = {
+      DiZhi::Xu,   DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao,
+      DiZhi::Chen, DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You};
+  constexpr std::array fei_lian = {
+      DiZhi::Xu,   DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You,
+      DiZhi::Chen, DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao};
+  constexpr std::array huang_en = {
+      DiZhi::Xu, DiZhi::Chou, DiZhi::Chen, DiZhi::Wei, DiZhi::You,  DiZhi::Mao,
+      DiZhi::Zi, DiZhi::Wu,   DiZhi::Yin,  DiZhi::Si,  DiZhi::Shen, DiZhi::Hai};
+  constexpr std::array sang_po = {DiZhi::Wei,  DiZhi::Chen, DiZhi::Chou,
+                                  DiZhi::Xu,   DiZhi::Wei,  DiZhi::Chen,
+                                  DiZhi::Chou, DiZhi::Xu,   DiZhi::Wei,
+                                  DiZhi::Chen, DiZhi::Chou, DiZhi::Xu};
+  constexpr std::array jie_shen = {
+      DiZhi::Shen, DiZhi::Shen, DiZhi::Xu,   DiZhi::Xu,   DiZhi::Zi, DiZhi::Zi,
+      DiZhi::Yin,  DiZhi::Yin,  DiZhi::Chen, DiZhi::Chen, DiZhi::Wu, DiZhi::Wu};
+  constexpr std::array xue_ji = {
+      DiZhi::Chou, DiZhi::Wei, DiZhi::Yin, DiZhi::Shen, DiZhi::Mao, DiZhi::You,
+      DiZhi::Chen, DiZhi::Xu,  DiZhi::Si,  DiZhi::Hai,  DiZhi::Wu,  DiZhi::Zi};
+  constexpr std::array xin_shen = {DiZhi::Shen, DiZhi::Xu,   DiZhi::Yin,
+                                   DiZhi::Chou, DiZhi::Hai,  DiZhi::Chen,
+                                   DiZhi::Si,   DiZhi::Wei,  DiZhi::Si,
+                                   DiZhi::Wei,  DiZhi::Shen, DiZhi::Xu};
+  constexpr std::array tian_ji = {
+      DiZhi::You, DiZhi::Shen, DiZhi::Wei,  DiZhi::Wu, DiZhi::Si,  DiZhi::Chen,
+      DiZhi::Mao, DiZhi::Yin,  DiZhi::Chou, DiZhi::Zi, DiZhi::Hai, DiZhi::Xu};
+  constexpr std::array yue_xing = {
+      DiZhi::Si,  DiZhi::Zi,  DiZhi::Chen, DiZhi::Shen, DiZhi::Wu,  DiZhi::Chou,
+      DiZhi::Yin, DiZhi::You, DiZhi::Wei,  DiZhi::Hai,  DiZhi::Mao, DiZhi::Xu};
+  constexpr std::array jian_men = {
+      DiZhi::Shen, DiZhi::Hai, DiZhi::Yin,  DiZhi::Si,  DiZhi::Shen, DiZhi::Hai,
+      DiZhi::Yin,  DiZhi::Si,  DiZhi::Shen, DiZhi::Hai, DiZhi::Yin,  DiZhi::Si};
+  constexpr std::array hua_gai = {DiZhi::Xu,   DiZhi::Wei,  DiZhi::Chen,
+                                  DiZhi::Chou, DiZhi::Xu,   DiZhi::Wei,
+                                  DiZhi::Chen, DiZhi::Chou, DiZhi::Xu,
+                                  DiZhi::Wei,  DiZhi::Chen, DiZhi::Chou};
+  constexpr std::array jie_sha = {
+      DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen,
+      DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin};
+  constexpr std::array zai_sha = {DiZhi::Zi, DiZhi::You, DiZhi::Wu, DiZhi::Mao,
+                                  DiZhi::Zi, DiZhi::You, DiZhi::Wu, DiZhi::Mao,
+                                  DiZhi::Zi, DiZhi::You, DiZhi::Wu, DiZhi::Mao};
+  constexpr std::array wang_shen = {DiZhi::Si,   DiZhi::Yin,  DiZhi::Hai,
+                                    DiZhi::Shen, DiZhi::Si,   DiZhi::Yin,
+                                    DiZhi::Hai,  DiZhi::Shen, DiZhi::Si,
+                                    DiZhi::Yin,  DiZhi::Hai,  DiZhi::Shen};
+  constexpr std::array si_shen = {
+      DiZhi::Si,  DiZhi::Wu, DiZhi::Wei,  DiZhi::Shen, DiZhi::You, DiZhi::Xu,
+      DiZhi::Hai, DiZhi::Zi, DiZhi::Chou, DiZhi::Yin,  DiZhi::Mao, DiZhi::Chen};
+  constexpr std::array zei_shen = {
+      DiZhi::Mao, DiZhi::Mao, DiZhi::Mao, DiZhi::Wu, DiZhi::Wu, DiZhi::Wu,
+      DiZhi::You, DiZhi::You, DiZhi::You, DiZhi::Zi, DiZhi::Zi, DiZhi::Zi};
+
+  for (std::size_t index = 0; index < 12; ++index) {
+    const auto month_zhi = static_cast<DiZhi>((index + 2) % 12);
+    const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, month_zhi,
+                                        TianGan::Jia, DiZhi::Zi);
+    const auto result = ShenShaEngine(bazi).calculate();
+    if (result.yue_jian != month_zhi || result.yue_po != month_zhi + 6 ||
+        result.xiao_shi != month_zhi || result.yue_yi_ma != yue_yi_ma[index] ||
+        result.huang_shu != huang_shu[index] ||
+        result.huang_en != huang_en[index] ||
+        result.tian_zhao != tian_zhao[index] ||
+        result.fei_hun != tian_zhao[index] ||
+        result.tian_ma != tian_ma[index] ||
+        result.cheng_shen != cheng_shen[index] ||
+        result.tian_yi != tian_yi[index] || result.di_yi != di_yi[index] ||
+        result.jie_shen != jie_shen[index] || result.xue_ji != xue_ji[index] ||
+        result.xin_shen != xin_shen[index] ||
+        result.tian_ji != tian_ji[index] || result.sang_po != sang_po[index] ||
+        result.yue_xing != yue_xing[index] ||
+        result.jian_men != jian_men[index] ||
+        result.yue_fei_lian != fei_lian[index] ||
+        result.yue_hua_gai != hua_gai[index] ||
+        result.yue_jie_sha != jie_sha[index] ||
+        result.yue_zai_sha != zai_sha[index] ||
+        result.yue_wang_shen != wang_shen[index] ||
+        result.yue_si_shen != si_shen[index] ||
+        result.zei_shen != zei_shen[index]) {
+      throw std::runtime_error("大六壬月神煞十二月表不一致");
     }
   }
 }
@@ -90,15 +217,18 @@ void verify_day_stem_shensha_tables() {
   constexpr std::array yang_ren = {
       DiZhi::Mao, DiZhi::Chen, DiZhi::Wu, DiZhi::Wei, DiZhi::Wu,
       DiZhi::Wei, DiZhi::You,  DiZhi::Xu, DiZhi::Zi,  DiZhi::Chou};
+  constexpr std::array ri_qi = {
+      DiZhi::Wu,   DiZhi::Si,  DiZhi::Chen, DiZhi::Mao, DiZhi::Yin,
+      DiZhi::Chou, DiZhi::Wei, DiZhi::Shen, DiZhi::You, DiZhi::Xu};
 
   for (std::size_t index = 0; index < 10; ++index) {
     const auto day_gan = static_cast<TianGan>(index);
     const auto day_zhi = static_cast<DiZhi>(index);
     const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
                                         day_gan, day_zhi);
-    const auto result = ShenShaEngine(bazi, day_zhi).calculate();
+    const auto result = ShenShaEngine(bazi).calculate();
     if (result.ri_de != ri_de[index] || result.ri_lu != ri_lu[index] ||
-        result.yang_ren != yang_ren[index]) {
+        result.ri_qi != ri_qi[index] || result.yang_ren != yang_ren[index]) {
       throw std::runtime_error("大六壬日德、日禄或羊刃干表错误");
     }
   }
@@ -114,6 +244,19 @@ void verify_year_and_month_shensha_tables() {
   constexpr std::array year_xing = {
       DiZhi::Mao, DiZhi::Xu,   DiZhi::Si,  DiZhi::Zi,  DiZhi::Chen, DiZhi::Shen,
       DiZhi::Wu,  DiZhi::Chou, DiZhi::Yin, DiZhi::You, DiZhi::Wei,  DiZhi::Hai};
+  constexpr std::array year_he = {
+      DiZhi::Chou, DiZhi::Zi, DiZhi::Hai, DiZhi::Xu,   DiZhi::You, DiZhi::Shen,
+      DiZhi::Wei,  DiZhi::Wu, DiZhi::Si,  DiZhi::Chen, DiZhi::Mao, DiZhi::Yin};
+  constexpr std::array year_jie_sha = {DiZhi::Si,   DiZhi::Yin,  DiZhi::Hai,
+                                       DiZhi::Shen, DiZhi::Si,   DiZhi::Yin,
+                                       DiZhi::Hai,  DiZhi::Shen, DiZhi::Si,
+                                       DiZhi::Yin,  DiZhi::Hai,  DiZhi::Shen};
+  constexpr std::array year_wang_shen = {
+      DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen,
+      DiZhi::Si,  DiZhi::Yin,  DiZhi::Hai, DiZhi::Shen, DiZhi::Si,  DiZhi::Yin};
+  constexpr std::array hong_luan = {
+      DiZhi::Mao, DiZhi::Yin,  DiZhi::Chou, DiZhi::Zi, DiZhi::Hai, DiZhi::Xu,
+      DiZhi::You, DiZhi::Shen, DiZhi::Wei,  DiZhi::Wu, DiZhi::Si,  DiZhi::Chen};
   constexpr std::array month_po_sui = {
       DiZhi::You, DiZhi::Si, DiZhi::Chou, DiZhi::You, DiZhi::Si, DiZhi::Chou,
       DiZhi::You, DiZhi::Si, DiZhi::Chou, DiZhi::You, DiZhi::Si, DiZhi::Chou};
@@ -127,14 +270,40 @@ void verify_year_and_month_shensha_tables() {
     const auto month_zhi = static_cast<DiZhi>((index + 2) % 12);
     const auto bazi =
         make_shensha_bazi(stem, branch, month_zhi, TianGan::Jia, DiZhi::Zi);
-    const auto result = ShenShaEngine(bazi, DiZhi::Zi).calculate();
-    if (result.nian_yi_ma != year_yi_ma[index] ||
-        result.sui_xing != year_xing[index] || result.sang_men != branch + 2 ||
-        result.diao_ke != branch + (-2) ||
+    const auto result = ShenShaEngine(bazi).calculate();
+    if (result.tai_sui != branch || result.da_hao != branch + 6 ||
+        result.xiao_hao != branch + 5 || result.bing_fu != branch + (-1) ||
+        result.nian_yi_ma != year_yi_ma[index] ||
+        result.sui_xing != year_xing[index] ||
+        result.sui_he != year_he[index] ||
+        result.jie_sha != year_jie_sha[index] ||
+        result.wang_shen != year_wang_shen[index] ||
+        result.hong_luan != hong_luan[index] ||
+        result.yue_he != year_he[(index + 2) % 12] ||
+        result.sang_men != branch + 2 || result.diao_ke != branch + (-2) ||
         result.po_sui != month_po_sui[index] ||
         result.yue_yan != month_yan[index]) {
       throw std::runtime_error("大六壬年煞或月煞十二支表错误");
     }
+  }
+}
+
+/** @brief 核验岁德与死符按年干取值，不受年支变化影响。 */
+void verify_year_stem_shensha_tables() {
+  constexpr std::array sui_de = {
+      DiZhi::Yin, DiZhi::Shen, DiZhi::Si, DiZhi::Hai, DiZhi::Si,
+      DiZhi::Yin, DiZhi::Shen, DiZhi::Si, DiZhi::Hai, DiZhi::Si};
+  constexpr std::array si_fu = {
+      DiZhi::Shen, DiZhi::Shen, DiZhi::Hai, DiZhi::Hai,  DiZhi::Yin,
+      DiZhi::Yin,  DiZhi::Si,   DiZhi::Si,  DiZhi::Chen, DiZhi::Chen};
+
+  for (std::size_t index = 0; index < sui_de.size(); ++index) {
+    const auto year_gan = static_cast<TianGan>(index);
+    const auto bazi = make_shensha_bazi(year_gan, DiZhi::Zi, DiZhi::Yin,
+                                        TianGan::Jia, DiZhi::Zi);
+    const auto result = ShenShaEngine(bazi).calculate();
+    if (result.sui_de != sui_de[index] || result.si_fu != si_fu[index])
+      throw std::runtime_error("大六壬岁德或死符年干表不一致");
   }
 }
 
@@ -149,10 +318,11 @@ void verify_xun_shensha() {
   for (std::size_t index = 0; index < xun_heads.size(); ++index) {
     const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
                                         TianGan::Jia, xun_heads[index]);
-    const auto result = ShenShaEngine(bazi, xun_heads[index]).calculate();
+    const auto result = ShenShaEngine(bazi).calculate();
     if (result.xun_yi != xun_heads[index] || result.xun_qi != xun_qi[index] ||
-        result.xun_ding != xun_heads[index] + 3) {
-      throw std::runtime_error("大六壬旬仪、旬奇或旬丁错误");
+        result.xun_ding != xun_heads[index] + 3 ||
+        result.xun_yi_sha != xun_heads[index] + 1) {
+      throw std::runtime_error("大六壬旬仪、旬奇、旬丁或旬乙错误");
     }
   }
 }
@@ -163,7 +333,7 @@ void verify_xun_shensha() {
 void verify_shensha_mapping_contains_stem_rules() {
   const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
                                       TianGan::Yi, DiZhi::Chou);
-  const auto result = ShenShaEngine(bazi, DiZhi::Chou).calculate();
+  const auto result = ShenShaEngine(bazi).calculate();
   const auto ri_de_names = result.get_shensha_on_zhi(DiZhi::Shen);
   const auto ri_lu_names = result.get_shensha_on_zhi(DiZhi::Mao);
   if (!std::ranges::contains(ri_de_names, std::string("日德")) ||
@@ -172,22 +342,56 @@ void verify_shensha_mapping_contains_stem_rules() {
   }
 }
 
+/** @brief 穷举年支、月支和六十甲子，确保同一地支不重复登记同名神煞。 */
+void verify_shensha_mapping_has_no_duplicate_names() {
+  for (std::size_t year_index = 0; year_index < 12; ++year_index) {
+    for (std::size_t month_index = 0; month_index < 12; ++month_index) {
+      for (std::size_t day_index = 0; day_index < 60; ++day_index) {
+        const auto year_gan = static_cast<TianGan>(year_index % 10);
+        const auto year_zhi = static_cast<DiZhi>(year_index);
+        const auto month_zhi = static_cast<DiZhi>(month_index);
+        const auto day_gan = static_cast<TianGan>(day_index % 10);
+        const auto day_zhi = static_cast<DiZhi>(day_index % 12);
+        const auto bazi =
+            make_shensha_bazi(year_gan, year_zhi, month_zhi, day_gan, day_zhi);
+        const auto result = ShenShaEngine(bazi).calculate();
+        for (const auto &[branch, names] : result.zhi_to_shensha_map) {
+          auto sorted_names = names;
+          std::ranges::sort(sorted_names);
+          if (std::ranges::adjacent_find(sorted_names) != sorted_names.end())
+            throw std::runtime_error("大六壬地支神煞映射存在同名重复项");
+        }
+      }
+    }
+  }
+}
+
 /**
- * @brief 核验中文报告与 JSON 按年、月、日归类同一批神煞。
+ * @brief 核验中文报告与 JSON 按年、月、旬、日归类同一批神煞。
  */
 void verify_shensha_report_contract() {
   const auto bazi = make_shensha_bazi(TianGan::Jia, DiZhi::Zi, DiZhi::Yin,
                                       TianGan::Yi, DiZhi::Chou);
-  const auto result = ShenShaEngine(bazi, DiZhi::Chou).calculate();
+  const auto result = ShenShaEngine(bazi).calculate();
   const auto json = result.to_json();
   const auto text = result.to_string();
 
   if (!json.at("年").contains("死符") || !json.at("年").contains("红鸾") ||
-      json.at("月").contains("红鸾") || !json.at("月").contains("成神") ||
-      !json.at("月").contains("解神") || !json.at("月").contains("天巫") ||
+      json.at("年").contains("飞廉") || json.at("月").contains("红鸾") ||
+      !json.at("月").contains("成神") || !json.at("月").contains("解神") ||
+      !json.at("月").contains("天巫") || !json.at("月").contains("飞廉") ||
+      !json.at("月").contains("丧魄") || json.at("月").contains("丧魂") ||
+      json.at("月").contains("游魂") || !json.at("月").contains("飞魂") ||
+      !json.at("月").contains("华盖") || !json.at("月").contains("劫煞") ||
+      !json.at("月").contains("灾煞") || !json.at("月").contains("亡神") ||
+      !json.at("月").contains("死神") || !json.at("月").contains("贼神") ||
+      !json.at("旬").contains("旬奇") || !json.at("旬").contains("旬仪") ||
+      !json.at("旬").contains("旬丁") || !json.at("旬").contains("旬乙") ||
+      json.at("日").contains("旬奇") || json.at("日").contains("贼神") ||
       !json.at("日").contains("华盖") || !json.at("日").contains("劫煞") ||
       !json.at("日").contains("灾煞") || !json.at("日").contains("亡神") ||
-      !json.at("日").contains("破碎") || text.contains("红弯")) {
+      !json.at("日").contains("破碎") || !json.at("日").contains("支死神") ||
+      text.contains("红弯")) {
     throw std::runtime_error("大六壬神煞中文报告或 JSON 分类错误");
   }
 }
@@ -334,8 +538,11 @@ int main() {
     verify_day_branch_shensha_tables();
     verify_day_stem_shensha_tables();
     verify_year_and_month_shensha_tables();
+    verify_year_stem_shensha_tables();
+    verify_month_shensha_tables();
     verify_xun_shensha();
     verify_shensha_mapping_contains_stem_rules();
+    verify_shensha_mapping_has_no_duplicate_names();
     verify_shensha_report_contract();
     verify_hao_shi_uses_upper_deities();
     verify_yin_si_shen_punishment();
