@@ -42,8 +42,6 @@ ZhouYiLab 使用现代 C++ 实现和研究传统术数与西方占星算法，�
 
 塔罗牌当前提供牌图与资源清单支持，素材位于 `assets/tarot/waite_1918/`，清单包含图片路径、来源与文件哈希。[塔罗牌素材说明](assets/tarot/waite_1918/README.md)
 
-https://zhuanlan.zhihu.com/p/714853759
-
 ---
 
 ##  核心特性
