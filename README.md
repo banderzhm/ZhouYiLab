@@ -44,8 +44,6 @@ ZhouYiLab 使用现代 C++ 实现和研究传统术数与西方占星算法，�
 
 https://zhuanlan.zhihu.com/p/714853759
 
-GPT更喜欢YAML格式，Claude更喜欢XML格式，而Gemini/Gemma则更倾向于JSON格式。
-
 ---
 
 ##  核心特性
