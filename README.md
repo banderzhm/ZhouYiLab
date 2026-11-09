@@ -20,13 +20,13 @@ https://www.mingtugps.cn/discover
 |---|---|---|---|---|
 | Windows | x64 | Visual Studio 2022（MSVC） | Debug / Release | ✅ |
 | Linux | x64 | Clang 19 / 20 / 21 + libc++ | Debug / Release | ✅ |
-| macOS 14 / 15 | Apple Silicon（arm64） | Homebrew LLVM 20 + libc++ | Debug / Release | ✅ |
+| macOS 15 | Apple Silicon（arm64） | Homebrew LLVM 20 + libc++ | Debug / Release | ✅ |
 
 ---
 
 ##  项目简介
 
-ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化相关的算法，包括：
+ZhouYiLab 使用现代 C++ 实现和研究传统术数与西方占星算法，并提供塔罗牌素材资源，包括：
 
 -  **大六壬** - 古代占卜术数之一
 -  **六爻** - 周易卦象推演系统
@@ -35,6 +35,12 @@ ZhouYiLab 致力于用现代化的编程方式实现和研究传统周易文化�
 -  **八字排盘** - 四柱命理计算
 -  **奇门遁甲** - 古代奇门排盘术数
 -  **农历历法** - 公历农历互转、节气、干支等
+-  **西方占星** - 本命盘、行运、比较盘、组合盘、次限、太阳弧及太阳/月亮返照
+-  **塔罗牌素材** - 78 张韦特系牌图、中英文牌名、固定编号及 SHA-256 校验清单
+
+西方占星支持十星、四轴、十二宫、逆行和相位，提供整宫、等宫及普拉西德宫制，支持热带黄道与显式岁差值配置的恒星黄道。排盘覆盖 1900—2100 年，可选择 JPL DE440s 高精度星历，输出中文报告与 JSON。[占星接口与验证说明](src/astrology/README.md)
+
+塔罗牌当前提供牌图与资源清单支持，素材位于 `assets/tarot/waite_1918/`，清单包含图片路径、来源与文件哈希。[塔罗牌素材说明](assets/tarot/waite_1918/README.md)
 
 https://zhuanlan.zhihu.com/p/714853759
 
@@ -170,9 +176,12 @@ LOCAL 模式要求标准库模块与编译器、头文件匹配；缺失模块�
 
 # 运行紫微斗数示例
 ./build/examples/example_zi_wei
+
+# 运行西方占星示例，使用 JPL DE440s 高精度星历
+./build/examples/example_astrology assets/ephemeris/de440s.bsp
 ```
 
-以上命令从仓库根目录执行，报告写入对应 `docs/` 子目录。
+以上命令从仓库根目录执行，传统术数示例的报告写入对应 `docs/` 子目录，西方占星示例将完整报告输出到控制台。
 Visual Studio 多配置构建使用 `build/Release/ZhouYiLab.exe` 和
 `build/examples/Release/example_*.exe`；Debug 相应替换目录名。
 
@@ -270,13 +279,18 @@ ZhouYiLab/
     liu_yao/               # 六爻模块
     qi_men/                # 奇门遁甲模块
     zi_wei/                # 紫微斗数模块
+    astrology/             # 西方占星与高精度星历模块
     main.cpp               # 主程序入口
+ assets/                      # 素材与星历数据
+    tarot/                 # 塔罗牌图与资源清单
+    ephemeris/             # JPL DE440s 星历数据
  examples/                    # 示例程序 
     example_ba_zi.cpp      # 八字系统示例
     example_da_liu_ren.cpp # 大六壬示例
     example_liu_yao.cpp    # 六爻示例
     example_qi_men.cpp     # 奇门遁甲示例
     example_zi_wei.cpp     # 紫微斗数示例
+    example_astrology.cpp  # 西方占星示例
  tests/                       # 单元测试
  docs/                        # 文档
  CMakeLists.txt              # CMake 主配置

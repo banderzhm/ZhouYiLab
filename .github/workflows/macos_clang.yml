@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, macos-15]  # Apple Silicon (M1/M2)
+        os: [macos-15]  # Apple Silicon（arm64）
         build_type: [Release, Debug]
 
     steps:
@@ -34,7 +34,7 @@ jobs:
     - name: Install versioned LLVM toolchain
       run: |
         # 未版本化 llvm 会随 Homebrew 滚动到不再为旧 macOS 提供 bottle 的
-        # 最新主版本。llvm@20 同时覆盖 Sonoma 与 Sequoia，并满足 C++23
+        # 最新主版本。llvm@20 用于 Sequoia，并满足 C++23
         # 标准库模块构建要求。
         brew install llvm@20
         command -v ninja >/dev/null 2>&1 || brew install ninja
