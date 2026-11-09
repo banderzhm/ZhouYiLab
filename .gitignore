@@ -10,6 +10,7 @@
 
 # Build directories
 build/
+/build_*/
 cmake-build-*/
 out/
 bin/
