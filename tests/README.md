@@ -17,7 +17,7 @@
 
 占星回归还核验 `astrology_time_context.json` 中 300 组同口径结果，采用显式 ΔT 与 IAU 2006/2000A。十星黄经阈值为 0.006 度，宫头阈值为 0.000005 度，并检查时间配置在正常、异常和并发调用后的隔离。
 
-塔罗原书素材另运行 `python -B tests/test_tarot_assets.py`，检查 78 张牌的编号、名称、JPEG 格式及 SHA-256。行星轨道对照的范围与参考版本见 `src/astrology/README.md`。
+塔罗原书素材另运行 `python -B tests/test_tarot_assets.py`，检查 78 张牌的编号、名称、JPEG 格式及 SHA-256。行星轨道对照的范围与参考版本见 [占星接口与验证说明](../docs/astrology/README.md)。
 
 Tyme 测试源文件在 `tests/tyme/test_tyme_module.cpp`，不再放在生产源码目录。
 可单独构建 `test_tyme_module`，再用 `ctest --test-dir build -C Debug -R test_tyme_module --output-on-failure --no-tests=error` 运行。

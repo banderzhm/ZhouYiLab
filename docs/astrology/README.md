@@ -52,7 +52,7 @@
 
 仓库附有 NASA/JPL DE440s 原始文件 `assets/ephemeris/de440s.bsp`，约 32 MB。下载来源、SHA-256 和复现命令见同目录 README。`./tools/fetch_de440s.ps1` 核验文件或获取固定版本。文件随 CMake 安装至 `share/zhouyilab/ephemeris`，应用通过路径配置选择它。
 
-解析器位于 `jpl_ephemeris.cppm/.cpp`，实现 DAF 摘要、SPK Type 2 切比雪夫位置及导数求值，并沿目标与中心链恢复太阳系质心状态。视位置另处理 TT 至 TDB、光行时迭代、有限距离太阳引力偏折、光行差，以及 ICRF 至日期真黄道转换。缓存最多保存一个不可变内核。格式、边界、未知目标和损坏文件返回明确错误。
+解析器位于 `src/astrology/jpl_ephemeris.cppm/.cpp`，实现 DAF 摘要、SPK Type 2 切比雪夫位置及导数求值，并沿目标与中心链恢复太阳系质心状态。视位置另处理 TT 至 TDB、光行时迭代、有限距离太阳引力偏折、光行差，以及 ICRF 至日期真黄道转换。缓存最多保存一个不可变内核。格式、边界、未知目标和损坏文件返回明确错误。
 
 独立验证包含两部分。`jpl_states.json` 由 jplephem 2.24 从原始文件生成，覆盖 1918 组位置和速度，含文件覆盖端点及插值区间附近。`astrology_jpl_reference.json` 由 Swiss Ephemeris 正式星历文件 `sepl_18.se1`、`semo_18.se1` 生成，记录文件哈希，并检查计算返回标志必须包含 `FLG_SWIEPH`。原有参考配置曾回退到 Moshier，相关语料与高精度语料分别保存。
 
