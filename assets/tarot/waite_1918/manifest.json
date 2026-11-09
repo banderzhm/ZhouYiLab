@@ -1,0 +1,790 @@
+{
+  "schema_version": 1,
+  "deck": "waite_1918_scan",
+  "source_page": "https://www.gutenberg.org/cache/epub/43548/pg43548-images.html",
+  "illustrator": "Pamela Colman Smith",
+  "source_edition_year": 1918,
+  "source_rights": "Project Gutenberg #43548, public domain in the USA; see source license and jurisdiction terms",
+  "cards": [
+    {
+      "id": 0,
+      "key": "major_00",
+      "name_zh": "愚人",
+      "name_en": "The Fool",
+      "image": "major_00.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_082.jpg",
+      "sha256": "f0d0bd1764032e6969b644c501aaad2af9ecde624ac4d9c9b7e9eeda50d3f9e2",
+      "bytes": 72372
+    },
+    {
+      "id": 1,
+      "key": "major_01",
+      "name_zh": "魔术师",
+      "name_en": "The Magician",
+      "image": "major_01.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_042.jpg",
+      "sha256": "ebb0a695d5ce3fcdc6a046ef6f79a9200408bacbcd15cf8110ce08e08c91675e",
+      "bytes": 76242
+    },
+    {
+      "id": 2,
+      "key": "major_02",
+      "name_zh": "女祭司",
+      "name_en": "The High Priestess",
+      "image": "major_02.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_044.jpg",
+      "sha256": "09a38763fc1f190c7cb97a2d48fc3c970131a32f70922bd6542eddaa1098a350",
+      "bytes": 75379
+    },
+    {
+      "id": 3,
+      "key": "major_03",
+      "name_zh": "皇后",
+      "name_en": "The Empress",
+      "image": "major_03.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_046.jpg",
+      "sha256": "62e837e6f1f019fa365f98bbc5bb24eff6022aedb5d33a63b1e9daa18c9acb5e",
+      "bytes": 93345
+    },
+    {
+      "id": 4,
+      "key": "major_04",
+      "name_zh": "皇帝",
+      "name_en": "The Emperor",
+      "image": "major_04.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_048.jpg",
+      "sha256": "d43d8031f7942d67423a2e2141617655c06536341dd54f31bf15de2375002ad3",
+      "bytes": 83046
+    },
+    {
+      "id": 5,
+      "key": "major_05",
+      "name_zh": "教皇",
+      "name_en": "The Hierophant",
+      "image": "major_05.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_050.jpg",
+      "sha256": "f1b8852b6d5041ec175c0f9f1df41cd27641481a1b0c8a513d7575db313b1734",
+      "bytes": 77061
+    },
+    {
+      "id": 6,
+      "key": "major_06",
+      "name_zh": "恋人",
+      "name_en": "The Lovers",
+      "image": "major_06.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_052.jpg",
+      "sha256": "b217d0775a2bb77df209b69debaad3864ba6caf6963853c5fa90c53390c245c8",
+      "bytes": 92724
+    },
+    {
+      "id": 7,
+      "key": "major_07",
+      "name_zh": "战车",
+      "name_en": "The Chariot",
+      "image": "major_07.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_054.jpg",
+      "sha256": "5d265d1ec2521b5bd7064dd7a9b1fc8c09cf1207bf851d3de7b255b1735e509a",
+      "bytes": 76707
+    },
+    {
+      "id": 8,
+      "key": "major_08",
+      "name_zh": "力量",
+      "name_en": "Strength",
+      "image": "major_08.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_056.jpg",
+      "sha256": "a69d8754719d9e272808846c6585030ec8970756f2e38b9cca40b98e8b27a458",
+      "bytes": 60316
+    },
+    {
+      "id": 9,
+      "key": "major_09",
+      "name_zh": "隐者",
+      "name_en": "The Hermit",
+      "image": "major_09.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_058.jpg",
+      "sha256": "1d8ac886758df5d488dc704e859badcc1834e8cc0617807a6eae8b3a73b566b8",
+      "bytes": 52596
+    },
+    {
+      "id": 10,
+      "key": "major_10",
+      "name_zh": "命运之轮",
+      "name_en": "Wheel of Fortune",
+      "image": "major_10.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_060.jpg",
+      "sha256": "498413f4fffb0f030e1d33dc775332c9d735282e08189d73e5a68f1f24e812e4",
+      "bytes": 78060
+    },
+    {
+      "id": 11,
+      "key": "major_11",
+      "name_zh": "正义",
+      "name_en": "Justice",
+      "image": "major_11.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_062.jpg",
+      "sha256": "6bef308b18d1a05577f9b7c50380fda499a54a05188fc36e1de06037429742c7",
+      "bytes": 88872
+    },
+    {
+      "id": 12,
+      "key": "major_12",
+      "name_zh": "倒吊人",
+      "name_en": "The hanged man",
+      "image": "major_12.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_064.jpg",
+      "sha256": "dee60f2e573a7e3852c6b57c06642d4c5e5db2c587aaa349e3c4cd0e912c805b",
+      "bytes": 63532
+    },
+    {
+      "id": 13,
+      "key": "major_13",
+      "name_zh": "死神",
+      "name_en": "Death",
+      "image": "major_13.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_066.jpg",
+      "sha256": "b81e0ae860b931c02e72412820db859162c627065efd172a900ad0c079c95276",
+      "bytes": 84647
+    },
+    {
+      "id": 14,
+      "key": "major_14",
+      "name_zh": "节制",
+      "name_en": "Temperance",
+      "image": "major_14.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_068.jpg",
+      "sha256": "3aee8db4d9599c07daa643742c2a7255a0e76f200094fab42b8d733dcf94b613",
+      "bytes": 84993
+    },
+    {
+      "id": 15,
+      "key": "major_15",
+      "name_zh": "恶魔",
+      "name_en": "The Devil",
+      "image": "major_15.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_070.jpg",
+      "sha256": "118a2c9300317a2e298ff6031306a666b42ec412fb5c819963efe1fd0a1b7839",
+      "bytes": 70517
+    },
+    {
+      "id": 16,
+      "key": "major_16",
+      "name_zh": "高塔",
+      "name_en": "The Tower",
+      "image": "major_16.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_072.jpg",
+      "sha256": "cb03ff69574ff21e0322bb6bd269a9180f46a998e798d7cb8c43d5c1baf68950",
+      "bytes": 73993
+    },
+    {
+      "id": 17,
+      "key": "major_17",
+      "name_zh": "星星",
+      "name_en": "The Star",
+      "image": "major_17.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_074.jpg",
+      "sha256": "ad00758cc382d8aad1566151e893880bf624d4726dcb01d87745a7f31ee24376",
+      "bytes": 82021
+    },
+    {
+      "id": 18,
+      "key": "major_18",
+      "name_zh": "月亮",
+      "name_en": "The Moon",
+      "image": "major_18.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_076.jpg",
+      "sha256": "5c87b1e61d35cd8b6274ee2b6d0748ec82a5551a2df523fa6f1585f4c1431ca3",
+      "bytes": 75941
+    },
+    {
+      "id": 19,
+      "key": "major_19",
+      "name_zh": "太阳",
+      "name_en": "The Sun",
+      "image": "major_19.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_078.jpg",
+      "sha256": "88890d4c77568fed7700bfb8f60b5441bf205de94f0f917e31405cd8010159d6",
+      "bytes": 91069
+    },
+    {
+      "id": 20,
+      "key": "major_20",
+      "name_zh": "审判",
+      "name_en": "The Judgement",
+      "image": "major_20.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_080.jpg",
+      "sha256": "f882bdf0d8b7b5b88ec1230f340c2c4f6b2447f897b3360b5e08fa084e9e4667",
+      "bytes": 84724
+    },
+    {
+      "id": 21,
+      "key": "major_21",
+      "name_zh": "世界",
+      "name_en": "The World",
+      "image": "major_21.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_084.jpg",
+      "sha256": "680e14d06223b9014e95d185114b7d4dde15f6376bc9fd1f8fb27d0b8893abd1",
+      "bytes": 83276
+    },
+    {
+      "id": 22,
+      "key": "wands_01",
+      "name_zh": "权杖王牌",
+      "name_en": "Ace of Wands",
+      "image": "wands_01.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_104.jpg",
+      "sha256": "e2fa13bfec1f10ee4c35b4aa0936ec01698837dba4f2ea175ad11970c8d78a70",
+      "bytes": 35089
+    },
+    {
+      "id": 23,
+      "key": "wands_02",
+      "name_zh": "权杖二",
+      "name_en": "Two of Wands",
+      "image": "wands_02.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_103.jpg",
+      "sha256": "d2cba7380e7ccdbbed44f0f4cbfcd2572ab4ecf7efcd70e6a3cb11f8671867af",
+      "bytes": 42487
+    },
+    {
+      "id": 24,
+      "key": "wands_03",
+      "name_zh": "权杖三",
+      "name_en": "Three of Wands",
+      "image": "wands_03.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_102.jpg",
+      "sha256": "174bc26c7a51047430b3c6d083908c661e03e738c3d21de9d20c93f00d335eed",
+      "bytes": 42694
+    },
+    {
+      "id": 25,
+      "key": "wands_04",
+      "name_zh": "权杖四",
+      "name_en": "Four of Wands",
+      "image": "wands_04.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_101.jpg",
+      "sha256": "0703ac4bc1f085fb03991c46275a548a81da131606e880d17e1a8735506c3a3a",
+      "bytes": 45150
+    },
+    {
+      "id": 26,
+      "key": "wands_05",
+      "name_zh": "权杖五",
+      "name_en": "Five of Wands",
+      "image": "wands_05.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_100.jpg",
+      "sha256": "ddd939384e935cf08ba5dc9ea87a086258751c9fa7716e0f78c1f4809522409e",
+      "bytes": 48924
+    },
+    {
+      "id": 27,
+      "key": "wands_06",
+      "name_zh": "权杖六",
+      "name_en": "Six of Wands",
+      "image": "wands_06.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_099.jpg",
+      "sha256": "d7d07e90beac933eb285e71736ba18832ae5888481248cb747d8adae941219bb",
+      "bytes": 48090
+    },
+    {
+      "id": 28,
+      "key": "wands_07",
+      "name_zh": "权杖七",
+      "name_en": "Seven of Wands",
+      "image": "wands_07.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_098.jpg",
+      "sha256": "e59f60caa1bc0f843cf6a9e0af7966df7634ffa59fcf81b57d724d099279409f",
+      "bytes": 40967
+    },
+    {
+      "id": 29,
+      "key": "wands_08",
+      "name_zh": "权杖八",
+      "name_en": "Eight of Wands",
+      "image": "wands_08.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_097.jpg",
+      "sha256": "150f87ecbea8f03582c060d92c971e40fcc265baf551c36a2d1c8ac4f494b6f6",
+      "bytes": 37931
+    },
+    {
+      "id": 30,
+      "key": "wands_09",
+      "name_zh": "权杖九",
+      "name_en": "Nine of Wands",
+      "image": "wands_09.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_096.jpg",
+      "sha256": "55729da449a9689f3b79b32a7894271e0dffaa393410f250cd6869a169454423",
+      "bytes": 44560
+    },
+    {
+      "id": 31,
+      "key": "wands_10",
+      "name_zh": "权杖十",
+      "name_en": "Ten of Wands",
+      "image": "wands_10.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_095.jpg",
+      "sha256": "3f8157d3ac5df2e3e679b7e5027d920f6a1e755f1cd0a0def6fbefdeaa5e762b",
+      "bytes": 45787
+    },
+    {
+      "id": 32,
+      "key": "wands_11",
+      "name_zh": "权杖侍从",
+      "name_en": "Page of Wands",
+      "image": "wands_11.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_094.jpg",
+      "sha256": "b6762df01152c56b1810d2d26edca92ee332079ff186c4bd664d9b771e1dba49",
+      "bytes": 42309
+    },
+    {
+      "id": 33,
+      "key": "wands_12",
+      "name_zh": "权杖骑士",
+      "name_en": "Knight of Wands",
+      "image": "wands_12.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_093.jpg",
+      "sha256": "b29045b2b87231fc1053e022860b12aaf2235c4110a79ab031743abeded9f9ac",
+      "bytes": 45918
+    },
+    {
+      "id": 34,
+      "key": "wands_13",
+      "name_zh": "权杖王后",
+      "name_en": "Queen of Wands",
+      "image": "wands_13.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_092.jpg",
+      "sha256": "33c14693f17268472c9716d0a13d4845c20872fbb5fae20904cec7d80f4b6114",
+      "bytes": 55382
+    },
+    {
+      "id": 35,
+      "key": "wands_14",
+      "name_zh": "权杖国王",
+      "name_en": "King of Wands",
+      "image": "wands_14.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_091.jpg",
+      "sha256": "2d8dc7115c30eb0513c3794f490f30a3fa976b4689359317500f207937d782a4",
+      "bytes": 49067
+    },
+    {
+      "id": 36,
+      "key": "cups_01",
+      "name_zh": "圣杯王牌",
+      "name_en": "Ace of Cups",
+      "image": "cups_01.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_118.jpg",
+      "sha256": "03533d90353a7388cac21be87a8b1c88eca3f574840af19d9fb0bd706fbd141e",
+      "bytes": 41435
+    },
+    {
+      "id": 37,
+      "key": "cups_02",
+      "name_zh": "圣杯二",
+      "name_en": "Two of Cups",
+      "image": "cups_02.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_117.jpg",
+      "sha256": "289037a00a3d92c76e805dbee3adb099258a175e6dc2fcfc3c8c48fe81c019fb",
+      "bytes": 47037
+    },
+    {
+      "id": 38,
+      "key": "cups_03",
+      "name_zh": "圣杯三",
+      "name_en": "Three of Cups",
+      "image": "cups_03.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_116.jpg",
+      "sha256": "0dbd0e977c77f914c32ae7947a643936a2b8a3b964d3a3442f6f06a5008831c0",
+      "bytes": 45942
+    },
+    {
+      "id": 39,
+      "key": "cups_04",
+      "name_zh": "圣杯四",
+      "name_en": "Four of Cups",
+      "image": "cups_04.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_115.jpg",
+      "sha256": "243ef18e8bfdc2bc36876ee6ab91ef3c47bb0f9b839adca910d6df24af32fa34",
+      "bytes": 44455
+    },
+    {
+      "id": 40,
+      "key": "cups_05",
+      "name_zh": "圣杯五",
+      "name_en": "Five of Cups",
+      "image": "cups_05.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_114.jpg",
+      "sha256": "fd2167dec84bb69323eb6166fb98b3a331f87fd23d6aa84fd72b2ae7e3d5f068",
+      "bytes": 33171
+    },
+    {
+      "id": 41,
+      "key": "cups_06",
+      "name_zh": "圣杯六",
+      "name_en": "Six of Cups",
+      "image": "cups_06.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_113.jpg",
+      "sha256": "42ff608103cd5563248351b7e6128af363798258a731d6aace9c80172197e1d5",
+      "bytes": 54390
+    },
+    {
+      "id": 42,
+      "key": "cups_07",
+      "name_zh": "圣杯七",
+      "name_en": "Seven of Cups",
+      "image": "cups_07.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_112.jpg",
+      "sha256": "50b0c170be5e3aa455998b4a108df948a9569a045f5d1de7f23ba362af9d28fb",
+      "bytes": 48005
+    },
+    {
+      "id": 43,
+      "key": "cups_08",
+      "name_zh": "圣杯八",
+      "name_en": "Eight of Cups",
+      "image": "cups_08.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_111.jpg",
+      "sha256": "5049dea56a8a949d7b9be51b9bc07a6f5ab9c72ea235597c6dc298e168568a42",
+      "bytes": 42129
+    },
+    {
+      "id": 44,
+      "key": "cups_09",
+      "name_zh": "圣杯九",
+      "name_en": "Nine of Cups",
+      "image": "cups_09.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_110.jpg",
+      "sha256": "41128d7dc79aa2689c89d7e2f782a0c150e277671a9f9a700d3394d269142ad7",
+      "bytes": 47602
+    },
+    {
+      "id": 45,
+      "key": "cups_10",
+      "name_zh": "圣杯十",
+      "name_en": "Ten of Cups",
+      "image": "cups_10.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_109.jpg",
+      "sha256": "497c27a5bc7a90823251b2ebbc347ad70febe6da1dac22db7bd24231b21b8a22",
+      "bytes": 42144
+    },
+    {
+      "id": 46,
+      "key": "cups_11",
+      "name_zh": "圣杯侍从",
+      "name_en": "Page of Cups",
+      "image": "cups_11.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_108.jpg",
+      "sha256": "0eecd9386e3349d6c443504c02a795649002de786a2f19eba52abf4b3143ecb6",
+      "bytes": 40570
+    },
+    {
+      "id": 47,
+      "key": "cups_12",
+      "name_zh": "圣杯骑士",
+      "name_en": "Knight of Cups",
+      "image": "cups_12.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_107.jpg",
+      "sha256": "28665e8e5f767d8d5e297e4caefc6770e3d8f27b20fdd0210f0ba0acdf9a6d25",
+      "bytes": 48188
+    },
+    {
+      "id": 48,
+      "key": "cups_13",
+      "name_zh": "圣杯王后",
+      "name_en": "Queen of Cups",
+      "image": "cups_13.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_106.jpg",
+      "sha256": "efbef68a0a28238006cefb754128d2d7e6a8cce2147ed0b54eaf619ee96ea22a",
+      "bytes": 47199
+    },
+    {
+      "id": 49,
+      "key": "cups_14",
+      "name_zh": "圣杯国王",
+      "name_en": "King of Cups",
+      "image": "cups_14.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_105.jpg",
+      "sha256": "6c417f267780e02d8cd0f683b1caae25cc9c474825453626a95d4043a144eebc",
+      "bytes": 49743
+    },
+    {
+      "id": 50,
+      "key": "swords_01",
+      "name_zh": "宝剑王牌",
+      "name_en": "Ace of Swords",
+      "image": "swords_01.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_132.jpg",
+      "sha256": "d420a73e10ca6644f4faa67f232bdc9f1f1914af4e898e847106e8a0e9ae99db",
+      "bytes": 38096
+    },
+    {
+      "id": 51,
+      "key": "swords_02",
+      "name_zh": "宝剑二",
+      "name_en": "Two of Swords",
+      "image": "swords_02.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_131.jpg",
+      "sha256": "504b836e389e4fbc5c2d3d6e6bfa6413c02d7a5b2d55d3d9a882911d173d83bc",
+      "bytes": 36808
+    },
+    {
+      "id": 52,
+      "key": "swords_03",
+      "name_zh": "宝剑三",
+      "name_en": "Three of Swords",
+      "image": "swords_03.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_130.jpg",
+      "sha256": "058bb947c3183567ad37d97ac2b54e3b81f0bf60dfcec1b47decf6677b44a1ca",
+      "bytes": 40747
+    },
+    {
+      "id": 53,
+      "key": "swords_04",
+      "name_zh": "宝剑四",
+      "name_en": "Four of Swords",
+      "image": "swords_04.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_129.jpg",
+      "sha256": "4a5dad2752e276cfca5f2f4bc5e1a69e10898deb2aa5f3b8c19c03c9167923df",
+      "bytes": 44000
+    },
+    {
+      "id": 54,
+      "key": "swords_05",
+      "name_zh": "宝剑五",
+      "name_en": "Five of Swords",
+      "image": "swords_05.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_128.jpg",
+      "sha256": "8668a6d69693804fae0fcf4270c4e74e4a400834de236108d2bcd60cb1cd88ff",
+      "bytes": 47870
+    },
+    {
+      "id": 55,
+      "key": "swords_06",
+      "name_zh": "宝剑六",
+      "name_en": "Six of Swords",
+      "image": "swords_06.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_127.jpg",
+      "sha256": "7dd16100da4eab229f0f6ec5eca66c5c92c64e865cb7599b750a04ea1ac9981c",
+      "bytes": 41369
+    },
+    {
+      "id": 56,
+      "key": "swords_07",
+      "name_zh": "宝剑七",
+      "name_en": "Seven of Swords",
+      "image": "swords_07.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_126.jpg",
+      "sha256": "e745ae054bd3fc6ea35451c8b5dae0299c3dbce76f9a750b826e9800c3477606",
+      "bytes": 42547
+    },
+    {
+      "id": 57,
+      "key": "swords_08",
+      "name_zh": "宝剑八",
+      "name_en": "Eight of Swords",
+      "image": "swords_08.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_125.jpg",
+      "sha256": "9c6355e9d4c390b8347d9ff9a3ea894a276b62cf374963bbf8b0967d20b42c8a",
+      "bytes": 44630
+    },
+    {
+      "id": 58,
+      "key": "swords_09",
+      "name_zh": "宝剑九",
+      "name_en": "Nine of Swords",
+      "image": "swords_09.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_124.jpg",
+      "sha256": "9f9743d8a312f9f35ae8937b6d10ce19aa10049b7244b396ea2568d0b0fd8f45",
+      "bytes": 49499
+    },
+    {
+      "id": 59,
+      "key": "swords_10",
+      "name_zh": "宝剑十",
+      "name_en": "Ten of Swords",
+      "image": "swords_10.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_123.jpg",
+      "sha256": "e4c69707b0c366f47057abd961f557215d24ffc9b806ffa0cda03ca3eb8470d3",
+      "bytes": 46861
+    },
+    {
+      "id": 60,
+      "key": "swords_11",
+      "name_zh": "宝剑侍从",
+      "name_en": "Page of Swords",
+      "image": "swords_11.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_122.jpg",
+      "sha256": "fa214c8639e1b188445132849bf303dcd2467e67017f1a871b9515497cf1591a",
+      "bytes": 43624
+    },
+    {
+      "id": 61,
+      "key": "swords_12",
+      "name_zh": "宝剑骑士",
+      "name_en": "Knight of Swords",
+      "image": "swords_12.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_121.jpg",
+      "sha256": "81de9c611c7384196d615a700c2d341d4ac0c471f9ce9737581d645133460f6d",
+      "bytes": 47058
+    },
+    {
+      "id": 62,
+      "key": "swords_13",
+      "name_zh": "宝剑王后",
+      "name_en": "Queen of Swords",
+      "image": "swords_13.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_120.jpg",
+      "sha256": "d907b72e40f263d96cbfb8e6355c9855c611d6a209f03696cebceb293ed7f399",
+      "bytes": 39676
+    },
+    {
+      "id": 63,
+      "key": "swords_14",
+      "name_zh": "宝剑国王",
+      "name_en": "King of Swords",
+      "image": "swords_14.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_119.jpg",
+      "sha256": "c55f0cddc9addd758d0a76f6b31ec16f18a03e4b5c35fe8f8ba491a0f050c141",
+      "bytes": 46223
+    },
+    {
+      "id": 64,
+      "key": "pentacles_01",
+      "name_zh": "星币王牌",
+      "name_en": "Ace of Pentacles",
+      "image": "pentacles_01.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_146.jpg",
+      "sha256": "dbacc9b943ca51f86bd8655a5c250724d07d698f18e58ee8622dc9d2676cfb05",
+      "bytes": 38892
+    },
+    {
+      "id": 65,
+      "key": "pentacles_02",
+      "name_zh": "星币二",
+      "name_en": "Two of Pentacles",
+      "image": "pentacles_02.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_145.jpg",
+      "sha256": "78b0149120781d1143126c9ecfd29c68a5633fc0ec186615c37d06238514f3a7",
+      "bytes": 37517
+    },
+    {
+      "id": 66,
+      "key": "pentacles_03",
+      "name_zh": "星币三",
+      "name_en": "Three of Pentacles",
+      "image": "pentacles_03.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_144.jpg",
+      "sha256": "2d638f35c1d2055cb4865c7d4ef9ad506914ac85208760c952c8af00a087df4d",
+      "bytes": 48757
+    },
+    {
+      "id": 67,
+      "key": "pentacles_04",
+      "name_zh": "星币四",
+      "name_en": "Four of Pentacles",
+      "image": "pentacles_04.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_143.jpg",
+      "sha256": "d10e353d6c8218b8b4d99b545e157e7af1155ced25c9564565c3d09877bfcd17",
+      "bytes": 34905
+    },
+    {
+      "id": 68,
+      "key": "pentacles_05",
+      "name_zh": "星币五",
+      "name_en": "Five of Pentacles",
+      "image": "pentacles_05.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_142.jpg",
+      "sha256": "16e47dfbbd1dea1b19f226bf54451c4da8e1af9f09f6faeb2dc0a5b2b8aaf7b8",
+      "bytes": 55351
+    },
+    {
+      "id": 69,
+      "key": "pentacles_06",
+      "name_zh": "星币六",
+      "name_en": "Six of Pentacles",
+      "image": "pentacles_06.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_141.jpg",
+      "sha256": "37f0417ddac3213d1194dcd1ac190022099a012deb2d9dee14f03e519cf44390",
+      "bytes": 44611
+    },
+    {
+      "id": 70,
+      "key": "pentacles_07",
+      "name_zh": "星币七",
+      "name_en": "Seven of Pentacles",
+      "image": "pentacles_07.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_140.jpg",
+      "sha256": "fb6c6a6ecf99c238cad6cbe54fe073c1da612bcb9e7750660710aa72947beb23",
+      "bytes": 44893
+    },
+    {
+      "id": 71,
+      "key": "pentacles_08",
+      "name_zh": "星币八",
+      "name_en": "Eight of Pentacles",
+      "image": "pentacles_08.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_139.jpg",
+      "sha256": "69824bb9e93435f720cf2e3a5b1d1c73767f2c8f97b6e7c03f6cce5f3433a77d",
+      "bytes": 42458
+    },
+    {
+      "id": 72,
+      "key": "pentacles_09",
+      "name_zh": "星币九",
+      "name_en": "Nine of Pentacles",
+      "image": "pentacles_09.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_138.jpg",
+      "sha256": "e5a877a3ab89eb903dbdd316145f6b04ea8e2cd86a6b93b579cfb170447a13d0",
+      "bytes": 50774
+    },
+    {
+      "id": 73,
+      "key": "pentacles_10",
+      "name_zh": "星币十",
+      "name_en": "Ten of Pentacles",
+      "image": "pentacles_10.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_137.jpg",
+      "sha256": "2b24c0eedca97d567fc0b33f773a6dbaab8dcce3b3e937a859f12592038a849c",
+      "bytes": 61722
+    },
+    {
+      "id": 74,
+      "key": "pentacles_11",
+      "name_zh": "星币侍从",
+      "name_en": "Page of Pentacles",
+      "image": "pentacles_11.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_136.jpg",
+      "sha256": "d9b8460324a2a3653ff1c17aef70ba294ec4130748125654f64bbdfc327c23d1",
+      "bytes": 37035
+    },
+    {
+      "id": 75,
+      "key": "pentacles_12",
+      "name_zh": "星币骑士",
+      "name_en": "Knight of Pentacles",
+      "image": "pentacles_12.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_135.jpg",
+      "sha256": "83c31c0622c3d91c5cdb81b10207677c9bd3cba9121782701b1345138293f5a0",
+      "bytes": 40214
+    },
+    {
+      "id": 76,
+      "key": "pentacles_13",
+      "name_zh": "星币王后",
+      "name_en": "Queen of Pentacles",
+      "image": "pentacles_13.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_134.jpg",
+      "sha256": "80dec8c56cbf1ea000e3126995349c1cc7e6e74c3815032a916503a5924b8a96",
+      "bytes": 63941
+    },
+    {
+      "id": 77,
+      "key": "pentacles_14",
+      "name_zh": "星币国王",
+      "name_en": "King of Pentacles",
+      "image": "pentacles_14.jpg",
+      "source_url": "https://www.gutenberg.org/cache/epub/43548/images/i_133.jpg",
+      "sha256": "fc90661b864bbd2fd31ab0c594b6afdaa5a6d7b8e6d8354bfc61136e44436679",
+      "bytes": 53562
+    }
+  ]
+}

@@ -10,6 +10,14 @@
 | regression_da_liu_ren | 固定遥克盘例、四课三传、年干年支月支日干日支全表，以及 8640 组跨层去重检查 |
 | regression_liu_yao | 十干、十二支和十二月神煞全表、公共天乙贵人规则及中英文 JSON 一致性 |
 | test_tyme_module | Tyme 模块导入、公历转农历能否正常运行（冒烟测试，不核验固定历法预期） |
+| regression_planetary_orbit | 八大行星 40816 条几何日心位置对照、TT 边界与非法输入；同源系数，坐标分量容差 1e-11 AU |
+| regression_astrology | Kerykeion 的 300 张参考盘、40 张极区盘、100 组本命相位、10 组比较盘/行运/组合盘/推运、20 次返照，以及时区、高纬度和无效输入 |
+| regression_jpl_ephemeris | jplephem 独立生成的 1918 组 SPK 状态、插值边界、覆盖边界、坏文件和未知目标 |
+| regression_astrology_precision | JPL DE440s 对 Swiss 正式星历的 3000 个星体位置，检查黄经、黄纬、距离、速度、后端隔离及推运返照传递 |
+
+占星回归还核验 `astrology_time_context.json` 中 300 组同口径结果，采用显式 ΔT 与 IAU 2006/2000A。十星黄经阈值为 0.006 度，宫头阈值为 0.000005 度，并检查时间配置在正常、异常和并发调用后的隔离。
+
+塔罗原书素材另运行 `python -B tests/test_tarot_assets.py`，检查 78 张牌的编号、名称、JPEG 格式及 SHA-256。行星轨道对照的范围与参考版本见 `src/astrology/README.md`。
 
 Tyme 测试源文件在 `tests/tyme/test_tyme_module.cpp`，不再放在生产源码目录。
 可单独构建 `test_tyme_module`，再用 `ctest --test-dir build -C Debug -R test_tyme_module --output-on-failure --no-tests=error` 运行。

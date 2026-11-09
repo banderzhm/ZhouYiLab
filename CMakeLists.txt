@@ -146,9 +146,17 @@ list(REMOVE_ITEM CPP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 # ==============================================================================
 
 # 创建静态库，包含所有核心模块和实现（除了 main.cpp）
+file(GLOB ERFA_ORIENTATION_SOURCES CONFIGURE_DEPENDS "3rdparty/erfa/*.cpp")
 add_library(ZhouYiLabCore STATIC 
     ${CPP_SOURCES}
+    3rdparty/astronomy_engine/astronomy.cpp
+    ${ERFA_ORIENTATION_SOURCES}
 )
+set_property(SOURCE src/astrology/astrology.cpp APPEND PROPERTY INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/erfa")
+set_property(SOURCE src/astrology/jpl_ephemeris.cpp APPEND PROPERTY INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/erfa")
+target_include_directories(ZhouYiLabCore PRIVATE 3rdparty/astronomy_engine)
 
 # 定义 MAGIC_ENUM_USE_STD_MODULE 以使用 import std
 target_compile_definitions(ZhouYiLabCore PUBLIC
@@ -293,6 +301,12 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include/"
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/tyme4cpp/tyme/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/tyme"
 )
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/astronomy_engine/LICENSE"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/licenses/ZhouYiLab/astronomy_engine")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/erfa/LICENSE"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/licenses/ZhouYiLab/erfa")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/ephemeris/de440s.bsp"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/zhouyilab/ephemeris")
 
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ZhouYiLabConfig.cmake.in"
