@@ -1,9 +1,9 @@
 # ZhouYiLab - 周易实验室
 ## 商务合作微信-备注周易实验室: 17306666568
 ## 基于当前算法java版本实现的项目
-https://www.mingtugps.cn/discover
+https://www.mingtugps.cn/
 
-<img width="1920" height="869" alt="image" src="https://github.com/user-attachments/assets/76b4de36-445d-42ac-860b-69457fb01c88" />
+[![命途导航网站首页](docs/img/mingtugps-home.jpg)](https://www.mingtugps.cn/)
 
 > **一个基于现代 C++23 Modules 的传统文化算法库，使用纯模块化设计实现**
 
