@@ -1,0 +1,9 @@
+{
+  "version": "v2.1.19",
+  "source": "https://github.com/cosinekitty/astronomy/tree/v2.1.19",
+  "source_sha256": "729c0ce37cc1a8096034a689039a5f04585ee8184177c638e8c74dec4fa3185a",
+  "coordinates": "J2000 equatorial, geometric heliocentric, AU",
+  "time": "TT days since J2000",
+  "rows": 40816,
+  "shared_coefficients": true
+}

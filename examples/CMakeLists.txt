@@ -32,6 +32,7 @@ option(BUILD_EXAMPLES "Build example programs" OFF)
 
 # 示例程序列表及描述
 set(EXAMPLES
+    example_astrology
     example_ba_zi       # "八字排盘示例"
     example_ba_zi_mangpai # "盲派八字分析示例"
     example_da_liu_ren  # "大六壬起课示例"

@@ -1,4 +1,33 @@
 # 独立回归程序复用生产模块；输出仅写入构建目录。
+add_executable(regression_jpl_ephemeris regression_jpl_ephemeris.cpp)
+target_link_libraries(regression_jpl_ephemeris PRIVATE ZhouYiLabCore)
+target_compile_features(regression_jpl_ephemeris PRIVATE cxx_std_23)
+add_test(NAME regression_jpl_ephemeris COMMAND regression_jpl_ephemeris
+    "${PROJECT_SOURCE_DIR}/assets/ephemeris/de440s.bsp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/jpl_states.json")
+set_tests_properties(regression_jpl_ephemeris PROPERTIES TIMEOUT 60 LABELS "regression;astrology")
+add_executable(reference_astrology reference_astrology.cpp)
+target_link_libraries(reference_astrology PRIVATE ZhouYiLabCore)
+target_compile_features(reference_astrology PRIVATE cxx_std_23)
+add_executable(regression_astrology regression_astrology.cpp)
+target_link_libraries(regression_astrology PRIVATE ZhouYiLabCore)
+target_compile_features(regression_astrology PRIVATE cxx_std_23)
+add_test(NAME regression_astrology COMMAND regression_astrology
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/astrology_kerykeion.json"
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/astrology_time_context.json")
+set_tests_properties(regression_astrology PROPERTIES TIMEOUT 120 LABELS "regression;astrology")
+add_test(NAME regression_astrology_precision COMMAND regression_astrology
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/astrology_kerykeion.json"
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/astrology_time_context.json"
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/astrology_jpl_reference.json"
+    "${PROJECT_SOURCE_DIR}/assets/ephemeris/de440s.bsp")
+set_tests_properties(regression_astrology_precision PROPERTIES TIMEOUT 120 LABELS "regression;astrology;precision")
+add_executable(regression_planetary_orbit regression_planetary_orbit.cpp)
+target_link_libraries(regression_planetary_orbit PRIVATE ZhouYiLabCore)
+target_compile_features(regression_planetary_orbit PRIVATE cxx_std_23)
+add_test(NAME regression_planetary_orbit COMMAND regression_planetary_orbit
+    "${CMAKE_CURRENT_SOURCE_DIR}/reference/astronomy_heliocentric.txt")
+set_tests_properties(regression_planetary_orbit PROPERTIES TIMEOUT 60 LABELS "regression;astronomy")
 foreach(system IN ITEMS zi_wei qi_men mei_hua da_liu_ren liu_yao)
     add_executable(regression_${system} regression_${system}.cpp)
     target_link_libraries(regression_${system} PRIVATE ZhouYiLabCore)
